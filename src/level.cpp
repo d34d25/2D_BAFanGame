@@ -6,13 +6,11 @@ Level::Level() : player({0, 0})
 
 Level::~Level()
 {
-    for(int i = 0; i < ROWS; i++)
-    {
-        for(int j = 0; j < COLS; j++)
-        {
-            delete gameObjTiles[i][j];
-        }
-    }
+    ClearTileMatrix();
+
+    ClearGameObjMatrix();
+
+    ClearPlatformList();
 }
 
 void Level::InitLevel(const char *levelPath, float gridSize, float dt, int iterations)
@@ -23,7 +21,7 @@ void Level::InitLevel(const char *levelPath, float gridSize, float dt, int itera
 
     this->gridSize = gridSize;
 
-    gravity = 200;
+    gravity = 3500;
 
     player.entityData.flipY = gravity < 0;
 
@@ -35,7 +33,11 @@ void Level::InitLevel(const char *levelPath, float gridSize, float dt, int itera
 
     if(!IsImageValid(levelImage)) return;
 
+    ClearTileMatrix();
+
     ClearGameObjMatrix();
+
+    ClearPlatformList();
 
     for(int i = 0; i < ROWS; i++)
     {
@@ -105,15 +107,70 @@ void Level::InitLevel(const char *levelPath, float gridSize, float dt, int itera
 
             level[i][j].type = type;
 
-            if(isPlayerSpawn)
-            {
-                float xpos = i * gridSize + gridSize * 0.5f;
-                float ypos = j * gridSize + gridSize * 0.5f;
+            float xpos = i * gridSize + gridSize * 0.5f;
+            float ypos = j * gridSize + gridSize * 0.5f;
 
-                player.phys.position = {xpos, ypos};
-            }
-
+            if(isPlayerSpawn) player.phys.position = {xpos, ypos};
+           
             //platforms...
+
+            bool isPlatform = isHorizontalPlatform || isVerticalPlatform
+            || isFallingPlatform || isDisappearingPlatform;
+
+            if(isPlatform)
+            {
+                Platform* platform = new Platform();
+
+                float platformWidth = gridSize * 3.0f;
+                float platformHeight = gridSize * 0.3f;
+
+                platform->gravity = gravity;
+
+                if(isFallingPlatform || isDisappearingPlatform)
+                {
+                    platformWidth = gridSize;
+                    platformHeight = gridSize;
+                }
+
+                platform->phys.position = {xpos, ypos};
+
+                platform->phys.aabb.width = platformWidth;
+                platform->phys.aabb.height = platformHeight;
+
+                platform->phys.UpdateAABB();
+
+                float platformSpeed = 100.0f;
+
+                platform->SetTimer(0.3f);
+
+                if(isHorizontalPlatform)
+                {
+                    platform->isHorizontal = true;
+
+                    platform->phys.body.velocity.x = platformSpeed;
+
+                    platform->updateRequired = true;
+                }
+                else if(isVerticalPlatform)
+                {
+                    platform->isVertical = true;
+
+                    platform->phys.body.velocity.y = platformSpeed;
+
+                    platform->updateRequired = true;
+                }
+                else if(isFallingPlatform)
+                {
+                    platform->isFalling = true;
+                    platform->phys.body.hasGravity = true;
+                }
+                else if(isDisappearingPlatform)
+                {
+                    platform->isDisappearing = true;
+                }
+
+                platformList.push_back(platform);
+            }
         }
     }
 
@@ -140,7 +197,7 @@ void Level::InitLevel(const char *levelPath, float gridSize, float dt, int itera
 
             objTile->UpdateAABB();
 
-            float treadmillVel = 10.0f;
+            float treadmillVel = 100.0f;
 
             switch (type)
             {
@@ -186,7 +243,7 @@ void Level::InitLevel(const char *levelPath, float gridSize, float dt, int itera
                 objTile->canEntityCollide = true;
                 objTile->canPlatformCollide = true;
 
-                objTile->velocity.x = treadmillVel;
+                objTile->body.velocity.x = treadmillVel;
             }
             break;
 
@@ -195,7 +252,7 @@ void Level::InitLevel(const char *levelPath, float gridSize, float dt, int itera
                 objTile->canEntityCollide = true;
                 objTile->canPlatformCollide = true;
 
-                objTile->velocity.x = -treadmillVel;
+                objTile->body.velocity.x = -treadmillVel;
             }
             break;
 
@@ -247,8 +304,6 @@ void Level::InitLevel(const char *levelPath, float gridSize, float dt, int itera
 
 void Level::UpdateLevel()
 {
-    player.Update(dt, iterations);
-
     for(int iteraion = 0; iteraion < iterations; iteraion++)
     {
         DiscreteUpdate();
@@ -271,7 +326,38 @@ void Level::DiscreteUpdate()
 
     player.Update(dt, iterations);
 
-    player.phys.UpdatePositionX(dt);
+    player.phys.UpdatePositionX(dt, iterations);
+
+    for(int i = playerTileRange.startX; i <= playerTileRange.endX; i++)
+    {
+        for(int j = playerTileRange.startY; j <= playerTileRange.endY; j++)
+        {
+            GameObject* objTile = gameObjTiles[i][j];            
+
+            if(!objTile) continue;
+
+            if(!objTile->canEntityCollide) continue;
+
+            const Tile& tile = level[i][j];
+
+            if(!IsOneWayTile(i, j))
+            {
+                SolveCollisions(&player.phys, objTile, true, isGravityUp);
+            }
+            else if(IsOneWayRightLeft(i, j))
+            {
+                SolveCollisionsOneWayLeftRight(
+                    &player.phys, objTile,
+                    tile.type == TileType::ONE_WAY_RIGHT
+                );
+            }
+        }
+    }
+
+
+    player.phys.UpdatePositionY(dt, iterations);
+
+    bool isPlayerGrounded = false;
 
     for(int i = playerTileRange.startX; i <= playerTileRange.endX; i++)
     {
@@ -279,30 +365,56 @@ void Level::DiscreteUpdate()
         {
             GameObject* objTile = gameObjTiles[i][j];
 
-            if(!objTile) continue;
+            if(!objTile) continue;            
 
             if(!objTile->canEntityCollide) continue;
 
-            SolveCollisions(&player.phys, objTile, true, isGravityUp);
+            const Tile& tile = level[i][j];
+
+            if(!IsOneWayTile(i, j))
+            {
+                SolveCollisions(&player.phys, objTile, false, isGravityUp);
+            }
+            else if(IsOneWayUpDown(i, j))
+            {
+                SolveCollisionsOneWayUpDown
+                (
+                    &player.phys, objTile,
+                    tile.type == TileType::ONE_WAY_UP,
+                    isGravityUp
+                );
+            }
+
+            if(CheckCollisionRecs(player.GetJumpDetector(), objTile->aabb))
+                isPlayerGrounded = true;
         }
     }
 
-
-    player.phys.UpdatePositionY(dt);
-
-    for(int i = playerTileRange.startX; i <= playerTileRange.endX; i++)
+    for(int i = 0; i < platformList.size(); i++)
     {
-        for(int j = playerTileRange.startY; j <= playerTileRange.endY; j++)
+        Platform* platform = platformList[i];
+
+        if(!platform) continue;
+
+        if(platform->IsInactive()) continue;
+
+        if(platform->updateRequired) platform->Update(dt, iterations);
+
+        SolveCollisionsOneWayUpDown(
+            &player.phys, &platform->phys,
+            true, isGravityUp
+        );
+
+        if(CheckCollisionRecs(player.GetJumpDetector(), platform->phys.aabb))
         {
-            GameObject* objTile = gameObjTiles[i][j];
+            platform->updateRequired = true;
 
-            if(!objTile) continue;
-
-            if(!objTile->canEntityCollide) continue;
-
-            SolveCollisions(&player.phys, objTile, false, isGravityUp);
+            isPlayerGrounded = true;
         }
     }
+
+    
+    player.canJump = isPlayerGrounded;
 }
 
 void Level::DrawLevel()
@@ -314,6 +426,21 @@ void Level::DrawLevel()
         player.phys.position.y,
         14
     );
+
+    for(int i = 0; i < platformList.size(); i++)
+    {
+        Color platformColor = HORIZONTAL_MOVING_PLATFORM;
+
+        Platform* platform = platformList[i];
+
+        if(!platform) continue;
+
+        if(platform->isVertical) platformColor = VERTICAL_MOVING_PLATFORM;
+        else if(platform->isFalling) platformColor = FALLING_PLATFORM;
+        else if(platform->isDisappearing) platformColor = DISAPPEARING_PLATFORM;
+
+        DrawRectangleRec(platform->phys.aabb, platformColor);
+    }
 
     for(int i = playerTileRange.startX; i <= playerTileRange.endX; i++)
     {
@@ -377,7 +504,7 @@ void Level::DrawLevel()
 
             if(IsColorOf(color, Color{0,0,0,0})) continue;
 
-            else if(gameObjTiles[i][j]) DrawRectangleRec(gameObjTiles[i][j]->aabb, color);
+            if(gameObjTiles[i][j]) DrawRectangleRec(gameObjTiles[i][j]->aabb, color);
         }
     }
 
@@ -423,6 +550,14 @@ void Level::DebugDrawing()
 
 void Level::DebugTextDrawing()
 {
-    DrawText(TextFormat("Player X speed: %.4f", player.phys.velocity.x), 10, 100, 20, GRAY);
-    DrawText(TextFormat("Player Y speed: %.4f", player.phys.velocity.y), 10, 120, 20, GRAY);
+    DrawText(TextFormat("Iterations: %i", iterations), 10, 60, 20, SKYBLUE);
+
+    DrawText(TextFormat("Player X speed: %.4f", player.phys.body.velocity.x), 10, 100, 20, GRAY);
+    DrawText(TextFormat("Player Y speed: %.4f", player.phys.body.velocity.y), 10, 120, 20, GRAY);
+
+    DrawText(TextFormat("Player alt X speed: %.4f", player.phys.body.altVelocity.x), 10, 160, 20, GRAY);
+    DrawText(TextFormat("Player alt Y speed: %.4f", player.phys.body.altVelocity.y), 10, 180, 20, GRAY);
+
+    DrawText(TextFormat("Player final X speed: %.4f", player.phys.body.GetFinalVelocity().x), 10, 220, 20, GRAY);
+    DrawText(TextFormat("Player final Y speed: %.4f", player.phys.body.GetFinalVelocity().y), 10, 240, 20, GRAY);
 }

@@ -1,9 +1,12 @@
 #pragma once
 
+#include <vector>
+
 #include "raylib.h"
 #include "player.h"
 #include "physics.h"
 #include "drawing.h"
+#include "platform.h"
 
 static constexpr Color PLAYER_SPAWN = Color{251,242,54,255};
 
@@ -109,11 +112,28 @@ private:
 
     Tile level[ROWS][COLS];
 
-    GameObject* gameObjTiles[ROWS][COLS];
+    GameObject* gameObjTiles[ROWS][COLS] = {nullptr};
+
+    std::vector<Platform*> platformList = {};
 
     Camera2D camera = {};
 
     Player player;
+
+    inline void ClearTileMatrix()
+    {
+        for(int i = 0; i < ROWS; i++)
+        {
+            for(int j = 0; j < COLS; j++)
+            {
+                Tile& tile = level[i][j];
+
+                tile.isSolid = false;
+                tile.renderData = {};
+                tile.type = TileType::VOID;
+            }
+        }
+    }
 
     inline void ClearGameObjMatrix()
     {
@@ -121,9 +141,22 @@ private:
         {
             for(int j = 0; j < COLS; j++)
             {
+                if(gameObjTiles[i][j])
+                    delete gameObjTiles[i][j];
+                
                 gameObjTiles[i][j] = nullptr;
             }
         }
+    }
+
+    inline void ClearPlatformList()
+    {
+        for(int i = 0; i < platformList.size(); i++)
+        {
+            delete platformList[i];
+        }
+
+        platformList.clear();
     }
 
     inline TileRange CalculateTileRange(int x, int y, int range)
@@ -156,6 +189,25 @@ private:
         camera.zoom = 1.25f;
     }
 
+    inline bool IsOneWayUpDown(int i, int j)
+    {
+        const Tile& tile = level[i][j];
+
+        return tile.type == TileType::ONE_WAY_UP || tile.type == TileType::ONE_WAY_DOWN;  
+    }
+
+    inline bool IsOneWayRightLeft(int i, int j)
+    {
+        const Tile& tile = level[i][j];
+
+        return tile.type == TileType::ONE_WAY_RIGHT || tile.type == TileType::ONE_WAY_LEFT;
+    }
+
+    inline bool IsOneWayTile(int i, int j)
+    {
+        return IsOneWayRightLeft(i, j) || IsOneWayUpDown(i, j);
+    }
+
     void DiscreteUpdate();
 
     void DebugDrawing();
@@ -175,10 +227,4 @@ public:
     void UpdateLevel();
 
     void DrawLevel();
-
-    inline void CallPlayerInputUpdate()
-    {
-        player.UpdateInput();
-    }
-
 };

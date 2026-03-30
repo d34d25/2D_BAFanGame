@@ -45,15 +45,12 @@ int main()
         float dt = GetFrameTime();
         accumulator += dt;
 
-        testLevel.CallPlayerInputUpdate();
-
         while (accumulator >= fixedDt)
         {
             testLevel.UpdateLevel();
             accumulator -= fixedDt;
         }
         
-
         //-----
 
         BeginDrawing();

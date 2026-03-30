@@ -4,6 +4,8 @@ Player::Player(Vector2 position)
 {
     phys.position = position;
 
+    phys.body.hasGravity = true;
+
     phys.aabb.width = 40;
     phys.aabb.height = 48;
 
@@ -102,77 +104,75 @@ Player::Player(Vector2 position)
     };
 }
 
-void Player::UpdateInput()
-{
-    if(IsKeyDown(KEY_LEFT))
-    {
-        inputs[(int)Inputs::LEFT] = true;
-        inputs[(int)Inputs::RIGHT] = false;
-    }
-    else if(IsKeyDown(KEY_RIGHT))
-    {
-        inputs[(int)Inputs::RIGHT] = true;
-        inputs[(int)Inputs::LEFT] = false;
-    }
-
-    if(IsKeyPressed(KEY_Z)) inputs[(int)Inputs::JUMP] = true;
-
-    if(IsKeyPressed(KEY_X)) inputs[(int)Inputs::SHOOT] = true;
-}
 
 void Player::Update(float dt, int iterations)
 {
-    float subDT = dt / iterations;
-
-    //gravity
-    float gravAcc = 0.0;
-
-    gravAcc += gravity;
-
-    phys.velocity.y += gravAcc * subDT;
+    float subDt = dt / iterations;
 
     //lateral movement
-    float targetSpeed = 70 * iterations;
 
-    float acceleration = 2.0f;
-    float deacceleration = 3.5f;
+    float moveForce = 400 * phys.body.damping;
 
-    float accelerationFactor = Clamp(acceleration * subDT, 0.0f, 1.0f);
-    float deaccelerationFactor = Clamp(deacceleration * subDT, 0.0f, 1.0f);
-
-    if(inputs[(int)Inputs::LEFT])
+    if(IsKeyDown(KEY_LEFT))
     {
-        phys.velocity.x = Lerp(phys.velocity.x, -targetSpeed, accelerationFactor);
+        phys.body.force.x = -moveForce;
+        
         entityData.flipX = true;
-        inputs[(int)Inputs::LEFT] = false;
     }
-    else if(inputs[(int)Inputs::RIGHT])
+    else if(IsKeyDown(KEY_RIGHT))
     {
-        phys.velocity.x = Lerp(phys.velocity.x, targetSpeed, accelerationFactor);
+        phys.body.force.x = moveForce;
+
         entityData.flipX = false;
-        inputs[(int)Inputs::RIGHT] = false;
-    }
-    else
-    {
-        phys.velocity.x = Lerp(phys.velocity.x, 0.0f, deaccelerationFactor);
     }
 
     //jump
 
-    float jumpForce = -80;
+    float jumpVel = -9000;
 
-    if(inputs[(int)Inputs::JUMP]) 
+    float jump = jumpVel;
+
+    if(entityData.flipY) jump = -jumpVel;
+
+    if(isJumping)
     {
-        phys.velocity.y = jumpForce;
-        inputs[(int)Inputs::JUMP] = false;
-    };
+        phys.body.hasGravity = false;
+    }
+    else
+    {
+        phys.body.hasGravity = true;
+    }
 
+    if(!canJump && std::abs(phys.body.velocity.y) <= 0.1f) isJumping = false;
+
+    if(canJump)
+    {
+        jumpTime = maxJumpTime;
+    }
+    else
+    {
+        jumpTime -= subDt;
+
+        if(jumpTime <= 0.0f) jumpTime = 0.0f; 
+    }
+
+    if(IsKeyDown(KEY_Z))
+    {
+        if(canJump) isJumping = true;
+
+        if(isJumping)
+        {
+            phys.body.velocity.y += jump * subDt;
+
+            if(jumpTime <= 0.0f) isJumping = false;
+        }
+    }
+    else
+    {
+        isJumping = false;
+    }
 
     //update
-    phys.velocity.x = Clamp(phys.velocity.x, -MAX_SPEED, MAX_SPEED);
-    phys.velocity.y = Clamp(phys.velocity.y, -MAX_SPEED, MAX_SPEED);
-
-    phys.UpdateVelocity();
-
-    phys.altVelocity = {0,0};
+    
+    phys.body.UpdateVelocity(dt, iterations, gravity);
 }

@@ -3,17 +3,6 @@
 #include "entity.h"
 #include <array>
 
-enum class Inputs
-{
-    RIGHT,
-    LEFT,
-    UP,
-    DOWN,
-    JUMP,
-    SHOOT,
-    COUNT
-};
-
 enum class Character
 {
     MOMOI,
@@ -28,10 +17,6 @@ class Player
 
 private:
 
-    std::array<bool, (int)Inputs::COUNT> inputs = {false};
-
-    float MAX_SPEED = 90;
-
     Rectangle jumpDetector = {0,0,1,1};
 
     Character character = Character::MOMOI;
@@ -40,9 +25,15 @@ private:
 
     Vector2 weaponOffset = {0,0};
 
+    float jumpTime = 0.0f;
+    float maxJumpTime = 0.1f;
+
 public:
 
     float gravity = 500;
+
+    bool canJump = true;
+    bool isJumping = false;
 
     GameObject phys = {};
 
@@ -53,8 +44,6 @@ public:
     EntityData entityData = {false,false};
 
     Player(Vector2 position);
-
-    void UpdateInput();
 
     void Update(float dt, int iterations);
 
@@ -67,7 +56,7 @@ public:
 
     inline Rectangle GetJumpDetector()
     {
-        float offset = 10.0f;
+        float offset = 5.0f;
 
         int dir = entityData.flipY ? -1 : 1;
 
@@ -82,10 +71,5 @@ public:
         else jumpDetector.y = centerY - offset - jumpDetector.height;
         
         return jumpDetector;
-    }
-
-    inline void ResetAltVelocity()
-    {
-        phys.altVelocity = {0,0};
     }
 };

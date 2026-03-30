@@ -43,3 +43,8 @@ inline void DrawAABB(Rectangle aabb, Color color)
 {
     DrawRectangleLines(aabb.x, aabb.y, aabb.width, aabb.height, color);
 }
+
+inline void DrawSpike()
+{
+    
+}
