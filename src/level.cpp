@@ -1,5 +1,7 @@
 #include "level.h"
 
+#include <iostream>
+
 Level::Level() : player({0, 0})
 {
 }
@@ -13,13 +15,34 @@ Level::~Level()
     ClearPlatformList();
 }
 
+void Level::LoadLevelData(const char *levelPath)
+{
+    int dataSize = 0;
+
+    unsigned char* fileData = LoadFileData(levelPath, &dataSize);
+
+    if(fileData == nullptr) return;
+
+    TileType* loadedTypes = (TileType*)fileData;
+
+    for(int i = 0; i < ROWS; i++)
+    {
+        for(int j = 0; j < COLS; j++)
+        {
+            TileType type = loadedTypes[i * COLS + j];
+
+            level[i][j].type = type;
+        }
+    }
+
+    UnloadFileData(fileData);
+}
+
 void Level::InitLevel(const char *levelPath, float gridSize, float dt, int iterations)
 {
     this->iterations = iterations;
 
     this->dt = dt;
-
-    this->gridSize = gridSize;
 
     gravity = 3500;
 
@@ -29,93 +52,31 @@ void Level::InitLevel(const char *levelPath, float gridSize, float dt, int itera
 
     camera.target = {0,0};
 
-    levelImage = LoadImage(levelPath);
-
-    if(!IsImageValid(levelImage)) return;
-
     ClearTileMatrix();
 
     ClearGameObjMatrix();
 
     ClearPlatformList();
 
+    LoadLevelData(levelPath);
+
     for(int i = 0; i < ROWS; i++)
     {
         for(int j = 0; j < COLS; j++)
         {
-            Color pixelColor = GetImageColor(levelImage, i, j);
+            if(level[i][j].type == TileType::COUNT) level[i][j].type = TileType::VOID;
 
-            bool isTile = IsColorOf(pixelColor, BLACK);
-
-            bool isPlayerSpawn = IsColorOf(pixelColor, PLAYER_SPAWN);
-
-            bool isGoal = IsColorOf(pixelColor, GOAL);
+            TileType type = level[i][j].type;
             
-            bool isHorizontalPlatform = IsColorOf(pixelColor, HORIZONTAL_MOVING_PLATFORM);
-
-            bool isVerticalPlatform =  IsColorOf(pixelColor, VERTICAL_MOVING_PLATFORM);
-
-            bool isPlatformStop = IsColorOf(pixelColor, MOVING_PLATFORM_STOP);
-
-            bool isTileTrampoline = IsColorOf(pixelColor, TRAMPOLINE);
-
-            bool isGravityChanger = IsColorOf(pixelColor, GRAVITY_CHANGER);
-
-            bool isTreadmillRight = IsColorOf(pixelColor, TREADMILL_RIGHT);
-
-            bool isTreadmillLeft = IsColorOf(pixelColor, TREADMILL_LEFT);
-
-            bool isFallingPlatform = IsColorOf(pixelColor, FALLING_PLATFORM);
-
-            bool isOneWayUp = IsColorOf(pixelColor, ONE_WAY_UP);
-
-            bool isOneWayDown = IsColorOf(pixelColor, ONE_WAY_DOWN);
-
-            bool isOneWayRight = IsColorOf(pixelColor, ONE_WAY_RIGHT);
-
-            bool isOneWayLeft = IsColorOf(pixelColor, ONE_WAY_LEFT);
-
-            bool isDisappearingPlatform = IsColorOf(pixelColor, DISAPPEARING_PLATFORM);
-
-            bool isSpike = IsColorOf(pixelColor, SPIKE);
-
-            TileType type = TileType::VOID;
-
-            if(isTile) type = TileType::SOLID;
-
-            else if(isGoal) type = TileType::GOAL;
-
-            else if(isPlatformStop)  type = TileType::PLATFORM_STOP;
-
-            else if(isTileTrampoline) type = TileType::TRAMPOLINE;
-
-            else if(isGravityChanger) type = TileType::GRAVITY_CHANGER;
-
-            else if(isTreadmillRight) type = TileType::TREADMILL_RIGHT;
-
-            else if(isTreadmillLeft) type = TileType::TREADMILL_LEFT;
-
-            else if(isOneWayUp) type = TileType::ONE_WAY_UP;
-
-            else if(isOneWayDown) type = TileType::ONE_WAY_DOWN;
-
-            else if(isOneWayRight) type = TileType::ONE_WAY_RIGHT;
-
-            else if(isOneWayLeft) type = TileType::ONE_WAY_LEFT;
-
-            else if(isSpike) type = TileType::SPIKE;
-
-            level[i][j].type = type;
-
             float xpos = i * gridSize + gridSize * 0.5f;
             float ypos = j * gridSize + gridSize * 0.5f;
 
-            if(isPlayerSpawn) player.phys.position = {xpos, ypos};
+            if(type == TileType::PLAYER_SPAWN) player.phys.position = {xpos, ypos};
            
             //platforms...
 
-            bool isPlatform = isHorizontalPlatform || isVerticalPlatform
-            || isFallingPlatform || isDisappearingPlatform;
+            bool isPlatform = type == TileType::HORIZONALT_MOVING_PLATFORM || type == TileType::VERTICAL_MOVING_PLATFORM
+            || type == TileType::FALLING_PLATFORM || type == TileType::DISAPPEARING_PLATFORM;
 
             if(isPlatform)
             {
@@ -126,7 +87,7 @@ void Level::InitLevel(const char *levelPath, float gridSize, float dt, int itera
 
                 platform->gravity = gravity;
 
-                if(isFallingPlatform || isDisappearingPlatform)
+                if(type == TileType::FALLING_PLATFORM || type == TileType::DISAPPEARING_PLATFORM)
                 {
                     platformWidth = gridSize;
                     platformHeight = gridSize;
@@ -143,7 +104,7 @@ void Level::InitLevel(const char *levelPath, float gridSize, float dt, int itera
 
                 platform->SetTimer(0.3f);
 
-                if(isHorizontalPlatform)
+                if(type == TileType::HORIZONALT_MOVING_PLATFORM)
                 {
                     platform->isHorizontal = true;
 
@@ -151,7 +112,7 @@ void Level::InitLevel(const char *levelPath, float gridSize, float dt, int itera
 
                     platform->updateRequired = true;
                 }
-                else if(isVerticalPlatform)
+                else if(type == TileType::VERTICAL_MOVING_PLATFORM)
                 {
                     platform->isVertical = true;
 
@@ -159,12 +120,12 @@ void Level::InitLevel(const char *levelPath, float gridSize, float dt, int itera
 
                     platform->updateRequired = true;
                 }
-                else if(isFallingPlatform)
+                else if(type == TileType::FALLING_PLATFORM)
                 {
                     platform->isFalling = true;
                     platform->phys.body.hasGravity = true;
                 }
-                else if(isDisappearingPlatform)
+                else if(type == TileType::DISAPPEARING_PLATFORM)
                 {
                     platform->isDisappearing = true;
                 }
@@ -178,11 +139,10 @@ void Level::InitLevel(const char *levelPath, float gridSize, float dt, int itera
     {
         for(int j = 0; j < COLS; j++)
         {
-
             Tile* tile = &level[i][j];
             TileType type = tile->type;
 
-            if(type == TileType::VOID) continue;
+            if(IsNotRealTile(i,j)) continue;
 
             float xpos = i * gridSize + gridSize * 0.5f;
             float ypos = j * gridSize + gridSize * 0.5f;
@@ -385,6 +345,9 @@ void Level::DiscreteUpdate()
                 );
             }
 
+            if(IsOneWayRightLeft(i,j)) continue;
+
+            //check for direction in the case of one way tiles
             if(CheckCollisionRecs(player.GetJumpDetector(), objTile->aabb))
                 isPlayerGrounded = true;
         }
@@ -446,63 +409,13 @@ void Level::DrawLevel()
     {
         for(int j = playerTileRange.startY; j <= playerTileRange.endY; j++)
         {
-            Color color = {0,0,0,0};
-
             TileType type = level[i][j].type;
 
-            if(type == TileType::VOID) continue;
+            if(IsNotRealTile(i,j)) continue;
 
-            switch (type)
-            {
-            case TileType::SOLID:
-                color = BLACK;
-                break;
+            Color color = GetTileColor(type);
 
-            case TileType::GOAL:
-                color = GOAL;
-                break;
-
-            case TileType::TRAMPOLINE:
-                color = TRAMPOLINE;
-                break;
-
-            case TileType::TREADMILL_RIGHT:
-                color = TREADMILL_RIGHT;
-                break;
-            
-            case TileType::TREADMILL_LEFT:
-                color = TREADMILL_LEFT;
-                break;
-
-            case TileType::ONE_WAY_UP:
-                color = ONE_WAY_UP;
-                break;
-
-            case TileType::ONE_WAY_DOWN:
-                color = ONE_WAY_DOWN;
-                break;
-
-            case TileType::ONE_WAY_RIGHT:
-                color = ONE_WAY_RIGHT;
-                break;
-
-            case TileType::ONE_WAY_LEFT:
-                color = ONE_WAY_LEFT;
-                break;
-
-            case TileType::SPIKE:
-                color = SPIKE;
-                break;
-
-            case TileType::GRAVITY_CHANGER:
-                color = GRAVITY_CHANGER;
-                break;
-
-            default:
-                break;
-            }
-
-            if(IsColorOf(color, Color{0,0,0,0})) continue;
+            if(IsColorOf(color, BLANK)) continue;
 
             if(gameObjTiles[i][j]) DrawRectangleRec(gameObjTiles[i][j]->aabb, color);
         }

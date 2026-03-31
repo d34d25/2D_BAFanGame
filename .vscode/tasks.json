@@ -11,6 +11,7 @@
                 "${workspaceFolder}/src/player.cpp",
                 "${workspaceFolder}/src/level.cpp",
                 "${workspaceFolder}/src/platform.cpp",
+                "${workspaceFolder}/src/levelEditor.cpp",
                 "-o",
                 "${fileDirname}/${fileBasenameNoExtension}",
                 "-I", "${workspaceFolder}/headers",

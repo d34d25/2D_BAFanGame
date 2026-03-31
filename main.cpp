@@ -4,6 +4,8 @@
 
 #include "level.h"
 
+#include "levelEditor.h"
+
 int main()
 {
     const int SCREEN_WIDTH = 800 * 2;
@@ -18,12 +20,14 @@ int main()
 
     Level testLevel = Level();
 
+    LevelEditor editor = LevelEditor(SCREEN_WIDTH,SCREEN_HEIGHT, "levels/testLevel");
+
     int iterations = 10;
 
     int gridSize = 50;
 
     testLevel.InitLevel(
-        "assets/testLevel.png",
+        "levels/testLevel",
         gridSize,
         fixedDt,
         iterations
@@ -38,6 +42,8 @@ int main()
     testLevel.screenWidth = SCREEN_WIDTH;
     testLevel.screenHeight = SCREEN_HEIGHT;
 
+    bool editorMode = false;
+
     while (!WindowShouldClose())
     {
         //update
@@ -47,7 +53,9 @@ int main()
 
         while (accumulator >= fixedDt)
         {
-            testLevel.UpdateLevel();
+            if(!editorMode) testLevel.UpdateLevel();
+            else editor.Update();
+
             accumulator -= fixedDt;
         }
         
@@ -57,7 +65,8 @@ int main()
 
         ClearBackground(LIGHTGRAY);
 
-        testLevel.DrawLevel();
+        if(!editorMode) testLevel.DrawLevel();
+        else editor.Draw();
 
         DrawFPS(10,10);
 
