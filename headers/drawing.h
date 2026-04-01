@@ -41,7 +41,18 @@ inline void DrawSprite(
 
 inline void DrawAABB(Rectangle aabb, Color color)
 {
-    DrawRectangleLines(aabb.x, aabb.y, aabb.width, aabb.height, color);
+    float thickness = 1.0f;
+    //up-left to up-right
+    DrawLineEx({aabb.x, aabb.y}, {aabb.x + aabb.width, aabb.y}, thickness, color);
+    
+    //up-left to down-left
+    DrawLineEx({aabb.x, aabb.y}, {aabb.x, aabb.y + aabb.height}, thickness, color);
+
+    //up-right to down-right
+    DrawLineEx({aabb.x + aabb.width, aabb.y}, {aabb.x + aabb.width, aabb.y + aabb.height}, thickness, color);
+
+    //down-left to down-right
+    DrawLineEx({aabb.x, aabb.y + aabb.height}, {aabb.x + aabb.width, aabb.y + aabb.height}, thickness, color);
 }
 
 inline void DrawSpike()

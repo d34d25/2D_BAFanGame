@@ -26,7 +26,7 @@ private:
     Vector2 weaponOffset = {0,0};
 
     float jumpTime = 0.0f;
-    float maxJumpTime = 0.1f;
+    float maxJumpTime = 0.15f;
 
 public:
 

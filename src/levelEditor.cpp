@@ -77,7 +77,7 @@ void LevelEditor::Update()
 
     if(IsKeyPressed(KEY_ONE)) currentTileType = TileType::SOLID;
 
-    if(IsKeyPressed(KEY_TWO)) currentTileType = (TileType)2;
+    if(IsKeyPressed(KEY_TWO)) currentTileType = TileType::GOAL;
 
     float mouseWheel = GetMouseWheelMove();
 
@@ -93,13 +93,13 @@ void LevelEditor::Update()
 
     if(mouseWheel != 0 && currentTileType > TileType::SOLID && !IsKeyDown(KEY_LEFT_ALT))
     {
-        static int specialTileIndex = 2;
+        static int specialTileIndex = (int)TileType::GOAL;
 
         if(mouseWheel > 0) specialTileIndex++;
         else if(mouseWheel < 0) specialTileIndex--;
 
         if(specialTileIndex < 2) specialTileIndex = (int)TileType::COUNT - 1;
-        if(specialTileIndex >= (int)TileType::COUNT) specialTileIndex = 2;
+        if(specialTileIndex >= (int)TileType::COUNT) specialTileIndex = (int)TileType::GOAL;
 
         currentTileType = (TileType)specialTileIndex;
     }

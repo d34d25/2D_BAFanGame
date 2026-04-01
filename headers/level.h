@@ -84,7 +84,18 @@ private:
         camera.offset = {screenWidth * 0.5f, screenHeight * 0.5f};
 
         camera.rotation = 0.0f;
-        camera.zoom = 1.25f;
+
+        int mouseWheel = GetMouseWheelMove();
+
+        float cameraFactor = 0.25f;
+
+        if(IsKeyDown(KEY_LEFT_ALT))
+        {
+            if(mouseWheel > 0) camera.zoom += cameraFactor;
+            else if(mouseWheel < 0) camera.zoom -= cameraFactor;
+
+            camera.zoom = Clamp(camera.zoom, 0.25f, 15.25f);
+        }
     }
 
     inline bool IsOneWayUpDown(int i, int j)

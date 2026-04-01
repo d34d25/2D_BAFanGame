@@ -52,6 +52,8 @@ void Level::InitLevel(const char *levelPath, float gridSize, float dt, int itera
 
     camera.target = {0,0};
 
+    camera.zoom = 1.25f;
+
     ClearTileMatrix();
 
     ClearGameObjMatrix();
@@ -116,7 +118,7 @@ void Level::InitLevel(const char *levelPath, float gridSize, float dt, int itera
                 {
                     platform->isVertical = true;
 
-                    platform->phys.body.velocity.y = platformSpeed;
+                    platform->phys.body.velocity.y = -platformSpeed;
 
                     platform->updateRequired = true;
                 }
@@ -248,6 +250,53 @@ void Level::InitLevel(const char *levelPath, float gridSize, float dt, int itera
             {
                 objTile->canEntityCollide = true;
                 objTile->canPlatformCollide = true;
+
+                bool upFree = IsTileEmpty(i, j - 1, level);
+                bool downFree = IsTileEmpty(i, j + 1, level);
+
+                bool rightFree = IsTileEmpty(i + 1, j, level);
+                bool leftFree = IsTileEmpty(i - 1, j, level);
+
+                if(upFree && downFree && rightFree && leftFree)
+                {
+                    objTile->aabb.width *= 0.4f; 
+                    objTile->aabb.height *= 0.4f;
+                }
+                else if((upFree && !downFree) || (!upFree && !downFree))
+                {
+                    objTile->aabb.width *= 0.3f; 
+                    objTile->aabb.height *= 0.4f;
+                }
+                else if(downFree && !upFree)
+                {
+                    objTile->aabb.width *= 0.3f; 
+                    objTile->aabb.height *= 0.4f;
+                }
+                else if((rightFree && !leftFree) || (!rightFree && !leftFree))
+                {
+                    objTile->aabb.width *= 0.4f; 
+                    objTile->aabb.height *= 0.3f;
+                }
+                else if(leftFree && !rightFree)
+                {
+                    objTile->aabb.width *= 0.4f; 
+                    objTile->aabb.height *= 0.3f;
+                }
+
+                objTile->UpdateAABB();
+
+                float spikePositionCorrectionFactor = 0.75f;
+
+                if(upFree && downFree && rightFree && leftFree);
+
+                else if((upFree && !downFree) || (!upFree && !downFree)) objTile->aabb.y += objTile->aabb.height * spikePositionCorrectionFactor;
+
+                else if(downFree && !upFree) objTile->aabb.y -= objTile->aabb.height * spikePositionCorrectionFactor;
+
+                else if((rightFree && !leftFree) || (!rightFree && !leftFree)) objTile->aabb.x -= objTile->aabb.width * spikePositionCorrectionFactor;
+
+                else if(leftFree && !rightFree) objTile->aabb.x += objTile->aabb.width * spikePositionCorrectionFactor;
+                
             }
             break;
 
@@ -286,6 +335,8 @@ void Level::DiscreteUpdate()
 
     player.Update(dt, iterations);
 
+    //X pass
+
     player.phys.UpdatePositionX(dt, iterations);
 
     for(int i = playerTileRange.startX; i <= playerTileRange.endX; i++)
@@ -300,7 +351,11 @@ void Level::DiscreteUpdate()
 
             const Tile& tile = level[i][j];
 
-            if(!IsOneWayTile(i, j))
+            if(tile.type == TileType::SPIKE)
+            {
+
+            }
+            else if(!IsOneWayTile(i, j))
             {
                 SolveCollisions(&player.phys, objTile, true, isGravityUp);
             }
@@ -314,10 +369,15 @@ void Level::DiscreteUpdate()
         }
     }
 
+    //Y pass
 
     player.phys.UpdatePositionY(dt, iterations);
 
     bool isPlayerGrounded = false;
+
+    bool isPlayerFalling = player.phys.body.velocity.y >= 0;
+
+    if(player.entityData.flipY) isPlayerFalling = player.phys.body.velocity.y <= 0;
 
     for(int i = playerTileRange.startX; i <= playerTileRange.endX; i++)
     {
@@ -331,7 +391,11 @@ void Level::DiscreteUpdate()
 
             const Tile& tile = level[i][j];
 
-            if(!IsOneWayTile(i, j))
+            if(tile.type == TileType::SPIKE)
+            {
+                
+            }
+            else if(!IsOneWayTile(i, j))
             {
                 SolveCollisions(&player.phys, objTile, false, isGravityUp);
             }
@@ -347,9 +411,27 @@ void Level::DiscreteUpdate()
 
             if(IsOneWayRightLeft(i,j)) continue;
 
-            //check for direction in the case of one way tiles
-            if(CheckCollisionRecs(player.GetJumpDetector(), objTile->aabb))
-                isPlayerGrounded = true;
+            if(tile.type == TileType::SPIKE) continue;
+
+            if(CheckCollisionRecs(player.GetJumpDetector(), objTile->aabb) && isPlayerFalling)
+            {
+               if(!IsOneWayUpDown(i,j)) isPlayerGrounded = true;
+               else if(IsOneWayUpDown(i,j))
+               {
+                    if(tile.type == TileType::ONE_WAY_UP &&
+                        IsAbove(player.phys.aabb, objTile->aabb, 0.0f)
+                    )
+                    {
+                        isPlayerGrounded = true;
+                    }
+                    else if(tile.type == TileType::ONE_WAY_DOWN &&
+                        IsBelow(player.phys.aabb, objTile->aabb, 0.0f)
+                    )
+                    {
+                        isPlayerGrounded = true;
+                    }
+               }
+            }   
         }
     }
 
@@ -368,14 +450,35 @@ void Level::DiscreteUpdate()
             true, isGravityUp
         );
 
-        if(CheckCollisionRecs(player.GetJumpDetector(), platform->phys.aabb))
+        if(CheckCollisionRecs(player.GetJumpDetector(), platform->phys.aabb) && isPlayerFalling)
         {
-            platform->updateRequired = true;
+            if(!isGravityUp && IsAbove(player.phys.aabb, platform->phys.aabb, 0.0f) || (isGravityUp && IsBelow(player.phys.aabb, platform->phys.aabb, 0.0f)))
+            {
+                platform->updateRequired = true;
+                isPlayerGrounded = true;
+            }
+        }
 
-            isPlayerGrounded = true;
+        bool isMovingPlatform = platform->isHorizontal || platform->isVertical;
+
+        if(!isMovingPlatform) continue;
+
+        TileRange platformRange = CalculateTileRange(
+            platform->phys.position.x,
+            platform->phys.position.y,
+            tileCheckRange
+        );
+
+        for(int i = platformRange.startX; i <= platformRange.endX; i++)
+        {
+            for(int j = platformRange.startY; j <= platformRange.endY; j++)
+            {
+                if(!gameObjTiles[i][j]) continue;
+
+                SolveCollisions_Platform(&platform->phys, gameObjTiles[i][j], platform->isHorizontal);
+            }
         }
     }
-
     
     player.canJump = isPlayerGrounded;
 }
@@ -454,6 +557,19 @@ void Level::DebugDrawing()
 
             DrawAABB(gameObjTiles[i][j]->aabb, RED);
         }
+    }
+
+    Color gridColor = GRAY;
+    gridColor.a = (int)(255 * 0.5f);
+
+    for(int i = 0; i <= ROWS * gridSize; i+= gridSize)
+    {
+        DrawLine(i, 0, i, ROWS * gridSize, gridColor);
+    }
+
+    for(int j = 0; j <= COLS * gridSize; j+= gridSize)
+    {
+        DrawLine(0, j, COLS * gridSize, j, gridColor);
     }
 
     DrawAABB(player.phys.aabb, ORANGE);
