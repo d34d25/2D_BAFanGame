@@ -16,6 +16,10 @@ private:
 
     int screenWidth, screenHeight;
 
+    //refactor the editor so it is able to assign textures directly
+
+    //i can switch from using TileType to just Tile as it has both the type and renderData
+
     TileType currentTileType = TileType::VOID;
 
     TileType tempLevel[ROWS][COLS];

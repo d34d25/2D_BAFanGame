@@ -1,7 +1,10 @@
 #pragma once
 
 #include "entity.h"
-#include <iostream>
+
+void SolveCollisions(GameObject* objA, GameObject* objB, bool isX, bool gravityUp, bool isTrampoline);
+
+void SolveCollisions_Platform(GameObject* objA, GameObject* objB, bool isX);
 
 inline bool IsLeft(const Rectangle& aabb_A, const Rectangle& aabb_B, float offset)
 {
@@ -35,55 +38,6 @@ inline bool IsBelow(const Rectangle& aabb_A, const Rectangle& aabb_B, float offs
     return (top > bottom - offset);
 }
 
-inline void SolveCollisions(GameObject* objA, GameObject* objB, bool isX, bool gravityUp)
-{
-    if(!CheckCollisionRecs(objA->aabb, objB->aabb)) return;
-
-    float overlap = 0;
-
-    float offset = 0.001f;
-
-    if(isX)
-    {
-        if(objA->aabb.x <= objB->aabb.x) // A is at the left
-        {
-            overlap = (objA->aabb.x + objA->aabb.width) - objB->aabb.x;
-            objA->position.x -= (overlap + offset);
-
-            if(objA->body.velocity.x > 0) objA->body.velocity.x = 0;
-        }
-        else // A is at the right
-        {
-            overlap = (objB->aabb.x + objB->aabb.width) - objA->aabb.x;
-            objA->position.x += (overlap + offset);
-
-            if(objA->body.velocity.x < 0) objA->body.velocity.x = 0;
-        }
-    }
-    else
-    {
-        if(objA->aabb.y <= objB->aabb.y) // A is above of B
-        {
-            overlap = (objA->aabb.y + objA->aabb.height) - objB->aabb.y;
-            objA->position.y -= (overlap + offset);
-
-            if(!gravityUp) objA->body.altVelocity = objB->body.velocity;
-        }
-        else //A is below B
-        {
-            overlap = (objB->aabb.y + objB->aabb.height) - objA->aabb.y;
-            objA->position.y += (overlap + offset);
-
-            if(gravityUp) objA->body.altVelocity = objB->body.velocity;
-        }
-
-        objA->body.velocity.y = 0;
-    }
-
-    objA->UpdateAABB();
-}
-
-
 inline void SolveCollisionsOneWayLeftRight(GameObject * objA, GameObject* objB, bool isRight)
 {
     bool isLeft = !isRight;
@@ -94,16 +48,16 @@ inline void SolveCollisionsOneWayLeftRight(GameObject * objA, GameObject* objB, 
 
     if(isRight) if(IsRight(objA->aabb, objB->aabb, offset) || objA->body.velocity.x >= 0.0f) return;
 
-    SolveCollisions(objA, objB, true, false);
+    SolveCollisions(objA, objB, true, false, false);
 }
 
-inline void SolveCollisionsOneWayUpDown(GameObject * objA, GameObject* objB, bool isUp ,bool gravityUp)
+inline void SolveCollisionsOneWayUpDown(GameObject * objA, GameObject* objB, bool isUp ,bool gravityUp, bool isPlatform)
 {
     bool isDown = !isUp;
 
     float offset = 15.0f;
 
-    if(!gravityUp)
+    if(!isPlatform)
     {
         if(isUp) if(!IsAbove(objA->aabb, objB->aabb, offset) || objA->body.velocity.y <= 0.0f) return;
 
@@ -111,46 +65,21 @@ inline void SolveCollisionsOneWayUpDown(GameObject * objA, GameObject* objB, boo
     }
     else
     {
-        if(isDown) if(!IsAbove(objA->aabb, objB->aabb, offset) || objA->body.velocity.y <= 0.0f) return;
-
-        if(isUp) if(!IsBelow(objA->aabb, objB->aabb, offset) || objA->body.velocity.y >= 0.0f) return;
-    }
-
-    SolveCollisions(objA, objB, false, gravityUp);
-}
-
-inline void SolveCollisions_Platform(GameObject* objA, GameObject* objB, bool isX)
-{
-    if(!CheckCollisionRecs(objA->aabb, objB->aabb)) return;
-
-    float offset = 0.001f;
-
-    if(isX)
-    {
-        if(objA->aabb.x <= objB->aabb.x)
+        if(!gravityUp)
         {
-            objA->position.x = (objB->aabb.x - objA->aabb.width * 0.5f) - offset;
+            if(isUp) if(!IsAbove(objA->aabb, objB->aabb, offset) || objA->body.velocity.y <= 0.0f) return;
+
+            if(isDown) if(!IsBelow(objA->aabb, objB->aabb, offset) || objA->body.velocity.y >= 0.0f) return;
         }
         else
         {
-            objA->position.x = ((objB->aabb.x + objB->aabb.width) + objA->aabb.width * 0.5f) + offset;
-        }
+            if(isDown) if(!IsAbove(objA->aabb, objB->aabb, offset) || objA->body.velocity.y <= 0.0f) return;
 
-        objA->body.velocity.x *= -1;
-    }
-    else
-    {
-        if(objA->aabb.y <= objB->aabb.y)
-        {
-            objA->position.y = (objB->aabb.y - objA->aabb.height * 0.5f) - offset;
+            if(isUp) if(!IsBelow(objA->aabb, objB->aabb, offset) || objA->body.velocity.y >= 0.0f) return;
         }
-        else
-        {
-            objA->position.y = ((objB->aabb.y + objB->aabb.height) + objA->aabb.height * 0.5f) + offset;
-        }
+    }    
 
-        objA->body.velocity.y *= -1;
-    }
-
-    objA->UpdateAABB();
+    SolveCollisions(objA, objB, false, gravityUp, false);
 }
+
+//Don't forget to implement the trampolines and gravity changers

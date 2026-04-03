@@ -42,7 +42,6 @@ private:
             {
                 Tile& tile = level[i][j];
 
-                tile.isSolid = false;
                 tile.renderData = {};
                 tile.type = TileType::VOID;
             }
@@ -115,6 +114,19 @@ private:
     inline bool IsOneWayTile(int i, int j)
     {
         return IsOneWayRightLeft(i, j) || IsOneWayUpDown(i, j);
+    }
+
+    inline bool IsTileJumpTrigger(int i, int j)
+    {
+        const TileType& type = level[i][j].type;
+
+        return type == TileType::SPIKE || 
+        type == TileType::TRAMPOLINE ||
+        type == TileType::GRAVITY_CHANGER ||
+        type == TileType::GOAL ||
+        type == TileType::ONE_WAY_RIGHT ||
+        type == TileType::ONE_WAY_LEFT ||
+        type == TileType::PLATFORM_STOP;
     }
 
     void DiscreteUpdate();

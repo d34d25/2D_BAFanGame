@@ -77,8 +77,6 @@ struct Tile
 {
     TileType type = TileType::VOID;
     SpriteRenderData renderData = {};
-
-    bool isSolid = false;
 };
 
 inline bool IsColorOf(Color colorA, Color colorB)

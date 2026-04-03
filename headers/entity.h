@@ -76,6 +76,11 @@ public:
     }
 };
 
+inline bool IsVelocityZero(const Vector2& velocity)
+{
+    return velocity.x == 0 && velocity.y == 0;
+}
+
 struct GameObject
 {
 
@@ -90,8 +95,8 @@ public:
 
     SimpleBody2D body = {};
 
-    bool canEntityCollide = false;
-    bool canPlatformCollide = false;
+    bool canEntityCollidePhysically = false;
+    bool canPlatformCollidePhysically = false;
 
     inline void UpdateAABB()
     {

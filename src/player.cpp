@@ -2,6 +2,8 @@
 
 Player::Player(Vector2 position)
 {
+    spawnPos = position;
+
     phys.position = position;
 
     phys.body.hasGravity = true;

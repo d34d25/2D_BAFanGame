@@ -12,6 +12,7 @@
                 "${workspaceFolder}/src/level.cpp",
                 "${workspaceFolder}/src/platform.cpp",
                 "${workspaceFolder}/src/levelEditor.cpp",
+                "${workspaceFolder}/src/physics.cpp",
                 "-o",
                 "${fileDirname}/${fileBasenameNoExtension}",
                 "-I", "${workspaceFolder}/headers",

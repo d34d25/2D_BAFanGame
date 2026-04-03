@@ -1,7 +1,8 @@
 #pragma once
 
 #include "entity.h"
-#include <array>
+
+#include<iostream>
 
 enum class Character
 {
@@ -27,13 +28,18 @@ private:
 
     float jumpTime = 0.0f;
     float maxJumpTime = 0.15f;
-
+    
 public:
 
     float gravity = 500;
 
     bool canJump = true;
     bool isJumping = false;
+
+    bool isTouchingGravityChanger = false;
+    bool isTouchingSpike = false;
+
+    Vector2 spawnPos = {0,0};
 
     GameObject phys = {};
 
@@ -71,5 +77,14 @@ public:
         else jumpDetector.y = centerY - offset - jumpDetector.height;
         
         return jumpDetector;
+    }
+
+    inline void Respawn()
+    {
+        phys.position = spawnPos;
+
+        phys.body.velocity = {0,0};
+
+        phys.body.altVelocity = {0,0};
     }
 };
