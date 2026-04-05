@@ -33,7 +33,7 @@ public:
 
     float gravity = 500;
 
-    bool canJump = true;
+    bool canJump = false;
     bool isJumping = false;
 
     bool isTouchingGravityChanger = false;
@@ -86,5 +86,8 @@ public:
         phys.body.velocity = {0,0};
 
         phys.body.altVelocity = {0,0};
+
+        isJumping = false;
+        canJump = false;
     }
 };

@@ -1,14 +1,15 @@
 #include "levelEditor.h"
 
 #include<iostream>
+#include<cstring>
 
 void LevelEditor::ExportLevel()
 {
-    int dataSize = ROWS * COLS * sizeof(TileType);
+    int dataSize = ROWS * COLS * sizeof(Tile);
 
     if(SaveFileData("testLevel", tempLevel, dataSize))
     {
-        std::cout<<"LEVEL EXPORT SUCCSESSFULLY"<<"\n";
+        std::cout<<"LEVEL EXPORT SUCCEED"<<"\n";
     }
     else 
     {
@@ -24,18 +25,10 @@ void LevelEditor::ImportLevel(const char* levelPath)
 
     if(fileData == nullptr) return;
 
-    TileType* loadedTypes = (TileType*)fileData;
+    if(dataSize != (ROWS * COLS * sizeof(Tile))) return;
 
-    for(int i = 0; i < ROWS; i++)
-    {
-        for(int j = 0; j < COLS; j++)
-        {
-            TileType type = loadedTypes[i * COLS + j];
-
-            tempLevel[i][j] = type;
-        }
-    }
-
+    memcpy(tempLevel, fileData, dataSize);
+    
     UnloadFileData(fileData);
 }
 
@@ -57,6 +50,16 @@ LevelEditor::LevelEditor(int screenWidth, int screenHeight, const char* levelPat
     int halfWorldHeight = (int)floor(worldHeight * 0.5f);
 
     camera.target = {(float)halfWorldWidth, (float)halfWorldHeight};
+
+    LoadAssets();
+
+    if(activeTextureArray == nullptr || activeTextureArray->empty()) currentTexture = DEFAULT_INVALID_INDEX;
+    else currentTexture = 0;
+}
+
+LevelEditor::~LevelEditor()
+{
+    UnloadAssets();
 }
 
 void LevelEditor::Update()
@@ -73,11 +76,21 @@ void LevelEditor::Update()
 
     mouseMatrixPosition = {i,j};
 
-    if(IsKeyPressed(KEY_ZERO)) currentTileType = TileType::VOID;
+    activeTextureArray = GetActiveTextureArray((TileType)currentTileType);
 
-    if(IsKeyPressed(KEY_ONE)) currentTileType = TileType::SOLID;
+    if(IsNumKeyPressed())
+    {
+        if(IsKeyPressed(KEY_ZERO)) currentTileType = (int)TileType::VOID;
 
-    if(IsKeyPressed(KEY_TWO)) currentTileType = TileType::GOAL;
+        if(IsKeyPressed(KEY_ONE)) currentTileType = (int)TileType::SOLID;
+
+        if(IsKeyPressed(KEY_TWO)) currentTileType = (int)TileType::GOAL;
+
+        activeTextureArray = GetActiveTextureArray((TileType)currentTileType);
+
+        if(activeTextureArray == nullptr || activeTextureArray->empty()) currentTexture = DEFAULT_INVALID_INDEX;
+        else currentTexture = 0;
+    }
 
     float mouseWheel = GetMouseWheelMove();
 
@@ -91,37 +104,63 @@ void LevelEditor::Update()
         camera.zoom = Clamp(camera.zoom, 0.1f,10.0f);
     }
 
-    if(mouseWheel != 0 && currentTileType > TileType::SOLID && !IsKeyDown(KEY_LEFT_ALT))
+    if(mouseWheel != 0 && IsKeyDown(KEY_LEFT_SHIFT))
     {
-        static int specialTileIndex = (int)TileType::GOAL;
+        if(activeTextureArray != nullptr && !activeTextureArray->empty())
+        {
+            if(mouseWheel > 0) currentTexture++;
+            else if(mouseWheel < 0) currentTexture--;
 
-        if(mouseWheel > 0) specialTileIndex++;
-        else if(mouseWheel < 0) specialTileIndex--;
-
-        if(specialTileIndex < 2) specialTileIndex = (int)TileType::COUNT - 1;
-        if(specialTileIndex >= (int)TileType::COUNT) specialTileIndex = (int)TileType::GOAL;
-
-        currentTileType = (TileType)specialTileIndex;
+            if(currentTexture < 0) currentTexture = activeTextureArray->size() - 1;
+            else if (currentTexture >= activeTextureArray->size()) currentTexture = 0;
+        }
+        else
+        {
+            currentTexture = DEFAULT_INVALID_INDEX;
+        }
     }
 
-    TileType& currentTile = tempLevel[mouseMatrixPosition.x][mouseMatrixPosition.y];
+    if(mouseWheel != 0 && currentTileType > (int)TileType::SOLID && !IsKeyDown(KEY_LEFT_ALT))
+    {
+        if(mouseWheel > 0) currentTileType++;
+        else if(mouseWheel < 0) currentTileType--;
+
+        if(currentTileType < (int)TileType::GOAL) currentTileType = (int)TileType::COUNT - 1;
+        if(currentTileType >= (int)TileType::COUNT) currentTileType = (int)TileType::GOAL;
+
+        activeTextureArray = GetActiveTextureArray((TileType)currentTileType);
+
+        if(activeTextureArray == nullptr || activeTextureArray->empty())
+        {
+            currentTexture = DEFAULT_INVALID_INDEX;
+        }
+        else
+        {
+            currentTexture = 0;
+        }
+    }
+
+    TileType& currentTile = tempLevel[mouseMatrixPosition.x][mouseMatrixPosition.y].type;
+    int& currentTileTextureIndex = tempLevel[mouseMatrixPosition.x][mouseMatrixPosition.y].textureIndex;
 
     if(IsMouseButtonDown(MOUSE_BUTTON_LEFT))
     {
-        if(currentTileType > TileType::VOID
-            && currentTileType != currentTile
-            && currentTileType < TileType::COUNT
+        if(currentTileType > (int)TileType::VOID
+            && currentTileType != (int)currentTile
+            && currentTileType < (int)TileType::COUNT
         )
         {
-            currentTile = currentTileType;
+            currentTile = (TileType)currentTileType;
+            currentTileTextureIndex = currentTexture;
         }
 
     }
     else if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT))
     {
-        if(currentTileType != TileType::VOID)
+        if(currentTileType != (int)TileType::VOID)
         {
             currentTile = TileType::VOID;
+            currentTileTextureIndex = DEFAULT_INVALID_INDEX;
         }
     }
 
@@ -164,11 +203,17 @@ void LevelEditor::Draw()
     {
         for(int j = cameraTileRange.startY; j <= cameraTileRange.endY; j++)
         {
-            TileType type = tempLevel[i][j];
+            Tile tile = tempLevel[i][j];
+
+            TileType type = tile.type;
+
+            int tileTextureId = tile.textureIndex;
 
             if(type == TileType::VOID || type >= TileType::COUNT) continue;
 
             Color color = GetTileColor(type);
+
+            std::vector<Texture2D>* currentTileTextureArray = GetActiveTextureArray(type);
 
             if(IsColorOf(color, BLANK)) continue;
 
@@ -184,7 +229,18 @@ void LevelEditor::Draw()
                 offset = -gridSize;
             }
 
-            DrawRectangle(i * gridSize + offset, j * gridSize, tileWidth, tileHeight, color);
+            if(tileTextureId < 0 || currentTileTextureArray == nullptr)
+            {
+                DrawRectangle(i * gridSize + offset, j * gridSize, tileWidth, tileHeight, color);
+            }
+            else 
+            {
+                DrawTexture((*currentTileTextureArray)[tileTextureId], 
+                    i * gridSize,
+                    j * gridSize,
+                    WHITE
+                );
+            }
         }
     }
     
@@ -193,25 +249,39 @@ void LevelEditor::Draw()
 
     Color previewColor = color;
 
-    if(currentTileType != TileType::VOID) previewColor.a = 50;
+    if(currentTileType != (int)TileType::VOID) previewColor.a = 50;
 
     float tileWidth = gridSize;
     float tileHeight = gridSize;
     float offset = 0;
 
-    if(currentTileType == TileType::HORIZONALT_MOVING_PLATFORM || currentTileType == TileType::VERTICAL_MOVING_PLATFORM)
+    if(currentTileType == (int)TileType::HORIZONALT_MOVING_PLATFORM || currentTileType == (int)TileType::VERTICAL_MOVING_PLATFORM)
     {
         tileWidth = gridSize * 3.0f;
         tileHeight = gridSize * 0.3f;
         offset = -gridSize;
     }
 
-    DrawRectangle(
-        mouseMatrixPosition.x * gridSize + offset, 
-        mouseMatrixPosition.y * gridSize,
-        tileWidth, tileHeight, 
-        previewColor
-    );
+    if(currentTexture < 0 || activeTextureArray == nullptr)
+    {
+        DrawRectangle(
+            mouseMatrixPosition.x * gridSize + offset, 
+            mouseMatrixPosition.y * gridSize,
+            tileWidth, tileHeight, 
+            previewColor
+        );
+    }
+    else
+    {
+        previewColor = WHITE;
+        previewColor.a = 100;
+
+        DrawTexture((*activeTextureArray)[currentTexture], 
+            mouseMatrixPosition.x * gridSize,
+            mouseMatrixPosition.y * gridSize,
+            previewColor
+        );     
+    }
 
     //grid
     for(int i = 0; i <= worldWidth; i+= gridSize)
@@ -245,9 +315,13 @@ void LevelEditor::Draw()
     
     //menu
 
-    DrawText(TextFormat("mouse x: %i", mouseMatrixPosition.x), 10, 10, 20, BLACK);
+    int ypos = 50;
+    int spacing = 30;
 
-    DrawText(TextFormat("mouse y: %i", mouseMatrixPosition.y), 10, 30, 20, BLACK);
+    DrawText(TextFormat("mouse x: %i", mouseMatrixPosition.x), 10, ypos, 20, BLACK);
 
-    DrawText(GetTileTypeText(currentTileType), 10, 50, 20, BLACK);
+    DrawText(TextFormat("mouse y: %i", mouseMatrixPosition.y), 10, ypos + spacing, 20, BLACK);
+
+    DrawText(GetTileTypeText((TileType)currentTileType), 10, ypos + spacing * 2, 20, BLACK);
+    DrawText(TextFormat("tileType: %i", currentTileType ), 10, ypos + spacing * 3,20,BLACK);
 }

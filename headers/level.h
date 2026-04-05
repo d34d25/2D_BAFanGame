@@ -29,6 +29,13 @@ private:
     GameObject* gameObjTiles[ROWS][COLS] = {nullptr};
 
     std::vector<Platform*> platformList = {};
+    //change the single vector to a pool system
+    //just like bullets, I don't need to re-set the position or velocity
+    //on spawn so I can keep it very simple and I can also "despawn" them
+    //when they're too far from a point (example: the camera's target)
+    //that way, on the level I only need to loop through active platforms
+
+    //similar idea for enemies in the future
 
     Camera2D camera = {};
 
@@ -42,7 +49,7 @@ private:
             {
                 Tile& tile = level[i][j];
 
-                tile.renderData = {};
+                tile.textureIndex = -1;
                 tile.type = TileType::VOID;
             }
         }

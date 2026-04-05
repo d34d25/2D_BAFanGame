@@ -3,6 +3,7 @@
 #include "raylib.h"
 #include "entity.h"
 
+#include<vector>
 
 static constexpr Color PLAYER_SPAWN = Color{251,242,54,255};
 
@@ -39,6 +40,8 @@ static constexpr Color SPIKE = Color{220,45,50,255};
 static constexpr int ROWS = 70;
 static constexpr int COLS = 70;
 
+static constexpr int DEFAULT_INVALID_INDEX = -1;
+
 static int gridSize = 50;
 
 struct TileRange
@@ -73,10 +76,39 @@ enum class TileType
     COUNT
 };
 
+struct TileTypeList
+{
+    TileType type = TileType::VOID;
+    Color color = BLANK;
+    const char* name = "BLANK";
+};
+
+const std::vector<TileTypeList> TILE_TYPE_LIST = {
+    {TileType::VOID, BLANK, "BLANK"},
+    {TileType::SOLID, BLACK, "SOLID"},
+    {TileType::GOAL, GOAL, "GOAL"},
+    {TileType::PLATFORM_STOP, PLATFORM_STOP, "PLATFORM_STOP"},
+    {TileType::TRAMPOLINE, TRAMPOLINE, "TRAMPOLINE"},
+    {TileType::GRAVITY_CHANGER, GRAVITY_CHANGER, "GRAVITY_CHANGER"},
+    {TileType::TREADMILL_RIGHT, TREADMILL_RIGHT, "TREADMILL_RIGHT"},
+    {TileType::TREADMILL_LEFT, TREADMILL_LEFT, "TREADMILL_LEFT"},
+    {TileType::ONE_WAY_UP, ONE_WAY_UP, "ONE_WAY_UP"},
+    {TileType::ONE_WAY_DOWN, ONE_WAY_DOWN, "ONE_WAY_DOWN"},
+    {TileType::ONE_WAY_RIGHT, ONE_WAY_RIGHT, "ONE_WAY_RIGHT"},
+    {TileType::ONE_WAY_LEFT, ONE_WAY_LEFT, "ONE_WAY_LEFT"},
+    {TileType::SPIKE, SPIKE, "SPIKE"},
+    {TileType::HORIZONALT_MOVING_PLATFORM, HORIZONTAL_MOVING_PLATFORM, "HORIZONALT_MOVING_PLATFORM"},
+    {TileType::VERTICAL_MOVING_PLATFORM, VERTICAL_MOVING_PLATFORM, "VERTICAL_MOVING_PLATFORM"},
+    {TileType::FALLING_PLATFORM, FALLING_PLATFORM, "FALLING_PLATFORM"},
+    {TileType::DISAPPEARING_PLATFORM, DISAPPEARING_PLATFORM, "DISAPPEARING_PLATFORM"},
+    {TileType::PLAYER_SPAWN, PLAYER_SPAWN, "PLAYER_SPAWN"},
+
+};
+
 struct Tile
 {
     TileType type = TileType::VOID;
-    SpriteRenderData renderData = {};
+    int textureIndex = -1;
 };
 
 inline bool IsColorOf(Color colorA, Color colorB)
@@ -112,54 +144,46 @@ inline TileRange CalculateTileRange(int x, int y, int range)
 
 inline Color GetTileColor(TileType type)
 {
-    switch (type)
+    for(int i = 0; i < TILE_TYPE_LIST.size(); i++)
     {
-    case TileType::VOID: return BLANK;
-    case TileType::SOLID: return BLACK;
-    case TileType::GOAL: return GOAL;
-    case TileType::PLATFORM_STOP: return PLATFORM_STOP;
-    case TileType::TRAMPOLINE: return TRAMPOLINE;
-    case TileType::TREADMILL_RIGHT: return TREADMILL_RIGHT;
-    case TileType::TREADMILL_LEFT: return TREADMILL_LEFT;
-    case TileType::ONE_WAY_UP: return ONE_WAY_UP;
-    case TileType::ONE_WAY_DOWN: return ONE_WAY_DOWN;
-    case TileType::ONE_WAY_RIGHT: return ONE_WAY_RIGHT;
-    case TileType::ONE_WAY_LEFT: return ONE_WAY_LEFT;
-    case TileType::GRAVITY_CHANGER: return GRAVITY_CHANGER;
-    case TileType::SPIKE: return SPIKE;
-    case TileType::HORIZONALT_MOVING_PLATFORM: return HORIZONTAL_MOVING_PLATFORM;
-    case TileType::VERTICAL_MOVING_PLATFORM: return VERTICAL_MOVING_PLATFORM;
-    case TileType::FALLING_PLATFORM: return FALLING_PLATFORM;
-    case TileType::DISAPPEARING_PLATFORM: return DISAPPEARING_PLATFORM;
-    case TileType::PLAYER_SPAWN: return PLAYER_SPAWN;
-    
-    default: return BLANK;
+        if(TILE_TYPE_LIST[i].type == type)
+        {
+            return TILE_TYPE_LIST[i].color;
+        }
     }
+    
+    return BLANK;
 }
 
 inline const char* GetTileTypeText(TileType type)
 {
+    for(int i = 0; i < TILE_TYPE_LIST.size(); i++)
+    {
+        if(TILE_TYPE_LIST[i].type == type)
+        {
+            return TILE_TYPE_LIST[i].name;
+        }
+    }
+
+    return "";
+}
+
+extern std::vector<Texture2D> solidTilesTextures;
+
+void LoadAssets();
+
+void UnloadAssets();
+
+inline std::vector<Texture2D>* GetActiveTextureArray(TileType type)
+{
     switch (type)
     {
-    case TileType::VOID: return "VOID";
-    case TileType::SOLID: return "SOLID";
-    case TileType::GOAL: return "GOAL";
-    case TileType::PLATFORM_STOP: return "PLATFORM_STOP";
-    case TileType::TRAMPOLINE: return "TRAMPOLINE";
-    case TileType::TREADMILL_RIGHT: return "TREADMILL_RIGHT";
-    case TileType::TREADMILL_LEFT: return "TREADMILL_LEFT";
-    case TileType::ONE_WAY_UP: return "ONE_WAY_UP";
-    case TileType::ONE_WAY_DOWN: return "ONE_WAY_DOWN";
-    case TileType::ONE_WAY_RIGHT: return "ONE_WAY_RIGHT";
-    case TileType::ONE_WAY_LEFT: return "ONE_WAY_LEFT";
-    case TileType::GRAVITY_CHANGER: return "GRAVITY_CHANGER";
-    case TileType::SPIKE: return "SPIKE";
-    case TileType::HORIZONALT_MOVING_PLATFORM: return "HORIZONTAL_MOVING_PLATFORM";
-    case TileType::VERTICAL_MOVING_PLATFORM: return "VERTICAL_MOVING_PLATFORM";
-    case TileType::FALLING_PLATFORM: return "FALLING_PLATFORM";
-    case TileType::DISAPPEARING_PLATFORM: return "DISAPPEARING_PLATFORM";
-    case TileType::PLAYER_SPAWN: return "PLAYER_SPAWN";
+    case TileType::SOLID:
+        return &solidTilesTextures;
+        break;
 
-    default: return "BLANK";
+    default:
+    return nullptr;
+        break;
     }
 }

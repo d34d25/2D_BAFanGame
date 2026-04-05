@@ -81,5 +81,3 @@ inline void SolveCollisionsOneWayUpDown(GameObject * objA, GameObject* objB, boo
 
     SolveCollisions(objA, objB, false, gravityUp, false);
 }
-
-//Don't forget to implement the trampolines and gravity changers

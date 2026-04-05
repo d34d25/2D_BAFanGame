@@ -1,6 +1,7 @@
 #include "level.h"
 
 #include <iostream>
+#include<cstring>
 
 Level::Level() : player({0, 0})
 {
@@ -23,18 +24,10 @@ void Level::LoadLevelData(const char *levelPath)
 
     if(fileData == nullptr) return;
 
-    TileType* loadedTypes = (TileType*)fileData;
+    if(dataSize != (ROWS * COLS * sizeof(Tile))) return;
 
-    for(int i = 0; i < ROWS; i++)
-    {
-        for(int j = 0; j < COLS; j++)
-        {
-            TileType type = loadedTypes[i * COLS + j];
-
-            level[i][j].type = type;
-        }
-    }
-
+    memcpy(level, fileData, dataSize);
+    
     UnloadFileData(fileData);
 }
 
@@ -574,15 +567,28 @@ void Level::DrawLevel()
     {
         for(int j = playerTileRange.startY; j <= playerTileRange.endY; j++)
         {
-            TileType type = level[i][j].type;
+            Tile tile = level[i][j];
 
             if(IsNotRealTile(i,j)) continue;
 
-            Color color = GetTileColor(type);
+            std::vector<Texture2D>* textureArray = GetActiveTextureArray(tile.type);
 
-            if(IsColorOf(color, BLANK)) continue;
+            if(textureArray && tile.textureIndex >= 0 && tile.textureIndex < (int)textureArray->size())
+            {
+                DrawTexture(
+                    (*textureArray)[tile.textureIndex],
+                    i * gridSize, j * gridSize, 
+                    WHITE
+                );
+            }
+            else
+            {
+                Color color = GetTileColor(tile.type);
 
-            if(gameObjTiles[i][j]) DrawRectangleRec(gameObjTiles[i][j]->aabb, color);
+                if(IsColorOf(color, BLANK)) continue;
+
+                if(gameObjTiles[i][j]) DrawRectangleRec(gameObjTiles[i][j]->aabb, color);
+            }
         }
     }
 

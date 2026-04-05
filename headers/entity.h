@@ -76,11 +76,6 @@ public:
     }
 };
 
-inline bool IsVelocityZero(const Vector2& velocity)
-{
-    return velocity.x == 0 && velocity.y == 0;
-}
-
 struct GameObject
 {
 
