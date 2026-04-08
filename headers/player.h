@@ -1,6 +1,7 @@
 #pragma once
 
 #include "entity.h"
+#include "drawing.h"
 
 #include<iostream>
 

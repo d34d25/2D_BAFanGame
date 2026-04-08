@@ -2,7 +2,7 @@
 
 #include "entity.h"
 
-void SolveCollisions(GameObject* objA, GameObject* objB, bool isX, bool gravityUp, bool isTrampoline);
+void SolveCollisions(GameObject* objA, GameObject* objB, bool isX, bool gravityUp, bool isTrampoline, bool isPlatform);
 
 void SolveCollisions_Platform(GameObject* objA, GameObject* objB, bool isX);
 
@@ -48,7 +48,7 @@ inline void SolveCollisionsOneWayLeftRight(GameObject * objA, GameObject* objB, 
 
     if(isRight) if(IsRight(objA->aabb, objB->aabb, offset) || objA->body.velocity.x >= 0.0f) return;
 
-    SolveCollisions(objA, objB, true, false, false);
+    SolveCollisions(objA, objB, true, false, false, false);
 }
 
 inline void SolveCollisionsOneWayUpDown(GameObject * objA, GameObject* objB, bool isUp ,bool gravityUp, bool isPlatform)
@@ -79,5 +79,5 @@ inline void SolveCollisionsOneWayUpDown(GameObject * objA, GameObject* objB, boo
         }
     }    
 
-    SolveCollisions(objA, objB, false, gravityUp, false);
+    SolveCollisions(objA, objB, false, gravityUp, false, isPlatform);
 }

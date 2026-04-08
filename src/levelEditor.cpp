@@ -53,7 +53,7 @@ LevelEditor::LevelEditor(int screenWidth, int screenHeight, const char* levelPat
 
     LoadAssets();
 
-    if(activeTextureArray == nullptr || activeTextureArray->empty()) currentTexture = DEFAULT_INVALID_INDEX;
+    if(!activeRenderData || activeRenderData->animationFrames.empty()) currentTexture = DEFAULT_INVALID_INDEX;
     else currentTexture = 0;
 }
 
@@ -76,19 +76,23 @@ void LevelEditor::Update()
 
     mouseMatrixPosition = {i,j};
 
-    activeTextureArray = GetActiveTextureArray((TileType)currentTileType);
+    activeRenderData = GetActiveRenderData((TileType)currentTileType);
 
     if(IsNumKeyPressed())
     {
         if(IsKeyPressed(KEY_ZERO)) currentTileType = (int)TileType::VOID;
 
-        if(IsKeyPressed(KEY_ONE)) currentTileType = (int)TileType::SOLID;
+        if(IsKeyPressed(KEY_ONE)) currentTileType = (int)TileType::STATIC_START + 1;
 
-        if(IsKeyPressed(KEY_TWO)) currentTileType = (int)TileType::GOAL;
+        if(IsKeyPressed(KEY_TWO)) currentTileType = (int)TileType::ANIMATED_START + 1;
 
-        activeTextureArray = GetActiveTextureArray((TileType)currentTileType);
+        if(IsKeyPressed(KEY_THREE)) currentTileType = (int)TileType::PLATFORM_START + 1;
 
-        if(activeTextureArray == nullptr || activeTextureArray->empty()) currentTexture = DEFAULT_INVALID_INDEX;
+        if(IsKeyPressed(KEY_FOUR)) currentTileType = (int)TileType::MISC_START + 1;
+
+        activeRenderData = GetActiveRenderData((TileType)currentTileType);
+
+        if(!activeRenderData || activeRenderData->animationFrames.empty()) currentTexture = DEFAULT_INVALID_INDEX;
         else currentTexture = 0;
     }
 
@@ -104,15 +108,15 @@ void LevelEditor::Update()
         camera.zoom = Clamp(camera.zoom, 0.1f,10.0f);
     }
 
-    if(mouseWheel != 0 && IsKeyDown(KEY_LEFT_SHIFT))
+    if(mouseWheel != 0 && IsKeyDown(KEY_LEFT_SHIFT) && currentTileType >= (int)TileType::STATIC_START && currentTileType <= (int)TileType::STATIC_END)
     {
-        if(activeTextureArray != nullptr && !activeTextureArray->empty())
+        if(activeRenderData != nullptr && !activeRenderData->animationFrames.empty())
         {
             if(mouseWheel > 0) currentTexture++;
             else if(mouseWheel < 0) currentTexture--;
 
-            if(currentTexture < 0) currentTexture = activeTextureArray->size() - 1;
-            else if (currentTexture >= activeTextureArray->size()) currentTexture = 0;
+            if(currentTexture < 0) currentTexture = activeRenderData->animationFrames.size() - 1;
+            else if (currentTexture >= activeRenderData->animationFrames.size()) currentTexture = 0;
         }
         else
         {
@@ -120,24 +124,54 @@ void LevelEditor::Update()
         }
     }
 
-    if(mouseWheel != 0 && currentTileType > (int)TileType::SOLID && !IsKeyDown(KEY_LEFT_ALT))
+    if(mouseWheel != 0 && !IsKeyDown(KEY_LEFT_ALT) && !IsKeyDown(KEY_LEFT_SHIFT))
     {
-        if(mouseWheel > 0) currentTileType++;
-        else if(mouseWheel < 0) currentTileType--;
+        int direction = (mouseWheel > 0) ? 1 : -1;
 
-        if(currentTileType < (int)TileType::GOAL) currentTileType = (int)TileType::COUNT - 1;
-        if(currentTileType >= (int)TileType::COUNT) currentTileType = (int)TileType::GOAL;
+        int start = (int)TileType::VOID;
 
-        activeTextureArray = GetActiveTextureArray((TileType)currentTileType);
+        int end = (int)TileType::COUNT;
 
-        if(activeTextureArray == nullptr || activeTextureArray->empty())
+        if(currentTileType >= (int)TileType::STATIC_START && currentTileType <= (int)TileType::STATIC_END)
         {
-            currentTexture = DEFAULT_INVALID_INDEX;
+            start = (int)TileType::STATIC_START;
+            end = (int)TileType::STATIC_END;
+        }
+        else if(currentTileType >= (int)TileType::ANIMATED_START && currentTileType <= (int)TileType::ANIMATED_END)
+        {
+            start = (int)TileType::ANIMATED_START;
+            end = (int)TileType::ANIMATED_END;
+        }
+        else if(currentTileType >= (int)TileType::PLATFORM_START && currentTileType <= (int)TileType::PLATFORM_END)
+        {
+            start = (int)TileType::PLATFORM_START;
+            end = (int)TileType::PLATFORM_END;
+        }
+        else if(currentTileType >= (int)TileType::MISC_START && currentTileType <= (int)TileType::MISC_END)
+        {
+            start = (int)TileType::MISC_START;
+            end = (int)TileType::MISC_END;
         }
         else
         {
-            currentTexture = 0;
+            direction = 0;
         }
+
+        currentTileType += direction;
+
+        while(IsTypeInvalid((TileType)currentTileType))
+        {
+            if(currentTileType >= end) currentTileType = start + 1;
+            else if(currentTileType <= start) currentTileType = end - 1;
+            else currentTileType += direction;
+        }
+
+        activeRenderData = GetActiveRenderData((TileType)currentTileType);
+
+        if(!activeRenderData || activeRenderData->animationFrames.empty()) currentTexture = DEFAULT_INVALID_INDEX;
+        else currentTexture = 0;
+
+        if(currentTileType == (int)TileType::TREADMILL_LEFT) currentTexture = TREADMILL_LEFT_START_FRAME;
     }
 
     TileType& currentTile = tempLevel[mouseMatrixPosition.x][mouseMatrixPosition.y].type;
@@ -145,11 +179,26 @@ void LevelEditor::Update()
 
     if(IsMouseButtonDown(MOUSE_BUTTON_LEFT))
     {
-        if(currentTileType > (int)TileType::VOID
+        if(currentTileType != (int)TileType::VOID
             && currentTileType != (int)currentTile
-            && currentTileType < (int)TileType::COUNT
+            && !IsTypeInvalid((TileType)currentTileType)
         )
         {
+            if((TileType)currentTileType == TileType::PLAYER_SPAWN)
+            {
+                for(int i = 0; i < ROWS; i++)
+                {
+                    for(int j = 0; j < COLS; j++)
+                    {
+                        if(tempLevel[i][j].type == TileType::PLAYER_SPAWN)
+                        {
+                            tempLevel[i][j].type = TileType::VOID;
+                            tempLevel[i][j].textureIndex = DEFAULT_INVALID_INDEX;
+                        }
+                    }
+                }
+            }
+
             currentTile = (TileType)currentTileType;
             currentTileTextureIndex = currentTexture;
         }
@@ -213,7 +262,7 @@ void LevelEditor::Draw()
 
             Color color = GetTileColor(type);
 
-            std::vector<Texture2D>* currentTileTextureArray = GetActiveTextureArray(type);
+            SpriteRenderData* tileRenderData = GetActiveRenderData(type);
 
             if(IsColorOf(color, BLANK)) continue;
 
@@ -229,15 +278,16 @@ void LevelEditor::Draw()
                 offset = -gridSize;
             }
 
-            if(tileTextureId < 0 || currentTileTextureArray == nullptr)
+            if(tileTextureId < 0 || !tileRenderData)
             {
                 DrawRectangle(i * gridSize + offset, j * gridSize, tileWidth, tileHeight, color);
             }
             else 
             {
-                DrawTexture((*currentTileTextureArray)[tileTextureId], 
-                    i * gridSize,
-                    j * gridSize,
+                DrawTextureRec(
+                    tileRenderData->sourceTexture,
+                    tileRenderData->animationFrames[tileTextureId],
+                    {(float) i * gridSize, (float) j * gridSize},
                     WHITE
                 );
             }
@@ -262,7 +312,7 @@ void LevelEditor::Draw()
         offset = -gridSize;
     }
 
-    if(currentTexture < 0 || activeTextureArray == nullptr)
+    if(currentTexture < 0 || !activeRenderData)
     {
         DrawRectangle(
             mouseMatrixPosition.x * gridSize + offset, 
@@ -276,11 +326,12 @@ void LevelEditor::Draw()
         previewColor = WHITE;
         previewColor.a = 100;
 
-        DrawTexture((*activeTextureArray)[currentTexture], 
-            mouseMatrixPosition.x * gridSize,
-            mouseMatrixPosition.y * gridSize,
+        DrawTextureRec(
+            activeRenderData->sourceTexture,
+            activeRenderData->animationFrames[currentTexture],
+            ConvertFromIntPairToVector2(mouseMatrixPosition, gridSize),
             previewColor
-        );     
+        );
     }
 
     //grid

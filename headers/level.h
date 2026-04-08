@@ -20,7 +20,9 @@ private:
 
     int iterations = 1;
 
-    int tileCheckRange = 2;
+    int collisionTileCheckRange = 2;
+
+    int renderTileCheckRange = 15;
 
     float gravity = 500;
 
@@ -29,13 +31,6 @@ private:
     GameObject* gameObjTiles[ROWS][COLS] = {nullptr};
 
     std::vector<Platform*> platformList = {};
-    //change the single vector to a pool system
-    //just like bullets, I don't need to re-set the position or velocity
-    //on spawn so I can keep it very simple and I can also "despawn" them
-    //when they're too far from a point (example: the camera's target)
-    //that way, on the level I only need to loop through active platforms
-
-    //similar idea for enemies in the future
 
     Camera2D camera = {};
 
@@ -87,18 +82,27 @@ private:
 
         camera.target = Vector2Lerp(camera.target, desired, 0.1f);
 
-        camera.offset = {screenWidth * 0.5f, screenHeight * 0.5f};
+        float zoom = camera.zoom;
+
+        camera.target.x = floorf(camera.target.x * zoom) / zoom;
+        camera.target.y = floorf(camera.target.y * zoom) / zoom;
+
+        camera.offset = {floorf(screenWidth * 0.5f), floorf(screenHeight * 0.5f)};
 
         camera.rotation = 0.0f;
 
         int mouseWheel = GetMouseWheelMove();
 
-        float cameraFactor = 0.25f;
+        float cameraFactor = 0.2f;
 
         if(IsKeyDown(KEY_LEFT_ALT))
         {
             if(mouseWheel > 0) camera.zoom += cameraFactor;
             else if(mouseWheel < 0) camera.zoom -= cameraFactor;
+
+            float step = 1.0f / (float)gridSize;
+
+            camera.zoom = roundf(camera.zoom / step) * step;
 
             camera.zoom = Clamp(camera.zoom, 0.25f, 15.25f);
         }
@@ -148,13 +152,15 @@ private:
     {
         TileType type = level[i][j].type;
 
-        return  type == TileType::VOID || 
-                type == TileType::PLAYER_SPAWN ||
-                type == TileType::HORIZONALT_MOVING_PLATFORM ||
-                type == TileType::VERTICAL_MOVING_PLATFORM ||
-                type == TileType::FALLING_PLATFORM ||
-                type == TileType::DISAPPEARING_PLATFORM ||
-                type == TileType::COUNT;
+        if(type == TileType::VOID) return true;
+
+        if(IsTypeInvalid(type)) return true;
+
+        if(type >=  TileType::LOGIC_START && type <= TileType::LOGIC_END) return true;
+
+        if(type >= TileType::PLATFORM_START && type <= TileType::PLATFORM_END) return true;
+
+        return false;
     }
 
 public:

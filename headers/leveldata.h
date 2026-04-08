@@ -3,6 +3,8 @@
 #include "raylib.h"
 #include "entity.h"
 
+#include "drawing.h"
+
 #include<vector>
 
 static constexpr Color PLAYER_SPAWN = Color{251,242,54,255};
@@ -42,6 +44,15 @@ static constexpr int COLS = 70;
 
 static constexpr int DEFAULT_INVALID_INDEX = -1;
 
+static constexpr int TREADMILL_LEFT_START_FRAME = 4;
+
+static constexpr int SPIKE_UP = 0;
+static constexpr int SPIKE_DOWN = 1;
+static constexpr int SPIKE_LEFT = 2;
+static constexpr int SPIKE_RIGHT = 3;
+static constexpr int SPIKE_FLOATING = 4;
+
+
 static int gridSize = 50;
 
 struct TileRange
@@ -53,7 +64,7 @@ struct TileRange
     int endY = COLS;
 };
 
-enum class TileType
+/*enum class TileType
 {
     VOID,
     SOLID,
@@ -74,7 +85,98 @@ enum class TileType
     DISAPPEARING_PLATFORM,
     PLAYER_SPAWN,
     COUNT
+};*/
+
+enum class TileType
+{
+    VOID,
+    
+    //with no animation
+    STATIC_START,
+
+    SOLID,
+
+    SPIKE,
+
+    ONE_WAY_UP,
+    ONE_WAY_DOWN,
+    ONE_WAY_RIGHT,
+    ONE_WAY_LEFT,
+
+    STATIC_END,
+
+    //with animation
+    ANIMATED_START,
+
+    TREADMILL_RIGHT,
+    TREADMILL_LEFT,
+
+    TRAMPOLINE,
+    
+    GRAVITY_CHANGER,
+
+    ANIMATED_END,
+
+    PLATFORM_START,
+
+    HORIZONALT_MOVING_PLATFORM,
+    VERTICAL_MOVING_PLATFORM,
+    FALLING_PLATFORM,
+    DISAPPEARING_PLATFORM,
+
+    PLATFORM_END,
+
+    MISC_START,
+
+    GOAL,
+
+    PLATFORM_STOP,
+
+    //non real tiles
+    LOGIC_START,
+
+    PLAYER_SPAWN,
+
+    LOGIC_END,
+
+    MISC_END,
+
+    COUNT
 };
+
+inline bool IsTypeInvalid(TileType type)
+{
+    switch (type)
+    {
+    case TileType::STATIC_START:
+    
+    case TileType::STATIC_END:
+
+    case TileType::ANIMATED_START:
+
+    case TileType::ANIMATED_END:
+
+    case TileType::PLATFORM_START:
+
+    case TileType::PLATFORM_END:
+
+    case TileType::MISC_START:
+
+    case TileType::MISC_END:
+
+    case TileType::LOGIC_START:
+
+    case TileType::LOGIC_END:
+
+    case TileType::COUNT:
+
+        return true;
+
+
+    
+    default: return false;
+    }
+}
 
 struct TileTypeList
 {
@@ -102,13 +204,12 @@ const std::vector<TileTypeList> TILE_TYPE_LIST = {
     {TileType::FALLING_PLATFORM, FALLING_PLATFORM, "FALLING_PLATFORM"},
     {TileType::DISAPPEARING_PLATFORM, DISAPPEARING_PLATFORM, "DISAPPEARING_PLATFORM"},
     {TileType::PLAYER_SPAWN, PLAYER_SPAWN, "PLAYER_SPAWN"},
-
 };
 
 struct Tile
 {
     TileType type = TileType::VOID;
-    int textureIndex = -1;
+    int textureIndex = DEFAULT_INVALID_INDEX;
 };
 
 inline bool IsColorOf(Color colorA, Color colorB)
@@ -119,11 +220,11 @@ inline bool IsColorOf(Color colorA, Color colorB)
     colorA.a == colorB.a;
 }
 
-inline bool IsTileEmpty(int i, int j, Tile(&levelTiles)[ROWS][COLS])
+inline bool IsTileEmpty(int i, int j, Tile(&levelTiles)[ROWS][COLS], TileType emptyType = TileType::VOID)
 {
     if(i < 0 || i >= ROWS || j < 0 || j >= COLS) return true;
 
-    return levelTiles[i][j].type == TileType::VOID;
+    return levelTiles[i][j].type == emptyType;
 }
 
 inline TileRange CalculateTileRange(int x, int y, int range)
@@ -168,22 +269,34 @@ inline const char* GetTileTypeText(TileType type)
     return "";
 }
 
-extern std::vector<Texture2D> solidTilesTextures;
+//textures
+
+//static
+extern SpriteRenderData solidTilesRenderData;
+
+extern SpriteRenderData spikesRenderData;
+
+//animated
+extern SpriteRenderData treadmillRenderData;
 
 void LoadAssets();
 
 void UnloadAssets();
 
-inline std::vector<Texture2D>* GetActiveTextureArray(TileType type)
+inline SpriteRenderData* GetActiveRenderData(TileType type)
 {
     switch (type)
     {
-    case TileType::SOLID:
-        return &solidTilesTextures;
-        break;
+    case TileType::SOLID:return &solidTilesRenderData;
 
-    default:
-    return nullptr;
-        break;
+    case TileType::TREADMILL_RIGHT: 
+    case TileType::TREADMILL_LEFT:
+        return &treadmillRenderData;
+
+    case TileType::SPIKE: return &spikesRenderData;
+
+    default: return nullptr;
+
     }
 }
+

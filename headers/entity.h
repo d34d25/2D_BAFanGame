@@ -3,6 +3,8 @@
 #include "raylib.h"
 #include "raymath.h"
 
+#include <vector>
+
 const float MASS = 1;
 
 const Vector2 MAX_SPEED = {500,500};
@@ -119,10 +121,16 @@ public:
 
 struct SpriteRenderData
 {
-    Texture2D texture = {};
-    Rectangle sourceRect = {0,0,1,1};
+    Texture2D sourceTexture = {};
+    
     Vector2 position = {0,0};
+    
     float scale = 1;
+
+    //animation
+    std::vector<Rectangle> animationFrames = {};
+
+    int currentFrame = 0;
 };
 
 struct EntityData

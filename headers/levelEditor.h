@@ -10,15 +10,16 @@ struct IntPair
     int y = 0;
 };
 
+inline Vector2 ConvertFromIntPairToVector2(IntPair pair, int scale)
+{
+    return {(float)pair.x * scale, (float)pair.y * scale};
+}
+
 class LevelEditor
 {
 private:
 
     int screenWidth, screenHeight;
-
-    //refactor the editor so it is able to assign textures directly
-
-    //i can switch from using TileType to just Tile as it has both the type and renderData
 
     int currentTileType = (int)TileType::VOID;
     
@@ -30,7 +31,7 @@ private:
 
     IntPair mouseMatrixPosition = {0,0};
 
-    std::vector<Texture2D>* activeTextureArray = nullptr;
+    SpriteRenderData* activeRenderData = nullptr;
 
     inline void UpdateCamera()
     {

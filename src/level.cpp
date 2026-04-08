@@ -45,7 +45,11 @@ void Level::InitLevel(const char *levelPath, float gridSize, float dt, int itera
 
     camera.target = {0,0};
 
-    camera.zoom = 1.25f;
+    camera.zoom = 1.2f;
+
+    float step = 1.0f / (float)gridSize;
+
+    camera.zoom = roundf(camera.zoom / step) * step;
 
     ClearTileMatrix();
 
@@ -59,10 +63,10 @@ void Level::InitLevel(const char *levelPath, float gridSize, float dt, int itera
     {
         for(int j = 0; j < COLS; j++)
         {
-            if(level[i][j].type == TileType::COUNT) level[i][j].type = TileType::VOID;
-
             TileType type = level[i][j].type;
-            
+
+            if(IsTypeInvalid(type)) level[i][j].type = TileType::VOID;
+
             float xpos = i * gridSize + gridSize * 0.5f;
             float ypos = j * gridSize + gridSize * 0.5f;
 
@@ -74,8 +78,7 @@ void Level::InitLevel(const char *levelPath, float gridSize, float dt, int itera
            
             //platforms...
 
-            bool isPlatform = type == TileType::HORIZONALT_MOVING_PLATFORM || type == TileType::VERTICAL_MOVING_PLATFORM
-            || type == TileType::FALLING_PLATFORM || type == TileType::DISAPPEARING_PLATFORM;
+            bool isPlatform = type > TileType::PLATFORM_START && type < TileType::PLATFORM_END;
 
             if(isPlatform)
             {
@@ -246,51 +249,49 @@ void Level::InitLevel(const char *levelPath, float gridSize, float dt, int itera
                 objTile->canEntityCollidePhysically = false;
                 objTile->canPlatformCollidePhysically = true;
 
-                bool upFree = IsTileEmpty(i, j - 1, level);
-                bool downFree = IsTileEmpty(i, j + 1, level);
+                float widthFactor = 0.4f;
+                float heightFactor = 0.4f;
 
-                bool rightFree = IsTileEmpty(i + 1, j, level);
-                bool leftFree = IsTileEmpty(i - 1, j, level);
+                switch (tile->textureIndex)
+                {
+                case SPIKE_UP:
+                case SPIKE_DOWN:
+                    break;
 
-                if(upFree && downFree && rightFree && leftFree)
-                {
-                    objTile->aabb.width *= 0.4f; 
-                    objTile->aabb.height *= 0.4f;
+                case SPIKE_RIGHT:
+                case SPIKE_LEFT:
+                    {
+                        std::swap(widthFactor, heightFactor);
+                    }
+                    break;
+                default:
+                    {
+                        widthFactor = 0.5f;
+                        heightFactor = 0.5f;
+                    }
+                    break;
                 }
-                else if((upFree && !downFree) || (!upFree && !downFree))
-                {
-                    objTile->aabb.width *= 0.3f; 
-                    objTile->aabb.height *= 0.4f;
-                }
-                else if(downFree && !upFree)
-                {
-                    objTile->aabb.width *= 0.3f; 
-                    objTile->aabb.height *= 0.4f;
-                }
-                else if((rightFree && !leftFree) || (!rightFree && !leftFree))
-                {
-                    objTile->aabb.width *= 0.4f; 
-                    objTile->aabb.height *= 0.3f;
-                }
-                else if(leftFree && !rightFree)
-                {
-                    objTile->aabb.width *= 0.4f; 
-                    objTile->aabb.height *= 0.3f;
-                }
+
+                objTile->aabb.width *= widthFactor; 
+                objTile->aabb.height *= heightFactor;
 
                 objTile->UpdateAABB();
 
                 float spikePositionCorrectionFactor = 0.75f;
 
-                if(upFree && downFree && rightFree && leftFree);
-
-                else if((upFree && !downFree) || (!upFree && !downFree)) objTile->aabb.y += objTile->aabb.height * spikePositionCorrectionFactor;
-
-                else if(downFree && !upFree) objTile->aabb.y -= objTile->aabb.height * spikePositionCorrectionFactor;
-
-                else if((rightFree && !leftFree) || (!rightFree && !leftFree)) objTile->aabb.x -= objTile->aabb.width * spikePositionCorrectionFactor;
-
-                else if(leftFree && !rightFree) objTile->aabb.x += objTile->aabb.width * spikePositionCorrectionFactor;
+                switch (tile->textureIndex)
+                {
+                case SPIKE_UP: objTile->aabb.y += objTile->aabb.height * spikePositionCorrectionFactor;
+                    break;
+                case SPIKE_DOWN: objTile->aabb.y -= objTile->aabb.height * spikePositionCorrectionFactor;
+                    break;
+                case SPIKE_RIGHT: objTile->aabb.x -= objTile->aabb.width * spikePositionCorrectionFactor;
+                    break;
+                case SPIKE_LEFT: objTile->aabb.x += objTile->aabb.width * spikePositionCorrectionFactor;
+                    break;
+                default:
+                    break;
+                }
                 
             }
             break;
@@ -325,7 +326,7 @@ void Level::DiscreteUpdate()
     TileRange playerTileRange = CalculateTileRange(
         player.phys.position.x,
         player.phys.position.y,
-        tileCheckRange
+        collisionTileCheckRange
     );
 
     player.Update(dt, iterations);
@@ -348,7 +349,12 @@ void Level::DiscreteUpdate()
 
             if(!IsOneWayTile(i, j))
             {
-                SolveCollisions(&player.phys, objTile, true, isGravityUp, tile.type == TileType::TRAMPOLINE);
+                SolveCollisions(
+                    &player.phys, objTile, 
+                    true, isGravityUp, 
+                    tile.type == TileType::TRAMPOLINE,
+                    false
+                );
             }
             else if(IsOneWayRightLeft(i, j))
             {
@@ -378,7 +384,12 @@ void Level::DiscreteUpdate()
 
             if(!IsOneWayTile(i, j))
             {
-                SolveCollisions(&player.phys, objTile, false, isGravityUp, tile.type == TileType::TRAMPOLINE);
+                SolveCollisions(
+                    &player.phys, objTile, 
+                    false, isGravityUp, 
+                    tile.type == TileType::TRAMPOLINE,
+                    false
+                );
             }
             else if(IsOneWayUpDown(i, j))
             {
@@ -436,7 +447,7 @@ void Level::DiscreteUpdate()
         TileRange platformRange = CalculateTileRange(
             platform->phys.position.x,
             platform->phys.position.y,
-            tileCheckRange
+            collisionTileCheckRange
         );
 
         for(int i = platformRange.startX; i <= platformRange.endX; i++)
@@ -476,15 +487,22 @@ void Level::DiscreteUpdate()
                 {
                     isPlayerTouchingSpike = true;
                 }
+
+                
             }
 
             if(IsTileJumpTrigger(i,j)) continue;
 
             if(CheckCollisionRecs(player.GetJumpDetector(), objTile->aabb) && isPlayerFalling)
             {
-               if(!IsOneWayUpDown(i,j)) isPlayerGrounded = true;
-               else if(IsOneWayUpDown(i,j))
-               {
+                if(tile.type == TileType::TREADMILL_LEFT || tile.type == TileType::TREADMILL_RIGHT)
+                {
+                    player.phys.body.altVelocity = objTile->body.velocity;
+                }
+
+                if(!IsOneWayUpDown(i,j)) isPlayerGrounded = true;
+                else if(IsOneWayUpDown(i,j))
+                {
                     if(tile.type == TileType::ONE_WAY_UP &&
                         IsAbove(player.phys.aabb, objTile->aabb, 0.0f)
                     )
@@ -497,7 +515,7 @@ void Level::DiscreteUpdate()
                     {
                         isPlayerGrounded = true;
                     }
-               }
+                }
             }
         }
     }
@@ -545,7 +563,7 @@ void Level::DrawLevel()
     TileRange playerTileRange = CalculateTileRange(
         player.phys.position.x,
         player.phys.position.y,
-        14
+        renderTileCheckRange
     );
 
     for(int i = 0; i < platformList.size(); i++)
@@ -571,13 +589,35 @@ void Level::DrawLevel()
 
             if(IsNotRealTile(i,j)) continue;
 
-            std::vector<Texture2D>* textureArray = GetActiveTextureArray(tile.type);
+            SpriteRenderData* tileRenderData = GetActiveRenderData(tile.type);
 
-            if(textureArray && tile.textureIndex >= 0 && tile.textureIndex < (int)textureArray->size())
+            if((tile.type > TileType::ANIMATED_START && tile.type < TileType::ANIMATED_END) && tileRenderData)
             {
-                DrawTexture(
-                    (*textureArray)[tile.textureIndex],
-                    i * gridSize, j * gridSize, 
+                int startFrame = 0;
+                int endFrame = (int)tileRenderData->animationFrames.size() - 1;
+
+                switch (tile.type)
+                {
+                case  TileType::TREADMILL_RIGHT:
+                    endFrame = TREADMILL_LEFT_START_FRAME - 1;
+                    break;
+                case TileType::TREADMILL_LEFT:
+                    startFrame = TREADMILL_LEFT_START_FRAME;
+                    break;
+                
+                default:
+                    break;
+                }
+
+                tile.textureIndex = GetCurrentFrame(tileRenderData->animationFrames, startFrame, endFrame, 5.0f);
+            }
+
+            if(tileRenderData && tile.textureIndex >= 0 && tile.textureIndex < (int)tileRenderData->animationFrames.size())
+            {
+                DrawTextureRec(
+                    tileRenderData->sourceTexture,
+                    tileRenderData->animationFrames[tile.textureIndex],
+                    {(float) i * gridSize, (float) j * gridSize},
                     WHITE
                 );
             }
@@ -614,7 +654,7 @@ void Level::DebugDrawing()
     TileRange playerTileRange = CalculateTileRange(
         player.phys.position.x,
         player.phys.position.y,
-        14
+        renderTileCheckRange
     );
 
     for(int i = playerTileRange.startX; i <= playerTileRange.endX; i++)

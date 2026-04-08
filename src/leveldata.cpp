@@ -1,31 +1,46 @@
 #include "leveldata.h"
 
-std::vector<Texture2D> solidTilesTextures = {};
+//static
+SpriteRenderData solidTilesRenderData = {};
+
+SpriteRenderData spikesRenderData = {};
+
+//animated
+SpriteRenderData treadmillRenderData = {};
+
+void LoadRenderData(const char* path, SpriteRenderData* renderData, int maxFrames, Vector2 size)
+{
+    renderData->animationFrames.clear();
+
+    renderData->sourceTexture = LoadTexture(path);
+
+    renderData->animationFrames = CropImage(renderData->sourceTexture, maxFrames, size);
+
+    SetTextureFilter(renderData->sourceTexture, TEXTURE_FILTER_POINT);
+
+    SetTextureWrap(renderData->sourceTexture, TEXTURE_WRAP_CLAMP);
+}
 
 void LoadAssets()
 {
-    solidTilesTextures.clear();
+    Vector2 tileSize = {(float)gridSize,(float)gridSize};
 
-    //solid tiles
+    LoadRenderData("assets/tiles/solid/solid-tiles-spritesheet.png", &solidTilesRenderData, 9, tileSize);
 
-    solidTilesTextures.push_back(LoadTexture("assets/tiles/solid/top-left-outter-corner.png")); 
+    //spikes
 
-    solidTilesTextures.push_back(LoadTexture("assets/tiles/solid/floor.png"));
+    LoadRenderData("assets/tiles/spike-sprite-sheet.png", &spikesRenderData, 5, tileSize);
 
-    solidTilesTextures.push_back(LoadTexture("assets/tiles/solid/top-right-outter-corner.png"));
+    //treadmills
 
-    solidTilesTextures.push_back(LoadTexture("assets/tiles/solid/wall-right.png"));
-
-    solidTilesTextures.push_back(LoadTexture("assets/tiles/solid/bottom-left-outter-corner.png"));
-
-    solidTilesTextures.push_back(LoadTexture("assets/tiles/solid/ceiling.png"));
-    
-    solidTilesTextures.push_back(LoadTexture("assets/tiles/solid/bottom-right-outter-corner.png"));
-
-    solidTilesTextures.push_back(LoadTexture("assets/tiles/solid/wall-left.png"));
+    LoadRenderData("assets/tiles/treadmill-right-spritesheet.png", &treadmillRenderData, 8, tileSize);
 }
 
 void UnloadAssets()
 {
-    solidTilesTextures.clear();
+    solidTilesRenderData.animationFrames.clear();
+
+    treadmillRenderData.animationFrames.clear();
+
+    spikesRenderData.animationFrames.clear();
 }

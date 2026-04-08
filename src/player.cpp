@@ -23,8 +23,8 @@ Player::Player(Vector2 position)
     {
     case Character::MOMOI:
 
-        characterRenderData.texture = LoadTexture("assets/characters/chibi-momoi.png");
-        weaponRenderData.texture = LoadTexture("assets/characters/momoi-weapon.png");
+        characterRenderData.sourceTexture = LoadTexture("assets/characters/chibi-momoi.png");
+        weaponRenderData.sourceTexture = LoadTexture("assets/characters/momoi-weapon.png");
 
         characterOffset.x = 0.0f;
         characterOffset.y = -3.0f;
@@ -32,11 +32,15 @@ Player::Player(Vector2 position)
         weaponOffset.x = 25.0f;
         weaponOffset.y = 16.0f;
 
+        characterRenderData.animationFrames = CropImage(
+            characterRenderData.sourceTexture, 2, {12,18}
+        );
+
         break;
     case Character::MIDORI:
 
-        characterRenderData.texture = LoadTexture("assets/characters/chibi-midori.png");
-        weaponRenderData.texture = LoadTexture("assets/characters/midori-weapon.png");
+        characterRenderData.sourceTexture = LoadTexture("assets/characters/chibi-midori.png");
+        weaponRenderData.sourceTexture = LoadTexture("assets/characters/midori-weapon.png");
 
         characterOffset.x = 0.0f;
         characterOffset.y = -3.0f;
@@ -47,8 +51,8 @@ Player::Player(Vector2 position)
         break;
     case Character::YUZU:
 
-        characterRenderData.texture = LoadTexture("assets/characters/chibi-yuzu.png");
-        weaponRenderData.texture = LoadTexture("assets/characters/yuzu-weapon.png");
+        characterRenderData.sourceTexture = LoadTexture("assets/characters/chibi-yuzu.png");
+        weaponRenderData.sourceTexture = LoadTexture("assets/characters/yuzu-weapon.png");
 
         characterOffset.x = 2.0f;
         characterOffset.y = 1.0f;
@@ -59,8 +63,8 @@ Player::Player(Vector2 position)
         break;
     case Character::ARISU:
 
-        characterRenderData.texture = LoadTexture("assets/characters/chibi-arisu.png");
-        weaponRenderData.texture = LoadTexture("assets/characters/arisu-weapon.png");
+        characterRenderData.sourceTexture = LoadTexture("assets/characters/chibi-arisu.png");
+        weaponRenderData.sourceTexture = LoadTexture("assets/characters/arisu-weapon.png");
 
         characterOffset.x = 0.0f;
         characterOffset.y = 1.0f;
@@ -71,8 +75,8 @@ Player::Player(Vector2 position)
         break;
     case Character::MOMOI_CHAQUENA:
 
-        characterRenderData.texture = LoadTexture("assets/characters/chibi-momoi-chaquena.png");
-        weaponRenderData.texture = LoadTexture("assets/characters/momoi-chaquena-weapon.png");
+        characterRenderData.sourceTexture = LoadTexture("assets/characters/chibi-momoi-chaquena.png");
+        weaponRenderData.sourceTexture = LoadTexture("assets/characters/momoi-chaquena-weapon.png");
 
         characterOffset.x = 0.0f;
         characterOffset.y = -2.0f;
@@ -86,24 +90,14 @@ Player::Player(Vector2 position)
     }
 
     //character sprite
-    SetTextureFilter(characterRenderData.texture, TEXTURE_FILTER_POINT);
+    SetTextureFilter(characterRenderData.sourceTexture, TEXTURE_FILTER_POINT);
 
-    SetTextureWrap(characterRenderData.texture, TEXTURE_WRAP_CLAMP);
-
-    characterRenderData.sourceRect = {
-        0,0, (float)characterRenderData.texture.width,
-        (float)characterRenderData.texture.height
-    };
+    SetTextureWrap(characterRenderData.sourceTexture, TEXTURE_WRAP_CLAMP);
 
     //weapon sprite
-    SetTextureFilter(weaponRenderData.texture, TEXTURE_FILTER_POINT);
+    SetTextureFilter(weaponRenderData.sourceTexture, TEXTURE_FILTER_POINT);
 
-    SetTextureWrap(weaponRenderData.texture, TEXTURE_WRAP_CLAMP);
-
-    weaponRenderData.sourceRect = {
-        0,0, (float)weaponRenderData.texture.width,
-        (float)weaponRenderData.texture.height
-    };
+    SetTextureWrap(weaponRenderData.sourceTexture, TEXTURE_WRAP_CLAMP);
 }
 
 
@@ -172,6 +166,11 @@ void Player::Update(float dt, int iterations)
     else
     {
         isJumping = false;
+    }
+
+    if(IsKeyDown(KEY_C))
+    {
+        characterRenderData.currentFrame = GetCurrentFrame(characterRenderData.animationFrames, 0, 1, 5.0f);
     }
 
     //update

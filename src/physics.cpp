@@ -1,6 +1,6 @@
 #include "physics.h"
 
-void SolveCollisions(GameObject *objA, GameObject *objB, bool isX, bool gravityUp, bool isTrampoline)
+void SolveCollisions(GameObject *objA, GameObject *objB, bool isX, bool gravityUp, bool isTrampoline, bool isPlatform)
 {
     if(!CheckCollisionRecs(objA->aabb, objB->aabb)) return;
 
@@ -40,7 +40,7 @@ void SolveCollisions(GameObject *objA, GameObject *objB, bool isX, bool gravityU
             overlap = (objA->aabb.y + objA->aabb.height) - objB->aabb.y;
             objA->position.y -= (overlap + offset);
 
-            if(!gravityUp) objA->body.altVelocity = objB->body.velocity;
+            if(!gravityUp && isPlatform) objA->body.altVelocity = objB->body.velocity;
 
             if(objA->body.velocity.y > 0) objA->body.velocity.y = 0;
 
@@ -52,7 +52,7 @@ void SolveCollisions(GameObject *objA, GameObject *objB, bool isX, bool gravityU
             overlap = (objB->aabb.y + objB->aabb.height) - objA->aabb.y;
             objA->position.y += (overlap + offset);
 
-            if(gravityUp) objA->body.altVelocity = objB->body.velocity;
+            if(gravityUp && isPlatform) objA->body.altVelocity = objB->body.velocity;
 
             if(objA->body.velocity.y < 0) objA->body.velocity.y = 0;
 
