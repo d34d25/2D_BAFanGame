@@ -32,6 +32,8 @@ private:
     
 public:
 
+    int currentFrame = 0;
+
     float gravity = 500;
 
     bool canJump = false;

@@ -130,7 +130,13 @@ struct SpriteRenderData
     //animation
     std::vector<Rectangle> animationFrames = {};
 
-    int currentFrame = 0;
+    int startFrame = 0;
+    int endFrame = (int)animationFrames.size();
+
+    int spacing = 0;
+
+    int maxFrames = 1;
+    Vector2 frameSize = {1,1};
 };
 
 struct EntityData

@@ -24,11 +24,8 @@ int main()
 
     int iterations = 10;
 
-    int gridSize = 50;
-
     testLevel.InitLevel(
         "levels/testLevel",
-        gridSize,
         fixedDt,
         iterations
     );

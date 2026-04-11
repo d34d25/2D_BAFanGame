@@ -82,13 +82,11 @@ void LevelEditor::Update()
     {
         if(IsKeyPressed(KEY_ZERO)) currentTileType = (int)TileType::VOID;
 
-        if(IsKeyPressed(KEY_ONE)) currentTileType = (int)TileType::STATIC_START + 1;
+        if(IsKeyPressed(KEY_ONE)) currentTileType = (int)TileType::TILE_START + 1;
 
-        if(IsKeyPressed(KEY_TWO)) currentTileType = (int)TileType::ANIMATED_START + 1;
+        if(IsKeyPressed(KEY_TWO)) currentTileType = (int)TileType::PLATFORM_START + 1;
 
-        if(IsKeyPressed(KEY_THREE)) currentTileType = (int)TileType::PLATFORM_START + 1;
-
-        if(IsKeyPressed(KEY_FOUR)) currentTileType = (int)TileType::MISC_START + 1;
+        if(IsKeyPressed(KEY_THREE)) currentTileType = (int)TileType::MISC_START + 1;
 
         activeRenderData = GetActiveRenderData((TileType)currentTileType);
 
@@ -108,15 +106,17 @@ void LevelEditor::Update()
         camera.zoom = Clamp(camera.zoom, 0.1f,10.0f);
     }
 
-    if(mouseWheel != 0 && IsKeyDown(KEY_LEFT_SHIFT) && currentTileType >= (int)TileType::STATIC_START && currentTileType <= (int)TileType::STATIC_END)
+    //texture cycling
+    if(mouseWheel != 0 && IsKeyDown(KEY_LEFT_SHIFT))
     {
-        if(activeRenderData != nullptr && !activeRenderData->animationFrames.empty())
+        if(activeRenderData && !activeRenderData->animationFrames.empty())
         {
-            if(mouseWheel > 0) currentTexture++;
-            else if(mouseWheel < 0) currentTexture--;
+            int direction = (mouseWheel > 0) ? 1 : -1;
 
-            if(currentTexture < 0) currentTexture = activeRenderData->animationFrames.size() - 1;
-            else if (currentTexture >= activeRenderData->animationFrames.size()) currentTexture = 0;
+            currentTexture += activeRenderData->spacing * direction;
+
+            if(currentTexture < activeRenderData->startFrame) currentTexture = activeRenderData->endFrame - activeRenderData->spacing;
+            else if (currentTexture >= activeRenderData->endFrame) currentTexture = activeRenderData->startFrame;
         }
         else
         {
@@ -124,6 +124,7 @@ void LevelEditor::Update()
         }
     }
 
+    //tile type cycling
     if(mouseWheel != 0 && !IsKeyDown(KEY_LEFT_ALT) && !IsKeyDown(KEY_LEFT_SHIFT))
     {
         int direction = (mouseWheel > 0) ? 1 : -1;
@@ -132,15 +133,10 @@ void LevelEditor::Update()
 
         int end = (int)TileType::COUNT;
 
-        if(currentTileType >= (int)TileType::STATIC_START && currentTileType <= (int)TileType::STATIC_END)
+        if(currentTileType >= (int)TileType::TILE_START && currentTileType <= (int)TileType::TILE_END)
         {
-            start = (int)TileType::STATIC_START;
-            end = (int)TileType::STATIC_END;
-        }
-        else if(currentTileType >= (int)TileType::ANIMATED_START && currentTileType <= (int)TileType::ANIMATED_END)
-        {
-            start = (int)TileType::ANIMATED_START;
-            end = (int)TileType::ANIMATED_END;
+            start = (int)TileType::TILE_START;
+            end = (int)TileType::TILE_END;
         }
         else if(currentTileType >= (int)TileType::PLATFORM_START && currentTileType <= (int)TileType::PLATFORM_END)
         {
@@ -169,9 +165,7 @@ void LevelEditor::Update()
         activeRenderData = GetActiveRenderData((TileType)currentTileType);
 
         if(!activeRenderData || activeRenderData->animationFrames.empty()) currentTexture = DEFAULT_INVALID_INDEX;
-        else currentTexture = 0;
-
-        if(currentTileType == (int)TileType::TREADMILL_LEFT) currentTexture = TREADMILL_LEFT_START_FRAME;
+        else currentTexture = activeRenderData->startFrame;
     }
 
     TileType& currentTile = tempLevel[mouseMatrixPosition.x][mouseMatrixPosition.y].type;
@@ -284,12 +278,8 @@ void LevelEditor::Draw()
             }
             else 
             {
-                DrawTextureRec(
-                    tileRenderData->sourceTexture,
-                    tileRenderData->animationFrames[tileTextureId],
-                    {(float) i * gridSize, (float) j * gridSize},
-                    WHITE
-                );
+
+                DrawTile(tileRenderData, tileTextureId, {(float) i * gridSize, (float) j * gridSize}, gridSize);
             }
         }
     }
@@ -326,12 +316,7 @@ void LevelEditor::Draw()
         previewColor = WHITE;
         previewColor.a = 100;
 
-        DrawTextureRec(
-            activeRenderData->sourceTexture,
-            activeRenderData->animationFrames[currentTexture],
-            ConvertFromIntPairToVector2(mouseMatrixPosition, gridSize),
-            previewColor
-        );
+        DrawTile(activeRenderData, currentTexture, ConvertFromIntPairToVector2(mouseMatrixPosition, gridSize), gridSize, previewColor);
     }
 
     //grid

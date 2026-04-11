@@ -8,8 +8,8 @@ Player::Player(Vector2 position)
 
     phys.body.hasGravity = true;
 
-    phys.aabb.width = 40;
-    phys.aabb.height = 48;
+    phys.aabb.width = 20;
+    phys.aabb.height = 46;
 
     phys.UpdateAABB();
 
@@ -27,7 +27,7 @@ Player::Player(Vector2 position)
         weaponRenderData.sourceTexture = LoadTexture("assets/characters/momoi-weapon.png");
 
         characterOffset.x = 0.0f;
-        characterOffset.y = -3.0f;
+        characterOffset.y = -5.0f;
 
         weaponOffset.x = 25.0f;
         weaponOffset.y = 16.0f;
@@ -43,7 +43,7 @@ Player::Player(Vector2 position)
         weaponRenderData.sourceTexture = LoadTexture("assets/characters/midori-weapon.png");
 
         characterOffset.x = 0.0f;
-        characterOffset.y = -3.0f;
+        characterOffset.y = -5.0f;
 
         weaponOffset.x = 29.0f;
         weaponOffset.y = 16.0f;
@@ -55,7 +55,7 @@ Player::Player(Vector2 position)
         weaponRenderData.sourceTexture = LoadTexture("assets/characters/yuzu-weapon.png");
 
         characterOffset.x = 2.0f;
-        characterOffset.y = 1.0f;
+        characterOffset.y = -1.0f;
 
         weaponOffset.x = 8.0f;
         weaponOffset.y = 14.0f;
@@ -67,7 +67,7 @@ Player::Player(Vector2 position)
         weaponRenderData.sourceTexture = LoadTexture("assets/characters/arisu-weapon.png");
 
         characterOffset.x = 0.0f;
-        characterOffset.y = 1.0f;
+        characterOffset.y = -1.0f;
 
         weaponOffset.x = 16.0f;
         weaponOffset.y = 18.0f;
@@ -79,7 +79,7 @@ Player::Player(Vector2 position)
         weaponRenderData.sourceTexture = LoadTexture("assets/characters/momoi-chaquena-weapon.png");
 
         characterOffset.x = 0.0f;
-        characterOffset.y = -2.0f;
+        characterOffset.y = -4.0f;
 
         weaponOffset.x = 16.0f;
         weaponOffset.y = 16.0f;
@@ -170,7 +170,7 @@ void Player::Update(float dt, int iterations)
 
     if(IsKeyDown(KEY_C))
     {
-        characterRenderData.currentFrame = GetCurrentFrame(characterRenderData.animationFrames, 0, 1, 5.0f);
+        currentFrame = GetCurrentFrame(characterRenderData.animationFrames, 0, 1, 5.0f);
     }
 
     //update

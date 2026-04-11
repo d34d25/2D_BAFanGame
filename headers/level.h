@@ -171,7 +171,7 @@ public:
 
     ~Level();
 
-    void InitLevel(const char* levelPath, float gridSize, float dt, int iterations);
+    void InitLevel(const char* levelPath, float dt, int iterations);
 
     void UpdateLevel();
 

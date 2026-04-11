@@ -59,7 +59,8 @@ inline int GetCurrentFrame(const std::vector<Rectangle>& frames, int startFrame,
 
 inline void DrawSprite(
     const SpriteRenderData& renderData,
-    const EntityData& entityData
+    const EntityData& entityData,
+    int currentFrame
 )
 {
     float scale = renderData.scale;
@@ -67,9 +68,9 @@ inline void DrawSprite(
 
     Rectangle sourceRect = Rectangle{0,0, (float)renderData.sourceTexture.width, (float)renderData.sourceTexture.height};
 
-    if(!renderData.animationFrames.empty() && renderData.currentFrame < renderData.animationFrames.size())
+    if(!renderData.animationFrames.empty() && currentFrame < renderData.animationFrames.size())
     {
-        sourceRect = renderData.animationFrames[renderData.currentFrame];
+        sourceRect = renderData.animationFrames[currentFrame];
     }
 
     float width = fabs(sourceRect.width) * scale;
@@ -98,30 +99,23 @@ inline void DrawSprite(
     );
 }
 
-inline void DrawSpriteRaw(const Texture2D& sourceTexture, Vector2 position, float scale, const std::vector<Rectangle> frames, int currentFrame)
+inline void DrawTile(SpriteRenderData* renderData, int frameIndex, Vector2 worldPos, int gridSize, Color color = WHITE)
 {
-    Rectangle sourceRect = {0,0,(float)sourceTexture.width, (float)sourceTexture.height};
+    if(!renderData || frameIndex < 0 || frameIndex >= renderData->animationFrames.size())
+        return;
 
-    if(!frames.empty() && currentFrame < frames.size()) sourceRect = frames[currentFrame];
+    Rectangle source = renderData->animationFrames[frameIndex];
 
-    float width = fabs(sourceRect.width) * scale;
-    float height = fabs(sourceRect.height) * scale;
-
-    Rectangle destRect = {
-        roundf(position.x),
-        roundf(position.y),
-        width,
-        height
+    Rectangle dest = {
+        worldPos.x, worldPos.y,
+        (float)gridSize, (float)gridSize
     };
 
-    Vector2 origin = {width * 0.5f, height * 0.5f};
-
     DrawTexturePro(
-        sourceTexture,
-        sourceRect,
-        destRect,
-        origin,
-        0.0f,
-        WHITE
+        renderData->sourceTexture,
+        source,
+        dest,
+        {0,0}, 0.0f,
+        color
     );
 }

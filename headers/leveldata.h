@@ -44,16 +44,9 @@ static constexpr int COLS = 70;
 
 static constexpr int DEFAULT_INVALID_INDEX = -1;
 
-static constexpr int TREADMILL_LEFT_START_FRAME = 4;
+static constexpr int gridSize = 48;
 
-static constexpr int SPIKE_UP = 0;
-static constexpr int SPIKE_DOWN = 1;
-static constexpr int SPIKE_LEFT = 2;
-static constexpr int SPIKE_RIGHT = 3;
-static constexpr int SPIKE_FLOATING = 4;
-
-
-static int gridSize = 50;
+static constexpr int tileScale = 3;
 
 struct TileRange
 {
@@ -92,7 +85,8 @@ enum class TileType
     VOID,
     
     //with no animation
-    STATIC_START,
+    
+    TILE_START,
 
     SOLID,
 
@@ -103,10 +97,7 @@ enum class TileType
     ONE_WAY_RIGHT,
     ONE_WAY_LEFT,
 
-    STATIC_END,
-
     //with animation
-    ANIMATED_START,
 
     TREADMILL_RIGHT,
     TREADMILL_LEFT,
@@ -115,7 +106,7 @@ enum class TileType
     
     GRAVITY_CHANGER,
 
-    ANIMATED_END,
+    TILE_END,
 
     PLATFORM_START,
 
@@ -148,13 +139,9 @@ inline bool IsTypeInvalid(TileType type)
 {
     switch (type)
     {
-    case TileType::STATIC_START:
-    
-    case TileType::STATIC_END:
+    case TileType::TILE_START:
 
-    case TileType::ANIMATED_START:
-
-    case TileType::ANIMATED_END:
+    case TileType::TILE_END:
 
     case TileType::PLATFORM_START:
 
@@ -171,8 +158,6 @@ inline bool IsTypeInvalid(TileType type)
     case TileType::COUNT:
 
         return true;
-
-
     
     default: return false;
     }
@@ -277,7 +262,9 @@ extern SpriteRenderData solidTilesRenderData;
 extern SpriteRenderData spikesRenderData;
 
 //animated
-extern SpriteRenderData treadmillRenderData;
+extern SpriteRenderData treadmillRenderData_Right;
+
+extern SpriteRenderData treadmillRenderData_Left;
 
 void LoadAssets();
 
@@ -289,9 +276,8 @@ inline SpriteRenderData* GetActiveRenderData(TileType type)
     {
     case TileType::SOLID:return &solidTilesRenderData;
 
-    case TileType::TREADMILL_RIGHT: 
-    case TileType::TREADMILL_LEFT:
-        return &treadmillRenderData;
+    case TileType::TREADMILL_RIGHT: return &treadmillRenderData_Right;
+    case TileType::TREADMILL_LEFT: return &treadmillRenderData_Left;
 
     case TileType::SPIKE: return &spikesRenderData;
 

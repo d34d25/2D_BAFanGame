@@ -31,7 +31,7 @@ void Level::LoadLevelData(const char *levelPath)
     UnloadFileData(fileData);
 }
 
-void Level::InitLevel(const char *levelPath, float gridSize, float dt, int iterations)
+void Level::InitLevel(const char *levelPath, float dt, int iterations)
 {
     this->iterations = iterations;
 
@@ -249,17 +249,28 @@ void Level::InitLevel(const char *levelPath, float gridSize, float dt, int itera
                 objTile->canEntityCollidePhysically = false;
                 objTile->canPlatformCollidePhysically = true;
 
-                float widthFactor = 0.4f;
-                float heightFactor = 0.4f;
+                SpriteRenderData* spikeRenderData = GetActiveRenderData(TileType::SPIKE);
 
-                switch (tile->textureIndex)
+                float widthFactor = 0.4f;
+                float heightFactor = 0.6f;
+
+                int orientation = 4;
+
+                if(spikeRenderData)
                 {
-                case SPIKE_UP:
-                case SPIKE_DOWN:
+                    orientation = tile->textureIndex % spikeRenderData->maxFrames;
+                }
+
+                std::cout<<"orientation: "<<orientation<<"\n";
+
+                switch (orientation)
+                {
+                case 0:
+                case 1:
                     break;
 
-                case SPIKE_RIGHT:
-                case SPIKE_LEFT:
+                case 2:
+                case 3:
                     {
                         std::swap(widthFactor, heightFactor);
                     }
@@ -277,17 +288,17 @@ void Level::InitLevel(const char *levelPath, float gridSize, float dt, int itera
 
                 objTile->UpdateAABB();
 
-                float spikePositionCorrectionFactor = 0.75f;
+                float spikePositionCorrectionFactor = 0.3f;
 
-                switch (tile->textureIndex)
+                switch (orientation)
                 {
-                case SPIKE_UP: objTile->aabb.y += objTile->aabb.height * spikePositionCorrectionFactor;
+                case 0: objTile->aabb.y += objTile->aabb.height * spikePositionCorrectionFactor;
                     break;
-                case SPIKE_DOWN: objTile->aabb.y -= objTile->aabb.height * spikePositionCorrectionFactor;
+                case 1: objTile->aabb.y -= objTile->aabb.height * spikePositionCorrectionFactor;
                     break;
-                case SPIKE_RIGHT: objTile->aabb.x -= objTile->aabb.width * spikePositionCorrectionFactor;
+                case 2: objTile->aabb.x -= objTile->aabb.width * spikePositionCorrectionFactor;
                     break;
-                case SPIKE_LEFT: objTile->aabb.x += objTile->aabb.width * spikePositionCorrectionFactor;
+                case 3: objTile->aabb.x += objTile->aabb.width * spikePositionCorrectionFactor;
                     break;
                 default:
                     break;
@@ -591,35 +602,28 @@ void Level::DrawLevel()
 
             SpriteRenderData* tileRenderData = GetActiveRenderData(tile.type);
 
-            if((tile.type > TileType::ANIMATED_START && tile.type < TileType::ANIMATED_END) && tileRenderData)
+            int frameToDraw = tile.textureIndex;
+
+            if(tileRenderData)
             {
-                int startFrame = 0;
-                int endFrame = (int)tileRenderData->animationFrames.size() - 1;
-
-                switch (tile.type)
+                if(tileRenderData->spacing != 1)
                 {
-                case  TileType::TREADMILL_RIGHT:
-                    endFrame = TREADMILL_LEFT_START_FRAME - 1;
-                    break;
-                case TileType::TREADMILL_LEFT:
-                    startFrame = TREADMILL_LEFT_START_FRAME;
-                    break;
-                
-                default:
-                    break;
-                }
+                    int loopEnd = tile.textureIndex + tileRenderData->spacing - 1;
 
-                tile.textureIndex = GetCurrentFrame(tileRenderData->animationFrames, startFrame, endFrame, 5.0f);
+                    if(tileRenderData->spacing == 0) loopEnd = tileRenderData->endFrame;
+
+                    frameToDraw = GetCurrentFrame(
+                        tileRenderData->animationFrames,
+                        tile.textureIndex,
+                        loopEnd,
+                        5.0f
+                    );
+                }
             }
 
             if(tileRenderData && tile.textureIndex >= 0 && tile.textureIndex < (int)tileRenderData->animationFrames.size())
             {
-                DrawTextureRec(
-                    tileRenderData->sourceTexture,
-                    tileRenderData->animationFrames[tile.textureIndex],
-                    {(float) i * gridSize, (float) j * gridSize},
-                    WHITE
-                );
+                DrawTile(tileRenderData, frameToDraw, {(float)i * gridSize, (float)j * gridSize}, gridSize);
             }
             else
             {
@@ -634,12 +638,14 @@ void Level::DrawLevel()
 
     DrawSprite(
         player.characterRenderData,
-        player.entityData
+        player.entityData,
+        player.currentFrame
     );
 
     DrawSprite(
         player.weaponRenderData,
-        player.entityData
+        player.entityData,
+        player.currentFrame
     );
 
     DebugDrawing();
