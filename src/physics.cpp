@@ -2,7 +2,7 @@
 
 void SolveCollisions(GameObject *objA, GameObject *objB, bool isX, bool gravityUp, bool isTrampoline, bool isPlatform)
 {
-    if(!CheckCollisionRecs(objA->aabb, objB->aabb)) return;
+    if(!CheckCollisionRecs(objA->mainAABB, objB->mainAABB)) return;
 
     float overlap = 0;
 
@@ -14,9 +14,9 @@ void SolveCollisions(GameObject *objA, GameObject *objB, bool isX, bool gravityU
 
     if(isX)
     {
-        if(objA->aabb.x <= objB->aabb.x) // A is at the left
+        if(objA->mainAABB.x <= objB->mainAABB.x) // A is at the left
         {
-            overlap = (objA->aabb.x + objA->aabb.width) - objB->aabb.x;
+            overlap = (objA->mainAABB.x + objA->mainAABB.width) - objB->mainAABB.x;
             objA->position.x -= (overlap + offset);
 
             if(objA->body.velocity.x > 0) objA->body.velocity.x = 0;
@@ -25,7 +25,7 @@ void SolveCollisions(GameObject *objA, GameObject *objB, bool isX, bool gravityU
         }
         else // A is at the right
         {
-            overlap = (objB->aabb.x + objB->aabb.width) - objA->aabb.x;
+            overlap = (objB->mainAABB.x + objB->mainAABB.width) - objA->mainAABB.x;
             objA->position.x += (overlap + offset);
 
             if(objA->body.velocity.x < 0) objA->body.velocity.x = 0;
@@ -35,9 +35,9 @@ void SolveCollisions(GameObject *objA, GameObject *objB, bool isX, bool gravityU
     }
     else
     {
-        if(objA->aabb.y <= objB->aabb.y) // A is above of B
+        if(objA->mainAABB.y <= objB->mainAABB.y) // A is above of B
         {
-            overlap = (objA->aabb.y + objA->aabb.height) - objB->aabb.y;
+            overlap = (objA->mainAABB.y + objA->mainAABB.height) - objB->mainAABB.y;
             objA->position.y -= (overlap + offset);
 
             if(!gravityUp && isPlatform) objA->body.altVelocity = objB->body.velocity;
@@ -49,7 +49,7 @@ void SolveCollisions(GameObject *objA, GameObject *objB, bool isX, bool gravityU
         }
         else //A is below B
         {
-            overlap = (objB->aabb.y + objB->aabb.height) - objA->aabb.y;
+            overlap = (objB->mainAABB.y + objB->mainAABB.height) - objA->mainAABB.y;
             objA->position.y += (overlap + offset);
 
             if(gravityUp && isPlatform) objA->body.altVelocity = objB->body.velocity;
@@ -66,32 +66,32 @@ void SolveCollisions(GameObject *objA, GameObject *objB, bool isX, bool gravityU
 
 void SolveCollisions_Platform(GameObject *objA, GameObject *objB, bool isX)
 {
-    if(!CheckCollisionRecs(objA->aabb, objB->aabb)) return;
+    if(!CheckCollisionRecs(objA->mainAABB, objB->mainAABB)) return;
 
     float offset = 0.001f;
 
     if(isX)
     {
-        if(objA->aabb.x <= objB->aabb.x)
+        if(objA->mainAABB.x <= objB->mainAABB.x)
         {
-            objA->position.x = (objB->aabb.x - objA->aabb.width * 0.5f) - offset;
+            objA->position.x = (objB->mainAABB.x - objA->mainAABB.width * 0.5f) - offset;
         }
         else
         {
-            objA->position.x = ((objB->aabb.x + objB->aabb.width) + objA->aabb.width * 0.5f) + offset;
+            objA->position.x = ((objB->mainAABB.x + objB->mainAABB.width) + objA->mainAABB.width * 0.5f) + offset;
         }
 
         objA->body.velocity.x *= -1;
     }
     else
     {
-        if(objA->aabb.y <= objB->aabb.y)
+        if(objA->mainAABB.y <= objB->mainAABB.y)
         {
-            objA->position.y = (objB->aabb.y - objA->aabb.height * 0.5f) - offset;
+            objA->position.y = (objB->mainAABB.y - objA->mainAABB.height * 0.5f) - offset;
         }
         else
         {
-            objA->position.y = ((objB->aabb.y + objB->aabb.height) + objA->aabb.height * 0.5f) + offset;
+            objA->position.y = ((objB->mainAABB.y + objB->mainAABB.height) + objA->mainAABB.height * 0.5f) + offset;
         }
 
         objA->body.velocity.y *= -1;

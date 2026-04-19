@@ -19,8 +19,6 @@ class Player
 
 private:
 
-    Rectangle jumpDetector = {0,0,1,1};
-
     Character character = Character::MOMOI;
 
     Vector2 characterOffset = {0,0};
@@ -69,17 +67,17 @@ public:
 
         int dir = entityData.flipY ? -1 : 1;
 
-        jumpDetector.height = phys.aabb.height * 0.5f;
-        jumpDetector.width = phys.aabb.width * 0.85f;
+        phys.subAABBList[0].height = phys.mainAABB.height * 0.5f;
+        phys.subAABBList[0].width = phys.mainAABB.width * 0.85f;
 
-        jumpDetector.x = phys.aabb.x + (phys.aabb.width - jumpDetector.width) * 0.5f;
+        phys.subAABBList[0].x = phys.mainAABB.x + (phys.mainAABB.width - phys.subAABBList[0].width) * 0.5f;
 
-        float centerY = phys.aabb.y + phys.aabb.height * 0.5f;
+        float centerY = phys.mainAABB.y + phys.mainAABB.height * 0.5f;
 
-        if(dir == 1) jumpDetector.y = centerY + offset;
-        else jumpDetector.y = centerY - offset - jumpDetector.height;
+        if(dir == 1) phys.subAABBList[0].y = centerY + offset;
+        else phys.subAABBList[0].y = centerY - offset - phys.subAABBList[0].height;
         
-        return jumpDetector;
+        return phys.subAABBList[0];
     }
 
     inline void Respawn()

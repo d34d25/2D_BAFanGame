@@ -44,9 +44,9 @@ inline void SolveCollisionsOneWayLeftRight(GameObject * objA, GameObject* objB, 
 
     float offset = 6.0f;
 
-    if(isLeft) if(IsLeft(objA->aabb, objB->aabb, offset) || objA->body.velocity.x <= 0.0f) return;
+    if(isLeft) if(IsLeft(objA->mainAABB, objB->mainAABB, offset) || objA->body.velocity.x <= 0.0f) return;
 
-    if(isRight) if(IsRight(objA->aabb, objB->aabb, offset) || objA->body.velocity.x >= 0.0f) return;
+    if(isRight) if(IsRight(objA->mainAABB, objB->mainAABB, offset) || objA->body.velocity.x >= 0.0f) return;
 
     SolveCollisions(objA, objB, true, false, false, false);
 }
@@ -59,23 +59,23 @@ inline void SolveCollisionsOneWayUpDown(GameObject * objA, GameObject* objB, boo
 
     if(!isPlatform)
     {
-        if(isUp) if(!IsAbove(objA->aabb, objB->aabb, offset) || objA->body.velocity.y <= 0.0f) return;
+        if(isUp) if(!IsAbove(objA->mainAABB, objB->mainAABB, offset) || objA->body.velocity.y <= 0.0f) return;
 
-        if(isDown) if(!IsBelow(objA->aabb, objB->aabb, offset) || objA->body.velocity.y >= 0.0f) return;
+        if(isDown) if(!IsBelow(objA->mainAABB, objB->mainAABB, offset) || objA->body.velocity.y >= 0.0f) return;
     }
     else
     {
         if(!gravityUp)
         {
-            if(isUp) if(!IsAbove(objA->aabb, objB->aabb, offset) || objA->body.velocity.y <= 0.0f) return;
+            if(isUp) if(!IsAbove(objA->mainAABB, objB->mainAABB, offset) || objA->body.velocity.y <= 0.0f) return;
 
-            if(isDown) if(!IsBelow(objA->aabb, objB->aabb, offset) || objA->body.velocity.y >= 0.0f) return;
+            if(isDown) if(!IsBelow(objA->mainAABB, objB->mainAABB, offset) || objA->body.velocity.y >= 0.0f) return;
         }
         else
         {
-            if(isDown) if(!IsAbove(objA->aabb, objB->aabb, offset) || objA->body.velocity.y <= 0.0f) return;
+            if(isDown) if(!IsAbove(objA->mainAABB, objB->mainAABB, offset) || objA->body.velocity.y <= 0.0f) return;
 
-            if(isUp) if(!IsBelow(objA->aabb, objB->aabb, offset) || objA->body.velocity.y >= 0.0f) return;
+            if(isUp) if(!IsBelow(objA->mainAABB, objB->mainAABB, offset) || objA->body.velocity.y >= 0.0f) return;
         }
     }    
 

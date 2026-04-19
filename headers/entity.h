@@ -65,17 +65,34 @@ public:
     float scale  = 0;
     float rotation = 0;
 
-    Rectangle aabb = {0,0,50,50};
+    Rectangle mainAABB = {0,0,50,50};
+
+    //these secondary hitboxes are only used for triggers (when necessary), not physics
+    std::vector<Rectangle> subAABBList = {};
 
     SimpleBody2D body = {};
 
     bool canEntityCollidePhysically = false;
     bool canPlatformCollidePhysically = false;
 
+    inline void AddSubHitbox(float xOffset, float yOffset, float width, float height)
+    {
+        float xpos = (position.x - width * 0.5f) + xOffset;
+        float ypos = (position.y - height * 0.5f) + yOffset;
+
+        subAABBList.push_back(Rectangle{xpos, ypos, width, height});
+    }
+
     inline void UpdateAABB()
     {
-        aabb.x = position.x - aabb.width * 0.5f;
-        aabb.y = position.y - aabb.height * 0.5f;
+        mainAABB.x = position.x - mainAABB.width * 0.5f;
+        mainAABB.y = position.y - mainAABB.height * 0.5f;
+
+        for(int i = 0; i < subAABBList.size(); i++)
+        {
+            subAABBList[i].x = position.x - subAABBList[i].width * 0.5f;
+            subAABBList[i].y = position.y - subAABBList[i].height * 0.5f;
+        }
     }
 
     inline void UpdateVelocity(float dt, int iterations, float gravity)
