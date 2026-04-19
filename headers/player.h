@@ -67,11 +67,6 @@ public:
 
         int dir = entityData.flipY ? -1 : 1;
 
-        phys.subAABBList[0].height = phys.mainAABB.height * 0.5f;
-        phys.subAABBList[0].width = phys.mainAABB.width * 0.85f;
-
-        phys.subAABBList[0].x = phys.mainAABB.x + (phys.mainAABB.width - phys.subAABBList[0].width) * 0.5f;
-
         float centerY = phys.mainAABB.y + phys.mainAABB.height * 0.5f;
 
         if(dir == 1) phys.subAABBList[0].y = centerY + offset;

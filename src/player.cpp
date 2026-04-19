@@ -11,7 +11,7 @@ Player::Player(Vector2 position)
     phys.mainAABB.width = 20;
     phys.mainAABB.height = 46;
 
-    phys.AddSubHitbox(0,0, phys.mainAABB.height * 0.5f, phys.mainAABB.width * 0.85f);
+    phys.AddSubHitbox(0,0, phys.mainAABB.width * 0.85f, phys.mainAABB.height * 0.5f);
 
     phys.UpdateAABB();
 
