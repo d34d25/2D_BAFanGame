@@ -28,7 +28,7 @@ private:
 
     Tile level[ROWS][COLS];
 
-    GameObject* gameObjTiles[ROWS][COLS] = {nullptr};
+    //GameObject* gameObjTiles[ROWS][COLS] = {nullptr};
 
     std::vector<Platform*> platformList = {};
 
@@ -56,10 +56,10 @@ private:
         {
             for(int j = 0; j < COLS; j++)
             {
-                if(gameObjTiles[i][j])
-                    delete gameObjTiles[i][j];
+                if(level[i][j].gameObj)
+                    delete level[i][j].gameObj;
                 
-                gameObjTiles[i][j] = nullptr;
+                level[i][j].gameObj = nullptr;
             }
         }
     }

@@ -146,12 +146,29 @@ void Level::InitLevel(const char *levelPath, float dt, int iterations)
 
             if(IsNotRealTile(i,j)) continue;
 
+            bool upLeft = IsTileEmpty(i - 1, j - 1, level);
+            bool up = IsTileEmpty(i, j - 1, level);
+            bool upRight = IsTileEmpty(i + 1, j - 1, level);
+
+            bool right = IsTileEmpty(i + 1, j, level);
+            bool downRight = IsTileEmpty(i + 1, j + 1, level);
+            bool down = IsTileEmpty(i, j + 1, level);
+
+            bool downLeft = IsTileEmpty(i - 1, j + 1, level);
+            bool left = IsTileEmpty(i, j - 1, level);
+
+            bool isEdge = upLeft || up || upRight ||
+            right || downRight || down ||
+            downLeft || left;
+
+            if(!isEdge) continue;
+
             float xpos = i * gridSize + gridSize * 0.5f;
             float ypos = j * gridSize + gridSize * 0.5f;
 
-            gameObjTiles[i][j] = new GameObject();
+            level[i][j].gameObj = new GameObject();
 
-            GameObject* objTile = gameObjTiles[i][j];
+            GameObject* objTile = level[i][j].gameObj;
 
             objTile->aabb = {0, 0, gridSize, gridSize};
 
@@ -350,7 +367,7 @@ void Level::DiscreteUpdate()
     {
         for(int j = playerTileRange.startY; j <= playerTileRange.endY; j++)
         {
-            GameObject* objTile = gameObjTiles[i][j];            
+            GameObject* objTile = level[i][j].gameObj;            
 
             if(!objTile) continue;
 
@@ -385,7 +402,7 @@ void Level::DiscreteUpdate()
     {
         for(int j = playerTileRange.startY; j <= playerTileRange.endY; j++)
         {
-            GameObject* objTile = gameObjTiles[i][j];
+            GameObject* objTile = level[i][j].gameObj;
 
             if(!objTile) continue;            
 
@@ -465,9 +482,9 @@ void Level::DiscreteUpdate()
         {
             for(int j = platformRange.startY; j <= platformRange.endY; j++)
             {
-                if(!gameObjTiles[i][j]) continue;
+                if(!level[i][j].gameObj) continue;
 
-                SolveCollisions_Platform(&platform->phys, gameObjTiles[i][j], platform->isHorizontal);
+                SolveCollisions_Platform(&platform->phys, level[i][j].gameObj, platform->isHorizontal);
             }
         }
     }
@@ -477,7 +494,7 @@ void Level::DiscreteUpdate()
     {
         for(int j = playerTileRange.startY; j <= playerTileRange.endY; j++)
         {
-            GameObject* objTile = gameObjTiles[i][j];
+            GameObject* objTile = level[i][j].gameObj;
 
             Tile& tile = level[i][j];
 
@@ -631,7 +648,7 @@ void Level::DrawLevel()
 
                 if(IsColorOf(color, BLANK)) continue;
 
-                if(gameObjTiles[i][j]) DrawRectangleRec(gameObjTiles[i][j]->aabb, color);
+                if(tile.gameObj) DrawRectangleRec(tile.gameObj->aabb, color);
             }
         }
     }
@@ -667,9 +684,9 @@ void Level::DebugDrawing()
     {
         for(int j = playerTileRange.startY; j <= playerTileRange.endY; j++)
         {
-            if(!gameObjTiles[i][j]) continue;
+            if(!level[i][j].gameObj) continue;
 
-            DrawAABB(gameObjTiles[i][j]->aabb, RED);
+            DrawAABB(level[i][j].gameObj->aabb, RED);
         }
     }
 

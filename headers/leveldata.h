@@ -195,6 +195,8 @@ struct Tile
 {
     TileType type = TileType::VOID;
     int textureIndex = DEFAULT_INVALID_INDEX;
+    
+    GameObject* gameObj = nullptr;
 };
 
 inline bool IsColorOf(Color colorA, Color colorB)
