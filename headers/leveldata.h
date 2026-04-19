@@ -214,6 +214,13 @@ inline bool IsTileEmpty(int i, int j, Tile(&levelTiles)[ROWS][COLS], TileType em
     return levelTiles[i][j].type == emptyType;
 }
 
+inline bool IsTileEmptyInverted(int i, int j, Tile(&levelTiles)[ROWS][COLS], TileType emptyType = TileType::VOID)
+{
+    if(i < 0 || i >= ROWS || j < 0 || j >= COLS) return true;
+
+    return levelTiles[i][j].type != emptyType;
+}
+
 inline TileRange CalculateTileRange(int x, int y, int range)
 {
     int gridX = x / gridSize;

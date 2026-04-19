@@ -28,8 +28,6 @@ private:
 
     Tile level[ROWS][COLS];
 
-    //GameObject* gameObjTiles[ROWS][COLS] = {nullptr};
-
     std::vector<Platform*> platformList = {};
 
     Camera2D camera = {};
@@ -131,8 +129,7 @@ private:
     {
         const TileType& type = level[i][j].type;
 
-        return type == TileType::SPIKE || 
-        type == TileType::TRAMPOLINE ||
+        return type == TileType::TRAMPOLINE ||
         type == TileType::GRAVITY_CHANGER ||
         type == TileType::GOAL ||
         type == TileType::ONE_WAY_RIGHT ||

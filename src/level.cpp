@@ -146,16 +146,16 @@ void Level::InitLevel(const char *levelPath, float dt, int iterations)
 
             if(IsNotRealTile(i,j)) continue;
 
-            bool upLeft = IsTileEmpty(i - 1, j - 1, level);
-            bool up = IsTileEmpty(i, j - 1, level);
-            bool upRight = IsTileEmpty(i + 1, j - 1, level);
+            bool upLeft = IsTileEmptyInverted(i - 1, j - 1, level, TileType::SOLID);
+            bool up = IsTileEmptyInverted(i, j - 1, level, TileType::SOLID);
+            bool upRight = IsTileEmptyInverted(i + 1, j - 1, level, TileType::SOLID);
 
-            bool right = IsTileEmpty(i + 1, j, level);
-            bool downRight = IsTileEmpty(i + 1, j + 1, level);
-            bool down = IsTileEmpty(i, j + 1, level);
+            bool right = IsTileEmptyInverted(i + 1, j, level, TileType::SOLID);
+            bool downRight = IsTileEmptyInverted(i + 1, j + 1, level, TileType::SOLID);
+            bool down = IsTileEmptyInverted(i, j + 1, level, TileType::SOLID);
 
-            bool downLeft = IsTileEmpty(i - 1, j + 1, level);
-            bool left = IsTileEmpty(i, j - 1, level);
+            bool downLeft = IsTileEmptyInverted(i - 1, j + 1, level, TileType::SOLID);
+            bool left = IsTileEmptyInverted(i, j - 1, level, TileType::SOLID);
 
             bool isEdge = upLeft || up || upRight ||
             right || downRight || down ||
