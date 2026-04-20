@@ -76,7 +76,11 @@ void LevelEditor::Update()
 
     mouseMatrixPosition = {i,j};
 
-    activeRenderData = GetActiveRenderData((TileType)currentTileType);
+    activeRenderData = GetActiveRenderData((TileType)currentTileType, currentVariant);
+
+    std::vector<SpriteRenderData>* activeRenderDataList = GetActiveRenderDataList((TileType)currentTileType);
+
+    if(!activeRenderDataList) currentVariant = 0;
 
     if(IsNumKeyPressed())
     {
@@ -88,7 +92,11 @@ void LevelEditor::Update()
 
         if(IsKeyPressed(KEY_THREE)) currentTileType = (int)TileType::MISC_START + 1;
 
-        activeRenderData = GetActiveRenderData((TileType)currentTileType);
+        activeRenderData = GetActiveRenderData((TileType)currentTileType, 0);
+
+        activeRenderDataList = GetActiveRenderDataList((TileType)currentTileType);
+
+        if(!activeRenderDataList) currentVariant = 0;
 
         if(!activeRenderData || activeRenderData->animationFrames.empty()) currentTexture = DEFAULT_INVALID_INDEX;
         else currentTexture = 0;
@@ -104,6 +112,22 @@ void LevelEditor::Update()
         else if(mouseWheel < 0) camera.zoom -= cameraZoomFactor;
 
         camera.zoom = Clamp(camera.zoom, 0.1f,10.0f);
+    }
+
+    //variant cycling
+    if(mouseWheel != 0 && IsKeyDown(KEY_SPACE))
+    {
+        std::vector<SpriteRenderData>* activeRenderDataList = GetActiveRenderDataList((TileType)currentTileType);
+
+        if(activeRenderDataList)
+        {
+            int direction = (mouseWheel > 0) ? 1 : -1;
+
+            currentVariant += direction;
+
+            if(currentVariant < 0) currentVariant = 0;
+            else if(currentVariant >= activeRenderDataList->size()) currentVariant = activeRenderDataList->size() - 1;
+        }
     }
 
     //texture cycling
@@ -125,7 +149,7 @@ void LevelEditor::Update()
     }
 
     //tile type cycling
-    if(mouseWheel != 0 && !IsKeyDown(KEY_LEFT_ALT) && !IsKeyDown(KEY_LEFT_SHIFT))
+    if(mouseWheel != 0 && !IsKeyDown(KEY_LEFT_ALT) && !IsKeyDown(KEY_LEFT_SHIFT) && !IsKeyDown(KEY_SPACE))
     {
         int direction = (mouseWheel > 0) ? 1 : -1;
 
@@ -162,14 +186,19 @@ void LevelEditor::Update()
             else currentTileType += direction;
         }
 
-        activeRenderData = GetActiveRenderData((TileType)currentTileType);
+        activeRenderData = GetActiveRenderData((TileType)currentTileType, currentVariant);
 
-        if(!activeRenderData || activeRenderData->animationFrames.empty()) currentTexture = DEFAULT_INVALID_INDEX;
+        if(!activeRenderData || activeRenderData->animationFrames.empty())
+        {
+            currentTexture = DEFAULT_INVALID_INDEX;
+            currentVariant = 0;
+        }
         else currentTexture = activeRenderData->startFrame;
     }
 
     TileType& currentTile = tempLevel[mouseMatrixPosition.x][mouseMatrixPosition.y].type;
     int& currentTileTextureIndex = tempLevel[mouseMatrixPosition.x][mouseMatrixPosition.y].textureIndex;
+    int& currentTileVariantIndex = tempLevel[mouseMatrixPosition.x][mouseMatrixPosition.y].variantIndex;
 
     if(IsMouseButtonDown(MOUSE_BUTTON_LEFT))
     {
@@ -188,6 +217,7 @@ void LevelEditor::Update()
                         {
                             tempLevel[i][j].type = TileType::VOID;
                             tempLevel[i][j].textureIndex = DEFAULT_INVALID_INDEX;
+                            tempLevel[i][j].variantIndex = 0;
                         }
                     }
                 }
@@ -195,6 +225,7 @@ void LevelEditor::Update()
 
             currentTile = (TileType)currentTileType;
             currentTileTextureIndex = currentTexture;
+            currentTileVariantIndex = currentVariant;
         }
 
     }
@@ -204,6 +235,7 @@ void LevelEditor::Update()
         {
             currentTile = TileType::VOID;
             currentTileTextureIndex = DEFAULT_INVALID_INDEX;
+            currentTileVariantIndex = 0;
         }
     }
 
@@ -256,7 +288,7 @@ void LevelEditor::Draw()
 
             Color color = GetTileColor(type);
 
-            SpriteRenderData* tileRenderData = GetActiveRenderData(type);
+            SpriteRenderData* tileRenderData = GetActiveRenderData(type, tile.variantIndex);
 
             if(IsColorOf(color, BLANK)) continue;
 

@@ -5,7 +5,7 @@
 
 #include "drawing.h"
 
-#include<vector>
+#include <vector>
 
 static constexpr Color PLAYER_SPAWN = Color{251,242,54,255};
 
@@ -57,34 +57,9 @@ struct TileRange
     int endY = COLS;
 };
 
-/*enum class TileType
-{
-    VOID,
-    SOLID,
-    GOAL,
-    PLATFORM_STOP,
-    TRAMPOLINE,
-    GRAVITY_CHANGER,
-    TREADMILL_RIGHT,
-    TREADMILL_LEFT,
-    ONE_WAY_UP,
-    ONE_WAY_DOWN,
-    ONE_WAY_RIGHT,
-    ONE_WAY_LEFT,
-    SPIKE,
-    HORIZONALT_MOVING_PLATFORM,
-    VERTICAL_MOVING_PLATFORM,
-    FALLING_PLATFORM,
-    DISAPPEARING_PLATFORM,
-    PLAYER_SPAWN,
-    COUNT
-};*/
-
 enum class TileType
 {
     VOID,
-    
-    //with no animation
     
     TILE_START,
 
@@ -96,8 +71,6 @@ enum class TileType
     ONE_WAY_DOWN,
     ONE_WAY_RIGHT,
     ONE_WAY_LEFT,
-
-    //with animation
 
     TREADMILL_RIGHT,
     TREADMILL_LEFT,
@@ -195,6 +168,8 @@ struct Tile
 {
     TileType type = TileType::VOID;
     int textureIndex = DEFAULT_INVALID_INDEX;
+
+    int variantIndex = 0;
     
     GameObject* gameObj = nullptr;
 };
@@ -265,21 +240,19 @@ inline const char* GetTileTypeText(TileType type)
 
 //textures
 
-//static
-extern SpriteRenderData solidTilesRenderData;
+extern std::vector<SpriteRenderData> solidTilesRenderData;
 
-extern SpriteRenderData spikesRenderData;
+extern std::vector<SpriteRenderData> spikesRenderData;
 
-//animated
-extern SpriteRenderData treadmillRenderData_Right;
+extern std::vector<SpriteRenderData> treadmillRenderData_Right;
 
-extern SpriteRenderData treadmillRenderData_Left;
+extern std::vector<SpriteRenderData> treadmillRenderData_Left;
 
 void LoadAssets();
 
 void UnloadAssets();
 
-inline SpriteRenderData* GetActiveRenderData(TileType type)
+inline std::vector<SpriteRenderData>* GetActiveRenderDataList(TileType type)
 {
     switch (type)
     {
@@ -291,7 +264,17 @@ inline SpriteRenderData* GetActiveRenderData(TileType type)
     case TileType::SPIKE: return &spikesRenderData;
 
     default: return nullptr;
-
-    }
+    } 
 }
 
+inline SpriteRenderData* GetActiveRenderData(TileType type, int index = 0)
+{
+    std::vector<SpriteRenderData>* activeRenderData = GetActiveRenderDataList(type);
+
+    if(activeRenderData && index >= 0 && index < (int)activeRenderData->size())
+    {
+        return &activeRenderData->at(index);
+    }
+
+    return nullptr;
+}

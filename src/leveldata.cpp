@@ -1,64 +1,81 @@
 #include "leveldata.h"
 
-//static
-SpriteRenderData solidTilesRenderData = {};
+std::vector<SpriteRenderData> solidTilesRenderData = {};
 
-SpriteRenderData spikesRenderData = {};
+std::vector<SpriteRenderData> spikesRenderData = {};
 
-//animated
-SpriteRenderData treadmillRenderData_Right = {};
+std::vector<SpriteRenderData> treadmillRenderData_Right = {};
 
-SpriteRenderData treadmillRenderData_Left = {};
+std::vector<SpriteRenderData> treadmillRenderData_Left = {};
 
-void LoadRenderData(const char* path, SpriteRenderData* renderData, int maxFrames, Vector2 frameSize, int spacing = 1, int startFrame = 0, int endFrame = 0)
+SpriteRenderData LoadRenderData(const char* path, int maxFrames, Vector2 frameSize, int spacing = 1, int startFrame = 0, int endFrame = 0)
 {
-    renderData->animationFrames.clear();
+    SpriteRenderData renderData = {};
 
-    renderData->sourceTexture = LoadTexture(path);
+    renderData.animationFrames.clear();
 
-    renderData->maxFrames = maxFrames;
+    renderData.sourceTexture = LoadTexture(path);
 
-    renderData->frameSize = frameSize;
+    renderData.maxFrames = maxFrames;
 
-    renderData->animationFrames = CropImage(renderData->sourceTexture, renderData->maxFrames, renderData->frameSize);
+    renderData.frameSize = frameSize;
 
-    renderData->startFrame = startFrame;
+    renderData.animationFrames = CropImage(renderData.sourceTexture, renderData.maxFrames, renderData.frameSize);
 
-    if(endFrame < 1 && !renderData->animationFrames.empty()) endFrame = (int)renderData->animationFrames.size();
+    renderData.startFrame = startFrame;
 
-    renderData->endFrame = endFrame;
+    if(endFrame < 1 && !renderData.animationFrames.empty()) endFrame = (int)renderData.animationFrames.size();
 
-    renderData->spacing = spacing;
+    renderData.endFrame = endFrame;
 
-    SetTextureFilter(renderData->sourceTexture, TEXTURE_FILTER_POINT);
+    renderData.spacing = spacing;
 
-    SetTextureWrap(renderData->sourceTexture, TEXTURE_WRAP_CLAMP);
+    SetTextureFilter(renderData.sourceTexture, TEXTURE_FILTER_POINT);
+
+    SetTextureWrap(renderData.sourceTexture, TEXTURE_WRAP_CLAMP);
+
+    return renderData;
 }
 
 void LoadAssets()
 {
     Vector2 tileSize = {16,16};
 
-    LoadRenderData("assets/tiles/solid/solid-tiles-spritesheet.png", &solidTilesRenderData, 9, tileSize);
+    solidTilesRenderData.push_back(LoadRenderData("assets/tiles/solid/solid-tiles-spritesheet.png", 9, tileSize));
+
+    solidTilesRenderData.push_back(LoadRenderData("assets/tiles/solid/solid-tiles-spritesheet-b.png", 9, tileSize));
 
     //spikes
 
-    LoadRenderData("assets/tiles/spike-sprite-sheet.png", &spikesRenderData, 5, tileSize);
+    spikesRenderData.push_back(LoadRenderData("assets/tiles/spike-sprite-sheet.png", 5, tileSize));
 
     //treadmills
 
     int treadmillMaxFrames = 6 * 2;
 
-    LoadRenderData("assets/tiles/treadmill-spritesheet.png", &treadmillRenderData_Right, treadmillMaxFrames, tileSize, 2, 0, (int)(treadmillMaxFrames / 2));
+    treadmillRenderData_Right.push_back(LoadRenderData("assets/tiles/treadmill-spritesheet.png", treadmillMaxFrames, tileSize, 2, 0, (int)(treadmillMaxFrames / 2)));
 
-    LoadRenderData("assets/tiles/treadmill-spritesheet.png", &treadmillRenderData_Left, treadmillMaxFrames, tileSize, 2, (int)(treadmillMaxFrames / 2), treadmillMaxFrames);
+    treadmillRenderData_Left.push_back(LoadRenderData("assets/tiles/treadmill-spritesheet.png", treadmillMaxFrames, tileSize, 2, (int)(treadmillMaxFrames / 2), treadmillMaxFrames));
 }
 
 void UnloadAssets()
 {
-    solidTilesRenderData.animationFrames.clear();
+    auto CleanUp = [](std::vector<SpriteRenderData>& renderData)
+    {
+        for(auto& data : renderData)
+        {
+            data.animationFrames.clear();
+        }
 
-    treadmillRenderData_Right.animationFrames.clear();
+        renderData.clear();
+    };
 
-    spikesRenderData.animationFrames.clear();
+    CleanUp(solidTilesRenderData);
+
+    CleanUp(spikesRenderData);
+
+    CleanUp(treadmillRenderData_Left);
+
+    CleanUp(treadmillRenderData_Right);
+    
 }

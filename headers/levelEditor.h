@@ -25,6 +25,8 @@ private:
     
     int currentTexture = DEFAULT_INVALID_INDEX;
 
+    int currentVariant = 0;
+
     Tile tempLevel[ROWS][COLS];
 
     Camera2D camera = {};
@@ -75,37 +77,3 @@ public:
     void Draw();
 
 };
-
-/*
-
-for having different sets of textures for solid tiles
-
-You would essentially introduce a currentSolidPalette variable.
-
-The Storage: You have a std::vector<std::vector<Texture2D>> solidPalettes.
-
-    solidPalettes[0] = Grass Set (Corners, Edges, etc.)
-
-    solidPalettes[1] = Stone Set
-
-    solidPalettes[2] = Wood Set
-
-The Selection: * Mouse Wheel + CTRL: Changes the currentSolidPalette index (switches between Grass/Stone/Wood).
-
-    Mouse Wheel + SHIFT: Changes the currentTexture index (switches between Corner/Middle/Edge within that palette).
-
-refactor GetActiveTextureArray adding a second parameter for the current palette
-
-
-
-separate the types on the editor on these
-
-platforms (platform stop included)
-
-special physical tiles
-
-misc (player spawn, goal)
-
-enemies
-
-*/

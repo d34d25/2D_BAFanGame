@@ -278,8 +278,6 @@ void Level::InitLevel(const char *levelPath, float dt, int iterations)
                     orientation = tile->textureIndex % spikeRenderData->maxFrames;
                 }
 
-                std::cout<<"orientation: "<<orientation<<"\n";
-
                 switch (orientation)
                 {
                 case 0:
@@ -672,7 +670,7 @@ void Level::DrawLevel()
 
             if(IsNotRealTile(i,j)) continue;
 
-            SpriteRenderData* tileRenderData = GetActiveRenderData(tile.type);
+            SpriteRenderData* tileRenderData = GetActiveRenderData(tile.type, tile.variantIndex);
 
             int frameToDraw = tile.textureIndex;
 
