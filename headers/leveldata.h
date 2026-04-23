@@ -55,6 +55,9 @@ struct TileRange
 
     int endX = ROWS;
     int endY = COLS;
+
+    int stepX = 1;
+    int stepY = 1;
 };
 
 enum class TileType
@@ -196,10 +199,10 @@ inline bool IsTileEmptyInverted(int i, int j, Tile(&levelTiles)[ROWS][COLS], Til
     return levelTiles[i][j].type != emptyType;
 }
 
-inline TileRange CalculateTileRange(int x, int y, int range)
+inline TileRange CalculateTileRange(Vector2 position, int range)
 {
-    int gridX = x / gridSize;
-    int gridY = y / gridSize;
+    int gridX = position.x / gridSize;
+    int gridY = position.y / gridSize;    
 
     TileRange rangeTiles = {};
 
@@ -208,6 +211,56 @@ inline TileRange CalculateTileRange(int x, int y, int range)
 
     rangeTiles.startY = fmaxf(0, gridY - range);
     rangeTiles.endY = fminf(COLS - 1, gridY + range);
+
+    return rangeTiles;
+}
+
+inline TileRange CalculateTileRangeDirectional(Vector2 position, Vector2 velocity, int range)
+{
+    int gridX = position.x / gridSize;
+    int gridY = position.y / gridSize;    
+
+    int minX = fmaxf(0, gridX - range);
+    int maxX = fminf(ROWS - 1, gridX + range);
+
+    int minY = fmaxf(0, gridY - range);
+    int maxY = fminf(COLS - 1, gridY + range);
+
+    TileRange rangeTiles = {};
+    
+    if(velocity.x >= 0)
+    {
+        rangeTiles.startX = minX;
+
+        rangeTiles.stepX = 1;
+
+        rangeTiles.endX = maxX + rangeTiles.stepX;
+    }
+    else
+    {
+        rangeTiles.startX = maxX;
+
+        rangeTiles.stepX = -1;
+
+        rangeTiles.endX = minX + rangeTiles.stepX;
+    }
+
+    if(velocity.y >= 0)
+    {
+        rangeTiles.startY = minY;
+
+        rangeTiles.stepY = 1;
+
+        rangeTiles.endY = maxY + rangeTiles.stepY;
+    }
+    else
+    {
+        rangeTiles.startY = maxY;
+        
+        rangeTiles.stepY = -1;
+
+        rangeTiles.endY = minY + rangeTiles.stepY;
+    }
 
     return rangeTiles;
 }

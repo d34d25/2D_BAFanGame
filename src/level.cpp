@@ -383,9 +383,9 @@ void Level::DiscreteUpdate()
 {
     bool isGravityUp = gravity < 0;
 
-    TileRange playerTileRange = CalculateTileRange(
-        player.phys.position.x,
-        player.phys.position.y,
+    TileRange playerTileRange = CalculateTileRangeDirectional(
+        player.phys.position,
+        player.phys.body.velocity,
         collisionTileCheckRange
     );
 
@@ -395,9 +395,9 @@ void Level::DiscreteUpdate()
 
     player.phys.UpdatePositionX(dt, iterations);
 
-    for(int i = playerTileRange.startX; i <= playerTileRange.endX; i++)
+    for(int i = playerTileRange.startX; i != playerTileRange.endX; i+= playerTileRange.stepX)
     {
-        for(int j = playerTileRange.startY; j <= playerTileRange.endY; j++)
+        for(int j = playerTileRange.startY; j != playerTileRange.endY; j+= playerTileRange.stepY)
         {
             GameObject* objTile = level[i][j].gameObj;            
 
@@ -409,12 +409,14 @@ void Level::DiscreteUpdate()
 
             if(!IsOneWayTile(i, j))
             {
-                SolveCollisions(
+                /*SolveCollisions(
                     &player.phys, objTile, 
                     true, isGravityUp, 
                     tile.type == TileType::TRAMPOLINE,
                     false
-                );
+                );*/
+
+                SolveCollisions_CCD_AxisSplit(&player.phys, objTile, true, dt);
             }
             else if(IsOneWayRightLeft(i, j))
             {
@@ -430,9 +432,9 @@ void Level::DiscreteUpdate()
 
     player.phys.UpdatePositionY(dt, iterations);
 
-    for(int i = playerTileRange.startX; i <= playerTileRange.endX; i++)
+    for(int i = playerTileRange.startX; i != playerTileRange.endX; i+= playerTileRange.stepX)
     {
-        for(int j = playerTileRange.startY; j <= playerTileRange.endY; j++)
+        for(int j = playerTileRange.startY; j != playerTileRange.endY; j+= playerTileRange.stepY)
         {
             GameObject* objTile = level[i][j].gameObj;
 
@@ -444,12 +446,14 @@ void Level::DiscreteUpdate()
 
             if(!IsOneWayTile(i, j))
             {
-                SolveCollisions(
+                /*SolveCollisions(
                     &player.phys, objTile, 
                     false, isGravityUp, 
                     tile.type == TileType::TRAMPOLINE,
                     false
-                );
+                );*/
+
+                SolveCollisions_CCD_AxisSplit(&player.phys, objTile, false, dt);
             }
             else if(IsOneWayUpDown(i, j))
             {
@@ -486,10 +490,12 @@ void Level::DiscreteUpdate()
 
         if(platform->updateRequired) platform->Update(dt, iterations);
 
-        SolveCollisionsOneWayUpDown(
+        /*SolveCollisionsOneWayUpDown(
             &player.phys, &platform->phys,
             true, isGravityUp, true
-        );
+        );*/
+
+        SolveCollisions_CCD_AxisSplit(&player.phys, &platform->phys, false, dt);
 
         if(CheckCollisionRecs(player.GetJumpDetector(), platform->phys.mainAABB) && isPlayerFalling)
         {
@@ -504,15 +510,15 @@ void Level::DiscreteUpdate()
 
         if(!isMovingPlatform) continue;
 
-        TileRange platformRange = CalculateTileRange(
-            platform->phys.position.x,
-            platform->phys.position.y,
+        TileRange platformRange = CalculateTileRangeDirectional(
+            platform->phys.position,
+            platform->phys.body.velocity,
             collisionTileCheckRange
         );
 
-        for(int i = platformRange.startX; i <= platformRange.endX; i++)
+        for(int i = platformRange.startX; i != platformRange.endX; i+= platformRange.stepX)
         {
-            for(int j = platformRange.startY; j <= platformRange.endY; j++)
+            for(int j = platformRange.startY; j != platformRange.endY; j += platformRange.stepY)
             {
                 if(!level[i][j].gameObj) continue;
 
@@ -522,9 +528,9 @@ void Level::DiscreteUpdate()
     }
 
     //tile triggers
-    for(int i = playerTileRange.startX; i <= playerTileRange.endX; i++)
+    for(int i = playerTileRange.startX; i != playerTileRange.endX; i+= playerTileRange.stepX)
     {
-        for(int j = playerTileRange.startY; j <= playerTileRange.endY; j++)
+        for(int j = playerTileRange.startY; j != playerTileRange.endY; j+= playerTileRange.stepY)
         {
             GameObject* objTile = level[i][j].gameObj;
 
@@ -642,8 +648,7 @@ void Level::DrawLevel()
     BeginMode2D(camera);
 
     TileRange playerTileRange = CalculateTileRange(
-        player.phys.position.x,
-        player.phys.position.y,
+        player.phys.position,
         renderTileCheckRange
     );
 
@@ -728,8 +733,7 @@ void Level::DrawLevel()
 void Level::DebugDrawing()
 {
     TileRange playerTileRange = CalculateTileRange(
-        player.phys.position.x,
-        player.phys.position.y,
+        player.phys.position,
         renderTileCheckRange
     );
 

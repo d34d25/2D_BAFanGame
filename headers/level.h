@@ -20,7 +20,7 @@ private:
 
     int iterations = 1;
 
-    int collisionTileCheckRange = 2;
+    int collisionTileCheckRange = 100;
 
     int renderTileCheckRange = 15;
 

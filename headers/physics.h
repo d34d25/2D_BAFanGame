@@ -2,6 +2,8 @@
 
 #include "entity.h"
 
+#include <algorithm>
+
 void SolveCollisions(GameObject* objA, GameObject* objB, bool isX, bool gravityUp, bool isTrampoline, bool isPlatform);
 
 void SolveCollisions_Platform(GameObject* objA, GameObject* objB, bool isX);
@@ -81,3 +83,20 @@ inline void SolveCollisionsOneWayUpDown(GameObject * objA, GameObject* objB, boo
 
     SolveCollisions(objA, objB, false, gravityUp, false, isPlatform);
 }
+
+inline bool CheckCollisionsRecs_CCD_X(Rectangle recA, float velocityA, Rectangle recB, float velocityB)
+{
+    return false;
+}
+
+inline bool CheckCollisionsRecs_CCD_Y(Rectangle recA, float velocityA, Rectangle recB, float velocityB)
+{
+    return false;
+}
+
+inline bool CheckCollisionsRecs_CCD(Rectangle recA, Vector2 velocityA, Rectangle recB, Vector2 velocityB)
+{
+    return false;
+}
+
+void SolveCollisions_CCD_AxisSplit(GameObject* objA, GameObject* objB, bool isX, float dt);

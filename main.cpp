@@ -22,7 +22,7 @@ int main()
 
     LevelEditor editor = LevelEditor(SCREEN_WIDTH,SCREEN_HEIGHT, "levels/testLevel");
 
-    int iterations = 10;
+    int iterations = 1;
 
     testLevel.InitLevel(
         "levels/testLevel",

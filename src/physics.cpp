@@ -99,3 +99,92 @@ void SolveCollisions_Platform(GameObject *objA, GameObject *objB, bool isX)
 
     objA->UpdateAABB();
 }
+
+void SolveCollisions_CCD_AxisSplit(GameObject *objA, GameObject *objB, bool isX, float dt)
+{
+    if(isX)
+    {
+        if(objA->mainAABB.y + objA->mainAABB.height <= objB->mainAABB.y ||
+        objA->mainAABB.y >= objB->mainAABB.y + objB->mainAABB.height) return;
+    }
+    else
+    {
+        if(objA->mainAABB.x + objA->mainAABB.width <= objB->mainAABB.x ||
+        objA->mainAABB.x >= objB->mainAABB.x + objB->mainAABB.width) return;
+    }
+
+    double frameStart = 0.0;
+    double frameEnd = 1.0;
+
+    float velocityA = isX ? objA->body.velocity.x : objA->body.velocity.y;
+    float velocityB = isX ? objB->body.velocity.x : objB->body.velocity.y;
+
+    double relativeSpeed = (velocityB - velocityA) * dt;
+
+    if(fabs(relativeSpeed) < 0.0000001f) return;
+
+    float minA = isX ? objA->mainAABB.x : objA->mainAABB.y;
+    float maxA = isX ? objA->mainAABB.x + objA->mainAABB.width : objA->mainAABB.y + objA->mainAABB.height;
+
+    float minB = isX ? objB->mainAABB.x : objB->mainAABB.y;
+    float maxB = isX ? objB->mainAABB.x + objB->mainAABB.width : objB->mainAABB.y + objB->mainAABB.height;
+
+    double entryTime = (minA - maxB) / relativeSpeed; 
+    double exitTime = (maxA - minB) / relativeSpeed;
+
+    if(entryTime > exitTime) std::swap(entryTime, exitTime);
+
+    if(entryTime > 1.0 || exitTime < 0.0) return;
+
+    entryTime = std::max(entryTime, 0.0);
+    exitTime = std::min(exitTime, 1.0);
+
+    if(entryTime > exitTime) return;
+
+    frameStart = std::max(frameStart, entryTime);
+    frameEnd = std::min(frameEnd, exitTime);
+
+    if(frameStart > frameEnd) return;
+
+    float currentVel = isX ? objA->body.velocity.x : objA->body.velocity.y;
+
+    if(fabs(currentVel) < 0.0001f) return;
+
+    //resolution
+
+    float offset = 0.5f;
+
+    float halfSizeA = isX ? objA->mainAABB.width * 0.5f : objA->mainAABB.height * 0.5f;
+    float halfSizeB = isX ? objB->mainAABB.width * 0.5f : objB->mainAABB.height * 0.5f;
+
+    if(isX)
+    {
+        if(velocityA > velocityB)
+        {
+            objA->position.x = objB->mainAABB.x - halfSizeA - offset;
+        }
+        else
+        {
+            objA->position.x = (objB->mainAABB.x + objB->mainAABB.width) + halfSizeA + offset;
+        }
+
+        objA->body.velocity.x = 0;
+    }
+    else
+    {
+        if(velocityA > velocityB)
+        {
+            objA->position.y = objB->mainAABB.y - halfSizeA - offset;
+        }
+        else
+        {
+            objA->position.y = (objB->mainAABB.y + objB->mainAABB.height) + halfSizeA + offset;
+        }
+
+        objA->body.velocity.y = objB->body.velocity.y;
+
+        objA->body.altVelocity.x = objB->body.velocity.x;
+    }
+
+    objA->UpdateAABB();
+}

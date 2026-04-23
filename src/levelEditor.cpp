@@ -271,7 +271,7 @@ void LevelEditor::Draw()
     BeginMode2D(camera);
 
     TileRange cameraTileRange = CalculateTileRange(
-        camera.target.x, camera.target.y, 100
+        camera.target, 100
     );
     
     for(int i = cameraTileRange.startX; i <= cameraTileRange.endX; i++)
