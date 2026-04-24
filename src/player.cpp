@@ -8,10 +8,9 @@ Player::Player(Vector2 position)
 
     phys.body.hasGravity = true;
 
-    phys.mainAABB.width = 20;
-    phys.mainAABB.height = 46;
+    phys.mainHitbox = {{0,0}, {20,46}};
 
-    phys.AddSubHitbox(0,0, phys.mainAABB.width * 0.85f, phys.mainAABB.height * 0.5f);
+    phys.AddSubHitbox({0,0}, {phys.GetMainAABB()->width * 0.85f, phys.GetMainAABB()->height * 0.5f});
 
     phys.UpdateAABB();
 

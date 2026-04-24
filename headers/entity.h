@@ -55,6 +55,35 @@ public:
     }
 };
 
+struct Hitbox
+{
+    Rectangle aabb = {0,0,0,0};
+    
+    Vector2 offset = {0,0};
+
+    Hitbox(Vector2 position, Vector2 size)
+    {
+        aabb = {
+            position.x,
+            position.y,
+            size.x,
+            size.y
+        };
+    }
+
+    Hitbox(Vector2 position, Vector2 offset, Vector2 size)
+    {
+        this->offset = offset;
+
+        aabb = {
+            position.x + this->offset.x,
+            position.y + this->offset.y,
+            size.x,
+            size.y
+        };
+    }
+};
+
 struct GameObject
 {
 
@@ -62,36 +91,47 @@ public:
 
     Vector2 position = {0,0};
 
-    float scale  = 0;
-    float rotation = 0;
-
-    Rectangle mainAABB = {0,0,50,50};
+    Hitbox mainHitbox = {{0,0},{0,0}};
 
     //these secondary hitboxes are only used for triggers (when necessary), not physics
-    std::vector<Rectangle> subAABBList = {};
+    std::vector<Hitbox> subHitboxList = {};
+
+    float scale  = 0;
 
     SimpleBody2D body = {};
 
     bool canEntityCollidePhysically = false;
     bool canPlatformCollidePhysically = false;
 
-    inline void AddSubHitbox(float xOffset, float yOffset, float width, float height)
+    inline Rectangle* GetMainAABB()
     {
-        float xpos = (position.x - width * 0.5f) + xOffset;
-        float ypos = (position.y - height * 0.5f) + yOffset;
+        return &mainHitbox.aabb;
+    }
 
-        subAABBList.push_back(Rectangle{xpos, ypos, width, height});
+    inline Rectangle* GetSubAABB(int index)
+    {
+        return &subHitboxList[index].aabb;
+    }
+
+    inline void AddSubHitbox(Vector2 offset, Vector2 size)
+    {
+        Vector2 spawnPosition = {
+            position.x - (size.x * 0.5f),
+            position.y - (size.y * 0.5f)
+        };
+
+        subHitboxList.push_back(Hitbox{spawnPosition, offset, size});
     }
 
     inline void UpdateAABB()
     {
-        mainAABB.x = position.x - mainAABB.width * 0.5f;
-        mainAABB.y = position.y - mainAABB.height * 0.5f;
+        GetMainAABB()->x = position.x - GetMainAABB()->width * 0.5f;
+        GetMainAABB()->y = position.y - GetMainAABB()->height * 0.5f;
 
-        for(int i = 0; i < subAABBList.size(); i++)
+        for(int i = 0; i < subHitboxList.size(); i++)
         {
-            subAABBList[i].x = position.x - subAABBList[i].width * 0.5f;
-            subAABBList[i].y = position.y - subAABBList[i].height * 0.5f;
+           GetSubAABB(i)->x = (position.x - GetSubAABB(i)->width * 0.5f) + subHitboxList[i].offset.x;
+           GetSubAABB(i)->y = (position.y - GetSubAABB(i)->height * 0.5f) + subHitboxList[i].offset.y;
         }
     }
 

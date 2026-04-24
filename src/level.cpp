@@ -97,8 +97,7 @@ void Level::InitLevel(const char *levelPath, float dt, int iterations)
 
                 platform->phys.position = {xpos, ypos};
 
-                platform->phys.mainAABB.width = platformWidth;
-                platform->phys.mainAABB.height = platformHeight;
+                platform->phys.mainHitbox = {{0,0}, {platformWidth, platformHeight}};
 
                 platform->phys.UpdateAABB();
 
@@ -170,7 +169,7 @@ void Level::InitLevel(const char *levelPath, float dt, int iterations)
 
             GameObject* objTile = level[i][j].gameObj;
 
-            objTile->mainAABB = {0, 0, gridSize, gridSize};
+            objTile->mainHitbox = {{0,0}, {gridSize, gridSize}};
 
             objTile->position = {xpos, ypos};
 
@@ -300,58 +299,53 @@ void Level::InitLevel(const char *levelPath, float dt, int iterations)
                     break;
                 }
 
-                objTile->mainAABB.width *= widthFactor; 
-                objTile->mainAABB.height *= heightFactor;
+                Vector2 subOffsetA = {0,0};
 
-                objTile->UpdateAABB();
+                Vector2 subSizeA = {objTile->GetMainAABB()->height * widthFactor, objTile->GetMainAABB()->width * heightFactor};
 
-                Vector2 subHitboxOffset = {0,0};
+                Vector2 subOffsetB = {0,0};
 
-                Vector2 subHitboxSize = {objTile->mainAABB.height * 0.5f, objTile->mainAABB.width * 0.5f};
+                Vector2 subSizeB = {subSizeA.y * 0.5f, subSizeA.x * 0.5f};
 
-                float spikePositionCorrectionFactor = 0.6f;
+                float spikePositionCorrectionFactor = 0.2f;
+
+                float correctionX = objTile->GetMainAABB()->width * spikePositionCorrectionFactor;
+                float correctionY = objTile->GetMainAABB()->height * spikePositionCorrectionFactor;
+
+                float offsetBFactor = 20;
 
                 switch (orientation)
                 {
                 case 0: 
                 {
-                    objTile->mainAABB.y += objTile->mainAABB.height * spikePositionCorrectionFactor;
-
-                    subHitboxOffset.y = -10;
-
-                    objTile->AddSubHitbox(subHitboxOffset.x, subHitboxOffset.y, subHitboxSize.x, subHitboxSize.y);
+                    subOffsetA.y = correctionY;
+                    subOffsetB.y = correctionY - offsetBFactor;
                 }
                     break;
                 case 1:
                 {
-                    objTile->mainAABB.y -= objTile->mainAABB.height * spikePositionCorrectionFactor;
-
-                    subHitboxOffset.y = 10;
-
-                    objTile->AddSubHitbox(subHitboxOffset.x, subHitboxOffset.y, subHitboxSize.x, subHitboxSize.y);
+                    subOffsetA.y = -correctionY;
+                    subOffsetB.y = -correctionY + offsetBFactor;
                 }
                     break;
                 case 2:
                 {
-                    objTile->mainAABB.x += objTile->mainAABB.width * spikePositionCorrectionFactor;
-
-                    subHitboxOffset.x = -10;
-
-                    objTile->AddSubHitbox(subHitboxOffset.x, subHitboxOffset.y, subHitboxSize.x, subHitboxSize.y);
+                    subOffsetA.x = correctionX;
+                    subOffsetB.x = correctionX - offsetBFactor;
                 }
                     break;
                 case 3:
                 {
-                    objTile->mainAABB.x -= objTile->mainAABB.width * spikePositionCorrectionFactor;
-
-                    subHitboxOffset.x = 10;
-
-                    objTile->AddSubHitbox(subHitboxOffset.x, subHitboxOffset.y, subHitboxSize.x, subHitboxSize.y);
+                    subOffsetA.x = -correctionX;
+                    subOffsetB.x = -correctionX + offsetBFactor;
                 }
                     break;
                 default:
                     break;
                 }
+
+                objTile->AddSubHitbox(subOffsetA, subSizeA);
+                objTile->AddSubHitbox(subOffsetB, subSizeB);
                 
             }
             break;
@@ -405,6 +399,8 @@ void Level::DiscreteUpdate()
 
             if(!objTile->canEntityCollidePhysically) continue;
 
+            if(!CheckCollisionRecs(*player.phys.GetMainAABB(), *objTile->GetMainAABB())) continue;
+
             const Tile& tile = level[i][j];
 
             if(!IsOneWayTile(i, j))
@@ -439,6 +435,8 @@ void Level::DiscreteUpdate()
             if(!objTile) continue;            
 
             if(!objTile->canEntityCollidePhysically) continue;
+
+            if(!CheckCollisionRecs(*player.phys.GetMainAABB(), *objTile->GetMainAABB())) continue;
 
             const Tile& tile = level[i][j];
 
@@ -491,9 +489,9 @@ void Level::DiscreteUpdate()
             true, isGravityUp, true
         );
 
-        if(CheckCollisionRecs(player.GetJumpDetector(), platform->phys.mainAABB) && isPlayerFalling)
+        if(CheckCollisionRecs(player.GetJumpDetector(), *platform->phys.GetMainAABB()) && isPlayerFalling)
         {
-            if(!isGravityUp && IsAbove(player.phys.mainAABB, platform->phys.mainAABB, 0.0f) || (isGravityUp && IsBelow(player.phys.mainAABB, platform->phys.mainAABB, 0.0f)))
+            if(!isGravityUp && IsAbove(*player.phys.GetMainAABB(), *platform->phys.GetMainAABB(), 0.0f) || (isGravityUp && IsBelow(*player.phys.GetMainAABB(), *platform->phys.GetMainAABB(), 0.0f)))
             {
                 platform->updateRequired = true;
                 isPlayerGrounded = true;
@@ -536,27 +534,23 @@ void Level::DiscreteUpdate()
 
             if(tile.type == TileType::PLATFORM_STOP) continue;
 
-            if(tile.type == TileType::GRAVITY_CHANGER)
+            if(CheckCollisionRecs(*player.phys.GetMainAABB(), *objTile->GetMainAABB()))
             {
-                if (CheckCollisionRecs(player.phys.mainAABB, objTile->mainAABB))
-                    isPlayerTouchingGravityChanger = true;
-            } 
+                if(tile.type == TileType::GRAVITY_CHANGER) isPlayerTouchingGravityChanger = true;
 
-            if(tile.type == TileType::SPIKE)
-            {
-                if (CheckCollisionRecs(player.phys.mainAABB, objTile->mainAABB))
-                    isPlayerTouchingSpike = true;
-
-                for(int h = 0; h < objTile->subAABBList.size(); h++)
+                if(tile.type == TileType::SPIKE)
                 {
-                    if(CheckCollisionRecs(player.phys.mainAABB, objTile->subAABBList[h]))
-                        isPlayerTouchingSpike = true;
-                }
-            }   
+                    for(int h = 0; h < objTile->subHitboxList.size(); h++)
+                    {
+                        if(CheckCollisionRecs(*player.phys.GetMainAABB(), *objTile->GetSubAABB(h)))
+                            isPlayerTouchingSpike = true;
+                    }
+                }   
+            }
 
-            if(IsTileJumpTrigger(i,j)) continue;
+            if(IsTileNotJumpTrigger(i,j)) continue;
 
-            if(CheckCollisionRecs(player.GetJumpDetector(), objTile->mainAABB) && isPlayerFalling)
+            if(CheckCollisionRecs(player.GetJumpDetector(), *objTile->GetMainAABB()) && isPlayerFalling)
             {
                 if(tile.type == TileType::TREADMILL_LEFT || tile.type == TileType::TREADMILL_RIGHT)
                 {
@@ -567,13 +561,13 @@ void Level::DiscreteUpdate()
                 else if(IsOneWayUpDown(i,j))
                 {
                     if(tile.type == TileType::ONE_WAY_UP &&
-                        IsAbove(player.phys.mainAABB, objTile->mainAABB, 0.0f)
+                        IsAbove(*player.phys.GetMainAABB(), *objTile->GetMainAABB(), 0.0f)
                     )
                     {
                         isPlayerGrounded = true;
                     }
                     else if(tile.type == TileType::ONE_WAY_DOWN &&
-                        IsBelow(player.phys.mainAABB, objTile->mainAABB, 0.0f)
+                        IsBelow(*player.phys.GetMainAABB(), *objTile->GetMainAABB(), 0.0f)
                     )
                     {
                         isPlayerGrounded = true;
@@ -659,7 +653,7 @@ void Level::DrawLevel()
         else if(platform->isFalling) platformColor = FALLING_PLATFORM;
         else if(platform->isDisappearing) platformColor = DISAPPEARING_PLATFORM;
 
-        DrawRectangleRec(platform->phys.mainAABB, platformColor);
+        DrawRectangleRec(*platform->phys.GetMainAABB(), platformColor);
     }
 
     for(int i = playerTileRange.startX; i <= playerTileRange.endX; i++)
@@ -701,7 +695,7 @@ void Level::DrawLevel()
 
                 if(IsColorOf(color, BLANK)) continue;
 
-                if(tile.gameObj) DrawRectangleRec(tile.gameObj->mainAABB, color);
+                if(tile.gameObj) DrawRectangleRec(*tile.gameObj->GetMainAABB(), color);
             }
         }
     }
@@ -741,11 +735,11 @@ void Level::DebugDrawing()
 
             if(!tileObj) continue;
 
-            DrawAABB(tileObj->mainAABB, RED);
+            DrawAABB(*tileObj->GetMainAABB(), RED);
 
-            for(int h = 0; h < tileObj->subAABBList.size(); h++)
+            for(int h = 0; h < tileObj->subHitboxList.size(); h++)
             {
-                DrawAABB(tileObj->subAABBList[h], MAGENTA);
+                DrawAABB(*tileObj->GetSubAABB(h), MAGENTA);
             }
         }
     }
@@ -763,7 +757,7 @@ void Level::DebugDrawing()
         DrawLine(0, j, COLS * gridSize, j, gridColor);
     }
 
-    DrawAABB(player.phys.mainAABB, ORANGE);
+    DrawAABB(*player.phys.GetMainAABB(), ORANGE);
 
     DrawAABB(player.GetJumpDetector(), GREEN);
 }

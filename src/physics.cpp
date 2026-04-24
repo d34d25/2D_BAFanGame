@@ -2,7 +2,7 @@
 
 void SolveCollisions(GameObject *objA, GameObject *objB, bool isX, bool gravityUp, bool isTrampoline, bool isPlatform)
 {
-    if(!CheckCollisionRecs(objA->mainAABB, objB->mainAABB)) return;
+    if(!CheckCollisionRecs(*objA->GetMainAABB(), *objB->GetMainAABB())) return;
 
     float overlap = 0;
 
@@ -14,9 +14,9 @@ void SolveCollisions(GameObject *objA, GameObject *objB, bool isX, bool gravityU
 
     if(isX)
     {
-        if(objA->mainAABB.x <= objB->mainAABB.x) // A is at the left
+        if(objA->GetMainAABB()->x <= objB->GetMainAABB()->x) // A is at the left
         {
-            overlap = (objA->mainAABB.x + objA->mainAABB.width) - objB->mainAABB.x;
+            overlap = (objA->GetMainAABB()->x + objA->GetMainAABB()->width) - objB->GetMainAABB()->x;
             objA->position.x -= (overlap + offset);
 
             if(objA->body.velocity.x > 0) objA->body.velocity.x = 0;
@@ -25,7 +25,7 @@ void SolveCollisions(GameObject *objA, GameObject *objB, bool isX, bool gravityU
         }
         else // A is at the right
         {
-            overlap = (objB->mainAABB.x + objB->mainAABB.width) - objA->mainAABB.x;
+            overlap = (objB->GetMainAABB()->x + objB->GetMainAABB()->width) - objA->GetMainAABB()->x;
             objA->position.x += (overlap + offset);
 
             if(objA->body.velocity.x < 0) objA->body.velocity.x = 0;
@@ -35,9 +35,9 @@ void SolveCollisions(GameObject *objA, GameObject *objB, bool isX, bool gravityU
     }
     else
     {
-        if(objA->mainAABB.y <= objB->mainAABB.y) // A is above of B
+        if(objA->GetMainAABB()->y <= objB->GetMainAABB()->y) // A is above of B
         {
-            overlap = (objA->mainAABB.y + objA->mainAABB.height) - objB->mainAABB.y;
+            overlap = (objA->GetMainAABB()->y + objA->GetMainAABB()->height) - objB->GetMainAABB()->y;
             objA->position.y -= (overlap + offset);
 
             if(!gravityUp && isPlatform) objA->body.altVelocity = objB->body.velocity;
@@ -49,7 +49,7 @@ void SolveCollisions(GameObject *objA, GameObject *objB, bool isX, bool gravityU
         }
         else //A is below B
         {
-            overlap = (objB->mainAABB.y + objB->mainAABB.height) - objA->mainAABB.y;
+            overlap = (objB->GetMainAABB()->y + objB->GetMainAABB()->height) - objA->GetMainAABB()->y;
             objA->position.y += (overlap + offset);
 
             if(gravityUp && isPlatform) objA->body.altVelocity = objB->body.velocity;
@@ -66,32 +66,32 @@ void SolveCollisions(GameObject *objA, GameObject *objB, bool isX, bool gravityU
 
 void SolveCollisions_Platform(GameObject *objA, GameObject *objB, bool isX)
 {
-    if(!CheckCollisionRecs(objA->mainAABB, objB->mainAABB)) return;
+    if(!CheckCollisionRecs(*objA->GetMainAABB(), *objB->GetMainAABB())) return;
 
     float offset = 0.001f;
 
     if(isX)
     {
-        if(objA->mainAABB.x <= objB->mainAABB.x)
+        if(objA->GetMainAABB()->x <= objB->GetMainAABB()->x)
         {
-            objA->position.x = (objB->mainAABB.x - objA->mainAABB.width * 0.5f) - offset;
+            objA->GetMainAABB()->x = (objB->GetMainAABB()->x - objA->GetMainAABB()->width * 0.5f) - offset;
         }
         else
         {
-            objA->position.x = ((objB->mainAABB.x + objB->mainAABB.width) + objA->mainAABB.width * 0.5f) + offset;
+            objA->position.x = ((objB->GetMainAABB()->x + objB->GetMainAABB()->width) + objA->GetMainAABB()->width * 0.5f) + offset;
         }
 
         objA->body.velocity.x *= -1;
     }
     else
     {
-        if(objA->mainAABB.y <= objB->mainAABB.y)
+        if(objA->GetMainAABB()->y <= objB->GetMainAABB()->y)
         {
-            objA->position.y = (objB->mainAABB.y - objA->mainAABB.height * 0.5f) - offset;
+            objA->position.y = (objB->GetMainAABB()->y - objA->GetMainAABB()->height * 0.5f) - offset;
         }
         else
         {
-            objA->position.y = ((objB->mainAABB.y + objB->mainAABB.height) + objA->mainAABB.height * 0.5f) + offset;
+            objA->position.y = ((objB->GetMainAABB()->y + objB->GetMainAABB()->height) + objA->GetMainAABB()->height * 0.5f) + offset;
         }
 
         objA->body.velocity.y *= -1;

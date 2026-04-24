@@ -125,7 +125,7 @@ private:
         return IsOneWayRightLeft(i, j) || IsOneWayUpDown(i, j);
     }
 
-    inline bool IsTileJumpTrigger(int i, int j)
+    inline bool IsTileNotJumpTrigger(int i, int j)
     {
         const TileType& type = level[i][j].type;
 

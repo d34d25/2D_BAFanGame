@@ -67,12 +67,12 @@ public:
 
         int dir = entityData.flipY ? -1 : 1;
 
-        float centerY = phys.mainAABB.y + phys.mainAABB.height * 0.5f;
+        float centerY = phys.GetMainAABB()->y + phys.GetMainAABB()->height * 0.5f;
 
-        if(dir == 1) phys.subAABBList[0].y = centerY + offset;
-        else phys.subAABBList[0].y = centerY - offset - phys.subAABBList[0].height;
+        if(dir == 1) phys.GetSubAABB(0)->y = centerY + offset;
+        else phys.GetSubAABB(0)->y = centerY - offset - phys.GetSubAABB(0)->height;
         
-        return phys.subAABBList[0];
+        return *phys.GetSubAABB(0);
     }
 
     inline void Respawn()
