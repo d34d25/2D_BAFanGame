@@ -39,6 +39,8 @@ static constexpr Color DISAPPEARING_PLATFORM = Color{200,100,140,255};
 
 static constexpr Color SPIKE = Color{220,45,50,255};
 
+static constexpr Color DECO = Color{135,30,255,255};
+
 static constexpr int ROWS = 70;
 static constexpr int COLS = 70;
 
@@ -105,6 +107,8 @@ enum class TileType
 
     MISC_END,
 
+    DECO,
+
     COUNT
 };
 
@@ -162,6 +166,7 @@ const std::vector<TileTypeList> TILE_TYPE_LIST = {
     {TileType::FALLING_PLATFORM, FALLING_PLATFORM, "FALLING_PLATFORM"},
     {TileType::DISAPPEARING_PLATFORM, DISAPPEARING_PLATFORM, "DISAPPEARING_PLATFORM"},
     {TileType::PLAYER_SPAWN, PLAYER_SPAWN, "PLAYER_SPAWN"},
+    {TileType::DECO, DECO, "DECO"},
 };
 
 struct Tile
@@ -248,6 +253,8 @@ extern std::vector<SpriteRenderData> treadmillRenderData_Right;
 
 extern std::vector<SpriteRenderData> treadmillRenderData_Left;
 
+extern std::vector<SpriteRenderData> decoRenderData;
+
 void LoadAssets();
 
 void UnloadAssets();
@@ -262,6 +269,8 @@ inline std::vector<SpriteRenderData>* GetActiveRenderDataList(TileType type)
     case TileType::TREADMILL_LEFT: return &treadmillRenderData_Left;
 
     case TileType::SPIKE: return &spikesRenderData;
+
+    case TileType::DECO: return &decoRenderData;
 
     default: return nullptr;
     } 

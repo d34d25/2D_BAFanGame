@@ -8,7 +8,16 @@ std::vector<SpriteRenderData> treadmillRenderData_Right = {};
 
 std::vector<SpriteRenderData> treadmillRenderData_Left = {};
 
-SpriteRenderData LoadRenderData(const char* path, int maxFrames, Vector2 frameSize, int spacing = 1, int startFrame = 0, int endFrame = 0)
+std::vector<SpriteRenderData> decoRenderData = {};
+
+/*
+    spacing means the length of each animation, if it is 1 frame it means it's static
+    start and end frame are only used in case of having multiple variants in one sprite sheet
+
+    sprite sheets are treated as an uniform grid so a single sprite sheet regadless of its content must have
+    a constant spacing and frame size
+*/
+SpriteRenderData LoadRenderData(const char* path, int maxFrames, Vector2 frameSize, int spacing = 1, int startFrame = 0, int endFrame = 0, float animationSpeed = 5.0f)
 {
     SpriteRenderData renderData = {};
 
@@ -29,6 +38,8 @@ SpriteRenderData LoadRenderData(const char* path, int maxFrames, Vector2 frameSi
     renderData.endFrame = endFrame;
 
     renderData.spacing = spacing;
+
+    renderData.animationSpeed = animationSpeed;
 
     SetTextureFilter(renderData.sourceTexture, TEXTURE_FILTER_POINT);
 
@@ -56,6 +67,11 @@ void LoadAssets()
     treadmillRenderData_Right.push_back(LoadRenderData("assets/tiles/treadmill-spritesheet.png", treadmillMaxFrames, tileSize, 2, 0, (int)(treadmillMaxFrames / 2)));
 
     treadmillRenderData_Left.push_back(LoadRenderData("assets/tiles/treadmill-spritesheet.png", treadmillMaxFrames, tileSize, 2, (int)(treadmillMaxFrames / 2), treadmillMaxFrames));
+
+    //decoration
+
+    decoRenderData.push_back(LoadRenderData("assets/tiles/deco-spritesheet-1.png", 2, {14,16}, 2, 0, 0, 2.0f));
+    decoRenderData.push_back(LoadRenderData("assets/tiles/deco-spritesheet-2.png", 2, {14,15}));
 }
 
 void UnloadAssets()
@@ -77,5 +93,6 @@ void UnloadAssets()
     CleanUp(treadmillRenderData_Left);
 
     CleanUp(treadmillRenderData_Right);
-    
+
+    CleanUp(decoRenderData);
 }

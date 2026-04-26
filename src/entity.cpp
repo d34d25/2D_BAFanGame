@@ -18,7 +18,7 @@ void SimpleBody2D::UpdateVelocity(float dt, int iterations, float gravity)
 
     velocity = Vector2Scale(velocity, decay);
 
-    finalVelocity = Vector2Add(velocity, altVelocity);
+    AddVelocities();
 
     force = {0,0};
 

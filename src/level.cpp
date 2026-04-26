@@ -145,6 +145,9 @@ void Level::InitLevel(const char *levelPath, float dt, int iterations)
 
             if(IsNotRealTile(i,j)) continue;
 
+            //decorational tiles don't need a physical body
+            if(level[i][j].type == TileType::DECO) continue;
+
             bool upLeft = IsTileEmptyInverted(i - 1, j - 1, level, TileType::SOLID);
             bool up = IsTileEmptyInverted(i, j - 1, level, TileType::SOLID);
             bool upRight = IsTileEmptyInverted(i + 1, j - 1, level, TileType::SOLID);
@@ -680,7 +683,7 @@ void Level::DrawLevel()
                         tileRenderData->animationFrames,
                         tile.textureIndex,
                         loopEnd,
-                        5.0f
+                        tileRenderData->animationSpeed
                     );
                 }
             }
@@ -696,6 +699,7 @@ void Level::DrawLevel()
                 if(IsColorOf(color, BLANK)) continue;
 
                 if(tile.gameObj) DrawRectangleRec(*tile.gameObj->GetMainAABB(), color);
+                else DrawRectangle(i * gridSize, j * gridSize, gridSize, gridSize, color);
             }
         }
     }

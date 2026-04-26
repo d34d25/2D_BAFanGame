@@ -7,7 +7,7 @@
 
 const float MASS = 1;
 
-const Vector2 MAX_SPEED = {500,500};
+const Vector2 MAX_SPEED = {600,600};
 
 struct SimpleBody2D
 {
@@ -31,6 +31,10 @@ public:
     inline void AddVelocities()
     {
         finalVelocity = Vector2Add(velocity, altVelocity);
+
+        finalVelocity.x = Clamp(finalVelocity.x, -MAX_SPEED.x, MAX_SPEED.x);
+
+        finalVelocity.y = Clamp(finalVelocity.y, -MAX_SPEED.y, MAX_SPEED.y);
     }
 
     void UpdateVelocity(float dt, int iterations, float gravity);
@@ -171,6 +175,8 @@ struct SpriteRenderData
 
     int maxFrames = 1;
     Vector2 frameSize = {1,1};
+
+    float animationSpeed = 5.0f;
 };
 
 struct EntityData

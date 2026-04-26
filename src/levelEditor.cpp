@@ -92,11 +92,13 @@ void LevelEditor::Update()
 
         if(IsKeyPressed(KEY_THREE)) currentTileType = (int)TileType::MISC_START + 1;
 
+        if(IsKeyPressed(KEY_FOUR)) currentTileType = (int)TileType::DECO;
+
         activeRenderData = GetActiveRenderData((TileType)currentTileType, 0);
 
         activeRenderDataList = GetActiveRenderDataList((TileType)currentTileType);
 
-        if(!activeRenderDataList) currentVariant = 0;
+        currentVariant = 0;
 
         if(!activeRenderData || activeRenderData->animationFrames.empty()) currentTexture = DEFAULT_INVALID_INDEX;
         else currentTexture = 0;
