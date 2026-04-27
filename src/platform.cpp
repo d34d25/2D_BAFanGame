@@ -3,6 +3,9 @@
 
 void Platform::Update(float dt, int iterations)
 {
+    bool isFalling = type == PlatformType::FALLING;
+    bool isDisappearing = type == PlatformType::DISAPPEARING;
+
     if(IsInactive())
     {
         updateRequired = false;

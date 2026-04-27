@@ -76,9 +76,9 @@ void LevelEditor::Update()
 
     mouseMatrixPosition = {i,j};
 
-    activeRenderData = GetActiveRenderData((TileType)currentTileType, currentVariant);
+    activeRenderData = GetTileActiveRenderData((TileType)currentTileType, currentVariant);
 
-    std::vector<SpriteRenderData>* activeRenderDataList = GetActiveRenderDataList((TileType)currentTileType);
+    std::vector<SpriteRenderData>* activeRenderDataList = GetTileActiveRenderDataList((TileType)currentTileType);
 
     if(!activeRenderDataList) currentVariant = 0;
 
@@ -94,9 +94,9 @@ void LevelEditor::Update()
 
         if(IsKeyPressed(KEY_FOUR)) currentTileType = (int)TileType::DECO;
 
-        activeRenderData = GetActiveRenderData((TileType)currentTileType, 0);
+        activeRenderData = GetTileActiveRenderData((TileType)currentTileType, 0);
 
-        activeRenderDataList = GetActiveRenderDataList((TileType)currentTileType);
+        activeRenderDataList = GetTileActiveRenderDataList((TileType)currentTileType);
 
         currentVariant = 0;
 
@@ -119,7 +119,7 @@ void LevelEditor::Update()
     //variant cycling
     if(mouseWheel != 0 && IsKeyDown(KEY_SPACE))
     {
-        std::vector<SpriteRenderData>* activeRenderDataList = GetActiveRenderDataList((TileType)currentTileType);
+        std::vector<SpriteRenderData>* activeRenderDataList = GetTileActiveRenderDataList((TileType)currentTileType);
 
         if(activeRenderDataList)
         {
@@ -188,7 +188,7 @@ void LevelEditor::Update()
             else currentTileType += direction;
         }
 
-        activeRenderData = GetActiveRenderData((TileType)currentTileType, currentVariant);
+        activeRenderData = GetTileActiveRenderData((TileType)currentTileType, currentVariant);
 
         if(!activeRenderData || activeRenderData->animationFrames.empty())
         {
@@ -290,58 +290,62 @@ void LevelEditor::Draw()
 
             Color color = GetTileColor(type);
 
-            SpriteRenderData* tileRenderData = GetActiveRenderData(type, tile.variantIndex);
+            SpriteRenderData* tileRenderData = GetTileActiveRenderData(type, tile.variantIndex);
 
             if(IsColorOf(color, BLANK)) continue;
 
-            float tileWidth = gridSize;
-            float tileHeight = gridSize;
+            Vector2 tileSize = {gridSize, gridSize};
 
-            float offset = 0;
+            float offsetX = 0;
+            float offsetY = 0;
 
             if(type == TileType::HORIZONALT_MOVING_PLATFORM || type == TileType::VERTICAL_MOVING_PLATFORM)
             {
-                tileWidth = gridSize * 3.0f;
-                tileHeight = gridSize * 0.3f;
-                offset = -gridSize;
+                tileSize.x = gridSize * 3.0f;
+                tileSize.y = gridSize * 0.3f;
+                offsetX = -gridSize;
+                offsetY = tileSize.y;
             }
 
             if(tileTextureId < 0 || !tileRenderData)
             {
-                DrawRectangle(i * gridSize + offset, j * gridSize, tileWidth, tileHeight, color);
+                DrawRectangle(i * gridSize + offsetX, j * gridSize + offsetY, tileSize.x, tileSize.y, color);
             }
             else 
             {
 
-                DrawTile(tileRenderData, tileTextureId, {(float) i * gridSize, (float) j * gridSize}, gridSize);
+                DrawTile(tileRenderData, tileTextureId, GetTileCenter(i,j), GetFrameSize(*tileRenderData));
             }
         }
     }
     
 
+    //preview
     Color color = GetTileColor((TileType)currentTileType);
 
     Color previewColor = color;
 
     if(currentTileType != (int)TileType::VOID) previewColor.a = 50;
 
-    float tileWidth = gridSize;
-    float tileHeight = gridSize;
-    float offset = 0;
+    Vector2 tileSize = {gridSize, gridSize};
+
+    float offsetX = 0;
+    float offsetY = 0;
 
     if(currentTileType == (int)TileType::HORIZONALT_MOVING_PLATFORM || currentTileType == (int)TileType::VERTICAL_MOVING_PLATFORM)
     {
-        tileWidth = gridSize * 3.0f;
-        tileHeight = gridSize * 0.3f;
-        offset = -gridSize;
+        tileSize.x = gridSize * 3.0f;
+        tileSize.y = gridSize * 0.3f;
+        offsetX = -gridSize;
+        offsetY =  tileSize.y;
     }
 
     if(currentTexture < 0 || !activeRenderData)
     {
         DrawRectangle(
-            mouseMatrixPosition.x * gridSize + offset, 
-            mouseMatrixPosition.y * gridSize,
-            tileWidth, tileHeight, 
+            mouseMatrixPosition.x * gridSize + offsetX, 
+            mouseMatrixPosition.y * gridSize + offsetY,
+            tileSize.x, tileSize.y, 
             previewColor
         );
     }
@@ -350,7 +354,7 @@ void LevelEditor::Draw()
         previewColor = WHITE;
         previewColor.a = 100;
 
-        DrawTile(activeRenderData, currentTexture, ConvertFromIntPairToVector2(mouseMatrixPosition, gridSize), gridSize, previewColor);
+        DrawTile(activeRenderData, currentTexture, GetTileCenter(mouseMatrixPosition.x, mouseMatrixPosition.y), GetFrameSize(*activeRenderData), previewColor);
     }
 
     //grid

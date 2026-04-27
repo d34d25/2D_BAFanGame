@@ -18,7 +18,7 @@ Player::Player(Vector2 position)
 
     weaponRenderData.scale = characterRenderData.scale;
 
-    character = Character::MOMOI;
+    character = Character::YUZU;
     
     switch (character)
     {
@@ -55,7 +55,7 @@ Player::Player(Vector2 position)
         characterRenderData.sourceTexture = LoadTexture("assets/characters/chibi-yuzu.png");
         weaponRenderData.sourceTexture = LoadTexture("assets/characters/yuzu-weapon.png");
 
-        characterOffset.x = 2.0f;
+        characterOffset.x = -4.0f;
         characterOffset.y = -1.0f;
 
         weaponOffset.x = 8.0f;

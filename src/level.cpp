@@ -105,9 +105,13 @@ void Level::InitLevel(const char *levelPath, float dt, int iterations)
 
                 platform->SetTimer(0.3f);
 
+                platform->textureIndex = level[i][j].textureIndex;
+
+                platform->variantIndex = level[i][j].variantIndex;
+
                 if(type == TileType::HORIZONALT_MOVING_PLATFORM)
                 {
-                    platform->isHorizontal = true;
+                    platform->type = PlatformType::MOVING_HORIZONTAL;
 
                     platform->phys.body.velocity.x = platformSpeed;
 
@@ -115,20 +119,21 @@ void Level::InitLevel(const char *levelPath, float dt, int iterations)
                 }
                 else if(type == TileType::VERTICAL_MOVING_PLATFORM)
                 {
-                    platform->isVertical = true;
+                    platform->type = PlatformType::MOVING_VERTICAL;
 
                     platform->phys.body.velocity.y = -platformSpeed;
 
                     platform->updateRequired = true;
                 }
                 else if(type == TileType::FALLING_PLATFORM)
-                {
-                    platform->isFalling = true;
+                {                    
+                    platform->type = PlatformType::FALLING;
+
                     platform->phys.body.hasGravity = true;
                 }
                 else if(type == TileType::DISAPPEARING_PLATFORM)
                 {
-                    platform->isDisappearing = true;
+                    platform->type = PlatformType::DISAPPEARING;
                 }
 
                 platformList.push_back(platform);
@@ -268,7 +273,7 @@ void Level::InitLevel(const char *levelPath, float dt, int iterations)
                 objTile->canEntityCollidePhysically = false;
                 objTile->canPlatformCollidePhysically = true;
 
-                SpriteRenderData* spikeRenderData = GetActiveRenderData(TileType::SPIKE);
+                SpriteRenderData* spikeRenderData = GetTileActiveRenderData(TileType::SPIKE);
 
                 float widthFactor = 0.6f;
                 float heightFactor = 0.4f;
@@ -501,7 +506,7 @@ void Level::DiscreteUpdate()
             }
         }
 
-        bool isMovingPlatform = platform->isHorizontal || platform->isVertical;
+        bool isMovingPlatform = platform->type == PlatformType::MOVING_HORIZONTAL || platform->type == PlatformType::MOVING_VERTICAL;
 
         if(!isMovingPlatform) continue;
 
@@ -517,7 +522,7 @@ void Level::DiscreteUpdate()
             {
                 if(!level[i][j].gameObj) continue;
 
-                SolveCollisions_Platform(&platform->phys, level[i][j].gameObj, platform->isHorizontal);
+                SolveCollisions_Platform(&platform->phys, level[i][j].gameObj, platform->type == PlatformType::MOVING_HORIZONTAL);
             }
         }
     }
@@ -597,7 +602,7 @@ void Level::DiscreteUpdate()
 
             if(!platform) continue;
 
-            if(!platform->isFalling || platform->updateRequired) continue;
+            if(!(platform->type == PlatformType::FALLING) || platform->updateRequired) continue;
 
             platform->gravity = gravity;
         }
@@ -618,7 +623,7 @@ void Level::DiscreteUpdate()
 
             if(!platform) continue;
 
-            if(!platform->isFalling || platform->updateRequired) continue;
+            if(!(platform->type == PlatformType::FALLING) || platform->updateRequired) continue;
 
             platform->gravity = gravity;
         }
@@ -646,17 +651,48 @@ void Level::DrawLevel()
 
     for(int i = 0; i < platformList.size(); i++)
     {
-        Color platformColor = HORIZONTAL_MOVING_PLATFORM;
-
         Platform* platform = platformList[i];
 
         if(!platform) continue;
 
-        if(platform->isVertical) platformColor = VERTICAL_MOVING_PLATFORM;
-        else if(platform->isFalling) platformColor = FALLING_PLATFORM;
-        else if(platform->isDisappearing) platformColor = DISAPPEARING_PLATFORM;
+        PlatformType platformType = platform->type;
 
-        DrawRectangleRec(*platform->phys.GetMainAABB(), platformColor);
+        SpriteRenderData* platformRenderData =  GetPlatformActiveRenderData(platformType, platform->variantIndex);
+
+        if(platformRenderData)
+        {
+            int frameToDraw = platform->textureIndex;
+
+            if(platformRenderData->spacing != 1)
+            {
+                int loopEnd = platform->textureIndex + platformRenderData->spacing - 1;
+
+                    if(platformRenderData->spacing == 0) loopEnd = platformRenderData->endFrame;
+
+                    frameToDraw = GetCurrentFrame(
+                        platformRenderData->animationFrames,
+                        platform->textureIndex,
+                        loopEnd,
+                        platformRenderData->animationSpeed
+                    );
+            }
+
+            if(platform->textureIndex >= 0 && platform->textureIndex < (int)platformRenderData->animationFrames.size())
+            {
+                DrawTile(platformRenderData, frameToDraw, platform->phys.position, GetFrameSize(*platformRenderData));
+            }
+        }
+        else
+        {
+            Color platformColor = DECO;
+
+            if(platformType == PlatformType::MOVING_VERTICAL) platformColor = VERTICAL_MOVING_PLATFORM;
+            else if(platformType == PlatformType::MOVING_HORIZONTAL) platformColor = HORIZONTAL_MOVING_PLATFORM;
+            else if(platformType == PlatformType::FALLING) platformColor = FALLING_PLATFORM;
+            else if(platformType == PlatformType::DISAPPEARING) platformColor = DISAPPEARING_PLATFORM;
+
+            DrawRectangleRec(*platform->phys.GetMainAABB(), platformColor);
+        }
     }
 
     for(int i = playerTileRange.startX; i <= playerTileRange.endX; i++)
@@ -667,12 +703,12 @@ void Level::DrawLevel()
 
             if(IsNotRealTile(i,j)) continue;
 
-            SpriteRenderData* tileRenderData = GetActiveRenderData(tile.type, tile.variantIndex);
-
-            int frameToDraw = tile.textureIndex;
+            SpriteRenderData* tileRenderData = GetTileActiveRenderData(tile.type, tile.variantIndex);
 
             if(tileRenderData)
             {
+                int frameToDraw = tile.textureIndex;
+
                 if(tileRenderData->spacing != 1)
                 {
                     int loopEnd = tile.textureIndex + tileRenderData->spacing - 1;
@@ -686,11 +722,11 @@ void Level::DrawLevel()
                         tileRenderData->animationSpeed
                     );
                 }
-            }
 
-            if(tileRenderData && tile.textureIndex >= 0 && tile.textureIndex < (int)tileRenderData->animationFrames.size())
-            {
-                DrawTile(tileRenderData, frameToDraw, {(float)i * gridSize, (float)j * gridSize}, gridSize);
+                if(tile.textureIndex >= 0 && tile.textureIndex < (int)tileRenderData->animationFrames.size())
+                {
+                    DrawTile(tileRenderData, frameToDraw, GetTileCenter(i,j), GetFrameSize(*tileRenderData));
+                }
             }
             else
             {
@@ -730,6 +766,15 @@ void Level::DebugDrawing()
         player.phys.position.y,
         renderTileCheckRange
     );
+
+    for(int i = 0; i < platformList.size(); i++)
+    {
+        Platform* platform = platformList[i];
+
+        if(!platform) continue;
+
+        DrawAABB(*platform->phys.GetMainAABB(), RED);
+    }
 
     for(int i = playerTileRange.startX; i <= playerTileRange.endX; i++)
     {

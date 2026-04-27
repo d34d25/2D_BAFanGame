@@ -5,6 +5,15 @@
 
 const Vector2 DESPAWN_LOCATION = {-10000,  -10000};
 
+enum class PlatformType
+{
+    NONE,
+    MOVING_HORIZONTAL,
+    MOVING_VERTICAL,
+    FALLING,
+    DISAPPEARING
+};
+
 class Platform
 {
 private:
@@ -16,11 +25,17 @@ public:
 
     GameObject phys = {};
 
-    bool isHorizontal = false;
-    bool isVertical = false;
+    //bool isHorizontal = false;
+    //bool isVertical = false;
 
-    bool isFalling = false; 
-    bool isDisappearing = false;
+    //bool isFalling = false; 
+    //bool isDisappearing = false;
+
+    PlatformType type = PlatformType::NONE;
+
+    int textureIndex = -1;
+
+    int variantIndex = 0;
 
     bool updateRequired = false;
 

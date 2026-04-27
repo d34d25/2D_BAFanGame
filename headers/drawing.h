@@ -99,16 +99,18 @@ inline void DrawSprite(
     );
 }
 
-inline void DrawTile(SpriteRenderData* renderData, int frameIndex, Vector2 worldPos, int gridSize, Color color = WHITE)
+inline void DrawTile(SpriteRenderData* renderData, int frameIndex, Vector2 worldPos, Vector2 size, Color color = WHITE)
 {
     if(!renderData || frameIndex < 0 || frameIndex >= renderData->animationFrames.size())
         return;
 
     Rectangle source = renderData->animationFrames[frameIndex];
 
+    Vector2 topLeft = {worldPos.x - size.x * 0.5f, worldPos.y - size.y * 0.5f};
+
     Rectangle dest = {
-        worldPos.x, worldPos.y,
-        (float)gridSize, (float)gridSize
+        topLeft.x, topLeft.y,
+        size.x, size.y
     };
 
     DrawTexturePro(

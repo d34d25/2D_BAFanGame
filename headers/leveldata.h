@@ -5,6 +5,8 @@
 
 #include "drawing.h"
 
+#include "platform.h"
+
 #include <vector>
 
 static constexpr Color PLAYER_SPAWN = Color{251,242,54,255};
@@ -243,7 +245,14 @@ inline const char* GetTileTypeText(TileType type)
     return "";
 }
 
+inline Vector2 GetTileCenter(int i, int j)
+{
+    return {i * gridSize + gridSize * 0.5f, j * gridSize + gridSize * 0.5f};
+}
+
 //textures
+
+//tiles
 
 extern std::vector<SpriteRenderData> solidTilesRenderData;
 
@@ -255,11 +264,15 @@ extern std::vector<SpriteRenderData> treadmillRenderData_Left;
 
 extern std::vector<SpriteRenderData> decoRenderData;
 
+//platforms
+
+extern std::vector<SpriteRenderData> movingPlatformRenderData_Vertical;
+
 void LoadAssets();
 
 void UnloadAssets();
 
-inline std::vector<SpriteRenderData>* GetActiveRenderDataList(TileType type)
+inline std::vector<SpriteRenderData>* GetTileActiveRenderDataList(TileType type)
 {
     switch (type)
     {
@@ -271,14 +284,18 @@ inline std::vector<SpriteRenderData>* GetActiveRenderDataList(TileType type)
     case TileType::SPIKE: return &spikesRenderData;
 
     case TileType::DECO: return &decoRenderData;
+    
+    //platforms (only used by the editor)
+
+    case TileType::VERTICAL_MOVING_PLATFORM: return &movingPlatformRenderData_Vertical;
 
     default: return nullptr;
     } 
 }
 
-inline SpriteRenderData* GetActiveRenderData(TileType type, int index = 0)
+inline SpriteRenderData* GetTileActiveRenderData(TileType type, int index = 0)
 {
-    std::vector<SpriteRenderData>* activeRenderData = GetActiveRenderDataList(type);
+    std::vector<SpriteRenderData>* activeRenderData = GetTileActiveRenderDataList(type);
 
     if(activeRenderData && index >= 0 && index < (int)activeRenderData->size())
     {
@@ -286,4 +303,31 @@ inline SpriteRenderData* GetActiveRenderData(TileType type, int index = 0)
     }
 
     return nullptr;
+}
+
+
+inline std::vector<SpriteRenderData>* GetPlatformActiveRenderDataList(PlatformType type)
+{
+    switch (type)
+    {
+    case PlatformType::MOVING_VERTICAL: return &movingPlatformRenderData_Vertical;
+    default: return nullptr;
+    }
+}
+
+inline SpriteRenderData* GetPlatformActiveRenderData(PlatformType type, int index = 0)
+{
+    std::vector<SpriteRenderData>* activeRenderData = GetPlatformActiveRenderDataList(type);
+
+    if(activeRenderData && index >= 0 && index < (int)activeRenderData->size())
+    {
+        return &activeRenderData->at(index);
+    }
+
+    return nullptr;
+}
+
+inline Vector2 GetFrameSize(SpriteRenderData renderData)
+{
+    return Vector2Scale(renderData.frameSize, tileScale);
 }

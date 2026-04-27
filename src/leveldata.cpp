@@ -1,5 +1,6 @@
 #include "leveldata.h"
 
+//tiles
 std::vector<SpriteRenderData> solidTilesRenderData = {};
 
 std::vector<SpriteRenderData> spikesRenderData = {};
@@ -9,6 +10,10 @@ std::vector<SpriteRenderData> treadmillRenderData_Right = {};
 std::vector<SpriteRenderData> treadmillRenderData_Left = {};
 
 std::vector<SpriteRenderData> decoRenderData = {};
+
+//platforms
+
+std::vector<SpriteRenderData> movingPlatformRenderData_Vertical = {};
 
 /*
     spacing means the length of each animation, if it is 1 frame it means it's static
@@ -52,6 +57,8 @@ void LoadAssets()
 {
     Vector2 tileSize = {16,16};
 
+    //tiles
+
     solidTilesRenderData.push_back(LoadRenderData("assets/tiles/solid/solid-tiles-spritesheet.png", 9, tileSize));
 
     solidTilesRenderData.push_back(LoadRenderData("assets/tiles/solid/solid-tiles-spritesheet-b.png", 9, tileSize));
@@ -71,7 +78,16 @@ void LoadAssets()
     //decoration
 
     decoRenderData.push_back(LoadRenderData("assets/tiles/deco-spritesheet-1.png", 2, {14,16}, 2, 0, 0, 2.0f));
-    decoRenderData.push_back(LoadRenderData("assets/tiles/deco-spritesheet-2.png", 2, {14,15}));
+    decoRenderData.push_back(LoadRenderData("assets/tiles/deco-spritesheet-2.png", 2, {14,16}));
+    decoRenderData.push_back(LoadRenderData("assets/tiles/deco-spritesheet-3.png", 1, {35,29}));
+
+    //when drawing a 'tile' if the size of the sprite to draw is different of tileSize the spirte drawn does not get centered
+    //so if it is smaller the left side of the spirte will be clamped to the left side of the tile where it got spawned
+    //and if it is wider it will extend to the right
+
+    //platforms
+
+    movingPlatformRenderData_Vertical.push_back(LoadRenderData("assets/platforms/vertical-moving-platform-spritesheet.png", 2, {48,5}, 2));
 }
 
 void UnloadAssets()
@@ -86,6 +102,7 @@ void UnloadAssets()
         renderData.clear();
     };
 
+    //tiles
     CleanUp(solidTilesRenderData);
 
     CleanUp(spikesRenderData);
@@ -95,4 +112,8 @@ void UnloadAssets()
     CleanUp(treadmillRenderData_Right);
 
     CleanUp(decoRenderData);
+
+    //platforms
+
+    CleanUp(movingPlatformRenderData_Vertical);
 }

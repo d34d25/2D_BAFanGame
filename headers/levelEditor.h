@@ -10,9 +10,9 @@ struct IntPair
     int y = 0;
 };
 
-inline Vector2 ConvertFromIntPairToVector2(IntPair pair, int scale)
+inline Vector2 ConvertFromIntPairToVector2(IntPair pair, int scale, int offsetX = 0, int offsetY = 0)
 {
-    return {(float)pair.x * scale, (float)pair.y * scale};
+    return {(float)pair.x * scale + offsetX, (float)pair.y * scale + offsetY};
 }
 
 class LevelEditor
