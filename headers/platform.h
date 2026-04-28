@@ -25,12 +25,6 @@ public:
 
     GameObject phys = {};
 
-    //bool isHorizontal = false;
-    //bool isVertical = false;
-
-    //bool isFalling = false; 
-    //bool isDisappearing = false;
-
     PlatformType type = PlatformType::NONE;
 
     int textureIndex = -1;

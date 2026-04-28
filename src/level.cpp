@@ -376,6 +376,10 @@ void Level::UpdateLevel()
         DiscreteUpdate();
     }
 
+    player.bulletpool.get()->UpdateBullets(dt);
+
+    player.Shoot(dt);
+
     UpdateCamera(player.phys.position, {0, -100});
 }
 
@@ -750,6 +754,15 @@ void Level::DrawLevel()
         player.currentFrame
     );
 
+    for(int i = 0; i < player.bulletpool->activeBullets.size(); i++)
+    {
+        Bullet* b = player.bulletpool->activeBullets[i];
+
+        if(!b) continue;
+
+        DrawBullet(b->posititon.x, b->posititon.y, b->radius, b->mainColor, b->backColor);
+    }
+
     DrawSprite(
         player.phys.position,
         player.weaponRenderData,
@@ -758,11 +771,11 @@ void Level::DrawLevel()
         player.currentFrame
     );
 
-    DebugDrawing();
+    //DebugDrawing();
 
     EndMode2D();
 
-    DebugTextDrawing();
+    //DebugTextDrawing();
 }
 
 void Level::DebugDrawing()
@@ -803,6 +816,16 @@ void Level::DebugDrawing()
             }
         }
     }
+
+    for(int i = 0; i < player.bulletpool->activeBullets.size(); i++)
+    {
+        Bullet* b = player.bulletpool->activeBullets[i];
+
+        if(!b) continue;
+
+        DrawCircleLines(b->posititon.x, b->posititon.y, b->radius, RED);
+    }
+
 
     Color gridColor = GRAY;
     gridColor.a = (int)(255 * 0.5f);

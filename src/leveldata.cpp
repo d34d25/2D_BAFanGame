@@ -77,9 +77,9 @@ void LoadAssets()
 
     //decoration
 
-    decoRenderData.push_back(LoadRenderData("assets/tiles/deco-spritesheet-1.png", 2, {14,16}, 2, 0, 0, 2.0f));
-    decoRenderData.push_back(LoadRenderData("assets/tiles/deco-spritesheet-2.png", 2, {14,16}));
-    decoRenderData.push_back(LoadRenderData("assets/tiles/deco-spritesheet-3.png", 1, {35,29}));
+    decoRenderData.push_back(LoadRenderData("assets/tiles/deco/deco-spritesheet-1.png", 2, {14,16}, 2, 0, 0, 2.0f));
+    decoRenderData.push_back(LoadRenderData("assets/tiles/deco/deco-spritesheet-2.png", 2, {14,16}));
+    decoRenderData.push_back(LoadRenderData("assets/tiles/deco/deco-spritesheet-3.png", 1, {35,29}));
 
     //platforms
 

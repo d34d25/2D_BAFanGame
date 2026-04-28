@@ -100,7 +100,7 @@ public:
     //these secondary hitboxes are only used for triggers (when necessary), not physics
     std::vector<Hitbox> subHitboxList = {};
 
-    float scale  = 0;
+    float scale = 0;
 
     SimpleBody2D body = {};
 

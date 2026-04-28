@@ -14,9 +14,12 @@ Player::Player(Vector2 position)
 
     phys.UpdateAABB();
 
-    //characterRenderData.scale = 3.0f;
+    bulletData = {};
+    bulletData.angle = 0;
+    bulletData.fireTimer = 0.0f;
+    bulletData.speed = 500;
 
-    //weaponRenderData.scale = characterRenderData.scale;
+    float bulletLifeTime = 2.0f;
 
     character = Character::YUZU;
     
@@ -37,6 +40,14 @@ Player::Player(Vector2 position)
             characterRenderData.sourceTexture, 2, {12,18}
         );
 
+        bulletData.fireRate = 0.2f;
+        bulletData.spread = 8.0f;
+
+        bulletData.radius = 4.5f;
+
+        bulletData.mainColor = MOMOI_PINK;
+        bulletData.backColor = MOMOI_PINK_BG;
+
         break;
     case Character::MIDORI:
 
@@ -48,6 +59,12 @@ Player::Player(Vector2 position)
 
         weaponRenderData.offset.x = 29.0f;
         weaponRenderData.offset.y = 16.0f;
+
+        bulletData.spread = 1.5f;
+        bulletData.radius = 6.0f;
+
+        bulletData.mainColor = MIDORI_GREEN;
+        bulletData.backColor = MIDORI_GREEN_BG;
 
         break;
     case Character::YUZU:
@@ -61,17 +78,37 @@ Player::Player(Vector2 position)
         weaponRenderData.offset.x = 8.0f;
         weaponRenderData.offset.y = 14.0f;
 
-        break;
-    case Character::ARISU:
+        bulletData.gravity = gravity;
 
-        characterRenderData.sourceTexture = LoadTexture("assets/characters/chibi-arisu.png");
-        weaponRenderData.sourceTexture = LoadTexture("assets/characters/arisu-weapon.png");
+        bulletData.spread = 0.0f;
+        bulletData.radius = 8.0f;
+        bulletData.angle = -80;
+        bulletData.fireRate = 1.2f;
+
+        bulletLifeTime = 3.0f;
+
+        bulletData.mainColor = YUZU_COLOR;
+        bulletData.backColor = YUZU_COLOR_BG;
+
+        break;
+    case Character::ARIS:
+
+        characterRenderData.sourceTexture = LoadTexture("assets/characters/chibi-aris.png");
+        weaponRenderData.sourceTexture = LoadTexture("assets/characters/aris-weapon.png");
 
         characterRenderData.offset.x = 0.0f;
         characterRenderData.offset.y = -1.0f;
 
         weaponRenderData.offset.x = 16.0f;
         weaponRenderData.offset.y = 18.0f;
+
+        bulletData.spread = 0.0f;
+        bulletData.radius = 10.0f;
+
+        bulletData.fireRate = 1.0f;
+
+        bulletData.mainColor = ARIS_PURPLE;
+        bulletData.backColor = ARIS_PURPLE_BG;
 
         break;
     case Character::MOMOI_CHAQUENA:
@@ -84,6 +121,14 @@ Player::Player(Vector2 position)
 
         weaponRenderData.offset.x = 16.0f;
         weaponRenderData.offset.y = 16.0f;
+
+        bulletData.fireRate = 0.2f;
+        bulletData.spread = 8.0f;
+
+        bulletData.radius = 4.5f;
+
+        bulletData.mainColor = MOMOI_PINK;
+        bulletData.backColor = MOMOI_PINK_BG;
 
         break;
     default:
@@ -99,6 +144,8 @@ Player::Player(Vector2 position)
     SetTextureFilter(weaponRenderData.sourceTexture, TEXTURE_FILTER_POINT);
 
     SetTextureWrap(weaponRenderData.sourceTexture, TEXTURE_WRAP_CLAMP);
+
+    bulletpool = std::make_unique<BulletPool>(30, bulletLifeTime, bulletData.radius, bulletData.mainColor, bulletData.backColor);
 }
 
 
@@ -176,5 +223,42 @@ void Player::Update(float dt, int iterations)
 
     //update
     
-    phys.body.UpdateVelocity(dt, iterations, gravity);
+    phys.body.UpdateVelocity(dt, iterations, gravity);   
+}
+
+void Player::Shoot(float dt)
+{
+    float angle = bulletData.angle;
+
+    float bulletGravity = bulletData.gravity;
+
+    if(entityData.flipX)
+    {
+        angle = 180.0f - angle;
+    }
+
+    if(entityData.flipY)
+    {
+        angle = -angle;
+        bulletGravity = -bulletData.gravity;
+    }
+
+    float radians = GenerateBulletSpread(angle, bulletData.spread) * (PI / 180.0f);
+
+    Vector2 initialVel = {0,0};
+
+    initialVel.x = bulletData.speed * cosf(radians) + phys.body.velocity.x;
+    initialVel.y = bulletData.speed * sinf(radians);
+
+    if(bulletData.fireTimer > 0.0f) bulletData.fireTimer -= dt;
+
+    if(IsKeyDown(KEY_X))
+    {
+        while((bulletData.fireTimer <= 0.0f))
+        {
+            bulletpool.get()->FireBullet(GetBulletSpawnPos(), initialVel, bulletGravity);
+
+            bulletData.fireTimer = bulletData.fireRate;
+        }
+    }
 }
