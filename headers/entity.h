@@ -104,6 +104,7 @@ public:
 
     SimpleBody2D body = {};
 
+    //these makes the gameobject solid for each one
     bool canEntityCollidePhysically = false;
     bool canPlatformCollidePhysically = false;
 

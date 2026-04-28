@@ -10,7 +10,7 @@
 #include "leveldata.h"
 
 
-const float MAX_DISTANCE_PLATFORM_PLAYER = 700;
+const float MAX_DISTANCE_PLATFORM_PLAYER_SQR = 800 * 800;
 
 class Level
 {
@@ -158,6 +158,11 @@ private:
         if(type >= TileType::PLATFORM_START && type <= TileType::PLATFORM_END) return true;
 
         return false;
+    }
+
+    inline bool IsPlatformFarFromPlayer(Vector2 platformPosition)
+    {
+        return Vector2LengthSqr(Vector2Subtract(platformPosition, player.phys.position)) > MAX_DISTANCE_PLATFORM_PLAYER_SQR;
     }
 
 public:

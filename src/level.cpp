@@ -486,6 +486,8 @@ void Level::DiscreteUpdate()
 
         if(!platform) continue;
 
+        if(IsPlatformFarFromPlayer(platform->phys.position)) continue;
+
         if(platform->IsInactive()) continue;
 
         if(platform->updateRequired) platform->Update(dt, iterations);
@@ -653,6 +655,8 @@ void Level::DrawLevel()
 
         if(!platform) continue;
 
+        if(IsPlatformFarFromPlayer(platform->phys.position)) continue;
+
         PlatformType platformType = platform->type;
 
         SpriteRenderData* platformRenderData =  GetPlatformActiveRenderData(platformType, platform->variantIndex);
@@ -754,7 +758,7 @@ void Level::DrawLevel()
         player.currentFrame
     );
 
-    //DebugDrawing();
+    DebugDrawing();
 
     EndMode2D();
 
@@ -774,6 +778,11 @@ void Level::DebugDrawing()
         Platform* platform = platformList[i];
 
         if(!platform) continue;
+
+        if(!IsPlatformFarFromPlayer(platform->phys.position))
+        {
+            DrawLine(player.phys.position.x, player.phys.position.y, platform->phys.position.x, platform->phys.position.y, RED);
+        }
 
         DrawAABB(*platform->phys.GetMainAABB(), RED);
     }
