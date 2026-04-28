@@ -14,9 +14,9 @@ Player::Player(Vector2 position)
 
     phys.UpdateAABB();
 
-    characterRenderData.scale = 3.0f;
+    //characterRenderData.scale = 3.0f;
 
-    weaponRenderData.scale = characterRenderData.scale;
+    //weaponRenderData.scale = characterRenderData.scale;
 
     character = Character::YUZU;
     
@@ -27,11 +27,11 @@ Player::Player(Vector2 position)
         characterRenderData.sourceTexture = LoadTexture("assets/characters/chibi-momoi.png");
         weaponRenderData.sourceTexture = LoadTexture("assets/characters/momoi-weapon.png");
 
-        characterOffset.x = 0.0f;
-        characterOffset.y = -5.0f;
+        characterRenderData.offset.x = 0.0f;
+        characterRenderData.offset.y = -5.0f;
 
-        weaponOffset.x = 25.0f;
-        weaponOffset.y = 16.0f;
+        weaponRenderData.offset.x = 25.0f;
+        weaponRenderData.offset.y = 16.0f;
 
         characterRenderData.animationFrames = CropImage(
             characterRenderData.sourceTexture, 2, {12,18}
@@ -43,11 +43,11 @@ Player::Player(Vector2 position)
         characterRenderData.sourceTexture = LoadTexture("assets/characters/chibi-midori.png");
         weaponRenderData.sourceTexture = LoadTexture("assets/characters/midori-weapon.png");
 
-        characterOffset.x = 0.0f;
-        characterOffset.y = -5.0f;
+        characterRenderData.offset.x = 0.0f;
+        characterRenderData.offset.y = -5.0f;
 
-        weaponOffset.x = 29.0f;
-        weaponOffset.y = 16.0f;
+        weaponRenderData.offset.x = 29.0f;
+        weaponRenderData.offset.y = 16.0f;
 
         break;
     case Character::YUZU:
@@ -55,11 +55,11 @@ Player::Player(Vector2 position)
         characterRenderData.sourceTexture = LoadTexture("assets/characters/chibi-yuzu.png");
         weaponRenderData.sourceTexture = LoadTexture("assets/characters/yuzu-weapon.png");
 
-        characterOffset.x = -4.0f;
-        characterOffset.y = -1.0f;
+        characterRenderData.offset.x = -4.0f;
+        characterRenderData.offset.y = -1.0f;
 
-        weaponOffset.x = 8.0f;
-        weaponOffset.y = 14.0f;
+        weaponRenderData.offset.x = 8.0f;
+        weaponRenderData.offset.y = 14.0f;
 
         break;
     case Character::ARISU:
@@ -67,11 +67,11 @@ Player::Player(Vector2 position)
         characterRenderData.sourceTexture = LoadTexture("assets/characters/chibi-arisu.png");
         weaponRenderData.sourceTexture = LoadTexture("assets/characters/arisu-weapon.png");
 
-        characterOffset.x = 0.0f;
-        characterOffset.y = -1.0f;
+        characterRenderData.offset.x = 0.0f;
+        characterRenderData.offset.y = -1.0f;
 
-        weaponOffset.x = 16.0f;
-        weaponOffset.y = 18.0f;
+        weaponRenderData.offset.x = 16.0f;
+        weaponRenderData.offset.y = 18.0f;
 
         break;
     case Character::MOMOI_CHAQUENA:
@@ -79,11 +79,11 @@ Player::Player(Vector2 position)
         characterRenderData.sourceTexture = LoadTexture("assets/characters/chibi-momoi-chaquena.png");
         weaponRenderData.sourceTexture = LoadTexture("assets/characters/momoi-chaquena-weapon.png");
 
-        characterOffset.x = 0.0f;
-        characterOffset.y = -4.0f;
+        characterRenderData.offset.x = 0.0f;
+        characterRenderData.offset.y = -4.0f;
 
-        weaponOffset.x = 16.0f;
-        weaponOffset.y = 16.0f;
+        weaponRenderData.offset.x = 16.0f;
+        weaponRenderData.offset.y = 16.0f;
 
         break;
     default:

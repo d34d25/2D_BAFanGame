@@ -58,13 +58,13 @@ inline int GetCurrentFrame(const std::vector<Rectangle>& frames, int startFrame,
 }
 
 inline void DrawSprite(
+    const Vector2& position,
     const SpriteRenderData& renderData,
     const EntityData& entityData,
+    float scale,
     int currentFrame
 )
 {
-    float scale = renderData.scale;
-    Vector2 position = renderData.position;
 
     Rectangle sourceRect = Rectangle{0,0, (float)renderData.sourceTexture.width, (float)renderData.sourceTexture.height};
 
@@ -73,21 +73,23 @@ inline void DrawSprite(
         sourceRect = renderData.animationFrames[currentFrame];
     }
 
+    if(entityData.flipX) sourceRect.width = -sourceRect.width;
+    if(entityData.flipY) sourceRect.height = -sourceRect.height;
+
     float width = fabs(sourceRect.width) * scale;
     float height = fabs(sourceRect.height) * scale;
 
+    float offsetX = entityData.flipX ? -renderData.offset.x : renderData.offset.x;
+    float offsetY = entityData.flipY ? -renderData.offset.y : renderData.offset.y;
+
     Rectangle destRect = {
-        roundf(position.x),
-        roundf(position.y),
+        roundf(position.x + offsetX),
+        roundf(position.y + offsetY),
         width,
         height
     };
 
     Vector2 origin = {width * 0.5f, height * 0.5f};
-
-    if(entityData.flipX) sourceRect.width = -sourceRect.width;
-
-    if(entityData.flipY) sourceRect.height = -sourceRect.height;
 
     DrawTexturePro(
         renderData.sourceTexture,
@@ -99,25 +101,26 @@ inline void DrawSprite(
     );
 }
 
-inline void DrawTile(SpriteRenderData* renderData, int frameIndex, Vector2 worldPos, Vector2 size, Color color = WHITE)
+inline void DrawTile(SpriteRenderData* renderData, int frameIndex, Vector2 worldPos, float scale, Color color = WHITE)
 {
     if(!renderData || frameIndex < 0 || frameIndex >= renderData->animationFrames.size())
         return;
 
     Rectangle source = renderData->animationFrames[frameIndex];
 
-    Vector2 topLeft = {worldPos.x - size.x * 0.5f, worldPos.y - size.y * 0.5f};
+    float width = source.width * scale;
+    float height = source.height * scale;
 
-    Rectangle dest = {
-        topLeft.x, topLeft.y,
-        size.x, size.y
-    };
+    Rectangle dest = {worldPos.x, worldPos.y, width, height};
+
+    Vector2 origin = {width * 0.5f, height * 0.5f};
 
     DrawTexturePro(
         renderData->sourceTexture,
         source,
         dest,
-        {0,0}, 0.0f,
+        origin, 
+        0.0f,
         color
     );
 }

@@ -376,8 +376,6 @@ void Level::UpdateLevel()
         DiscreteUpdate();
     }
 
-    player.UpdateRender();
-
     UpdateCamera(player.phys.position, {0, -100});
 }
 
@@ -679,7 +677,7 @@ void Level::DrawLevel()
 
             if(platform->textureIndex >= 0 && platform->textureIndex < (int)platformRenderData->animationFrames.size())
             {
-                DrawTile(platformRenderData, frameToDraw, platform->phys.position, GetFrameSize(*platformRenderData));
+                DrawTile(platformRenderData, frameToDraw, platform->phys.position, tileScale);
             }
         }
         else
@@ -725,7 +723,7 @@ void Level::DrawLevel()
 
                 if(tile.textureIndex >= 0 && tile.textureIndex < (int)tileRenderData->animationFrames.size())
                 {
-                    DrawTile(tileRenderData, frameToDraw, GetTileCenter(i,j), GetFrameSize(*tileRenderData));
+                    DrawTile(tileRenderData, frameToDraw, GetTileCenter(i,j), tileScale);
                 }
             }
             else
@@ -741,18 +739,22 @@ void Level::DrawLevel()
     }
 
     DrawSprite(
+        player.phys.position,
         player.characterRenderData,
         player.entityData,
+        tileScale,
         player.currentFrame
     );
 
     DrawSprite(
+        player.phys.position,
         player.weaponRenderData,
         player.entityData,
+        tileScale,
         player.currentFrame
     );
 
-    DebugDrawing();
+    //DebugDrawing();
 
     EndMode2D();
 

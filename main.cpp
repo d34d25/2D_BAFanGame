@@ -50,6 +50,10 @@ int main()
 
         while (accumulator >= fixedDt)
         {
+            //when making levels a list of level instances
+            //wrap that logic in a level manager
+            //hud and transitions and level switching are drawn and managed there
+            
             if(!editorMode) testLevel.UpdateLevel();
             else editor.Update();
 

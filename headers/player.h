@@ -21,10 +21,6 @@ private:
 
     Character character = Character::MOMOI;
 
-    Vector2 characterOffset = {0,0};
-
-    Vector2 weaponOffset = {0,0};
-
     float jumpTime = 0.0f;
     float maxJumpTime = 0.15f;
     
@@ -53,13 +49,6 @@ public:
     Player(Vector2 position);
 
     void Update(float dt, int iterations);
-
-    inline void UpdateRender()
-    {
-        UpdateSprite(&characterRenderData, entityData, phys.position, characterOffset);
-
-        UpdateSprite(&weaponRenderData, entityData, phys.position, weaponOffset);
-    }
 
     inline Rectangle GetJumpDetector()
     {

@@ -81,10 +81,6 @@ void LoadAssets()
     decoRenderData.push_back(LoadRenderData("assets/tiles/deco-spritesheet-2.png", 2, {14,16}));
     decoRenderData.push_back(LoadRenderData("assets/tiles/deco-spritesheet-3.png", 1, {35,29}));
 
-    //when drawing a 'tile' if the size of the sprite to draw is different of tileSize the spirte drawn does not get centered
-    //so if it is smaller the left side of the spirte will be clamped to the left side of the tile where it got spawned
-    //and if it is wider it will extend to the right
-
     //platforms
 
     movingPlatformRenderData_Vertical.push_back(LoadRenderData("assets/platforms/vertical-moving-platform-spritesheet.png", 2, {48,5}, 2));

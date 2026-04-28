@@ -160,10 +160,8 @@ public:
 struct SpriteRenderData
 {
     Texture2D sourceTexture = {};
-    
-    Vector2 position = {0,0};
-    
-    float scale = 1;
+
+    Vector2 offset = {0,0};
 
     //animation
     std::vector<Rectangle> animationFrames = {};
@@ -184,20 +182,3 @@ struct EntityData
     bool flipX = false;
     bool flipY = false;
 };
-
-inline void UpdateSprite(
-    SpriteRenderData* renderData,
-    const EntityData& entityData,
-    const Vector2& position,
-    Vector2 offset
-)
-{
-    float offsetX = offset.x;
-    float offsetY = offset.y;
-
-    if(entityData.flipX) offsetX = -offset.x;
-
-    if(entityData.flipY) offsetY = -offset.y;
-
-    renderData->position = {position.x + offsetX, position.y + offsetY};
-}

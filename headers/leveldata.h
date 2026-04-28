@@ -326,8 +326,3 @@ inline SpriteRenderData* GetPlatformActiveRenderData(PlatformType type, int inde
 
     return nullptr;
 }
-
-inline Vector2 GetFrameSize(SpriteRenderData renderData)
-{
-    return Vector2Scale(renderData.frameSize, tileScale);
-}

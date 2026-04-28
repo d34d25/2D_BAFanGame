@@ -314,7 +314,7 @@ void LevelEditor::Draw()
             else 
             {
 
-                DrawTile(tileRenderData, tileTextureId, GetTileCenter(i,j), GetFrameSize(*tileRenderData));
+                DrawTile(tileRenderData, tileTextureId, GetTileCenter(i,j), tileScale);
             }
         }
     }
@@ -354,7 +354,7 @@ void LevelEditor::Draw()
         previewColor = WHITE;
         previewColor.a = 100;
 
-        DrawTile(activeRenderData, currentTexture, GetTileCenter(mouseMatrixPosition.x, mouseMatrixPosition.y), GetFrameSize(*activeRenderData), previewColor);
+        DrawTile(activeRenderData, currentTexture, GetTileCenter(mouseMatrixPosition.x, mouseMatrixPosition.y), tileScale, previewColor);
     }
 
     //grid
