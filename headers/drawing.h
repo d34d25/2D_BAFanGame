@@ -127,7 +127,7 @@ inline void DrawTile(SpriteRenderData* renderData, int frameIndex, Vector2 world
 
 inline void DrawBullet(int x, int y, float radius, Color mainColor, Color backColor)
 {
-    if(!ColorIsEqual(backColor, BLACK)) DrawCircleGradient({(float)x,(float)y}, radius * 1.2f ,mainColor, backColor);
+    if(!ColorIsEqual(backColor, BLACK)) DrawCircleGradient({(float)x,(float)y}, radius * 1.2f, mainColor, backColor);
     else DrawCircle(x, y, radius * 1.2f, backColor);
 
     DrawCircle(x, y, radius, mainColor);

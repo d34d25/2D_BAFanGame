@@ -69,8 +69,6 @@ enum class TileType
 
     SOLID,
 
-    SPIKE,
-
     ONE_WAY_UP,
     ONE_WAY_DOWN,
     ONE_WAY_RIGHT,
@@ -84,6 +82,12 @@ enum class TileType
     GRAVITY_CHANGER,
 
     TILE_END,
+
+    SPIKE_START,
+
+    SPIKE,
+
+    SPIKE_END,
 
     PLATFORM_START,
 
@@ -121,6 +125,10 @@ inline bool IsTypeInvalid(TileType type)
     case TileType::TILE_START:
 
     case TileType::TILE_END:
+
+    case TileType::SPIKE_START:
+
+    case TileType::SPIKE_END:
 
     case TileType::PLATFORM_START:
 

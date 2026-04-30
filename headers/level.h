@@ -134,7 +134,8 @@ private:
         type == TileType::GOAL ||
         type == TileType::ONE_WAY_RIGHT ||
         type == TileType::ONE_WAY_LEFT ||
-        type == TileType::PLATFORM_STOP;
+        type == TileType::PLATFORM_STOP ||
+        (type > TileType::SPIKE_START && type < TileType::SPIKE_END);
     }
 
     void DiscreteUpdate();
@@ -145,10 +146,8 @@ private:
 
     void LoadLevelData(const char* levelPath);
 
-    inline bool IsNotRealTile(int i, int j)
+    inline bool IsNotRealTile(TileType type)
     {
-        TileType type = level[i][j].type;
-
         if(type == TileType::VOID) return true;
 
         if(IsTypeInvalid(type)) return true;
@@ -163,6 +162,11 @@ private:
     inline bool IsPlatformFarFromPlayer(Vector2 platformPosition)
     {
         return Vector2LengthSqr(Vector2Subtract(platformPosition, player.phys.position)) > MAX_DISTANCE_PLATFORM_PLAYER_SQR;
+    }
+
+    inline bool IsTileSpike(TileType type)
+    {
+        return (type > TileType::SPIKE_START && type < TileType::SPIKE_END);
     }
 
 public:

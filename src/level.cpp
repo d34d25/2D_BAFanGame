@@ -148,7 +148,7 @@ void Level::InitLevel(const char *levelPath, float dt, int iterations)
             Tile* tile = &level[i][j];
             TileType type = tile->type;
 
-            if(IsNotRealTile(i,j)) continue;
+            if(IsNotRealTile(type)) continue;
 
             //decorational tiles don't need a physical body
             if(level[i][j].type == TileType::DECO) continue;
@@ -282,7 +282,11 @@ void Level::InitLevel(const char *levelPath, float dt, int iterations)
 
                 if(spikeRenderData)
                 {
-                    orientation = tile->textureIndex % spikeRenderData->maxFrames;
+                    int logicalIndex = tile->textureIndex / spikeRenderData->spacing;
+
+                    int totalOrientations = spikeRenderData->maxFrames / spikeRenderData->spacing;
+
+                    orientation = logicalIndex % totalOrientations;
                 }
 
                 switch (orientation)
@@ -550,7 +554,7 @@ void Level::DiscreteUpdate()
             {
                 if(tile.type == TileType::GRAVITY_CHANGER) isPlayerTouchingGravityChanger = true;
 
-                if(tile.type == TileType::SPIKE)
+                if(IsTileSpike(tile.type))
                 {
                     for(int h = 0; h < objTile->subHitboxList.size(); h++)
                     {
@@ -707,7 +711,7 @@ void Level::DrawLevel()
         {
             Tile tile = level[i][j];
 
-            if(IsNotRealTile(i,j)) continue;
+            if(IsNotRealTile(tile.type)) continue;
 
             SpriteRenderData* tileRenderData = GetTileActiveRenderData(tile.type, tile.variantIndex);
 
@@ -771,7 +775,7 @@ void Level::DrawLevel()
         player.currentFrame
     );
 
-    //DebugDrawing();
+    DebugDrawing();
 
     EndMode2D();
 

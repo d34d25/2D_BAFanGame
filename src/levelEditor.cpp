@@ -88,11 +88,13 @@ void LevelEditor::Update()
 
         if(IsKeyPressed(KEY_ONE)) currentTileType = (int)TileType::TILE_START + 1;
 
-        if(IsKeyPressed(KEY_TWO)) currentTileType = (int)TileType::PLATFORM_START + 1;
+        if(IsKeyPressed(KEY_TWO)) currentTileType = (int)TileType::SPIKE_START + 1;
 
-        if(IsKeyPressed(KEY_THREE)) currentTileType = (int)TileType::MISC_START + 1;
+        if(IsKeyPressed(KEY_THREE)) currentTileType = (int)TileType::PLATFORM_START + 1;
 
-        if(IsKeyPressed(KEY_FOUR)) currentTileType = (int)TileType::DECO;
+        if(IsKeyPressed(KEY_FOUR)) currentTileType = (int)TileType::MISC_START + 1;
+
+        if(IsKeyPressed(KEY_FIVE)) currentTileType = (int)TileType::DECO;
 
         activeRenderData = GetTileActiveRenderData((TileType)currentTileType, 0);
 
@@ -163,6 +165,11 @@ void LevelEditor::Update()
         {
             start = (int)TileType::TILE_START;
             end = (int)TileType::TILE_END;
+        }
+        else if(currentTileType >= (int)TileType::SPIKE_START && currentTileType <= (int)TileType::SPIKE_END)
+        {
+            start = (int)TileType::SPIKE_START;
+            end = (int)TileType::SPIKE_END;
         }
         else if(currentTileType >= (int)TileType::PLATFORM_START && currentTileType <= (int)TileType::PLATFORM_END)
         {
