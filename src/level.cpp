@@ -1,7 +1,7 @@
 #include "level.h"
 
 #include <iostream>
-#include<cstring>
+#include <cstring>
 
 Level::Level() : player({0, 0})
 {
@@ -268,15 +268,20 @@ void Level::InitLevel(const char *levelPath, float dt, int iterations)
             }
             break;
 
-            case TileType::SPIKE:
+            default:
+            {
+                objTile->canEntityCollidePhysically = false;
+                objTile->canPlatformCollidePhysically = false;
+            }
+            break;
+            }
+
+            if(IsTileSpike(tile->type))
             {
                 objTile->canEntityCollidePhysically = false;
                 objTile->canPlatformCollidePhysically = true;
 
                 SpriteRenderData* spikeRenderData = GetTileActiveRenderData(TileType::SPIKE);
-
-                float widthFactor = 0.6f;
-                float heightFactor = 0.4f;
 
                 int orientation = 4;
 
@@ -289,85 +294,51 @@ void Level::InitLevel(const char *levelPath, float dt, int iterations)
                     orientation = logicalIndex % totalOrientations;
                 }
 
-                switch (orientation)
+                auto AddSpikeHitbox = [&](float widthFactor, float heightFactor, float correctionFactor, float defaultFactor)
                 {
-                case 0:
-                case 1:
-                    break;
-
-                case 2:
-                case 3:
+                    if(orientation == 2 || orientation == 3)
                     {
                         std::swap(widthFactor, heightFactor);
                     }
-                    break;
-                default:
+                    else if(orientation >= 4)
                     {
-                        float factor = 0.8f;
-
-                        widthFactor = factor;
-                        heightFactor = factor;
+                        widthFactor = defaultFactor;
+                        heightFactor = defaultFactor;
                     }
-                    break;
-                }
 
-                Vector2 subOffsetA = {0,0};
+                    Vector2 size = {objTile->GetMainAABB()->width * widthFactor, objTile->GetMainAABB()->height * heightFactor};
 
-                Vector2 subSizeA = {objTile->GetMainAABB()->height * widthFactor, objTile->GetMainAABB()->width * heightFactor};
+                    Vector2 offset = {0,0};
 
-                Vector2 subOffsetB = {0,0};
+                    float correctionX = objTile->GetMainAABB()->width * correctionFactor;
+                    float correctionY = objTile->GetMainAABB()->height * correctionFactor;
 
-                Vector2 subSizeB = {subSizeA.y * 0.5f, subSizeA.x * 0.5f};
+                    switch (orientation)
+                    {
+                        case 0: offset.y = correctionY; break;
+                        case 1: offset.y = -correctionY; break;
+                        case 2: offset.x = correctionX; break;
+                        case 3: offset.x = -correctionX; break;
+                    }
 
-                float spikePositionCorrectionFactor = 0.2f;
+                    objTile->AddSubHitbox(offset, size);
+                };
 
-                float correctionX = objTile->GetMainAABB()->width * spikePositionCorrectionFactor;
-                float correctionY = objTile->GetMainAABB()->height * spikePositionCorrectionFactor;
-
-                float offsetBFactor = 20;
-
-                switch (orientation)
+                switch (tile->type)
                 {
-                case 0: 
+                case TileType::SPIKE:
                 {
-                    subOffsetA.y = correctionY;
-                    subOffsetB.y = correctionY - offsetBFactor;
-                }
-                    break;
-                case 1:
-                {
-                    subOffsetA.y = -correctionY;
-                    subOffsetB.y = -correctionY + offsetBFactor;
+                    float wFactor = 0.6f;
+                    float hFactor = 0.4f;
+
+                    AddSpikeHitbox(wFactor, hFactor, 0.25, 0.8f);
+                    AddSpikeHitbox(hFactor * 0.5f, wFactor * 0.5f, -0.2, 0.8f);
                 }
                     break;
-                case 2:
-                {
-                    subOffsetA.x = correctionX;
-                    subOffsetB.x = correctionX - offsetBFactor;
-                }
-                    break;
-                case 3:
-                {
-                    subOffsetA.x = -correctionX;
-                    subOffsetB.x = -correctionX + offsetBFactor;
-                }
-                    break;
+                
                 default:
                     break;
                 }
-
-                objTile->AddSubHitbox(subOffsetA, subSizeA);
-                objTile->AddSubHitbox(subOffsetB, subSizeB);
-                
-            }
-            break;
-
-            default:
-            {
-                objTile->canEntityCollidePhysically = false;
-                objTile->canPlatformCollidePhysically = false;
-            }
-            break;
             }
         }
     }
