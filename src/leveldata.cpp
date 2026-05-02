@@ -21,6 +21,10 @@ std::vector<SpriteRenderData> windRenderData_Left = {};
 
 std::vector<SpriteRenderData> windRenderData_Right = {};
 
+//water
+
+std::vector<SpriteRenderData> waterRenderData = {};
+
 //platforms
 
 std::vector<SpriteRenderData> movingPlatformRenderData_Vertical = {};
@@ -98,6 +102,10 @@ void LoadAssets()
     windRenderData_Left.push_back(LoadRenderData("assets/tiles/wind-left.png", 3, {16,16}, 3));
     windRenderData_Right.push_back(LoadRenderData("assets/tiles/wind-right.png", 3, {16,16}, 3));
 
+    //water
+
+    waterRenderData.push_back(LoadRenderData("assets/tiles/water.png", 6, {16,16}, 3));
+
     //platforms
 
     movingPlatformRenderData_Vertical.push_back(LoadRenderData("assets/platforms/vertical-moving-platform-spritesheet.png", 2, {48,5}, 2));
@@ -134,4 +142,6 @@ void UnloadAssets()
     CleanUp(windRenderData_Down);
     CleanUp(windRenderData_Left);
     CleanUp(windRenderData_Right);
+
+    CleanUp(waterRenderData);
 }

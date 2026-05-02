@@ -78,6 +78,8 @@ public:
 
     bool windApplied = false;
 
+    bool inWater = false;
+
     //current frame flags
     bool isGrounded = false;
     bool isTouchingGravityChanger = false;
@@ -120,6 +122,20 @@ public:
         return *phys.GetSubAABB(0);
     }
 
+    inline Rectangle GetTreadmillDetector()
+    {
+        float offset = 5.0f;
+
+        int dir = entityData.flipY ? -1 : 1;
+
+        float centerY = phys.GetMainAABB()->y + phys.GetMainAABB()->height * 0.5f;
+
+        if(dir == 1) phys.GetSubAABB(1)->y = centerY + offset;
+        else phys.GetSubAABB(1)->y = centerY - offset - phys.GetSubAABB(1)->height;
+        
+        return *phys.GetSubAABB(1);
+    }
+
     inline void Respawn()
     {
         phys.position = spawnPos;
@@ -145,6 +161,8 @@ public:
         wasTouchingSpike = false;
 
         windApplied = false;
+
+        inWater = false;
     }
 
     inline void UpdateFlags()

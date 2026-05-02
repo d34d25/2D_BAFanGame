@@ -108,7 +108,7 @@ inline void ApplyWind(
     
     if(right || left)
     {
-        windForce = 250 * objA->body.damping;
+        windForce = 350 * objA->body.damping;
     }
 
     if(up)
@@ -127,4 +127,12 @@ inline void ApplyWind(
     {
         objA->body.force.x -= windForce;
     }
+}
+
+inline void ApplyWaterPhysics(GameObject* objA, bool gravityUp)
+{
+    float force = 700 * objA->body.damping;
+
+    if(!gravityUp) objA->body.force.y -= force;
+    else objA->body.force.y += force;
 }

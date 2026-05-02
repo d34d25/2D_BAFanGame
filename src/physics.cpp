@@ -12,6 +12,8 @@ void SolveCollisions(GameObject *objA, GameObject *objB, bool isX, bool gravityU
 
     float trampolineImpulseFactor = 0.6f;
 
+    float trampolineFactor_Y = 3.0f;
+
     if(isX)
     {
         if(objA->GetMainAABB()->x <= objB->GetMainAABB()->x) // A is at the left
@@ -44,7 +46,7 @@ void SolveCollisions(GameObject *objA, GameObject *objB, bool isX, bool gravityU
 
             if(objA->body.velocity.y > 0) objA->body.velocity.y = 0;
 
-            if(isTrampoline && !gravityUp) objA->body.velocity.y = -trampolineImpulse;
+            if(isTrampoline && !gravityUp) objA->body.velocity.y = -trampolineImpulse * trampolineFactor_Y;
             else if(isTrampoline && gravityUp) objA->body.velocity.y = -trampolineImpulse * trampolineImpulseFactor;
         }
         else //A is below B
@@ -57,7 +59,7 @@ void SolveCollisions(GameObject *objA, GameObject *objB, bool isX, bool gravityU
             if(objA->body.velocity.y < 0) objA->body.velocity.y = 0;
 
             if(isTrampoline && !gravityUp) objA->body.velocity.y = trampolineImpulse * trampolineImpulseFactor;
-            else if(isTrampoline && gravityUp) objA->body.velocity.y = trampolineImpulse;
+            else if(isTrampoline && gravityUp) objA->body.velocity.y = trampolineImpulse * trampolineFactor_Y;
         }
     }
 

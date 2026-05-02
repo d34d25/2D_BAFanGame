@@ -37,7 +37,7 @@ void Level::InitLevel(const char *levelPath, float dt, int iterations)
 
     this->dt = dt;
 
-    gravity = 3500;
+    gravity = GRAVITY;
 
     player.entityData.flipY = gravity < 0;
 
@@ -183,7 +183,7 @@ void Level::InitLevel(const char *levelPath, float dt, int iterations)
 
             objTile->UpdateAABB();
 
-            float treadmillVel = 100.0f;
+            float treadmillVel = 200.0f;
 
             switch (type)
             {
@@ -525,7 +525,7 @@ void Level::DiscreteUpdate()
                             player.wasTouchingSpike = true;
                     }
                 }
-
+                
                 if(IsTileWind(tile.type) && !player.windApplied)
                 {
                     bool isEdgeUp = tile.type == TileType::WIND_UP && IsTileEmpty(i, j - 1, level, TileType::VOID);
@@ -546,17 +546,25 @@ void Level::DiscreteUpdate()
 
                     player.windApplied = true;
                 }
+
+                if(tile.type == TileType::WATER && !player.inWater)
+                {
+                    ApplyWaterPhysics(&player.phys, isGravityUp);
+
+                    player.inWater = true;
+                }
             }
 
             if(IsTileNotJumpTrigger(tile.type)) continue;
 
+            if(tile.type == TileType::TREADMILL_LEFT || tile.type == TileType::TREADMILL_RIGHT)
+            {
+                if(CheckCollisionRecs(player.GetTreadmillDetector(), *objTile->GetMainAABB()) && player.IsFalling())
+                    player.phys.body.altVelocity = objTile->body.velocity;
+            }
+
             if(CheckCollisionRecs(player.GetJumpDetector(), *objTile->GetMainAABB()) && player.IsFalling())
             {
-                if(tile.type == TileType::TREADMILL_LEFT || tile.type == TileType::TREADMILL_RIGHT)
-                {
-                    player.phys.body.altVelocity = objTile->body.velocity;
-                }
-
                 if(!IsOneWayUpDown(tile.type)) player.wasGrounded = true;
                 else if(IsOneWayUpDown(tile.type))
                 {
@@ -658,14 +666,14 @@ void Level::DrawLevel()
             {
                 int loopEnd = platform->textureIndex + platformRenderData->spacing - 1;
 
-                    if(platformRenderData->spacing == 0) loopEnd = platformRenderData->endFrame;
+                if(platformRenderData->spacing == 0) loopEnd = platformRenderData->endFrame;
 
-                    frameToDraw = GetCurrentFrame(
-                        platformRenderData->animationFrames,
-                        platform->textureIndex,
-                        loopEnd,
-                        platformRenderData->animationSpeed
-                    );
+                frameToDraw = GetCurrentFrame(
+                    platformRenderData->animationFrames,
+                    platform->textureIndex,
+                    loopEnd,
+                    platformRenderData->animationSpeed
+                );
             }
 
             if(platform->textureIndex >= 0 && platform->textureIndex < (int)platformRenderData->animationFrames.size())

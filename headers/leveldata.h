@@ -86,6 +86,8 @@ enum class TileType
     WIND_LEFT,
     WIND_RIGHT,
 
+    WATER,
+
     TILE_END,
 
     SPIKE_START,
@@ -173,6 +175,7 @@ const std::vector<TileTypeList> TILE_TYPE_LIST = {
     {TileType::WIND_DOWN, WHITE, "WIND_DOWN"},
     {TileType::WIND_LEFT, WHITE, "WIND_LEFT"},
     {TileType::WIND_RIGHT, WHITE, "WIND_RIGHT"},
+    {TileType::WATER, SKYBLUE, "WATER"},
     {TileType::TREADMILL_RIGHT, TREADMILL_RIGHT, "TREADMILL_RIGHT"},
     {TileType::TREADMILL_LEFT, TREADMILL_LEFT, "TREADMILL_LEFT"},
     {TileType::ONE_WAY_UP, ONE_WAY_UP, "ONE_WAY_UP"},
@@ -290,6 +293,10 @@ extern std::vector<SpriteRenderData> windRenderData_Left;
 
 extern std::vector<SpriteRenderData> windRenderData_Right;
 
+//water
+
+extern std::vector<SpriteRenderData> waterRenderData;
+
 //platforms
 
 extern std::vector<SpriteRenderData> movingPlatformRenderData_Vertical;
@@ -320,6 +327,10 @@ inline std::vector<SpriteRenderData>* GetTileActiveRenderDataList(TileType type)
     case TileType::WIND_LEFT: return &windRenderData_Left;
 
     case TileType::WIND_RIGHT: return &windRenderData_Right;
+
+    //water
+
+    case TileType::WATER: return &waterRenderData;
     
     //platforms (only used by the editor)
 

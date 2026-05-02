@@ -12,6 +12,8 @@
 
 const float MAX_DISTANCE_PLATFORM_PLAYER_SQR = 800 * 800;
 
+const float GRAVITY = 3500.0f;
+
 class Level
 {
 private:
@@ -138,7 +140,8 @@ private:
         type == TileType::ONE_WAY_LEFT ||
         type == TileType::PLATFORM_STOP ||
         (type > TileType::SPIKE_START && type < TileType::SPIKE_END) ||
-        IsTileWind(type);
+        IsTileWind(type) ||
+        type == TileType::WATER;
     }
 
     void DiscreteUpdate();
