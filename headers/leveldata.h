@@ -81,6 +81,11 @@ enum class TileType
     
     GRAVITY_CHANGER,
 
+    WIND_UP,
+    WIND_DOWN,
+    WIND_LEFT,
+    WIND_RIGHT,
+
     TILE_END,
 
     SPIKE_START,
@@ -164,6 +169,10 @@ const std::vector<TileTypeList> TILE_TYPE_LIST = {
     {TileType::PLATFORM_STOP, PLATFORM_STOP, "PLATFORM_STOP"},
     {TileType::TRAMPOLINE, TRAMPOLINE, "TRAMPOLINE"},
     {TileType::GRAVITY_CHANGER, GRAVITY_CHANGER, "GRAVITY_CHANGER"},
+    {TileType::WIND_UP, WHITE, "WIND_UP"},
+    {TileType::WIND_DOWN, WHITE, "WIND_DOWN"},
+    {TileType::WIND_LEFT, WHITE, "WIND_LEFT"},
+    {TileType::WIND_RIGHT, WHITE, "WIND_RIGHT"},
     {TileType::TREADMILL_RIGHT, TREADMILL_RIGHT, "TREADMILL_RIGHT"},
     {TileType::TREADMILL_LEFT, TREADMILL_LEFT, "TREADMILL_LEFT"},
     {TileType::ONE_WAY_UP, ONE_WAY_UP, "ONE_WAY_UP"},
@@ -272,6 +281,15 @@ extern std::vector<SpriteRenderData> treadmillRenderData_Left;
 
 extern std::vector<SpriteRenderData> decoRenderData;
 
+//wind tiles
+extern std::vector<SpriteRenderData> windRenderData_Up;
+
+extern std::vector<SpriteRenderData> windRenderData_Down;
+
+extern std::vector<SpriteRenderData> windRenderData_Left;
+
+extern std::vector<SpriteRenderData> windRenderData_Right;
+
 //platforms
 
 extern std::vector<SpriteRenderData> movingPlatformRenderData_Vertical;
@@ -292,6 +310,16 @@ inline std::vector<SpriteRenderData>* GetTileActiveRenderDataList(TileType type)
     case TileType::SPIKE: return &spikesRenderData;
 
     case TileType::DECO: return &decoRenderData;
+
+    //wind tiles
+    
+    case TileType::WIND_UP: return &windRenderData_Up;
+
+    case TileType::WIND_DOWN: return &windRenderData_Down;
+
+    case TileType::WIND_LEFT: return &windRenderData_Left;
+
+    case TileType::WIND_RIGHT: return &windRenderData_Right;
     
     //platforms (only used by the editor)
 

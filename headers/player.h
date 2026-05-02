@@ -71,11 +71,20 @@ public:
 
     float gravity = 500;
 
-    bool canJump = false;
-    bool isJumping = false;
+    //previous frame flags
+    bool wasGrounded = false;
+    bool wasTouchingGravityChanger = false;
+    bool wasTouchingSpike = false;
 
+    bool windApplied = false;
+
+    //current frame flags
+    bool isGrounded = false;
     bool isTouchingGravityChanger = false;
     bool isTouchingSpike = false;
+
+    //jump flags
+    bool isJumping = false;
 
     Vector2 spawnPos = {0,0};
 
@@ -120,6 +129,28 @@ public:
         phys.body.altVelocity = {0,0};
 
         isJumping = false;
-        canJump = false;
+        isGrounded = false;
+    }
+
+    inline bool IsFalling()
+    {
+        if(entityData.flipY) return phys.body.velocity.y <= 0;
+        else return phys.body.velocity.y >= 0;
+    }
+
+    inline void ResetFalgs()
+    {
+        wasGrounded = false;
+        wasTouchingGravityChanger = false;
+        wasTouchingSpike = false;
+
+        windApplied = false;
+    }
+
+    inline void UpdateFlags()
+    {
+        isGrounded = wasGrounded;
+        isTouchingGravityChanger = wasTouchingGravityChanger;
+        isTouchingSpike = wasTouchingSpike;
     }
 };

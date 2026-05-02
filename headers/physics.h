@@ -81,3 +81,50 @@ inline void SolveCollisionsOneWayUpDown(GameObject * objA, GameObject* objB, boo
 
     SolveCollisions(objA, objB, false, gravityUp, false, isPlatform);
 }
+
+inline void ApplyWind(
+    GameObject* objA, GameObject* objB, 
+    bool up, bool down, 
+    bool left, bool right, 
+    bool isEdgeUp, bool isEdgeDown, 
+    bool gravityUp
+)
+{
+    float windForce = 1600 * objA->body.damping;
+
+    bool isEdge = (!gravityUp && isEdgeUp) || (gravityUp && isEdgeDown);
+
+    float offset = objB->GetMainAABB()->height * 0.8f;
+
+    bool above = IsAbove(*objA->GetMainAABB(), *objB->GetMainAABB(), offset);
+
+    bool below = IsBelow(*objA->GetMainAABB(), *objB->GetMainAABB(), offset);
+
+    bool onTop = !gravityUp ? above : below;
+
+    bool falling = !gravityUp ? objA->body.velocity.y > 0 : objA->body.velocity.y < 0;
+
+    if(isEdge && onTop && falling) return;
+    
+    if(right || left)
+    {
+        windForce = 250 * objA->body.damping;
+    }
+
+    if(up)
+    {
+        objA->body.force.y -= windForce;
+    }
+    else if(down)
+    {
+        objA->body.force.y += windForce;
+    }
+    else if(right)
+    {
+        objA->body.force.x += windForce;
+    }
+    else if(left)
+    {
+        objA->body.force.x -= windForce;
+    }
+}

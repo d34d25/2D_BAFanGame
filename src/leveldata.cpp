@@ -11,6 +11,16 @@ std::vector<SpriteRenderData> treadmillRenderData_Left = {};
 
 std::vector<SpriteRenderData> decoRenderData = {};
 
+//wind tiles
+
+std::vector<SpriteRenderData> windRenderData_Up = {};
+
+std::vector<SpriteRenderData> windRenderData_Down = {};
+
+std::vector<SpriteRenderData> windRenderData_Left = {};
+
+std::vector<SpriteRenderData> windRenderData_Right = {};
+
 //platforms
 
 std::vector<SpriteRenderData> movingPlatformRenderData_Vertical = {};
@@ -81,6 +91,13 @@ void LoadAssets()
     decoRenderData.push_back(LoadRenderData("assets/tiles/deco/deco-spritesheet-2.png", 2, {14,16}));
     decoRenderData.push_back(LoadRenderData("assets/tiles/deco/deco-spritesheet-3.png", 1, {35,29}));
 
+    //wind tiles
+
+    windRenderData_Up.push_back(LoadRenderData("assets/tiles/wind-up.png", 3, {16,16}, 3));
+    windRenderData_Down.push_back(LoadRenderData("assets/tiles/wind-down.png", 3, {16,16}, 3));
+    windRenderData_Left.push_back(LoadRenderData("assets/tiles/wind-left.png", 3, {16,16}, 3));
+    windRenderData_Right.push_back(LoadRenderData("assets/tiles/wind-right.png", 3, {16,16}, 3));
+
     //platforms
 
     movingPlatformRenderData_Vertical.push_back(LoadRenderData("assets/platforms/vertical-moving-platform-spritesheet.png", 2, {48,5}, 2));
@@ -112,4 +129,9 @@ void UnloadAssets()
     //platforms
 
     CleanUp(movingPlatformRenderData_Vertical);
+
+    CleanUp(windRenderData_Up);
+    CleanUp(windRenderData_Down);
+    CleanUp(windRenderData_Left);
+    CleanUp(windRenderData_Right);
 }

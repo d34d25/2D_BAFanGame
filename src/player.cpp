@@ -155,17 +155,19 @@ void Player::Update(float dt, int iterations)
 
     //lateral movement
 
-    float moveForce = 400 * phys.body.damping;
+    float maxMoveForce = 400 * phys.body.damping;
+
+    float moveForce = Clamp(moveForce, -maxMoveForce, maxMoveForce);
 
     if(IsKeyDown(KEY_LEFT))
     {
-        phys.body.force.x = -moveForce;
+        phys.body.force.x -= maxMoveForce;
         
         entityData.flipX = true;
     }
     else if(IsKeyDown(KEY_RIGHT))
     {
-        phys.body.force.x = moveForce;
+        phys.body.force.x += maxMoveForce;
 
         entityData.flipX = false;
     }
@@ -187,9 +189,9 @@ void Player::Update(float dt, int iterations)
         phys.body.hasGravity = true;
     }
 
-    if(!canJump && std::abs(phys.body.velocity.y) <= 0.1f) isJumping = false;
+    if(!isGrounded && std::abs(phys.body.velocity.y) <= 0.1f) isJumping = false;
 
-    if(canJump)
+    if(isGrounded)
     {
         jumpTime = maxJumpTime;
     }
@@ -202,7 +204,7 @@ void Player::Update(float dt, int iterations)
 
     if(IsKeyDown(KEY_Z))
     {
-        if(canJump) isJumping = true;
+        if(isGrounded) isJumping = true;
 
         if(isJumping)
         {

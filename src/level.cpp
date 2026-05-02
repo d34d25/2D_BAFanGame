@@ -368,6 +368,8 @@ void Level::DiscreteUpdate()
         collisionTileCheckRange
     );
 
+    player.ResetFalgs();
+
     player.Update(dt, iterations);
 
     //X pass
@@ -388,7 +390,7 @@ void Level::DiscreteUpdate()
 
             const Tile& tile = level[i][j];
 
-            if(!IsOneWayTile(i, j))
+            if(!IsTileOneWay(tile.type))
             {
                 SolveCollisions(
                     &player.phys, objTile, 
@@ -397,7 +399,7 @@ void Level::DiscreteUpdate()
                     false
                 );
             }
-            else if(IsOneWayRightLeft(i, j))
+            else if(IsOneWayRightLeft(tile.type))
             {
                 SolveCollisionsOneWayLeftRight(
                     &player.phys, objTile,
@@ -425,7 +427,7 @@ void Level::DiscreteUpdate()
 
             const Tile& tile = level[i][j];
 
-            if(!IsOneWayTile(i, j))
+            if(!IsTileOneWay(tile.type))
             {
                 SolveCollisions(
                     &player.phys, objTile, 
@@ -434,7 +436,7 @@ void Level::DiscreteUpdate()
                     false
                 );
             }
-            else if(IsOneWayUpDown(i, j))
+            else if(IsOneWayUpDown(tile.type))
             {
                 SolveCollisionsOneWayUpDown
                 (
@@ -446,16 +448,6 @@ void Level::DiscreteUpdate()
             }
         }
     }
-
-    bool isPlayerGrounded = false;
-
-    bool isPlayerFalling = player.phys.body.velocity.y >= 0;
-
-    if(player.entityData.flipY) isPlayerFalling = player.phys.body.velocity.y <= 0;
-
-    bool isPlayerTouchingGravityChanger = false;
-
-    bool isPlayerTouchingSpike = false;
 
     //platforms
 
@@ -476,12 +468,12 @@ void Level::DiscreteUpdate()
             true, isGravityUp, true
         );
 
-        if(CheckCollisionRecs(player.GetJumpDetector(), *platform->phys.GetMainAABB()) && isPlayerFalling)
+        if(CheckCollisionRecs(player.GetJumpDetector(), *platform->phys.GetMainAABB()) && player.IsFalling())
         {
             if(!isGravityUp && IsAbove(*player.phys.GetMainAABB(), *platform->phys.GetMainAABB(), 0.0f) || (isGravityUp && IsBelow(*player.phys.GetMainAABB(), *platform->phys.GetMainAABB(), 0.0f)))
             {
                 platform->updateRequired = true;
-                isPlayerGrounded = true;
+                player.wasGrounded = true;
             }
         }
 
@@ -506,7 +498,7 @@ void Level::DiscreteUpdate()
         }
     }
 
-    //tile triggers
+    //tile triggers and non solid tiles
     for(int i = playerTileRange.startX; i <= playerTileRange.endX; i++)
     {
         for(int j = playerTileRange.startY; j <= playerTileRange.endY; j++)
@@ -517,56 +509,77 @@ void Level::DiscreteUpdate()
 
             if(!objTile) continue;
 
-            if(IsOneWayRightLeft(i,j)) continue;
+            if(IsOneWayRightLeft(tile.type)) continue;
 
             if(tile.type == TileType::PLATFORM_STOP) continue;
 
             if(CheckCollisionRecs(*player.phys.GetMainAABB(), *objTile->GetMainAABB()))
             {
-                if(tile.type == TileType::GRAVITY_CHANGER) isPlayerTouchingGravityChanger = true;
+                if(tile.type == TileType::GRAVITY_CHANGER) player.wasTouchingGravityChanger = true;
 
                 if(IsTileSpike(tile.type))
                 {
                     for(int h = 0; h < objTile->subHitboxList.size(); h++)
                     {
                         if(CheckCollisionRecs(*player.phys.GetMainAABB(), *objTile->GetSubAABB(h)))
-                            isPlayerTouchingSpike = true;
+                            player.wasTouchingSpike = true;
                     }
-                }   
+                }
+
+                if(IsTileWind(tile.type) && !player.windApplied)
+                {
+                    bool isEdgeUp = tile.type == TileType::WIND_UP && IsTileEmpty(i, j - 1, level, TileType::VOID);
+
+                    bool isEdgeDown = tile.type == TileType::WIND_DOWN && IsTileEmpty(i, j + 1, level, TileType::VOID);
+
+                    ApplyWind(
+                        &player.phys,
+                        objTile,
+                        tile.type == TileType::WIND_UP,
+                        tile.type == TileType::WIND_DOWN,
+                        tile.type == TileType::WIND_LEFT,
+                        tile.type == TileType::WIND_RIGHT,
+                        isEdgeUp,
+                        isEdgeDown,
+                        isGravityUp
+                    );
+
+                    player.windApplied = true;
+                }
             }
 
-            if(IsTileNotJumpTrigger(i,j)) continue;
+            if(IsTileNotJumpTrigger(tile.type)) continue;
 
-            if(CheckCollisionRecs(player.GetJumpDetector(), *objTile->GetMainAABB()) && isPlayerFalling)
+            if(CheckCollisionRecs(player.GetJumpDetector(), *objTile->GetMainAABB()) && player.IsFalling())
             {
                 if(tile.type == TileType::TREADMILL_LEFT || tile.type == TileType::TREADMILL_RIGHT)
                 {
                     player.phys.body.altVelocity = objTile->body.velocity;
                 }
 
-                if(!IsOneWayUpDown(i,j)) isPlayerGrounded = true;
-                else if(IsOneWayUpDown(i,j))
+                if(!IsOneWayUpDown(tile.type)) player.wasGrounded = true;
+                else if(IsOneWayUpDown(tile.type))
                 {
                     if(tile.type == TileType::ONE_WAY_UP &&
                         IsAbove(*player.phys.GetMainAABB(), *objTile->GetMainAABB(), 0.0f)
                     )
                     {
-                        isPlayerGrounded = true;
+                        player.wasGrounded = true;
                     }
                     else if(tile.type == TileType::ONE_WAY_DOWN &&
                         IsBelow(*player.phys.GetMainAABB(), *objTile->GetMainAABB(), 0.0f)
                     )
                     {
-                        isPlayerGrounded = true;
+                        player.wasGrounded = true;
                     }
                 }
             }
         }
     }
 
-    if(!player.isTouchingGravityChanger && isPlayerTouchingGravityChanger)
+    if(!player.isTouchingGravityChanger && player.wasTouchingGravityChanger)
     {
-        player.canJump = false;
+        player.isGrounded = false;
         player.isJumping = false;
 
         gravity *= -1;
@@ -587,7 +600,7 @@ void Level::DiscreteUpdate()
         }
     }
 
-    if(!player.isTouchingSpike && isPlayerTouchingSpike)
+    if(!player.isTouchingSpike && player.wasTouchingSpike)
     {
         if(gravity < 0) gravity *= -1;
 
@@ -611,11 +624,8 @@ void Level::DiscreteUpdate()
     }
 
     //booleans update
-    player.canJump = isPlayerGrounded;
 
-    player.isTouchingGravityChanger = isPlayerTouchingGravityChanger;
-
-    player.isTouchingSpike = isPlayerTouchingSpike;
+    player.UpdateFlags();
 }
 
 void Level::DrawLevel()
@@ -750,7 +760,7 @@ void Level::DrawLevel()
 
     EndMode2D();
 
-    //DebugTextDrawing();
+    DebugTextDrawing();
 }
 
 void Level::DebugDrawing()

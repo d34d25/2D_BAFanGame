@@ -106,36 +106,39 @@ private:
         }
     }
 
-    inline bool IsOneWayUpDown(int i, int j)
+    inline bool IsOneWayUpDown(TileType type)
     {
-        const Tile& tile = level[i][j];
-
-        return tile.type == TileType::ONE_WAY_UP || tile.type == TileType::ONE_WAY_DOWN;  
+        return type == TileType::ONE_WAY_UP || type == TileType::ONE_WAY_DOWN;  
     }
 
-    inline bool IsOneWayRightLeft(int i, int j)
+    inline bool IsOneWayRightLeft(TileType type)
     {
-        const Tile& tile = level[i][j];
-
-        return tile.type == TileType::ONE_WAY_RIGHT || tile.type == TileType::ONE_WAY_LEFT;
+        return type == TileType::ONE_WAY_RIGHT || type == TileType::ONE_WAY_LEFT;
     }
 
-    inline bool IsOneWayTile(int i, int j)
+    inline bool IsTileOneWay(TileType type)
     {
-        return IsOneWayRightLeft(i, j) || IsOneWayUpDown(i, j);
+        return IsOneWayRightLeft(type) || IsOneWayUpDown(type);
     }
 
-    inline bool IsTileNotJumpTrigger(int i, int j)
+    inline bool IsTileWind(TileType type)
     {
-        const TileType& type = level[i][j].type;
+        return type == TileType::WIND_UP ||
+        type == TileType::WIND_DOWN ||
+        type == TileType::WIND_LEFT ||
+        type == TileType::WIND_RIGHT;
+    }
 
+    inline bool IsTileNotJumpTrigger(TileType type)
+    {
         return type == TileType::TRAMPOLINE ||
         type == TileType::GRAVITY_CHANGER ||
         type == TileType::GOAL ||
         type == TileType::ONE_WAY_RIGHT ||
         type == TileType::ONE_WAY_LEFT ||
         type == TileType::PLATFORM_STOP ||
-        (type > TileType::SPIKE_START && type < TileType::SPIKE_END);
+        (type > TileType::SPIKE_START && type < TileType::SPIKE_END) ||
+        IsTileWind(type);
     }
 
     void DiscreteUpdate();
