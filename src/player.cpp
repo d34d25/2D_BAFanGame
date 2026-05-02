@@ -155,19 +155,17 @@ void Player::Update(float dt, int iterations)
 
     //lateral movement
 
-    float maxMoveForce = 400 * phys.body.damping;
-
-    float moveForce = Clamp(moveForce, -maxMoveForce, maxMoveForce);
+    float moveForce = 400 * phys.body.damping;
 
     if(IsKeyDown(KEY_LEFT))
     {
-        phys.body.force.x -= maxMoveForce;
+        phys.body.force.x -= moveForce;
         
         entityData.flipX = true;
     }
     else if(IsKeyDown(KEY_RIGHT))
     {
-        phys.body.force.x += maxMoveForce;
+        phys.body.force.x += moveForce;
 
         entityData.flipX = false;
     }
