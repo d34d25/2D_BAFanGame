@@ -5,6 +5,8 @@
 #include <vector>
 #include <memory>
 
+#include "entity.h"
+
 struct BulletProperties
 {
     float fireTimer = 0;
@@ -16,6 +18,19 @@ struct BulletProperties
     float radius = 2.0f;
     Color mainColor = RAYWHITE;
     Color backColor = BLACK;
+};
+
+struct Explosion
+{
+    SpriteRenderData* renderData = nullptr;
+
+    Vector2 position = {0.0f,0.0f};
+
+    float radius = 10.0f;
+
+    float lifeTime = 1.0f;
+
+    float currentTime = 0.0f;
 };
 
 class Bullet
@@ -31,10 +46,10 @@ public:
 
     float radius = 2.0f;
 
-    float lifeTime = 0;
-    float currentTime = 0;
+    float lifeTime = 0.0f;
+    float currentTime = 0.0f;
 
-    float gravity = 0;
+    float gravity = 0.0f;
 
     Color mainColor = RAYWHITE;
 
@@ -61,9 +76,19 @@ public:
 
     std::vector<std::unique_ptr<Bullet>> bullets = {};
 
+    bool explodes = false;
+
+    std::vector<Explosion*> activeExplosions = {};
+    std::vector<Explosion*> inactiveExplosions = {};
+
+    std::vector<std::unique_ptr<Explosion>> explosions = {};
+
     BulletPool() = default;
 
-    BulletPool(int quantity, float lifeTime, float radius, Color mainColor, Color backColor);
+    BulletPool(
+        int quantity, float lifeTime, float radius, Color mainColor, Color backColor, 
+        bool explodes = false, float explosionRadius = 70.0f, float explosionLifeTime = 0.5f, SpriteRenderData* explosionRenderData = nullptr
+    );
 
     ~BulletPool() = default;
 

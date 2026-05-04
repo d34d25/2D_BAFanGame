@@ -796,6 +796,18 @@ void Level::DrawLevel()
         DrawBullet(b->posititon.x, b->posititon.y, b->radius, b->mainColor, b->backColor);
     }
 
+    if(!player.bulletpool->explosions.empty())
+    {
+        for(int i = 0; i < player.bulletpool->activeExplosions.size(); i++)
+        {
+            Explosion* e = player.bulletpool->activeExplosions[i];
+
+            if(!e) continue;
+
+            DrawExplosion(e->position.x, e->position.y, e->radius, e->renderData, 0, tileScale);
+        }
+    }
+
     DrawSprite(
         player.phys.position,
         player.weaponRenderData,

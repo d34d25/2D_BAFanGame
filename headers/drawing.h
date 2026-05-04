@@ -61,8 +61,8 @@ inline void DrawSprite(
     const Vector2& position,
     const SpriteRenderData& renderData,
     const EntityData& entityData,
-    float scale,
-    int currentFrame
+    float scale = 1,
+    int currentFrame = 0
 )
 {
 
@@ -101,7 +101,7 @@ inline void DrawSprite(
     );
 }
 
-inline void DrawTile(SpriteRenderData* renderData, int frameIndex, Vector2 worldPos, float scale, Color color = WHITE)
+inline void DrawTile(SpriteRenderData* renderData, int frameIndex, Vector2 worldPos, float scale = 1, Color color = WHITE)
 {
     if(!renderData || frameIndex < 0 || frameIndex >= renderData->animationFrames.size())
         return;
@@ -131,4 +131,17 @@ inline void DrawBullet(int x, int y, float radius, Color mainColor, Color backCo
     else DrawCircle(x, y, radius * 1.2f, backColor);
 
     DrawCircle(x, y, radius, mainColor);
+}
+
+inline void DrawExplosion(int x, int y, float radius, SpriteRenderData* renderData, int frameIndex = 0, float scale = 1, Color color = WHITE)
+{
+    if(renderData)
+    {
+        //WIP
+        DrawTile(renderData, frameIndex, {(float)x, (float)y}, scale, color);
+    }
+    else
+    {
+        DrawCircleLines(x, y, radius, RED);
+    }
 }

@@ -24,6 +24,8 @@ Player::Player(Vector2 position)
 
     float bulletLifeTime = 2.0f;
 
+    bool explodes = false;
+
     character = Character::YUZU;
     
     switch (character)
@@ -88,10 +90,10 @@ Player::Player(Vector2 position)
         bulletData.angle = -80;
         bulletData.fireRate = 1.2f;
 
-        bulletLifeTime = 3.0f;
-
         bulletData.mainColor = YUZU_COLOR;
         bulletData.backColor = YUZU_COLOR_BG;
+
+        explodes = true;
 
         break;
     case Character::ARIS:
@@ -148,7 +150,7 @@ Player::Player(Vector2 position)
 
     SetTextureWrap(weaponRenderData.sourceTexture, TEXTURE_WRAP_CLAMP);
 
-    bulletpool = std::make_unique<BulletPool>(30, bulletLifeTime, bulletData.radius, bulletData.mainColor, bulletData.backColor);
+    bulletpool = std::make_unique<BulletPool>(30, bulletLifeTime, bulletData.radius, bulletData.mainColor, bulletData.backColor, explodes);
 }
 
 
