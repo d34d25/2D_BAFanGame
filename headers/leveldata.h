@@ -93,6 +93,8 @@ enum class TileType
     SPIKE_START,
 
     SPIKE,
+    SPIKE_DOUBLE,
+    SPIKE_SMALL,
 
     SPIKE_END,
 
@@ -166,28 +168,43 @@ struct TileTypeList
 
 const std::vector<TileTypeList> TILE_TYPE_LIST = {
     {TileType::VOID, BLANK, "BLANK"},
+
     {TileType::SOLID, BLACK, "SOLID"},
+
     {TileType::GOAL, GOAL, "GOAL"},
+
     {TileType::PLATFORM_STOP, PLATFORM_STOP, "PLATFORM_STOP"},
+
     {TileType::TRAMPOLINE, TRAMPOLINE, "TRAMPOLINE"},
+
     {TileType::GRAVITY_CHANGER, GRAVITY_CHANGER, "GRAVITY_CHANGER"},
+
     {TileType::WIND_UP, WHITE, "WIND_UP"},
     {TileType::WIND_DOWN, WHITE, "WIND_DOWN"},
     {TileType::WIND_LEFT, WHITE, "WIND_LEFT"},
     {TileType::WIND_RIGHT, WHITE, "WIND_RIGHT"},
+
     {TileType::WATER, SKYBLUE, "WATER"},
+    
     {TileType::TREADMILL_RIGHT, TREADMILL_RIGHT, "TREADMILL_RIGHT"},
     {TileType::TREADMILL_LEFT, TREADMILL_LEFT, "TREADMILL_LEFT"},
+
     {TileType::ONE_WAY_UP, ONE_WAY_UP, "ONE_WAY_UP"},
     {TileType::ONE_WAY_DOWN, ONE_WAY_DOWN, "ONE_WAY_DOWN"},
     {TileType::ONE_WAY_RIGHT, ONE_WAY_RIGHT, "ONE_WAY_RIGHT"},
     {TileType::ONE_WAY_LEFT, ONE_WAY_LEFT, "ONE_WAY_LEFT"},
+
     {TileType::SPIKE, SPIKE, "SPIKE"},
+    {TileType::SPIKE_DOUBLE, SPIKE, "SPIKE_DOUBLE"},
+    {TileType::SPIKE_SMALL, SPIKE, "SPIKE_SMALL"},
+
     {TileType::HORIZONALT_MOVING_PLATFORM, HORIZONTAL_MOVING_PLATFORM, "HORIZONALT_MOVING_PLATFORM"},
     {TileType::VERTICAL_MOVING_PLATFORM, VERTICAL_MOVING_PLATFORM, "VERTICAL_MOVING_PLATFORM"},
     {TileType::FALLING_PLATFORM, FALLING_PLATFORM, "FALLING_PLATFORM"},
     {TileType::DISAPPEARING_PLATFORM, DISAPPEARING_PLATFORM, "DISAPPEARING_PLATFORM"},
+
     {TileType::PLAYER_SPAWN, PLAYER_SPAWN, "PLAYER_SPAWN"},
+
     {TileType::DECO, DECO, "DECO"},
 };
 
@@ -276,13 +293,20 @@ inline Vector2 GetTileCenter(int i, int j)
 
 extern std::vector<SpriteRenderData> solidTilesRenderData;
 
-extern std::vector<SpriteRenderData> spikesRenderData;
-
 extern std::vector<SpriteRenderData> treadmillRenderData_Right;
 
 extern std::vector<SpriteRenderData> treadmillRenderData_Left;
 
 extern std::vector<SpriteRenderData> decoRenderData;
+
+//spikes
+
+extern std::vector<SpriteRenderData> spikesRenderData;
+
+extern std::vector<SpriteRenderData> spikesDobuleRenderData;
+
+extern std::vector<SpriteRenderData> spikesSmallRenderData;
+
 
 //wind tiles
 extern std::vector<SpriteRenderData> windRenderData_Up;
@@ -314,7 +338,15 @@ inline std::vector<SpriteRenderData>* GetTileActiveRenderDataList(TileType type)
     case TileType::TREADMILL_RIGHT: return &treadmillRenderData_Right;
     case TileType::TREADMILL_LEFT: return &treadmillRenderData_Left;
 
+    //spikes
+
     case TileType::SPIKE: return &spikesRenderData;
+
+    case TileType::SPIKE_DOUBLE: return &spikesDobuleRenderData;
+
+    case TileType::SPIKE_SMALL: return &spikesSmallRenderData;
+
+    //deco
 
     case TileType::DECO: return &decoRenderData;
 

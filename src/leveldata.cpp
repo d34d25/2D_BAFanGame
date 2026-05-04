@@ -3,13 +3,19 @@
 //tiles
 std::vector<SpriteRenderData> solidTilesRenderData = {};
 
-std::vector<SpriteRenderData> spikesRenderData = {};
-
 std::vector<SpriteRenderData> treadmillRenderData_Right = {};
 
 std::vector<SpriteRenderData> treadmillRenderData_Left = {};
 
 std::vector<SpriteRenderData> decoRenderData = {};
+
+//spikes
+
+std::vector<SpriteRenderData> spikesRenderData = {};
+
+std::vector<SpriteRenderData> spikesDobuleRenderData = {};
+
+std::vector<SpriteRenderData> spikesSmallRenderData = {};
 
 //wind tiles
 
@@ -80,6 +86,10 @@ void LoadAssets()
     //spikes
 
     spikesRenderData.push_back(LoadRenderData("assets/tiles/spike-sprite-sheet.png", 5, tileSize));
+
+    spikesDobuleRenderData.push_back(LoadRenderData("assets/tiles/spike-double-sprite-sheet.png", 5, tileSize));
+
+    spikesSmallRenderData.push_back(LoadRenderData("assets/tiles/spike-small-sprite-sheet.png", 5, tileSize));
 
     //treadmills
 

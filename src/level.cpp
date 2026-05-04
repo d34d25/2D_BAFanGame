@@ -294,7 +294,7 @@ void Level::InitLevel(const char *levelPath, float dt, int iterations)
                     orientation = logicalIndex % totalOrientations;
                 }
 
-                auto AddSpikeHitbox = [&](float widthFactor, float heightFactor, float correctionFactor, float defaultFactor)
+                auto AddSpikeHitbox = [&](float widthFactor, float heightFactor, float offsetX, float offsetY, float defaultFactor)
                 {
                     if(orientation == 2 || orientation == 3)
                     {
@@ -310,15 +310,17 @@ void Level::InitLevel(const char *levelPath, float dt, int iterations)
 
                     Vector2 offset = {0,0};
 
-                    float correctionX = objTile->GetMainAABB()->width * correctionFactor;
-                    float correctionY = objTile->GetMainAABB()->height * correctionFactor;
+                    offset.x = offsetX;
+                    offset.y = offsetY;
 
                     switch (orientation)
                     {
-                        case 0: offset.y = correctionY; break;
-                        case 1: offset.y = -correctionY; break;
-                        case 2: offset.x = correctionX; break;
-                        case 3: offset.x = -correctionX; break;
+                        case 1: offset.y = -offsetY; break;
+
+                        case 2: offset = {offsetY, offsetX}; break;
+                        case 3: offset = {-offsetY, offsetX}; break;
+
+                        case 4: offset = {0,0}; break;
                     }
 
                     objTile->AddSubHitbox(offset, size);
@@ -330,12 +332,50 @@ void Level::InitLevel(const char *levelPath, float dt, int iterations)
                 {
                     float wFactor = 0.6f;
                     float hFactor = 0.4f;
+  
+                    float correctionY_A = 12;
+                    float correctionY_B = -9;
 
-                    AddSpikeHitbox(wFactor, hFactor, 0.25, 0.8f);
-                    AddSpikeHitbox(hFactor * 0.5f, wFactor * 0.5f, -0.2, 0.8f);
+                    AddSpikeHitbox(wFactor, hFactor,0 ,correctionY_A, 0.8f);
+                    AddSpikeHitbox(hFactor * 0.5f, wFactor * 0.5f, 0 ,correctionY_B, 0.8f);
                 }
                     break;
-                
+
+                case TileType::SPIKE_DOUBLE:
+                {
+                    float wFactor = 0.3f;
+                    float hFactor = 0.2f;
+
+                    float correctionX_A = 13;
+
+                    float correctionX_B = -correctionX_A;
+
+                    float correctionY_A = 15;
+
+                    float correctionY_B = 5;
+
+                    AddSpikeHitbox(wFactor, hFactor,correctionX_A, correctionY_A, 0.6f);
+                    AddSpikeHitbox(hFactor * 0.5f, wFactor * 0.5f,correctionX_A, correctionY_B, 0.6f);
+
+                    AddSpikeHitbox(wFactor, hFactor,correctionX_B, correctionY_A, 0.6f);
+                    AddSpikeHitbox(hFactor * 0.5f, wFactor * 0.5f,correctionX_B, correctionY_B, 0.6f);
+                }
+                break;
+
+                case TileType::SPIKE_SMALL:
+                {
+                    float wFactor = 0.3f;
+                    float hFactor = 0.2f;
+
+                    float correctionY_A = 15;
+
+                    float correctionY_B = 5;
+
+                    AddSpikeHitbox(wFactor, hFactor, 0, correctionY_A, 0.6f);
+                    AddSpikeHitbox(hFactor * 0.5f, wFactor * 0.5f, 0, correctionY_B, 0.6f);
+                }
+                break;
+
                 default:
                     break;
                 }
