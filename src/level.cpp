@@ -14,6 +14,8 @@ Level::~Level()
     ClearGameObjMatrix();
 
     ClearPlatformList();
+
+    UnloadAssets();
 }
 
 void Level::LoadLevelData(const char *levelPath)

@@ -44,7 +44,7 @@ private:
             {
                 Tile& tile = level[i][j];
 
-                tile.textureIndex = -1;
+                tile.textureIndex = 0;
                 tile.type = TileType::VOID;
             }
         }
@@ -68,7 +68,8 @@ private:
     {
         for(int i = 0; i < platformList.size(); i++)
         {
-            delete platformList[i];
+            if(platformList[i])
+                delete platformList[i];
         }
 
         platformList.clear();
