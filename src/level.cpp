@@ -109,7 +109,9 @@ void Level::InitLevel(const char *levelPath, float dt, int iterations)
 
                 platform->variantIndex = level[i][j].variantIndex;
 
-                if(type == TileType::HORIZONALT_MOVING_PLATFORM)
+                switch (type)
+                {
+                case TileType::HORIZONALT_MOVING_PLATFORM:
                 {
                     platform->type = PlatformType::MOVING_HORIZONTAL;
 
@@ -117,7 +119,9 @@ void Level::InitLevel(const char *levelPath, float dt, int iterations)
 
                     platform->updateRequired = true;
                 }
-                else if(type == TileType::VERTICAL_MOVING_PLATFORM)
+                break;
+
+                case TileType::VERTICAL_MOVING_PLATFORM:
                 {
                     platform->type = PlatformType::MOVING_VERTICAL;
 
@@ -125,15 +129,24 @@ void Level::InitLevel(const char *levelPath, float dt, int iterations)
 
                     platform->updateRequired = true;
                 }
-                else if(type == TileType::FALLING_PLATFORM)
-                {                    
+                break;
+
+                case TileType::FALLING_PLATFORM:
+                {
                     platform->type = PlatformType::FALLING;
 
                     platform->phys.body.hasGravity = true;
                 }
-                else if(type == TileType::DISAPPEARING_PLATFORM)
+                break;
+
+                case TileType::DISAPPEARING_PLATFORM:
                 {
                     platform->type = PlatformType::DISAPPEARING;
+                }
+                break;
+
+                default:
+                    break;
                 }
 
                 platformList.push_back(platform);
@@ -376,8 +389,7 @@ void Level::InitLevel(const char *levelPath, float dt, int iterations)
                 }
                 break;
 
-                default:
-                    break;
+                default: break;
                 }
             }
         }
@@ -531,7 +543,11 @@ void Level::DiscreteUpdate()
         {
             for(int j = platformRange.startY; j <= platformRange.endY; j++)
             {
-                if(!level[i][j].gameObj) continue;
+                GameObject* objTile = level[i][j].gameObj;
+
+                if(!objTile) continue;
+
+                if(!objTile->canPlatformCollidePhysically) continue;
 
                 SolveCollisions_Platform(&platform->phys, level[i][j].gameObj, platform->type == PlatformType::MOVING_HORIZONTAL);
             }
@@ -808,11 +824,11 @@ void Level::DrawLevel()
         player.currentFrame
     );
 
-    //DebugDrawing();
+    DebugDrawing();
 
     EndMode2D();
 
-    //DebugTextDrawing();
+    DebugTextDrawing();
 }
 
 void Level::DebugDrawing()

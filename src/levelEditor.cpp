@@ -53,8 +53,7 @@ LevelEditor::LevelEditor(int screenWidth, int screenHeight, const char* levelPat
 
     LoadAssets();
 
-    if(!activeRenderData || activeRenderData->animationFrames.empty()) currentTexture = 0;
-    else currentTexture = 0;
+    currentTexture = 0;
 }
 
 LevelEditor::~LevelEditor()
