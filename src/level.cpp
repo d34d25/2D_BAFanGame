@@ -704,19 +704,15 @@ void Level::DrawLevel()
 
             if(platformRenderData->spacing != 1)
             {
-                int loopEnd = platform->textureIndex + platformRenderData->spacing - 1;
-
-                if(platformRenderData->spacing == 0) loopEnd = platformRenderData->endFrame;
-
                 frameToDraw = GetCurrentFrame(
                     platformRenderData->animationFrames,
                     platform->textureIndex,
-                    loopEnd,
+                    platformRenderData->spacing,
                     platformRenderData->animationSpeed
                 );
             }
 
-            if(platform->textureIndex >= 0 && platform->textureIndex < (int)platformRenderData->animationFrames.size())
+            if(frameToDraw >= 0 && frameToDraw < (int)platformRenderData->animationFrames.size())
             {
                 DrawTile(platformRenderData, frameToDraw, platform->phys.position, tileScale);
             }
@@ -750,19 +746,15 @@ void Level::DrawLevel()
 
                 if(tileRenderData->spacing != 1)
                 {
-                    int loopEnd = tile.textureIndex + tileRenderData->spacing - 1;
-
-                    if(tileRenderData->spacing == 0) loopEnd = tileRenderData->endFrame;
-
                     frameToDraw = GetCurrentFrame(
                         tileRenderData->animationFrames,
                         tile.textureIndex,
-                        loopEnd,
+                        tileRenderData->spacing,
                         tileRenderData->animationSpeed
                     );
                 }
 
-                if(tile.textureIndex >= 0 && tile.textureIndex < (int)tileRenderData->animationFrames.size())
+                if(frameToDraw >= 0 && frameToDraw < (int)tileRenderData->animationFrames.size())
                 {
                     DrawTile(tileRenderData, frameToDraw, GetTileCenter(i,j), tileScale);
                 }
@@ -816,11 +808,11 @@ void Level::DrawLevel()
         player.currentFrame
     );
 
-    DebugDrawing();
+    //DebugDrawing();
 
     EndMode2D();
 
-    DebugTextDrawing();
+    //DebugTextDrawing();
 }
 
 void Level::DebugDrawing()

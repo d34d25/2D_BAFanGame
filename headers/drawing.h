@@ -19,7 +19,7 @@ inline void DrawAABB(Rectangle aabb, Color color)
     DrawLineEx({aabb.x, aabb.y + aabb.height}, {aabb.x + aabb.width, aabb.y + aabb.height}, thickness, color);
 }
 
-inline std::vector<Rectangle> CropImage(const Texture2D& sourceTexture, int maxFrames, Vector2 size)
+inline std::vector<Rectangle> CropImage(const Texture2D& sourceTexture, Vector2 size)
 {
     std::vector<Rectangle> frames = {};
 
@@ -28,8 +28,11 @@ inline std::vector<Rectangle> CropImage(const Texture2D& sourceTexture, int maxF
     int gap = 1;
 
     int framesPerRow = sourceTexture.width / ((int)size.x + gap);
+    int framesPerCol = sourceTexture.height / ((int)size.y + gap);
 
-    for(int i = 0; i < maxFrames; i++)
+    int totalFrames = framesPerRow * framesPerCol;
+
+    for(int i = 0; i < totalFrames; i++)
     {
         float x = (float)(i % framesPerRow) * (size.x + gap) + gap;
         float y = (float)(i / framesPerRow) * (size.y + gap) + gap;
@@ -40,21 +43,15 @@ inline std::vector<Rectangle> CropImage(const Texture2D& sourceTexture, int maxF
     return frames;
 }
 
-inline int GetCurrentFrame(const std::vector<Rectangle>& frames, int startFrame, int endFrame, float animationSpeed)
+inline int GetCurrentFrame(const std::vector<Rectangle>& frames, int index, int spacing, float animationSpeed)
 {
     if(frames.empty()) return 0;
 
-    if(startFrame < 0) startFrame = 0;
+    int frameCount = (spacing <= 0) ? (int)frames.size() : spacing;
 
-    if(endFrame >= (int)frames.size()) endFrame = (int)frames.size() - 1;
+    int frame = (int)(GetTime() * animationSpeed) % frameCount;
 
-    if(startFrame > endFrame) return startFrame;
-
-    int frameCount = (endFrame - startFrame) + 1;
-
-    int currentLoopFrame = (int)(GetTime() * animationSpeed) % frameCount;
-
-    return startFrame + currentLoopFrame;
+    return index + frame;
 }
 
 inline void DrawSprite(
@@ -66,7 +63,7 @@ inline void DrawSprite(
 )
 {
 
-    Rectangle sourceRect = Rectangle{0,0, (float)renderData.sourceTexture.width, (float)renderData.sourceTexture.height};
+    Rectangle sourceRect = Rectangle{0,0, (float)renderData.sourceTexture->width, (float)renderData.sourceTexture->height};
 
     if(!renderData.animationFrames.empty() && currentFrame < renderData.animationFrames.size())
     {
@@ -92,7 +89,7 @@ inline void DrawSprite(
     Vector2 origin = {width * 0.5f, height * 0.5f};
 
     DrawTexturePro(
-        renderData.sourceTexture,
+        *renderData.sourceTexture,
         sourceRect,
         destRect,
         origin,
@@ -116,7 +113,7 @@ inline void DrawTile(SpriteRenderData* renderData, int frameIndex, Vector2 world
     Vector2 origin = {width * 0.5f, height * 0.5f};
 
     DrawTexturePro(
-        renderData->sourceTexture,
+        *renderData->sourceTexture,
         source,
         dest,
         origin, 

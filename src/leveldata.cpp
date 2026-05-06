@@ -1,5 +1,10 @@
 #include "leveldata.h"
 
+#include <map>
+#include <string>
+
+static std::map<std::string, Texture2D> textureCache = {};
+
 //tiles
 std::vector<SpriteRenderData> solidTilesRenderData = {};
 
@@ -36,39 +41,56 @@ std::vector<SpriteRenderData> waterRenderData = {};
 std::vector<SpriteRenderData> movingPlatformRenderData_Vertical = {};
 
 /*
-    spacing means the length of each animation, if it is 1 frame it means it's static
-    start and end frame are only used in case of having multiple variants in one sprite sheet
+    spacing is how many frames an animation loop has, this value is fixed for each SpriteRenderData
+    if the spacing is 0 or less the whole animation vector will be used, if it is 1 the SpriteRenderData won't have animations,
+    if it is greater than 1, each animation will have <spacing> frames per animation
 
-    sprite sheets are treated as an uniform grid so a single sprite sheet regadless of its content must have
-    a constant spacing and frame size
+    startFrame and endFrames alongside frameSize indicates what portion of the spritesheet is used
+    these values are fixed for each SpriteRenderData
+
+    CropImage splits the given texture in a uniform grid with a 1px gap
+
+    each SpriteRenderData will have a fixed spacing and frameSize value, but different SpriteRenderData can use
+    the same source texture despite having differente sizes, start, end and spacing.
 */
-SpriteRenderData LoadRenderData(const char* path, int maxFrames, Vector2 frameSize, int spacing = 1, int startFrame = 0, int endFrame = 0, float animationSpeed = 5.0f)
+SpriteRenderData LoadRenderData(const char* path, Vector2 frameSize, int spacing = 1, int startFrame = 0, int endFrame = 0, float animationSpeed = 5.0f)
 {
     SpriteRenderData renderData = {};
-
-    renderData.animationFrames.clear();
-
-    renderData.sourceTexture = LoadTexture(path);
-
-    renderData.maxFrames = maxFrames;
-
-    renderData.frameSize = frameSize;
-
-    renderData.animationFrames = CropImage(renderData.sourceTexture, renderData.maxFrames, renderData.frameSize);
-
-    renderData.startFrame = startFrame;
-
-    if(endFrame < 1 && !renderData.animationFrames.empty()) endFrame = (int)renderData.animationFrames.size();
-
-    renderData.endFrame = endFrame;
 
     renderData.spacing = spacing;
 
     renderData.animationSpeed = animationSpeed;
 
-    SetTextureFilter(renderData.sourceTexture, TEXTURE_FILTER_POINT);
+    renderData.animationFrames.clear();
 
-    SetTextureWrap(renderData.sourceTexture, TEXTURE_WRAP_CLAMP);
+    std::string key = path;
+
+    if(textureCache.find(key) == textureCache.end())
+    {
+        textureCache[key] = LoadTexture(path);
+
+        SetTextureFilter(textureCache[key], TEXTURE_FILTER_POINT);
+
+        SetTextureWrap(textureCache[key], TEXTURE_WRAP_CLAMP);
+    }
+
+    renderData.sourceTexture = &textureCache[key];
+
+    std::vector<Rectangle> allFrames = CropImage(*renderData.sourceTexture, frameSize);
+
+    if(endFrame <= 0 || endFrame > (int)allFrames.size()) endFrame = (int)allFrames.size();
+
+    if(startFrame < 0 || startFrame > endFrame) startFrame = 0;
+
+    if(!allFrames.empty() && startFrame < endFrame)
+    {
+        renderData.animationFrames.assign(
+            allFrames.begin() + startFrame,
+            allFrames.begin() + endFrame
+        );
+    }
+
+    renderData.maxFrames = (int)renderData.animationFrames.size();
 
     return renderData;
 }
@@ -79,46 +101,44 @@ void LoadAssets()
 
     //tiles
 
-    solidTilesRenderData.push_back(LoadRenderData("assets/tiles/solid/solid-tiles-spritesheet.png", 9, tileSize));
+    solidTilesRenderData.push_back(LoadRenderData("assets/tiles/solid/solid-tiles-spritesheet.png", tileSize));
 
-    solidTilesRenderData.push_back(LoadRenderData("assets/tiles/solid/solid-tiles-spritesheet-b.png", 9, tileSize));
+    solidTilesRenderData.push_back(LoadRenderData("assets/tiles/solid/solid-tiles-spritesheet-b.png", tileSize));
 
     //spikes
 
-    spikesRenderData.push_back(LoadRenderData("assets/tiles/spike-sprite-sheet.png", 5, tileSize));
+    spikesRenderData.push_back(LoadRenderData("assets/tiles/spike-sprite-sheet.png", tileSize));
 
-    spikesDobuleRenderData.push_back(LoadRenderData("assets/tiles/spike-double-sprite-sheet.png", 5, tileSize));
+    spikesDobuleRenderData.push_back(LoadRenderData("assets/tiles/spike-double-sprite-sheet.png", tileSize));
 
-    spikesSmallRenderData.push_back(LoadRenderData("assets/tiles/spike-small-sprite-sheet.png", 5, tileSize));
+    spikesSmallRenderData.push_back(LoadRenderData("assets/tiles/spike-small-sprite-sheet.png", tileSize));
 
     //treadmills
 
-    int treadmillMaxFrames = 6 * 2;
+    treadmillRenderData_Right.push_back(LoadRenderData("assets/tiles/treadmill-spritesheet.png", tileSize, 2, 0, 6));
 
-    treadmillRenderData_Right.push_back(LoadRenderData("assets/tiles/treadmill-spritesheet.png", treadmillMaxFrames, tileSize, 2, 0, (int)(treadmillMaxFrames / 2)));
-
-    treadmillRenderData_Left.push_back(LoadRenderData("assets/tiles/treadmill-spritesheet.png", treadmillMaxFrames, tileSize, 2, (int)(treadmillMaxFrames / 2), treadmillMaxFrames));
+    treadmillRenderData_Left.push_back(LoadRenderData("assets/tiles/treadmill-spritesheet.png", tileSize, 2, 6, 12));
 
     //decoration
 
-    decoRenderData.push_back(LoadRenderData("assets/tiles/deco/deco-spritesheet-1.png", 2, {14,16}, 2, 0, 0, 2.0f));
-    decoRenderData.push_back(LoadRenderData("assets/tiles/deco/deco-spritesheet-2.png", 2, {14,16}));
-    decoRenderData.push_back(LoadRenderData("assets/tiles/deco/deco-spritesheet-3.png", 1, {35,29}));
+    decoRenderData.push_back(LoadRenderData("assets/tiles/deco/deco-spritesheet-1.png", {14,16}, 2, 0, 0, 2.0f));
+    decoRenderData.push_back(LoadRenderData("assets/tiles/deco/deco-spritesheet-2.png", {14,16}));
+    decoRenderData.push_back(LoadRenderData("assets/tiles/deco/deco-spritesheet-3.png", {35,29}));
 
     //wind tiles
 
-    windRenderData_Up.push_back(LoadRenderData("assets/tiles/wind-up.png", 3, {16,16}, 3));
-    windRenderData_Down.push_back(LoadRenderData("assets/tiles/wind-down.png", 3, {16,16}, 3));
-    windRenderData_Left.push_back(LoadRenderData("assets/tiles/wind-left.png", 3, {16,16}, 3));
-    windRenderData_Right.push_back(LoadRenderData("assets/tiles/wind-right.png", 3, {16,16}, 3));
+    windRenderData_Up.push_back(LoadRenderData("assets/tiles/wind-up.png", {16,16}, 3));
+    windRenderData_Down.push_back(LoadRenderData("assets/tiles/wind-down.png", {16,16}, 3));
+    windRenderData_Left.push_back(LoadRenderData("assets/tiles/wind-left.png", {16,16}, 3));
+    windRenderData_Right.push_back(LoadRenderData("assets/tiles/wind-right.png", {16,16}, 3));
 
     //water
 
-    waterRenderData.push_back(LoadRenderData("assets/tiles/water.png", 6, {16,16}, 3));
+    waterRenderData.push_back(LoadRenderData("assets/tiles/water.png", {16,16}, 3));
 
     //platforms
 
-    movingPlatformRenderData_Vertical.push_back(LoadRenderData("assets/platforms/vertical-moving-platform-spritesheet.png", 2, {48,5}, 2));
+    movingPlatformRenderData_Vertical.push_back(LoadRenderData("assets/platforms/vertical-moving-platform-spritesheet.png", {48,5}, 2));
 }
 
 void UnloadAssets()
@@ -136,13 +156,19 @@ void UnloadAssets()
     //tiles
     CleanUp(solidTilesRenderData);
 
-    CleanUp(spikesRenderData);
-
     CleanUp(treadmillRenderData_Left);
 
     CleanUp(treadmillRenderData_Right);
 
     CleanUp(decoRenderData);
+
+    //spikes
+
+    CleanUp(spikesRenderData);
+
+    CleanUp(spikesDobuleRenderData);
+
+    CleanUp(spikesSmallRenderData);
 
     //platforms
 

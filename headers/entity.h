@@ -160,20 +160,16 @@ public:
 
 struct SpriteRenderData
 {
-    Texture2D sourceTexture = {};
+    Texture2D* sourceTexture = nullptr;
 
     Vector2 offset = {0,0};
 
     //animation
     std::vector<Rectangle> animationFrames = {};
 
-    int startFrame = 0;
-    int endFrame = (int)animationFrames.size();
-
     int spacing = 0;
 
     int maxFrames = 1;
-    Vector2 frameSize = {1,1};
 
     float animationSpeed = 5.0f;
 };

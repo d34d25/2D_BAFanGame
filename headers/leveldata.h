@@ -46,8 +46,6 @@ static constexpr Color DECO = Color{135,30,255,255};
 static constexpr int ROWS = 70;
 static constexpr int COLS = 70;
 
-static constexpr int DEFAULT_INVALID_INDEX = -1;
-
 static constexpr int gridSize = 48;
 
 static constexpr int tileScale = 3;
@@ -211,7 +209,8 @@ const std::vector<TileTypeList> TILE_TYPE_LIST = {
 struct Tile
 {
     TileType type = TileType::VOID;
-    int textureIndex = DEFAULT_INVALID_INDEX;
+
+    int textureIndex = 0;
 
     int variantIndex = 0;
     
@@ -288,6 +287,7 @@ inline Vector2 GetTileCenter(int i, int j)
 }
 
 //textures
+
 
 //tiles
 

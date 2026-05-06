@@ -53,7 +53,7 @@ LevelEditor::LevelEditor(int screenWidth, int screenHeight, const char* levelPat
 
     LoadAssets();
 
-    if(!activeRenderData || activeRenderData->animationFrames.empty()) currentTexture = DEFAULT_INVALID_INDEX;
+    if(!activeRenderData || activeRenderData->animationFrames.empty()) currentTexture = 0;
     else currentTexture = 0;
 }
 
@@ -102,8 +102,7 @@ void LevelEditor::Update()
 
         currentVariant = 0;
 
-        if(!activeRenderData || activeRenderData->animationFrames.empty()) currentTexture = DEFAULT_INVALID_INDEX;
-        else currentTexture = 0;
+        currentTexture = 0;
     }
 
     float mouseWheel = GetMouseWheelMove();
@@ -143,12 +142,16 @@ void LevelEditor::Update()
 
             currentTexture += activeRenderData->spacing * direction;
 
-            if(currentTexture < activeRenderData->startFrame) currentTexture = activeRenderData->endFrame - activeRenderData->spacing;
-            else if (currentTexture >= activeRenderData->endFrame) currentTexture = activeRenderData->startFrame;
+            int frameCount = (int)activeRenderData->animationFrames.size();
+
+            if(currentTexture < 0)
+                currentTexture = frameCount - activeRenderData->spacing;
+            else if(currentTexture >= frameCount)
+                currentTexture = 0;
         }
         else
         {
-            currentTexture = DEFAULT_INVALID_INDEX;
+            currentTexture = 0;
         }
     }
 
@@ -199,10 +202,10 @@ void LevelEditor::Update()
 
         if(!activeRenderData || activeRenderData->animationFrames.empty())
         {
-            currentTexture = DEFAULT_INVALID_INDEX;
+            currentTexture = 0;
             currentVariant = 0;
         }
-        else currentTexture = activeRenderData->startFrame;
+        else currentTexture = 0;
     }
 
     TileType& currentTile = tempLevel[mouseMatrixPosition.x][mouseMatrixPosition.y].type;
@@ -225,7 +228,7 @@ void LevelEditor::Update()
                         if(tempLevel[i][j].type == TileType::PLAYER_SPAWN)
                         {
                             tempLevel[i][j].type = TileType::VOID;
-                            tempLevel[i][j].textureIndex = DEFAULT_INVALID_INDEX;
+                            tempLevel[i][j].textureIndex = 0;
                             tempLevel[i][j].variantIndex = 0;
                         }
                     }
@@ -243,7 +246,7 @@ void LevelEditor::Update()
         if(currentTileType != (int)TileType::VOID)
         {
             currentTile = TileType::VOID;
-            currentTileTextureIndex = DEFAULT_INVALID_INDEX;
+            currentTileTextureIndex = 0;
             currentTileVariantIndex = 0;
         }
     }
@@ -320,7 +323,6 @@ void LevelEditor::Draw()
             }
             else 
             {
-
                 DrawTile(tileRenderData, tileTextureId, GetTileCenter(i,j), tileScale);
             }
         }

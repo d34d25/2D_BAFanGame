@@ -23,7 +23,7 @@ private:
 
     int currentTileType = (int)TileType::VOID;
     
-    int currentTexture = DEFAULT_INVALID_INDEX;
+    int currentTexture = 0;
 
     int currentVariant = 0;
 

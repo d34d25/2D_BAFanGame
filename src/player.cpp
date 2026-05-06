@@ -32,8 +32,8 @@ Player::Player(Vector2 position)
     {
     case Character::MOMOI:
 
-        characterRenderData.sourceTexture = LoadTexture("assets/characters/chibi-momoi.png");
-        weaponRenderData.sourceTexture = LoadTexture("assets/characters/momoi-weapon.png");
+        playerTexture = LoadTexture("assets/characters/chibi-momoi.png");
+        weaponTexture = LoadTexture("assets/characters/momoi-weapon.png");
 
         characterRenderData.offset.x = 0.0f;
         characterRenderData.offset.y = -5.0f;
@@ -42,7 +42,7 @@ Player::Player(Vector2 position)
         weaponRenderData.offset.y = 16.0f;
 
         characterRenderData.animationFrames = CropImage(
-            characterRenderData.sourceTexture, 2, {12,18}
+            playerTexture, {12,18}
         );
 
         bulletData.fireRate = 0.2f;
@@ -56,8 +56,8 @@ Player::Player(Vector2 position)
         break;
     case Character::MIDORI:
 
-        characterRenderData.sourceTexture = LoadTexture("assets/characters/chibi-midori.png");
-        weaponRenderData.sourceTexture = LoadTexture("assets/characters/midori-weapon.png");
+        playerTexture = LoadTexture("assets/characters/chibi-midori.png");
+        weaponTexture = LoadTexture("assets/characters/midori-weapon.png");
 
         characterRenderData.offset.x = 0.0f;
         characterRenderData.offset.y = -5.0f;
@@ -74,8 +74,8 @@ Player::Player(Vector2 position)
         break;
     case Character::YUZU:
 
-        characterRenderData.sourceTexture = LoadTexture("assets/characters/chibi-yuzu.png");
-        weaponRenderData.sourceTexture = LoadTexture("assets/characters/yuzu-weapon.png");
+        playerTexture = LoadTexture("assets/characters/chibi-yuzu.png");
+        weaponTexture = LoadTexture("assets/characters/yuzu-weapon.png");
 
         characterRenderData.offset.x = -4.0f;
         characterRenderData.offset.y = -1.0f;
@@ -98,8 +98,8 @@ Player::Player(Vector2 position)
         break;
     case Character::ARIS:
 
-        characterRenderData.sourceTexture = LoadTexture("assets/characters/chibi-aris.png");
-        weaponRenderData.sourceTexture = LoadTexture("assets/characters/aris-weapon.png");
+        playerTexture = LoadTexture("assets/characters/chibi-aris.png");
+        weaponTexture = LoadTexture("assets/characters/aris-weapon.png");
 
         characterRenderData.offset.x = 0.0f;
         characterRenderData.offset.y = -1.0f;
@@ -118,8 +118,8 @@ Player::Player(Vector2 position)
         break;
     case Character::MOMOI_CHAQUENA:
 
-        characterRenderData.sourceTexture = LoadTexture("assets/characters/chibi-momoi-chaquena.png");
-        weaponRenderData.sourceTexture = LoadTexture("assets/characters/momoi-chaquena-weapon.png");
+        playerTexture = LoadTexture("assets/characters/chibi-momoi-chaquena.png");
+        weaponTexture = LoadTexture("assets/characters/momoi-chaquena-weapon.png");
 
         characterRenderData.offset.x = 0.0f;
         characterRenderData.offset.y = -4.0f;
@@ -141,14 +141,17 @@ Player::Player(Vector2 position)
     }
 
     //character sprite
-    SetTextureFilter(characterRenderData.sourceTexture, TEXTURE_FILTER_POINT);
+    SetTextureFilter(playerTexture, TEXTURE_FILTER_POINT);
 
-    SetTextureWrap(characterRenderData.sourceTexture, TEXTURE_WRAP_CLAMP);
+    SetTextureWrap(playerTexture, TEXTURE_WRAP_CLAMP);
 
     //weapon sprite
-    SetTextureFilter(weaponRenderData.sourceTexture, TEXTURE_FILTER_POINT);
+    SetTextureFilter(weaponTexture, TEXTURE_FILTER_POINT);
 
-    SetTextureWrap(weaponRenderData.sourceTexture, TEXTURE_WRAP_CLAMP);
+    SetTextureWrap(weaponTexture, TEXTURE_WRAP_CLAMP);
+
+    characterRenderData.sourceTexture = &playerTexture;
+    weaponRenderData.sourceTexture = &weaponTexture;
 
     bulletpool = std::make_unique<BulletPool>(30, bulletLifeTime, bulletData.radius, bulletData.mainColor, bulletData.backColor, explodes);
 }

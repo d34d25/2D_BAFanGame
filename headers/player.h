@@ -35,6 +35,9 @@ private:
 
     Character character = Character::MOMOI;
 
+    Texture2D playerTexture = {};
+    Texture2D weaponTexture = {};
+
     float jumpTime = 0.0f;
     float maxJumpTime = 0.15f;
 
@@ -44,7 +47,7 @@ private:
 
         Vector2 offset = weaponRenderData.offset;
 
-        float textureWidth = weaponRenderData.sourceTexture.width;
+        float textureWidth = weaponRenderData.sourceTexture->width;
 
         if(entityData.flipX)
         {
