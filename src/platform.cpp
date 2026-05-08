@@ -1,6 +1,20 @@
 #include "platform.h"
 #include <iostream>
 
+Platform::Platform()
+{
+    phys.body = new SimpleBody2D();
+}
+
+Platform::~Platform()
+{
+    if(phys.body)
+    {
+        delete phys.body;
+        phys.body = nullptr;
+    }
+}
+
 void Platform::Update(float dt, int iterations)
 {
     bool isFalling = type == PlatformType::FALLING;
@@ -26,24 +40,24 @@ void Platform::Update(float dt, int iterations)
 
         if(isDisappearing)
         {
-            phys.position = DESPAWN_LOCATION;
+            phys.transform.position = DESPAWN_LOCATION;
             updateRequired = false;
         }
         else if(isFalling)
         {
-            phys.body.hasGravity = true;
+            phys.body->hasGravity = true;
 
-            phys.body.UpdateVelocity(dt, iterations, gravity);
+            phys.body->UpdateVelocity(dt, iterations, gravity);
         }
     }
     else
     {
-        phys.body.AddVelocities();
+        phys.body->AddVelocities();
     }
 
-    phys.body.UpdatePositionX(dt, iterations, &phys.position.x);
+    phys.body->UpdatePositionX(dt, iterations, &phys.transform.position.x);
 
-    phys.body.UpdatePositionY(dt, iterations, &phys.position.y);
+    phys.body->UpdatePositionY(dt, iterations, &phys.transform.position.y);
 
-    phys.UpdateAABB();
+    phys.UpdateHitboxes();
 }

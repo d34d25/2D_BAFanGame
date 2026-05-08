@@ -11,8 +11,6 @@ Level::~Level()
 {
     ClearTileMatrix();
 
-    ClearGameObjMatrix();
-
     ClearPlatformList();
 
     UnloadAssets();
@@ -55,8 +53,6 @@ void Level::InitLevel(const char *levelPath, float dt, int iterations)
 
     ClearTileMatrix();
 
-    ClearGameObjMatrix();
-
     ClearPlatformList();
 
     LoadLevelData(levelPath);
@@ -74,8 +70,8 @@ void Level::InitLevel(const char *levelPath, float dt, int iterations)
 
             if(type == TileType::PLAYER_SPAWN)
             {
-                player.phys.position = {xpos, ypos};
-                player.spawnPos = player.phys.position;
+                player.phys.transform.position = {xpos, ypos};
+                player.spawnPos = player.phys.transform.position;
             }
            
             //platforms...
@@ -97,11 +93,11 @@ void Level::InitLevel(const char *levelPath, float dt, int iterations)
                     platformHeight = gridSize;
                 }
 
-                platform->phys.position = {xpos, ypos};
+                platform->phys.transform.position = {xpos, ypos};
 
-                platform->phys.mainHitbox = {{0,0}, {platformWidth, platformHeight}};
+                platform->phys.hitboxes.push_back(Hitbox{{0,0}, {platformWidth, platformHeight}});
 
-                platform->phys.UpdateAABB();
+                platform->phys.UpdateHitboxes();
 
                 float platformSpeed = 100.0f;
 
@@ -117,7 +113,7 @@ void Level::InitLevel(const char *levelPath, float dt, int iterations)
                 {
                     platform->type = PlatformType::MOVING_HORIZONTAL;
 
-                    platform->phys.body.velocity.x = platformSpeed;
+                    platform->phys.body->velocity.x = platformSpeed;
 
                     platform->updateRequired = true;
                 }
@@ -127,7 +123,7 @@ void Level::InitLevel(const char *levelPath, float dt, int iterations)
                 {
                     platform->type = PlatformType::MOVING_VERTICAL;
 
-                    platform->phys.body.velocity.y = -platformSpeed;
+                    platform->phys.body->velocity.y = -platformSpeed;
 
                     platform->updateRequired = true;
                 }
@@ -137,7 +133,7 @@ void Level::InitLevel(const char *levelPath, float dt, int iterations)
                 {
                     platform->type = PlatformType::FALLING;
 
-                    platform->phys.body.hasGravity = true;
+                    platform->phys.body->hasGravity = true;
                 }
                 break;
 
@@ -165,6 +161,11 @@ void Level::InitLevel(const char *levelPath, float dt, int iterations)
 
             if(IsNotRealTile(type)) continue;
 
+            float xpos = i * gridSize + gridSize * 0.5f;
+            float ypos = j * gridSize + gridSize * 0.5f;
+
+            tile->gameObj.transform.position = {xpos, ypos};
+
             //decorational tiles don't need a physical body
             if(level[i][j].type == TileType::DECO) continue;
 
@@ -185,18 +186,11 @@ void Level::InitLevel(const char *levelPath, float dt, int iterations)
 
             if(!isEdge) continue;
 
-            float xpos = i * gridSize + gridSize * 0.5f;
-            float ypos = j * gridSize + gridSize * 0.5f;
+            tile->gameObj.body = new SimpleBody2D();
 
-            level[i][j].gameObj = new GameObject();
+            tile->gameObj.hitboxes.push_back(Hitbox{{0,0}, {gridSize, gridSize}});
 
-            GameObject* objTile = level[i][j].gameObj;
-
-            objTile->mainHitbox = {{0,0}, {gridSize, gridSize}};
-
-            objTile->position = {xpos, ypos};
-
-            objTile->UpdateAABB();
+            tile->gameObj.UpdateHitboxes();
 
             float treadmillVel = 200.0f;
 
@@ -204,97 +198,97 @@ void Level::InitLevel(const char *levelPath, float dt, int iterations)
             {
             case TileType::SOLID:
             {
-                objTile->canEntityCollidePhysically = true;
-                objTile->canPlatformCollidePhysically = true;
+                tile->gameObj.canEntityCollidePhysically = true;
+                tile->gameObj.canPlatformCollidePhysically = true;
             }
             break;
 
             case TileType::GOAL:
             {
-                objTile->canEntityCollidePhysically = false;
-                objTile->canPlatformCollidePhysically = false;
+                tile->gameObj.canEntityCollidePhysically = false;
+                tile->gameObj.canPlatformCollidePhysically = false;
             }
             break;
 
             case TileType::PLATFORM_STOP:
             {
-                objTile->canEntityCollidePhysically = false;
-                objTile->canPlatformCollidePhysically = true;
+                tile->gameObj.canEntityCollidePhysically = false;
+                tile->gameObj.canPlatformCollidePhysically = true;
             }
             break;
             
             case TileType::TRAMPOLINE:
             {
-                objTile->canEntityCollidePhysically = true;
-                objTile->canPlatformCollidePhysically = true;
+                tile->gameObj.canEntityCollidePhysically = true;
+                tile->gameObj.canPlatformCollidePhysically = true;
             }
             break;
 
             case TileType::GRAVITY_CHANGER:
             {
-                objTile->canEntityCollidePhysically = false;
-                objTile->canPlatformCollidePhysically = false;
+                tile->gameObj.canEntityCollidePhysically = false;
+                tile->gameObj.canPlatformCollidePhysically = false;
             }
             break;
 
             case TileType::TREADMILL_RIGHT:
             {
-                objTile->canEntityCollidePhysically = true;
-                objTile->canPlatformCollidePhysically = true;
+                tile->gameObj.canEntityCollidePhysically = true;
+                tile->gameObj.canPlatformCollidePhysically = true;
 
-                objTile->body.velocity.x = treadmillVel;
+                tile->gameObj.body->velocity.x = treadmillVel;
             }
             break;
 
             case TileType::TREADMILL_LEFT:
             {
-                objTile->canEntityCollidePhysically = true;
-                objTile->canPlatformCollidePhysically = true;
+                tile->gameObj.canEntityCollidePhysically = true;
+                tile->gameObj.canPlatformCollidePhysically = true;
 
-                objTile->body.velocity.x = -treadmillVel;
+                tile->gameObj.body->velocity.x = -treadmillVel;
             }
             break;
 
             case TileType::ONE_WAY_UP:
             {
-                objTile->canEntityCollidePhysically = true;
-                objTile->canPlatformCollidePhysically = true;
+                tile->gameObj.canEntityCollidePhysically = true;
+                tile->gameObj.canPlatformCollidePhysically = true;
             }
             break;
 
             case TileType::ONE_WAY_DOWN:
             {
-                objTile->canEntityCollidePhysically = true;
-                objTile->canPlatformCollidePhysically = true;
+                tile->gameObj.canEntityCollidePhysically = true;
+                tile->gameObj.canPlatformCollidePhysically = true;
             }
             break;
 
             case TileType::ONE_WAY_RIGHT:
             {
-                objTile->canEntityCollidePhysically = true;
-                objTile->canPlatformCollidePhysically = true;
+                tile->gameObj.canEntityCollidePhysically = true;
+                tile->gameObj.canPlatformCollidePhysically = true;
             }
             break;
 
             case TileType::ONE_WAY_LEFT:
             {
-                objTile->canEntityCollidePhysically = true;
-                objTile->canPlatformCollidePhysically = true;
+                tile->gameObj.canEntityCollidePhysically = true;
+                tile->gameObj.canPlatformCollidePhysically = true;
             }
             break;
 
             default:
             {
-                objTile->canEntityCollidePhysically = false;
-                objTile->canPlatformCollidePhysically = false;
+                tile->gameObj.canEntityCollidePhysically = false;
+                tile->gameObj.canPlatformCollidePhysically = false;
             }
             break;
             }
 
             if(IsTileSpike(tile->type))
             {
-                objTile->canEntityCollidePhysically = false;
-                objTile->canPlatformCollidePhysically = true;
+                tile->gameObj.canEntityCollidePhysically = false;
+                tile->gameObj.canPlatformCollidePhysically = true;
 
                 SpriteRenderData* spikeRenderData = GetTileActiveRenderData(TileType::SPIKE);
 
@@ -321,7 +315,7 @@ void Level::InitLevel(const char *levelPath, float dt, int iterations)
                         heightFactor = defaultFactor;
                     }
 
-                    Vector2 size = {objTile->GetMainAABB()->width * widthFactor, objTile->GetMainAABB()->height * heightFactor};
+                    Vector2 size = {tile->gameObj.GetMainAABB()->width * widthFactor, tile->gameObj.GetMainAABB()->height * heightFactor};
 
                     Vector2 offset = {0,0};
 
@@ -338,7 +332,7 @@ void Level::InitLevel(const char *levelPath, float dt, int iterations)
                         case 4: offset = {0,0}; break;
                     }
 
-                    objTile->AddSubHitbox(offset, size);
+                    tile->gameObj.AddSubHitbox(offset, size);
                 };
 
                 switch (tile->type)
@@ -409,7 +403,7 @@ void Level::UpdateLevel()
 
     player.Shoot(dt);
 
-    UpdateCamera(player.phys.position, {0, -100});
+    UpdateCamera(player.phys.transform.position, {0, -100});
 }
 
 void Level::DiscreteUpdate()
@@ -417,8 +411,8 @@ void Level::DiscreteUpdate()
     bool isGravityUp = gravity < 0;
 
     TileRange playerTileRange = CalculateTileRange(
-        player.phys.position.x,
-        player.phys.position.y,
+        player.phys.transform.position.x,
+        player.phys.transform.position.y,
         collisionTileCheckRange
     );
 
@@ -434,20 +428,20 @@ void Level::DiscreteUpdate()
     {
         for(int j = playerTileRange.startY; j <= playerTileRange.endY; j++)
         {
-            GameObject* objTile = level[i][j].gameObj;            
+            GameObject objTile = level[i][j].gameObj;
 
-            if(!objTile) continue;
+            if(!objTile.body || objTile.hitboxes.empty()) continue;
 
-            if(!objTile->canEntityCollidePhysically) continue;
+            if(!objTile.canEntityCollidePhysically) continue;
 
-            if(!CheckCollisionRecs(*player.phys.GetMainAABB(), *objTile->GetMainAABB())) continue;
+            if(!CheckCollisionRecs(*player.phys.GetMainAABB(), *objTile.GetMainAABB())) continue;
 
             const Tile& tile = level[i][j];
 
             if(!IsTileOneWay(tile.type))
             {
                 SolveCollisions(
-                    &player.phys, objTile, 
+                    &player.phys, &objTile, 
                     true, isGravityUp, 
                     tile.type == TileType::TRAMPOLINE,
                     false
@@ -456,7 +450,7 @@ void Level::DiscreteUpdate()
             else if(IsOneWayRightLeft(tile.type))
             {
                 SolveCollisionsOneWayLeftRight(
-                    &player.phys, objTile,
+                    &player.phys, &objTile,
                     tile.type == TileType::ONE_WAY_RIGHT
                 );
             }
@@ -471,20 +465,20 @@ void Level::DiscreteUpdate()
     {
         for(int j = playerTileRange.startY; j <= playerTileRange.endY; j++)
         {
-            GameObject* objTile = level[i][j].gameObj;
+            GameObject objTile = level[i][j].gameObj;
 
-            if(!objTile) continue;            
+            if(!objTile.body || objTile.hitboxes.empty()) continue;            
 
-            if(!objTile->canEntityCollidePhysically) continue;
+            if(!objTile.canEntityCollidePhysically) continue;
 
-            if(!CheckCollisionRecs(*player.phys.GetMainAABB(), *objTile->GetMainAABB())) continue;
+            if(!CheckCollisionRecs(*player.phys.GetMainAABB(), *objTile.GetMainAABB())) continue;
 
             const Tile& tile = level[i][j];
 
             if(!IsTileOneWay(tile.type))
             {
                 SolveCollisions(
-                    &player.phys, objTile, 
+                    &player.phys, &objTile, 
                     false, isGravityUp, 
                     tile.type == TileType::TRAMPOLINE,
                     false
@@ -494,7 +488,7 @@ void Level::DiscreteUpdate()
             {
                 SolveCollisionsOneWayUpDown
                 (
-                    &player.phys, objTile,
+                    &player.phys, &objTile,
                     tile.type == TileType::ONE_WAY_UP,
                     isGravityUp,
                     false
@@ -511,7 +505,7 @@ void Level::DiscreteUpdate()
 
         if(!platform) continue;
 
-        if(IsPlatformFarFromPlayer(platform->phys.position)) continue;
+        if(IsPlatformFarFromPlayer(platform->phys.transform.position)) continue;
 
         if(platform->IsInactive()) continue;
 
@@ -536,8 +530,8 @@ void Level::DiscreteUpdate()
         if(!isMovingPlatform) continue;
 
         TileRange platformRange = CalculateTileRange(
-            platform->phys.position.x,
-            platform->phys.position.y,
+            platform->phys.transform.position.x,
+            platform->phys.transform.position.y,
             collisionTileCheckRange
         );
 
@@ -545,13 +539,13 @@ void Level::DiscreteUpdate()
         {
             for(int j = platformRange.startY; j <= platformRange.endY; j++)
             {
-                GameObject* objTile = level[i][j].gameObj;
+                GameObject objTile = level[i][j].gameObj;
 
-                if(!objTile) continue;
+                if(!objTile.body || objTile.hitboxes.empty()) continue;
 
-                if(!objTile->canPlatformCollidePhysically) continue;
+                if(!objTile.canPlatformCollidePhysically) continue;
 
-                SolveCollisions_Platform(&platform->phys, level[i][j].gameObj, platform->type == PlatformType::MOVING_HORIZONTAL);
+                SolveCollisions_Platform(&platform->phys, &level[i][j].gameObj, platform->type == PlatformType::MOVING_HORIZONTAL);
             }
         }
     }
@@ -561,25 +555,27 @@ void Level::DiscreteUpdate()
     {
         for(int j = playerTileRange.startY; j <= playerTileRange.endY; j++)
         {
-            GameObject* objTile = level[i][j].gameObj;
-
             Tile& tile = level[i][j];
 
-            if(!objTile) continue;
+            if(IsNotRealTile(tile.type)) continue;
+
+            GameObject objTile = tile.gameObj;
+
+            if(objTile.hitboxes.empty()) continue;
 
             if(IsOneWayRightLeft(tile.type)) continue;
 
             if(tile.type == TileType::PLATFORM_STOP) continue;
 
-            if(CheckCollisionRecs(*player.phys.GetMainAABB(), *objTile->GetMainAABB()))
+            if(CheckCollisionRecs(*player.phys.GetMainAABB(), *objTile.GetMainAABB()))
             {
                 if(tile.type == TileType::GRAVITY_CHANGER) player.wasTouchingGravityChanger = true;
 
                 if(IsTileSpike(tile.type))
                 {
-                    for(int h = 0; h < objTile->subHitboxList.size(); h++)
+                    for(int h = 0; h < objTile.hitboxes.size(); h++)
                     {
-                        if(CheckCollisionRecs(*player.phys.GetMainAABB(), *objTile->GetSubAABB(h)))
+                        if(CheckCollisionRecs(*player.phys.GetMainAABB(), *objTile.GetSubAABB(h)))
                             player.wasTouchingSpike = true;
                     }
                 }
@@ -592,7 +588,7 @@ void Level::DiscreteUpdate()
 
                     ApplyWind(
                         &player.phys,
-                        objTile,
+                        &objTile,
                         tile.type == TileType::WIND_UP,
                         tile.type == TileType::WIND_DOWN,
                         tile.type == TileType::WIND_LEFT,
@@ -617,23 +613,23 @@ void Level::DiscreteUpdate()
 
             if(tile.type == TileType::TREADMILL_LEFT || tile.type == TileType::TREADMILL_RIGHT)
             {
-                if(CheckCollisionRecs(player.GetTreadmillDetector(), *objTile->GetMainAABB()) && player.IsFalling())
-                    player.phys.body.altVelocity = objTile->body.velocity;
+                if(CheckCollisionRecs(player.GetTreadmillDetector(), *objTile.GetMainAABB()) && player.IsFalling())
+                    player.phys.body->altVelocity = objTile.body->velocity;
             }
 
-            if(CheckCollisionRecs(player.GetJumpDetector(), *objTile->GetMainAABB()) && player.IsFalling())
+            if(CheckCollisionRecs(player.GetJumpDetector(), *objTile.GetMainAABB()) && player.IsFalling())
             {
                 if(!IsOneWayUpDown(tile.type)) player.wasGrounded = true;
                 else if(IsOneWayUpDown(tile.type))
                 {
                     if(tile.type == TileType::ONE_WAY_UP &&
-                        IsAbove(*player.phys.GetMainAABB(), *objTile->GetMainAABB(), 0.0f)
+                        IsAbove(*player.phys.GetMainAABB(), *objTile.GetMainAABB(), 0.0f)
                     )
                     {
                         player.wasGrounded = true;
                     }
                     else if(tile.type == TileType::ONE_WAY_DOWN &&
-                        IsBelow(*player.phys.GetMainAABB(), *objTile->GetMainAABB(), 0.0f)
+                        IsBelow(*player.phys.GetMainAABB(), *objTile.GetMainAABB(), 0.0f)
                     )
                     {
                         player.wasGrounded = true;
@@ -699,8 +695,8 @@ void Level::DrawLevel()
     BeginMode2D(camera);
 
     TileRange playerTileRange = CalculateTileRange(
-        player.phys.position.x,
-        player.phys.position.y,
+        player.phys.transform.position.x,
+        player.phys.transform.position.y,
         renderTileCheckRange
     );
 
@@ -710,7 +706,7 @@ void Level::DrawLevel()
 
         if(!platform) continue;
 
-        if(IsPlatformFarFromPlayer(platform->phys.position)) continue;
+        if(IsPlatformFarFromPlayer(platform->phys.transform.position)) continue;
 
         PlatformType platformType = platform->type;
 
@@ -732,7 +728,7 @@ void Level::DrawLevel()
 
             if(frameToDraw >= 0 && frameToDraw < (int)platformRenderData->animationFrames.size())
             {
-                DrawTile(platformRenderData, frameToDraw, platform->phys.position, tileScale);
+                DrawTile(platformRenderData, frameToDraw, platform->phys.transform.position, tileScale);
             }
         }
         else
@@ -774,7 +770,7 @@ void Level::DrawLevel()
 
                 if(frameToDraw >= 0 && frameToDraw < (int)tileRenderData->animationFrames.size())
                 {
-                    DrawTile(tileRenderData, frameToDraw, GetTileCenter(i,j), tileScale);
+                    DrawTile(tileRenderData, frameToDraw, tile.gameObj.transform.position, tileScale);
                 }
             }
             else
@@ -783,14 +779,14 @@ void Level::DrawLevel()
 
                 if(IsColorOf(color, BLANK)) continue;
 
-                if(tile.gameObj) DrawRectangleRec(*tile.gameObj->GetMainAABB(), color);
+                if(!tile.gameObj.hitboxes.empty()) DrawRectangleRec(*tile.gameObj.GetMainAABB(), color);
                 else DrawRectangle(i * gridSize, j * gridSize, gridSize, gridSize, color);
             }
         }
     }
 
     DrawSprite(
-        player.phys.position,
+        player.phys.transform.position,
         player.characterRenderData,
         player.entityData,
         tileScale,
@@ -819,7 +815,7 @@ void Level::DrawLevel()
     }
 
     DrawSprite(
-        player.phys.position,
+        player.phys.transform.position,
         player.weaponRenderData,
         player.entityData,
         tileScale,
@@ -836,8 +832,8 @@ void Level::DrawLevel()
 void Level::DebugDrawing()
 {
     TileRange playerTileRange = CalculateTileRange(
-        player.phys.position.x,
-        player.phys.position.y,
+        player.phys.transform.position.x,
+        player.phys.transform.position.y,
         renderTileCheckRange
     );
 
@@ -847,9 +843,13 @@ void Level::DebugDrawing()
 
         if(!platform) continue;
 
-        if(!IsPlatformFarFromPlayer(platform->phys.position))
+        if(!IsPlatformFarFromPlayer(platform->phys.transform.position))
         {
-            DrawLine(player.phys.position.x, player.phys.position.y, platform->phys.position.x, platform->phys.position.y, RED);
+            DrawLine(
+                player.phys.transform.position.x, player.phys.transform.position.y, 
+                platform->phys.transform.position.x, platform->phys.transform.position.y, 
+                RED
+            );
         }
 
         DrawAABB(*platform->phys.GetMainAABB(), RED);
@@ -859,15 +859,15 @@ void Level::DebugDrawing()
     {
         for(int j = playerTileRange.startY; j <= playerTileRange.endY; j++)
         {
-            GameObject* tileObj = level[i][j].gameObj;
+            GameObject tileObj = level[i][j].gameObj;
 
-            if(!tileObj) continue;
+            if(tileObj.hitboxes.empty()) continue;
 
-            DrawAABB(*tileObj->GetMainAABB(), RED);
+            DrawAABB(*tileObj.GetMainAABB(), RED);
 
-            for(int h = 0; h < tileObj->subHitboxList.size(); h++)
+            for(int h = 0; h < tileObj.hitboxes.size(); h++)
             {
-                DrawAABB(*tileObj->GetSubAABB(h), MAGENTA);
+                DrawAABB(*tileObj.GetSubAABB(h), MAGENTA);
             }
         }
     }
@@ -904,12 +904,12 @@ void Level::DebugTextDrawing()
 {
     DrawText(TextFormat("Iterations: %i", iterations), 10, 60, 20, SKYBLUE);
 
-    DrawText(TextFormat("Player X speed: %.4f", player.phys.body.velocity.x), 10, 100, 20, GRAY);
-    DrawText(TextFormat("Player Y speed: %.4f", player.phys.body.velocity.y), 10, 120, 20, GRAY);
+    DrawText(TextFormat("Player X speed: %.4f", player.phys.body->velocity.x), 10, 100, 20, GRAY);
+    DrawText(TextFormat("Player Y speed: %.4f", player.phys.body->velocity.y), 10, 120, 20, GRAY);
 
-    DrawText(TextFormat("Player alt X speed: %.4f", player.phys.body.altVelocity.x), 10, 160, 20, GRAY);
-    DrawText(TextFormat("Player alt Y speed: %.4f", player.phys.body.altVelocity.y), 10, 180, 20, GRAY);
+    DrawText(TextFormat("Player alt X speed: %.4f", player.phys.body->altVelocity.x), 10, 160, 20, GRAY);
+    DrawText(TextFormat("Player alt Y speed: %.4f", player.phys.body->altVelocity.y), 10, 180, 20, GRAY);
 
-    DrawText(TextFormat("Player final X speed: %.4f", player.phys.body.GetFinalVelocity().x), 10, 220, 20, GRAY);
-    DrawText(TextFormat("Player final Y speed: %.4f", player.phys.body.GetFinalVelocity().y), 10, 240, 20, GRAY);
+    DrawText(TextFormat("Player final X speed: %.4f", player.phys.body->GetFinalVelocity().x), 10, 220, 20, GRAY);
+    DrawText(TextFormat("Player final Y speed: %.4f", player.phys.body->GetFinalVelocity().y), 10, 240, 20, GRAY);
 }

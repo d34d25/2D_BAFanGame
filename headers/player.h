@@ -61,9 +61,9 @@ private:
             offset.y = -offset.y;
         }
 
-        spawnPos.x = phys.position.x + offset.x + textureWidth;
+        spawnPos.x = phys.transform.position.x + offset.x + textureWidth;
 
-        spawnPos.y = phys.position.y + offset.y;
+        spawnPos.y = phys.transform.position.y + offset.y;
 
         return spawnPos;
     }
@@ -107,25 +107,13 @@ public:
 
     Player(Vector2 position);
 
+    ~Player();
+
     void Update(float dt, int iterations);
 
     void Shoot(float dt);
 
     inline Rectangle GetJumpDetector()
-    {
-        float offset = 5.0f;
-
-        int dir = entityData.flipY ? -1 : 1;
-
-        float centerY = phys.GetMainAABB()->y + phys.GetMainAABB()->height * 0.5f;
-
-        if(dir == 1) phys.GetSubAABB(0)->y = centerY + offset;
-        else phys.GetSubAABB(0)->y = centerY - offset - phys.GetSubAABB(0)->height;
-        
-        return *phys.GetSubAABB(0);
-    }
-
-    inline Rectangle GetTreadmillDetector()
     {
         float offset = 5.0f;
 
@@ -139,13 +127,27 @@ public:
         return *phys.GetSubAABB(1);
     }
 
+    inline Rectangle GetTreadmillDetector()
+    {
+        float offset = 5.0f;
+
+        int dir = entityData.flipY ? -1 : 1;
+
+        float centerY = phys.GetMainAABB()->y + phys.GetMainAABB()->height * 0.5f;
+
+        if(dir == 1) phys.GetSubAABB(2)->y = centerY + offset;
+        else phys.GetSubAABB(2)->y = centerY - offset - phys.GetSubAABB(2)->height;
+        
+        return *phys.GetSubAABB(2);
+    }
+
     inline void Respawn()
     {
-        phys.position = spawnPos;
+        phys.transform.position = spawnPos;
 
-        phys.body.velocity = {0,0};
+        phys.body->velocity = {0,0};
 
-        phys.body.altVelocity = {0,0};
+        phys.body->altVelocity = {0,0};
 
         isJumping = false;
         isGrounded = false;
@@ -153,8 +155,8 @@ public:
 
     inline bool IsFalling()
     {
-        if(entityData.flipY) return phys.body.velocity.y <= 0;
-        else return phys.body.velocity.y >= 0;
+        if(entityData.flipY) return phys.body->velocity.y <= 0;
+        else return phys.body->velocity.y >= 0;
     }
 
     inline void ResetFalgs()

@@ -214,7 +214,7 @@ struct Tile
 
     int variantIndex = 0;
     
-    GameObject* gameObj = nullptr;
+    GameObject gameObj = {};
 };
 
 inline bool IsColorOf(Color colorA, Color colorB)

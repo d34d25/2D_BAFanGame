@@ -4,10 +4,29 @@
 #include "raymath.h"
 
 #include <vector>
+#include <iostream>
 
 const float MASS = 1;
 
 const Vector2 MAX_SPEED = {600,600};
+
+enum class Direction
+{
+    UP,
+    DOWN,
+    LEFT,
+    RIGHT,
+    NONE
+};
+
+struct Transform2D
+{
+    Vector2 position = {0,0};
+
+    float scale = 1.0f;
+
+    Direction direction = Direction::NONE;
+};
 
 struct SimpleBody2D
 {
@@ -65,96 +84,109 @@ struct Hitbox
     
     Vector2 offset = {0,0};
 
-    Hitbox(Vector2 position, Vector2 size)
-    {
-        aabb = {
-            position.x,
-            position.y,
-            size.x,
-            size.y
-        };
-    }
-
-    Hitbox(Vector2 position, Vector2 offset, Vector2 size)
+    Hitbox(Vector2 position, Vector2 size, Vector2 offset = {0,0}, bool centered = false)
     {
         this->offset = offset;
 
-        aabb = {
-            position.x + this->offset.x,
-            position.y + this->offset.y,
-            size.x,
-            size.y
-        };
+        if(!centered)
+        {
+            aabb = {
+                position.x + this->offset.x,
+                position.y + this->offset.y,
+                size.x,
+                size.y
+            };
+        }
+        else
+        {
+            aabb = {
+                (position.x - (size.x * 0.5f)) + this->offset.x,
+                (position.y - (size.y * 0.5f)) + this->offset.y,
+                size.x,
+                size.y
+            };
+        }
+    }
+
+    inline void Update(const Transform2D& transform)
+    {
+        aabb.x = (transform.position.x - aabb.width * 0.5f) + offset.x;
+        aabb.y = (transform.position.y - aabb.height * 0.5f) + offset.y;
     }
 };
 
 struct GameObject
 {
+    Transform2D transform = {};
 
-public:
+    std::vector<Hitbox> hitboxes = {};
 
-    Vector2 position = {0,0};
+    SimpleBody2D* body = nullptr;
 
-    Hitbox mainHitbox = {{0,0},{0,0}};
-
-    //these secondary hitboxes are only used for triggers (when necessary), not physics
-    std::vector<Hitbox> subHitboxList = {};
-
-    float scale = 0;
-
-    SimpleBody2D body = {};
-
-    //these makes the gameobject solid for each one
     bool canEntityCollidePhysically = false;
     bool canPlatformCollidePhysically = false;
 
+    GameObject() = default;
+
+    ~GameObject();
+
+    inline void UpdateHitboxes()
+    {
+        if(hitboxes.empty()) return;
+
+        for(int i = 0; i < hitboxes.size(); i++)
+        {
+            hitboxes[i].Update(transform);
+        }
+    }
+
     inline Rectangle* GetMainAABB()
     {
-        return &mainHitbox.aabb;
+        return &hitboxes[0].aabb;
     }
 
     inline Rectangle* GetSubAABB(int index)
     {
-        return &subHitboxList[index].aabb;
+        if(index < 1) return &hitboxes[1].aabb;
+
+        return &hitboxes[index].aabb;
     }
 
     inline void AddSubHitbox(Vector2 offset, Vector2 size)
     {
-        Vector2 spawnPosition = {
-            position.x - (size.x * 0.5f),
-            position.y - (size.y * 0.5f)
-        };
-
-        subHitboxList.push_back(Hitbox{spawnPosition, offset, size});
-    }
-
-    inline void UpdateAABB()
-    {
-        GetMainAABB()->x = position.x - GetMainAABB()->width * 0.5f;
-        GetMainAABB()->y = position.y - GetMainAABB()->height * 0.5f;
-
-        for(int i = 0; i < subHitboxList.size(); i++)
+        if(hitboxes.size() >= 1)
         {
-           GetSubAABB(i)->x = (position.x - GetSubAABB(i)->width * 0.5f) + subHitboxList[i].offset.x;
-           GetSubAABB(i)->y = (position.y - GetSubAABB(i)->height * 0.5f) + subHitboxList[i].offset.y;
+            hitboxes.push_back(Hitbox{transform.position, size, offset, true});    
+        }
+        else
+        {
+            std::cout<<"THERE IS NO MAIN HITBOX"<<"\n";
         }
     }
 
     inline void UpdateVelocity(float dt, int iterations, float gravity)
     {
-        body.UpdateVelocity(dt,iterations, gravity);
+        if(!body) return;
+
+        body->UpdateVelocity(dt, iterations, gravity);
     }
 
     inline void UpdatePositionX(float dt, int iterations)
     {
-        body.UpdatePositionX(dt, iterations, &position.x);
-        UpdateAABB();
+        if(!body) return;
+
+        body->UpdatePositionX(dt, iterations, &transform.position.x);
+        
+        UpdateHitboxes();
     }
 
     inline void UpdatePositionY(float dt, int iterations)
     {
-        body.UpdatePositionY(dt, iterations, &position.y);
-        UpdateAABB();
+        if(!body) return;
+
+        body->UpdatePositionY(dt, iterations, &transform.position.y);
+        
+        UpdateHitboxes();
     }
 };
 

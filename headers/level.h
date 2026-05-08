@@ -46,20 +46,12 @@ private:
 
                 tile.textureIndex = 0;
                 tile.type = TileType::VOID;
-            }
-        }
-    }
 
-    inline void ClearGameObjMatrix()
-    {
-        for(int i = 0; i < ROWS; i++)
-        {
-            for(int j = 0; j < COLS; j++)
-            {
-                if(level[i][j].gameObj)
-                    delete level[i][j].gameObj;
-                
-                level[i][j].gameObj = nullptr;
+                if(tile.gameObj.body)
+                {
+                    delete tile.gameObj.body;
+                    tile.gameObj.body = nullptr;
+                }
             }
         }
     }
@@ -168,7 +160,7 @@ private:
 
     inline bool IsPlatformFarFromPlayer(Vector2 platformPosition)
     {
-        return Vector2LengthSqr(Vector2Subtract(platformPosition, player.phys.position)) > MAX_DISTANCE_PLATFORM_PLAYER_SQR;
+        return Vector2LengthSqr(Vector2Subtract(platformPosition, player.phys.transform.position)) > MAX_DISTANCE_PLATFORM_PLAYER_SQR;
     }
 
     inline bool IsTileSpike(TileType type)

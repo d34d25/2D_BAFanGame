@@ -35,6 +35,10 @@ public:
 
     float gravity = 0.0f;
 
+    Platform();
+
+    ~Platform();
+
     inline void SetTimer(float time)
     {
         this->timer = time;
@@ -42,7 +46,7 @@ public:
 
     inline bool IsInactive()
     {
-        return phys.position.x == DESPAWN_LOCATION.x && phys.position.y == DESPAWN_LOCATION.y;
+        return phys.transform.position.x == DESPAWN_LOCATION.x && phys.transform.position.y == DESPAWN_LOCATION.y;
     }
 
     void Update(float dt, int iterations);
