@@ -143,8 +143,6 @@ private:
 
     void DebugTextDrawing();
 
-    void LoadLevelData(const char* levelPath);
-
     inline bool IsNotRealTile(TileType type)
     {
         if(type == TileType::VOID) return true;

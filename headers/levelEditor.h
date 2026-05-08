@@ -61,8 +61,6 @@ private:
     }
 
     void ExportLevel();
-
-    void ImportLevel(const char* levelPath);
     
     const char* levelPath;
 

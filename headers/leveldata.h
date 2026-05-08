@@ -10,6 +10,8 @@
 
 #include <vector>
 
+#include <cstring>
+
 struct TileRange
 {
     int startX = 0;
@@ -364,4 +366,19 @@ inline SpriteRenderData* GetPlatformActiveRenderData(PlatformType type, int inde
     }
 
     return nullptr;
+}
+
+inline void LoadLevelData(const char* levelPath, Tile(&destination)[ROWS][COLS])
+{
+    int dataSize = 0;
+
+    unsigned char* fileData = LoadFileData(levelPath, &dataSize);
+
+    if(fileData == nullptr) return;
+
+    if(dataSize != (ROWS * COLS * sizeof(Tile))) return;
+
+    memcpy(destination, fileData, dataSize);
+    
+    UnloadFileData(fileData);
 }

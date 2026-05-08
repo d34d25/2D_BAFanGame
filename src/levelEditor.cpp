@@ -17,21 +17,6 @@ void LevelEditor::ExportLevel()
     }
 }
 
-void LevelEditor::ImportLevel(const char* levelPath)
-{
-    int dataSize = 0;
-
-    unsigned char* fileData = LoadFileData(levelPath, &dataSize);
-
-    if(fileData == nullptr) return;
-
-    if(dataSize != (ROWS * COLS * sizeof(Tile))) return;
-
-    memcpy(tempLevel, fileData, dataSize);
-    
-    UnloadFileData(fileData);
-}
-
 LevelEditor::LevelEditor(int screenWidth, int screenHeight, const char* levelPath)
 {
     this->levelPath = levelPath;
@@ -267,7 +252,7 @@ void LevelEditor::Update()
     }
     else if(IsKeyPressed(KEY_F9))
     {
-        ImportLevel(levelPath);
+        LoadLevelData(levelPath, tempLevel);
     }
 }
 

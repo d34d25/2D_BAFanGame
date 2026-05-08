@@ -1,7 +1,6 @@
 #include "level.h"
 
 #include <iostream>
-#include <cstring>
 
 Level::Level() : player({0, 0})
 {
@@ -14,21 +13,6 @@ Level::~Level()
     ClearPlatformList();
 
     UnloadAssets();
-}
-
-void Level::LoadLevelData(const char *levelPath)
-{
-    int dataSize = 0;
-
-    unsigned char* fileData = LoadFileData(levelPath, &dataSize);
-
-    if(fileData == nullptr) return;
-
-    if(dataSize != (ROWS * COLS * sizeof(Tile))) return;
-
-    memcpy(level, fileData, dataSize);
-    
-    UnloadFileData(fileData);
 }
 
 void Level::InitLevel(const char *levelPath, float dt, int iterations)
@@ -55,7 +39,7 @@ void Level::InitLevel(const char *levelPath, float dt, int iterations)
 
     ClearPlatformList();
 
-    LoadLevelData(levelPath);
+    LoadLevelData(levelPath, level);
 
     for(int i = 0; i < ROWS; i++)
     {
