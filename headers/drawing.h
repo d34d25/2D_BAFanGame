@@ -92,7 +92,7 @@ inline void DrawSprite(
         sourceRect,
         destRect,
         origin,
-        0.0f,
+        transform.angle,
         WHITE
     );
 }
@@ -116,7 +116,7 @@ inline void DrawTile(SpriteRenderData* renderData, int frameIndex, const Transfo
         source,
         dest,
         origin, 
-        0.0f,
+        transform.angle,
         color
     );
 }

@@ -12,22 +12,13 @@ const float MASS = 1;
 
 const Vector2 MAX_SPEED = {600,600};
 
-enum class Direction
-{
-    UP,
-    DOWN,
-    LEFT,
-    RIGHT,
-    NONE
-};
-
 struct Transform2D
 {
     Vector2 position = {0,0};
 
     float scale = tileScale;
 
-    Direction direction = Direction::NONE;
+    float angle = 0.0f; //in degrees
 };
 
 struct SimpleBody2D
