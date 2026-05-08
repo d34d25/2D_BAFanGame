@@ -55,10 +55,9 @@ inline int GetCurrentFrame(const std::vector<Rectangle>& frames, int index, int 
 }
 
 inline void DrawSprite(
-    const Vector2& position,
+    const Transform2D& transform,
     const SpriteRenderData& renderData,
     const EntityData& entityData,
-    float scale = 1,
     int currentFrame = 0
 )
 {
@@ -73,15 +72,15 @@ inline void DrawSprite(
     if(entityData.flipX) sourceRect.width = -sourceRect.width;
     if(entityData.flipY) sourceRect.height = -sourceRect.height;
 
-    float width = fabs(sourceRect.width) * scale;
-    float height = fabs(sourceRect.height) * scale;
+    float width = fabs(sourceRect.width) * transform.scale;
+    float height = fabs(sourceRect.height) * transform.scale;
 
     float offsetX = entityData.flipX ? -renderData.offset.x : renderData.offset.x;
     float offsetY = entityData.flipY ? -renderData.offset.y : renderData.offset.y;
 
     Rectangle destRect = {
-        roundf(position.x + offsetX),
-        roundf(position.y + offsetY),
+        roundf(transform.position.x + offsetX),
+        roundf(transform.position.y + offsetY),
         width,
         height
     };
@@ -98,17 +97,17 @@ inline void DrawSprite(
     );
 }
 
-inline void DrawTile(SpriteRenderData* renderData, int frameIndex, Vector2 worldPos, float scale = 1, Color color = WHITE)
+inline void DrawTile(SpriteRenderData* renderData, int frameIndex, const Transform2D& transform, Color color = WHITE)
 {
     if(!renderData || frameIndex < 0 || frameIndex >= renderData->animationFrames.size())
         return;
 
     Rectangle source = renderData->animationFrames[frameIndex];
 
-    float width = source.width * scale;
-    float height = source.height * scale;
+    float width = source.width * transform.scale;
+    float height = source.height * transform.scale;
 
-    Rectangle dest = {worldPos.x, worldPos.y, width, height};
+    Rectangle dest = {transform.position.x, transform.position.y, width, height};
 
     Vector2 origin = {width * 0.5f, height * 0.5f};
 
@@ -130,12 +129,11 @@ inline void DrawBullet(int x, int y, float radius, Color mainColor, Color backCo
     DrawCircle(x, y, radius, mainColor);
 }
 
-inline void DrawExplosion(int x, int y, float radius, SpriteRenderData* renderData, int frameIndex = 0, float scale = 1, Color color = WHITE)
+inline void DrawExplosion(int x, int y, float radius, SpriteRenderData* renderData, int frameIndex = 0, float scale = tileScale, Color color = WHITE)
 {
     if(renderData)
     {
         //WIP
-        DrawTile(renderData, frameIndex, {(float)x, (float)y}, scale, color);
     }
     else
     {

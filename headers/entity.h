@@ -3,6 +3,8 @@
 #include "raylib.h"
 #include "raymath.h"
 
+#include "definitions.h"
+
 #include <vector>
 #include <iostream>
 
@@ -23,7 +25,7 @@ struct Transform2D
 {
     Vector2 position = {0,0};
 
-    float scale = 1.0f;
+    float scale = tileScale;
 
     Direction direction = Direction::NONE;
 };

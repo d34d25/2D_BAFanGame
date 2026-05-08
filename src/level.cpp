@@ -61,19 +61,14 @@ void Level::InitLevel(const char *levelPath, float dt, int iterations)
     {
         for(int j = 0; j < COLS; j++)
         {
-            TileType type = level[i][j].type;
+            Tile* tile = &level[i][j];
+            TileType type = tile->type;
 
             if(IsTypeInvalid(type)) level[i][j].type = TileType::VOID;
 
             float xpos = i * gridSize + gridSize * 0.5f;
             float ypos = j * gridSize + gridSize * 0.5f;
 
-            if(type == TileType::PLAYER_SPAWN)
-            {
-                player.phys.transform.position = {xpos, ypos};
-                player.spawnPos = player.phys.transform.position;
-            }
-           
             //platforms...
 
             bool isPlatform = type > TileType::PLATFORM_START && type < TileType::PLATFORM_END;
@@ -149,20 +144,17 @@ void Level::InitLevel(const char *levelPath, float dt, int iterations)
 
                 platformList.push_back(platform);
             }
-        }
-    }
 
-    for(int i = 0; i < ROWS; i++)
-    {
-        for(int j = 0; j < COLS; j++)
-        {
-            Tile* tile = &level[i][j];
-            TileType type = tile->type;
+            if(type == TileType::PLAYER_SPAWN)
+            {
+                player.phys.transform.position = {xpos, ypos};
+                player.spawnPos = player.phys.transform.position;
+            }
 
+            //actual tiles
             if(IsNotRealTile(type)) continue;
 
-            float xpos = i * gridSize + gridSize * 0.5f;
-            float ypos = j * gridSize + gridSize * 0.5f;
+            tile->gameObj.transform.scale = tileScale;
 
             tile->gameObj.transform.position = {xpos, ypos};
 
@@ -728,7 +720,7 @@ void Level::DrawLevel()
 
             if(frameToDraw >= 0 && frameToDraw < (int)platformRenderData->animationFrames.size())
             {
-                DrawTile(platformRenderData, frameToDraw, platform->phys.transform.position, tileScale);
+                DrawTile(platformRenderData, frameToDraw, platform->phys.transform);
             }
         }
         else
@@ -770,7 +762,7 @@ void Level::DrawLevel()
 
                 if(frameToDraw >= 0 && frameToDraw < (int)tileRenderData->animationFrames.size())
                 {
-                    DrawTile(tileRenderData, frameToDraw, tile.gameObj.transform.position, tileScale);
+                    DrawTile(tileRenderData, frameToDraw, tile.gameObj.transform);
                 }
             }
             else
@@ -786,10 +778,9 @@ void Level::DrawLevel()
     }
 
     DrawSprite(
-        player.phys.transform.position,
+        player.phys.transform,
         player.characterRenderData,
         player.entityData,
-        tileScale,
         player.currentFrame
     );
 
@@ -815,10 +806,9 @@ void Level::DrawLevel()
     }
 
     DrawSprite(
-        player.phys.transform.position,
+        player.phys.transform,
         player.weaponRenderData,
         player.entityData,
-        tileScale,
         player.currentFrame
     );
 
