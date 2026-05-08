@@ -21,13 +21,15 @@ private:
 
     int screenWidth, screenHeight;
 
+    int currentLayer = 0;
+
     int currentTileType = (int)TileType::VOID;
     
     int currentTexture = 0;
 
     int currentVariant = 0;
 
-    Tile tempLevel[ROWS][COLS];
+    Tile tempLevel[LAYERS][ROWS][COLS];
 
     Camera2D camera = {};
 
@@ -58,6 +60,14 @@ private:
         IsKeyPressed(KEY_SEVEN) || 
         IsKeyPressed(KEY_EIGHT) || 
         IsKeyPressed(KEY_NINE);
+    }
+
+    inline Vector2 GetMouseGridPosition(IntPair mousePosition)
+    {
+        return {
+            mousePosition.x * gridSize + gridSize * 0.5f,
+            mousePosition.y * gridSize + gridSize * 0.5f
+        };
     }
 
     void ExportLevel();

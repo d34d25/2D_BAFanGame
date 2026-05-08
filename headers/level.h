@@ -28,7 +28,7 @@ private:
 
     float gravity = 500;
 
-    Tile level[ROWS][COLS];
+    Tile level[LAYERS][ROWS][COLS];
 
     std::vector<Platform*> platformList = {};
 
@@ -38,19 +38,22 @@ private:
 
     inline void ClearTileMatrix()
     {
-        for(int i = 0; i < ROWS; i++)
+        for(int l = 0; l < LAYERS; l++)
         {
-            for(int j = 0; j < COLS; j++)
+            for(int i = 0; i < ROWS; i++)
             {
-                Tile& tile = level[i][j];
-
-                tile.textureIndex = 0;
-                tile.type = TileType::VOID;
-
-                if(tile.gameObj.body)
+                for(int j = 0; j < COLS; j++)
                 {
-                    delete tile.gameObj.body;
-                    tile.gameObj.body = nullptr;
+                    Tile& tile = level[l][i][j];
+
+                    tile.textureIndex = 0;
+                    tile.type = TileType::VOID;
+
+                    if(tile.gameObj.body)
+                    {
+                        delete tile.gameObj.body;
+                        tile.gameObj.body = nullptr;
+                    }
                 }
             }
         }

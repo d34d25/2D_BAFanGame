@@ -187,18 +187,18 @@ inline bool IsColorOf(Color colorA, Color colorB)
     colorA.a == colorB.a;
 }
 
-inline bool IsTileEmpty(int i, int j, Tile(&levelTiles)[ROWS][COLS], TileType emptyType = TileType::VOID)
+inline bool IsTileEmpty(int l, int i, int j, Tile(&levelTiles)[LAYERS][ROWS][COLS], TileType emptyType = TileType::VOID)
 {
-    if(i < 0 || i >= ROWS || j < 0 || j >= COLS) return true;
+    if(i < 0 || i >= ROWS || j < 0 || j >= COLS || l < 0 || l >= LAYERS) return true;
 
-    return levelTiles[i][j].type == emptyType;
+    return levelTiles[l][i][j].type == emptyType;
 }
 
-inline bool IsTileEmptyInverted(int i, int j, Tile(&levelTiles)[ROWS][COLS], TileType emptyType = TileType::VOID)
+inline bool IsTileEmptyInverted(int l, int i, int j,Tile(&levelTiles)[LAYERS][ROWS][COLS], TileType emptyType = TileType::VOID)
 {
-    if(i < 0 || i >= ROWS || j < 0 || j >= COLS) return true;
+    if(i < 0 || i >= ROWS || j < 0 || j >= COLS || l < 0 || l >= LAYERS) return true;
 
-    return levelTiles[i][j].type != emptyType;
+    return levelTiles[l][i][j].type != emptyType;
 }
 
 inline TileRange CalculateTileRange(int x, int y, int range)
@@ -368,7 +368,7 @@ inline SpriteRenderData* GetPlatformActiveRenderData(PlatformType type, int inde
     return nullptr;
 }
 
-inline void LoadLevelData(const char* levelPath, Tile(&destination)[ROWS][COLS])
+inline void LoadLevelData(const char* levelPath, Tile(&destination)[LAYERS][ROWS][COLS])
 {
     int dataSize = 0;
 
@@ -376,7 +376,7 @@ inline void LoadLevelData(const char* levelPath, Tile(&destination)[ROWS][COLS])
 
     if(fileData == nullptr) return;
 
-    if(dataSize != (ROWS * COLS * sizeof(Tile))) return;
+    if(dataSize != (LAYERS * ROWS * COLS * sizeof(Tile))) return;
 
     memcpy(destination, fileData, dataSize);
     

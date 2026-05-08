@@ -39,6 +39,8 @@ static constexpr Color DECO = Color{135,30,255,255};
 static constexpr int ROWS = 70;
 static constexpr int COLS = 70;
 
+static constexpr int LAYERS = 2;
+
 static constexpr int gridSize = 48;
 
 static constexpr int tileScale = 3;

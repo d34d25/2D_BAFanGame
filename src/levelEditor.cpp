@@ -5,7 +5,7 @@
 
 void LevelEditor::ExportLevel()
 {
-    int dataSize = ROWS * COLS * sizeof(Tile);
+    int dataSize = LAYERS * ROWS * COLS * sizeof(Tile);
 
     if(SaveFileData("testLevel", tempLevel, dataSize))
     {
@@ -65,6 +65,13 @@ void LevelEditor::Update()
     std::vector<SpriteRenderData>* activeRenderDataList = GetTileActiveRenderDataList((TileType)currentTileType);
 
     if(!activeRenderDataList) currentVariant = 0;
+
+    if(IsKeyPressed(KEY_TAB))
+    {
+        currentLayer++;
+
+        if(currentLayer >= LAYERS) currentLayer = 0;
+    }
 
     if(IsNumKeyPressed())
     {
@@ -192,36 +199,39 @@ void LevelEditor::Update()
         else currentTexture = 0;
     }
 
-    TileType& currentTile = tempLevel[mouseMatrixPosition.x][mouseMatrixPosition.y].type;
-    int& currentTileTextureIndex = tempLevel[mouseMatrixPosition.x][mouseMatrixPosition.y].textureIndex;
-    int& currentTileVariantIndex = tempLevel[mouseMatrixPosition.x][mouseMatrixPosition.y].variantIndex;
+    Tile& targetTile = tempLevel[currentLayer][mouseMatrixPosition.x][mouseMatrixPosition.y];
 
     if(IsMouseButtonDown(MOUSE_BUTTON_LEFT))
     {
         if(currentTileType != (int)TileType::VOID
-            && currentTileType != (int)currentTile
+            && currentTileType != (int)targetTile.type
             && !IsTypeInvalid((TileType)currentTileType)
         )
         {
             if((TileType)currentTileType == TileType::PLAYER_SPAWN)
             {
-                for(int i = 0; i < ROWS; i++)
+                for(int l = 0; l < LAYERS; l++)
                 {
-                    for(int j = 0; j < COLS; j++)
+                    for(int i = 0; i < ROWS; i++)
                     {
-                        if(tempLevel[i][j].type == TileType::PLAYER_SPAWN)
+                        for(int j = 0; j < COLS; j++)
                         {
-                            tempLevel[i][j].type = TileType::VOID;
-                            tempLevel[i][j].textureIndex = 0;
-                            tempLevel[i][j].variantIndex = 0;
+                            if(tempLevel[l][i][j].type == TileType::PLAYER_SPAWN)
+                            {
+                                tempLevel[l][i][j] = {};
+                            }
                         }
                     }
-                }
+                }   
             }
 
-            currentTile = (TileType)currentTileType;
-            currentTileTextureIndex = currentTexture;
-            currentTileVariantIndex = currentVariant;
+            targetTile.type = (TileType)currentTileType;
+            targetTile.textureIndex = currentTexture;
+            targetTile.variantIndex = currentVariant;
+
+            targetTile.gameObj.transform.position = GetMouseGridPosition(mouseMatrixPosition);
+
+            targetTile.gameObj.transform.scale = tileScale;
         }
 
     }
@@ -229,9 +239,7 @@ void LevelEditor::Update()
     {
         if(currentTileType != (int)TileType::VOID)
         {
-            currentTile = TileType::VOID;
-            currentTileTextureIndex = 0;
-            currentTileVariantIndex = 0;
+            targetTile = {};
         }
     }
 
@@ -241,7 +249,21 @@ void LevelEditor::Update()
         {
             for(int j = 0; j < COLS; j++)
             {
-                tempLevel[i][j] = {};
+                tempLevel[currentLayer][i][j] = {};
+            }
+        }
+    }
+
+    if(IsKeyDown(KEY_LEFT_SHIFT) && IsKeyPressed(KEY_C) && IsKeyDown(KEY_LEFT_CONTROL))
+    {
+        for(int l = 0; l < LAYERS; i++)
+        {
+            for(int i = 0; i < ROWS; i++)
+            {
+                for(int j = 0; j < COLS; j++)
+                {
+                    tempLevel[l][i][j] = {};
+                }
             }
         }
     }
@@ -270,48 +292,56 @@ void LevelEditor::Draw()
         camera.target.x, camera.target.y, 100
     );
     
-    for(int i = cameraTileRange.startX; i <= cameraTileRange.endX; i++)
+    for(int l = 0; l < LAYERS; l++)
     {
-        for(int j = cameraTileRange.startY; j <= cameraTileRange.endY; j++)
+        for(int i = cameraTileRange.startX; i <= cameraTileRange.endX; i++)
         {
-            Tile tile = tempLevel[i][j];
-
-            TileType type = tile.type;
-
-            int tileTextureId = tile.textureIndex;
-
-            if(type == TileType::VOID || type >= TileType::COUNT) continue;
-
-            Color color = GetTileColor(type);
-
-            SpriteRenderData* tileRenderData = GetTileActiveRenderData(type, tile.variantIndex);
-
-            if(IsColorOf(color, BLANK)) continue;
-
-            Vector2 tileSize = {gridSize, gridSize};
-
-            float offsetX = 0;
-            float offsetY = 0;
-
-            if(type == TileType::HORIZONALT_MOVING_PLATFORM || type == TileType::VERTICAL_MOVING_PLATFORM)
+            for(int j = cameraTileRange.startY; j <= cameraTileRange.endY; j++)
             {
-                tileSize.x = gridSize * 3.0f;
-                tileSize.y = gridSize * 0.3f;
-                offsetX = -gridSize;
-                offsetY = tileSize.y;
-            }
+                bool isLayerActive = (l == currentLayer);
 
-            if(tileTextureId < 0 || !tileRenderData)
-            {
-                DrawRectangle(i * gridSize + offsetX, j * gridSize + offsetY, tileSize.x, tileSize.y, color);
-            }
-            else 
-            {
-                //DrawTile(tileRenderData, tileTextureId, GetTileCenter(i,j), tileScale);
+                unsigned char alpha = isLayerActive ? 255 : 80;
+
+                Color layerTint = {255,255,255,alpha};
+
+                Tile tile = tempLevel[l][i][j];
+
+                TileType type = tile.type;
+
+                int tileTextureId = tile.textureIndex;
+
+                if(type == TileType::VOID || type >= TileType::COUNT) continue;
+
+                Color color = GetTileColor(type);
+
+                SpriteRenderData* tileRenderData = GetTileActiveRenderData(type, tile.variantIndex);
+
+                Vector2 tileSize = {gridSize, gridSize};
+
+                float offsetX = 0;
+                float offsetY = 0;
+
+                if(type == TileType::HORIZONALT_MOVING_PLATFORM || type == TileType::VERTICAL_MOVING_PLATFORM)
+                {
+                    tileSize.x = gridSize * 3.0f;
+                    tileSize.y = gridSize * 0.3f;
+                    offsetX = -gridSize;
+                    offsetY = tileSize.y;
+                }
+
+                if(tileTextureId < 0 || !tileRenderData)
+                {
+                    if(IsColorOf(color, BLANK)) continue;
+
+                    DrawRectangle(i * gridSize + offsetX, j * gridSize + offsetY, tileSize.x, tileSize.y, {color.a,color.g, color.b, alpha});
+                }
+                else 
+                {
+                    DrawTile(tileRenderData, tileTextureId, tile.gameObj.transform, layerTint);
+                }
             }
         }
     }
-    
 
     //preview
     Color color = GetTileColor((TileType)currentTileType);
@@ -321,6 +351,11 @@ void LevelEditor::Draw()
     if(currentTileType != (int)TileType::VOID) previewColor.a = 50;
 
     Vector2 tileSize = {gridSize, gridSize};
+    
+    Transform2D previewTransform;
+
+    previewTransform.position = GetMouseGridPosition(mouseMatrixPosition);
+    previewTransform.scale = tileScale;
 
     float offsetX = 0;
     float offsetY = 0;
@@ -336,8 +371,8 @@ void LevelEditor::Draw()
     if(currentTexture < 0 || !activeRenderData)
     {
         DrawRectangle(
-            mouseMatrixPosition.x * gridSize + offsetX, 
-            mouseMatrixPosition.y * gridSize + offsetY,
+            previewTransform.position.x - (gridSize * 0.5f) + offsetX, 
+            previewTransform.position.y - (gridSize * 0.5f) + offsetY,
             tileSize.x, tileSize.y, 
             previewColor
         );
@@ -347,7 +382,7 @@ void LevelEditor::Draw()
         previewColor = WHITE;
         previewColor.a = 100;
 
-        //DrawTile(activeRenderData, currentTexture, GetTileCenter(mouseMatrixPosition.x, mouseMatrixPosition.y), tileScale, previewColor);
+        DrawTile(activeRenderData, currentTexture, previewTransform, previewColor);
     }
 
     //grid
@@ -391,4 +426,6 @@ void LevelEditor::Draw()
 
     DrawText(GetTileTypeText((TileType)currentTileType), 10, ypos + spacing * 2, 20, BLACK);
     DrawText(TextFormat("tileType: %i", currentTileType ), 10, ypos + spacing * 3,20,BLACK);
+
+    DrawText(TextFormat("current layer: %i", currentLayer), 10, ypos + spacing * 4, 20, RED);
 }
