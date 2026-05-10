@@ -140,7 +140,7 @@ const std::vector<TileTypeList> TILE_TYPE_LIST = {
     {TileType::TREADMILL_RIGHT, TREADMILL_RIGHT, "TREADMILL_RIGHT"},
     {TileType::TREADMILL_LEFT, TREADMILL_LEFT, "TREADMILL_LEFT"},
 
-    {TileType::ONE_WAY, ONE_WAY_UP, "ONE_WAY"},
+    {TileType::ONE_WAY, ONE_WAY, "ONE_WAY"},
 
     {TileType::SPIKE, SPIKE, "SPIKE"},
     {TileType::SPIKE_DOUBLE, SPIKE, "SPIKE_DOUBLE"},

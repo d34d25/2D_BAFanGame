@@ -375,7 +375,7 @@ void LevelEditor::Draw()
                 {
                     if(IsColorOf(color, BLANK)) continue;
 
-                    DrawRectangle(i * gridSize + offsetX, j * gridSize + offsetY, tileSize.x, tileSize.y, {color.a,color.g, color.b, alpha});
+                    DrawRectangle(i * gridSize + offsetX, j * gridSize + offsetY, tileSize.x, tileSize.y, {color.r, color.g, color.b, alpha});
                 }
                 else 
                 {
