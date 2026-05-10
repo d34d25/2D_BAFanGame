@@ -211,6 +211,15 @@ void LevelEditor::Update()
 
         currentTileType += direction;
 
+        if(direction != 0)
+        {
+            currentAngle = 0;
+
+            currentData = {false, false};
+
+            currentDirection = Direction::UP;
+        }
+
         while(IsTypeInvalid((TileType)currentTileType))
         {
             if(currentTileType >= end) currentTileType = start + 1;
@@ -370,7 +379,7 @@ void LevelEditor::Draw()
                 }
                 else 
                 {
-                    DrawSprite(tile.gameObj.transform, tileRenderData, tile.gameObj.data, tile.textureIndex, layerTint);
+                    DrawSprite(tile.gameObj, tileRenderData, tile.textureIndex, layerTint);
                 }
             }
         }

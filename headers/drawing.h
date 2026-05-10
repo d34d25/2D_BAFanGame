@@ -54,7 +54,7 @@ inline int GetCurrentFrame(const std::vector<Rectangle>& frames, int index, int 
 
 inline void DrawSprite(
     const Transform2D& transform,
-    SpriteRenderData* renderData,
+    const SpriteRenderData* renderData,
     const EntityData& entityData,
     int currentFrame = 0,
     Color color = WHITE
@@ -69,19 +69,6 @@ inline void DrawSprite(
     switch ((int)transform.angle)
     {
     case 0:
-    {
-        if(entityData.flipX) sourceRect.width = -sourceRect.width;
-        if(entityData.flipY) sourceRect.height = -sourceRect.height;
-    }
-    break;
-
-    case 90:
-    {
-        if(entityData.flipY) sourceRect.width = -sourceRect.width;
-        if(entityData.flipX) sourceRect.height = -sourceRect.height;
-    }
-    break;
-
     case 180:
     {
         if(entityData.flipX) sourceRect.width = -sourceRect.width;
@@ -89,6 +76,7 @@ inline void DrawSprite(
     }
     break;
 
+    case 90:
     case 270:
     {
         if(entityData.flipY) sourceRect.width = -sourceRect.width;
@@ -125,13 +113,24 @@ inline void DrawSprite(
     );
 }
 
+inline void DrawSprite(const GameObject& gameObj, SpriteRenderData* renderData, int currentFrame = 0, Color color = WHITE)
+{
+    DrawSprite(
+        gameObj.transform,
+        renderData,
+        gameObj.data,
+        currentFrame,
+        color
+    );
+};
+
 inline void DrawBullet(int x, int y, float radius, Color mainColor, Color backColor)
 {
     if(!ColorIsEqual(backColor, BLACK)) DrawCircleGradient({(float)x,(float)y}, radius * 1.2f, mainColor, backColor);
     else DrawCircle(x, y, radius * 1.2f, backColor);
 
     DrawCircle(x, y, radius, mainColor);
-}
+};
 
 inline void DrawExplosion(int x, int y, float radius, SpriteRenderData* renderData, int frameIndex = 0, float scale = tileScale, Color color = WHITE)
 {

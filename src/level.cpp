@@ -679,7 +679,7 @@ void Level::DrawLevel()
 
             if(frameToDraw >= 0 && frameToDraw < (int)platformRenderData->animationFrames.size())
             {
-                DrawSprite(platform->phys.transform, platformRenderData, platform->phys.data, frameToDraw);
+                DrawSprite(platform->phys, platformRenderData, frameToDraw);
             }
         }
         else
@@ -723,7 +723,7 @@ void Level::DrawLevel()
 
                     if(frameToDraw >= 0 && frameToDraw < (int)tileRenderData->animationFrames.size())
                     {
-                        DrawSprite(tile.gameObj.transform, tileRenderData, tile.gameObj.data, frameToDraw);
+                        DrawSprite(tile.gameObj, tileRenderData, frameToDraw);
                     }
                 }
                 else
@@ -823,6 +823,22 @@ void Level::DebugDrawing()
                 {
                     DrawAABB(*tileObj.GetSubAABB(h), MAGENTA);
                 }
+
+                Vector2 lineEnd = tileObj.transform.position;
+
+                float halfW = tileObj.GetMainAABB()->width * 0.5f;
+                float halfH = tileObj.GetMainAABB()->height * 0.5f;
+
+                switch (tileObj.direction)
+                {
+                case Direction::UP: lineEnd.y -= halfH; break;
+                case Direction::DOWN: lineEnd.y += halfH; break;
+                case Direction::LEFT: lineEnd.x -= halfW; break;
+                case Direction::RIGHT: lineEnd.x += halfW; break;
+                default:break;
+                }
+
+                DrawLineEx(tileObj.transform.position, lineEnd, 1.0f ,GREEN);
             }
         }
     }
