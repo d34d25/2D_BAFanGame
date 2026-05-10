@@ -39,7 +39,7 @@ int main()
     testLevel.screenWidth = SCREEN_WIDTH;
     testLevel.screenHeight = SCREEN_HEIGHT;
 
-    bool editorMode = true;
+    bool editorMode = false;
 
     while (!WindowShouldClose())
     {

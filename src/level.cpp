@@ -75,6 +75,8 @@ void Level::InitLevel(const char *levelPath, float dt, int iterations)
                     platform->phys.data = tile->gameObj.data;
                     platform->phys.direction = tile->gameObj.direction;
 
+                    platform->ogPosition = platform->phys.transform.position;
+
                     platform->phys.hitboxes.push_back(Hitbox{{0,0}, {platformWidth, platformHeight}});
 
                     platform->phys.UpdateHitboxes();
@@ -82,6 +84,8 @@ void Level::InitLevel(const char *levelPath, float dt, int iterations)
                     float platformSpeed = 100.0f;
 
                     platform->SetTimer(0.3f);
+
+                    platform->SetRespawnTimer(3.0f);
 
                     platform->textureIndex = level[l][i][j].textureIndex;
 
@@ -369,7 +373,7 @@ void Level::DiscreteUpdate()
         {
             for(int j = playerTileRange.startY; j <= playerTileRange.endY; j++)
             {
-                GameObject objTile = level[l][i][j].gameObj;
+                GameObject& objTile = level[l][i][j].gameObj;
 
                 if(!objTile.body || objTile.hitboxes.empty()) continue;
 
@@ -410,114 +414,44 @@ void Level::DiscreteUpdate()
         {
             for(int j = playerTileRange.startY; j <= playerTileRange.endY; j++)
             {
-                GameObject objTile = level[l][i][j].gameObj;
-
-                if(!objTile.body || objTile.hitboxes.empty()) continue;            
-
-                if(!objTile.canEntityCollidePhysically) continue;
-
-                if(!CheckCollisionRecs(*player.phys.GetMainAABB(), *objTile.GetMainAABB())) continue;
+                GameObject& objTile = level[l][i][j].gameObj;
 
                 const Tile& tile = level[l][i][j];
 
-                if(!IsTileOneWay(tile))
-                {
-                    SolveCollisions(
-                        &player.phys, &objTile, 
-                        false, isGravityUp, 
-                        tile.type == TileType::TRAMPOLINE,
-                        false
-                    );
-                }
-                else if(IsOneWayUpDown(tile))
-                {
-                    SolveCollisionsOneWayUpDown
-                    (
-                        &player.phys, &objTile,
-                        tile.gameObj.direction == Direction::UP,
-                        isGravityUp,
-                        false
-                    );
-                }
-            }
-        }
-    }
-
-    //platforms
-
-    for(int i = 0; i < platformList.size(); i++)
-    {
-        Platform* platform = platformList[i];
-
-        if(!platform) continue;
-
-        if(IsPlatformFarFromPlayer(platform->phys.transform.position)) continue;
-
-        if(platform->IsInactive()) continue;
-
-        if(platform->updateRequired) platform->Update(dt, iterations);
-
-        SolveCollisionsOneWayUpDown(
-            &player.phys, &platform->phys,
-            true, isGravityUp, true
-        );
-
-        if(CheckCollisionRecs(player.GetJumpDetector(), *platform->phys.GetMainAABB()) && player.IsFalling())
-        {
-            if(!isGravityUp && IsAbove(*player.phys.GetMainAABB(), *platform->phys.GetMainAABB(), 0.0f) || 
-            (isGravityUp && IsBelow(*player.phys.GetMainAABB(), *platform->phys.GetMainAABB(), 0.0f)))
-            {
-                platform->updateRequired = true;
-                player.wasGrounded = true;
-            }
-        }
-
-        bool isMovingPlatform = platform->type == PlatformType::MOVING_HORIZONTAL || platform->type == PlatformType::MOVING_VERTICAL;
-
-        if(!isMovingPlatform) continue;
-
-        TileRange platformRange = CalculateTileRange(
-            platform->phys.transform.position.x,
-            platform->phys.transform.position.y,
-            collisionTileCheckRange
-        );
-
-        for(int l = 0; l < LAYERS; l++)
-        {
-            for(int i = platformRange.startX; i <= platformRange.endX; i++)
-            {
-                for(int j = platformRange.startY; j <= platformRange.endY; j++)
-                {
-                    GameObject objTile = level[l][i][j].gameObj;
-
-                    if(!objTile.body || objTile.hitboxes.empty()) continue;
-
-                    if(!objTile.canPlatformCollidePhysically) continue;
-
-                    SolveCollisions_Platform(&platform->phys, &level[l][i][j].gameObj, platform->type == PlatformType::MOVING_HORIZONTAL);
-                }
-            }
-        }
-    }
-
-    //tile triggers and non solid tiles
-    for(int l = 0; l < LAYERS; l++)
-    {
-        for(int i = playerTileRange.startX; i <= playerTileRange.endX; i++)
-        {
-            for(int j = playerTileRange.startY; j <= playerTileRange.endY; j++)
-            {
-                Tile& tile = level[l][i][j];
-
                 if(IsNotRealTile(tile.type)) continue;
 
-                GameObject objTile = tile.gameObj;
+                if(!objTile.body || objTile.hitboxes.empty()) continue;
 
-                if(objTile.hitboxes.empty()) continue;
+                if(!CheckCollisionRecs(*player.phys.GetMainAABB(), *objTile.GetMainAABB())) continue;
 
+                if(objTile.canEntityCollidePhysically)
+                {
+                    if(!IsTileOneWay(tile))
+                    {
+                        SolveCollisions(
+                            &player.phys, &objTile, 
+                            false, isGravityUp, 
+                            tile.type == TileType::TRAMPOLINE,
+                            false
+                        );
+                    }
+                    else if(IsOneWayUpDown(tile))
+                    {
+                        SolveCollisionsOneWayUpDown
+                        (
+                            &player.phys, &objTile,
+                            tile.gameObj.direction == Direction::UP,
+                            isGravityUp,
+                            false
+                        );
+                    }
+                }
+
+                //tile triggers and non solid tiles
+
+                //if bugs with tirggers happen move this back into its own loop
+                
                 if(IsOneWayRightLeft(tile)) continue;
-
-                if(tile.type == TileType::PLATFORM_STOP) continue;
 
                 if(CheckCollisionRecs(*player.phys.GetMainAABB(), *objTile.GetMainAABB()))
                 {
@@ -588,8 +522,72 @@ void Level::DiscreteUpdate()
             }
         }
     }
-    
 
+    //platforms
+
+    for(int i = 0; i < platformList.size(); i++)
+    {
+        Platform* platform = platformList[i];
+
+        if(!platform) continue;
+
+        if(platform->IsInactive())
+        {
+            platform->Update(dt, iterations);
+            continue;
+        }
+
+        if(platform->updateRequired)
+        {
+            platform->Update(dt, iterations);
+
+            if(platform->IsInactive()) continue;
+        }
+        else if(IsPlatformFarFromPlayer(platform->phys.transform.position)) continue;
+
+        SolveCollisionsOneWayUpDown(
+            &player.phys, &platform->phys,
+            true, isGravityUp, true
+        );
+
+        if(CheckCollisionRecs(player.GetJumpDetector(), *platform->phys.GetMainAABB()) && player.IsFalling())
+        {
+            if(!isGravityUp && IsAbove(*player.phys.GetMainAABB(), *platform->phys.GetMainAABB(), 0.0f) || 
+            (isGravityUp && IsBelow(*player.phys.GetMainAABB(), *platform->phys.GetMainAABB(), 0.0f)))
+            {
+                platform->updateRequired = true;
+                player.wasGrounded = true;
+            }
+        }
+
+        bool isMovingPlatform = platform->type == PlatformType::MOVING_HORIZONTAL || platform->type == PlatformType::MOVING_VERTICAL;
+
+        if(!isMovingPlatform) continue;
+
+        TileRange platformRange = CalculateTileRange(
+            platform->phys.transform.position.x,
+            platform->phys.transform.position.y,
+            collisionTileCheckRange
+        );
+
+        for(int l = 0; l < LAYERS; l++)
+        {
+            for(int i = platformRange.startX; i <= platformRange.endX; i++)
+            {
+                for(int j = platformRange.startY; j <= platformRange.endY; j++)
+                {
+                    GameObject& objTile = level[l][i][j].gameObj;
+
+                    if(!objTile.body || objTile.hitboxes.empty()) continue;
+
+                    if(!objTile.canPlatformCollidePhysically) continue;
+
+                    SolveCollisions_Platform(&platform->phys, &level[l][i][j].gameObj, platform->type == PlatformType::MOVING_HORIZONTAL);
+                }
+            }
+        }
+    }
+   
     if(!player.isTouchingGravityChanger && player.wasTouchingGravityChanger)
     {
         player.isGrounded = false;
@@ -651,57 +649,13 @@ void Level::DrawLevel()
         renderTileCheckRange
     );
 
-    for(int i = 0; i < platformList.size(); i++)
-    {
-        Platform* platform = platformList[i];
-
-        if(!platform) continue;
-
-        if(IsPlatformFarFromPlayer(platform->phys.transform.position)) continue;
-
-        PlatformType platformType = platform->type;
-
-        SpriteRenderData* platformRenderData =  GetPlatformActiveRenderData(platformType, platform->variantIndex);
-
-        if(platformRenderData)
-        {
-            int frameToDraw = platform->textureIndex;
-
-            if(platformRenderData->spacing != 1)
-            {
-                frameToDraw = GetCurrentFrame(
-                    platformRenderData->animationFrames,
-                    platform->textureIndex,
-                    platformRenderData->spacing,
-                    platformRenderData->animationSpeed
-                );
-            }
-
-            if(frameToDraw >= 0 && frameToDraw < (int)platformRenderData->animationFrames.size())
-            {
-                DrawSprite(platform->phys, platformRenderData, frameToDraw);
-            }
-        }
-        else
-        {
-            Color platformColor = DECO;
-
-            if(platformType == PlatformType::MOVING_VERTICAL) platformColor = VERTICAL_MOVING_PLATFORM;
-            else if(platformType == PlatformType::MOVING_HORIZONTAL) platformColor = HORIZONTAL_MOVING_PLATFORM;
-            else if(platformType == PlatformType::FALLING) platformColor = FALLING_PLATFORM;
-            else if(platformType == PlatformType::DISAPPEARING) platformColor = DISAPPEARING_PLATFORM;
-
-            DrawRectangleRec(*platform->phys.GetMainAABB(), platformColor);
-        }
-    }
-
     for(int l = 0; l < LAYERS; l++)
     {
         for(int i = playerTileRange.startX; i <= playerTileRange.endX; i++)
         {
             for(int j = playerTileRange.startY; j <= playerTileRange.endY; j++)
             {
-                Tile tile = level[l][i][j];
+                Tile& tile = level[l][i][j];
 
                 if(IsNotRealTile(tile.type)) continue;
 
@@ -736,6 +690,50 @@ void Level::DrawLevel()
                     else DrawRectangle(i * gridSize, j * gridSize, gridSize, gridSize, color);
                 }
             }
+        }
+    }
+
+    for(int i = 0; i < platformList.size(); i++)
+    {
+        Platform* platform = platformList[i];
+
+        if(!platform) continue;
+
+        if(IsPlatformFarFromPlayer(platform->phys.transform.position)) continue;
+
+        PlatformType& platformType = platform->type;
+
+        SpriteRenderData* platformRenderData =  GetPlatformActiveRenderData(platformType, platform->variantIndex);
+
+        if(platformRenderData)
+        {
+            int frameToDraw = platform->textureIndex;
+
+            if(platformRenderData->spacing != 1)
+            {
+                frameToDraw = GetCurrentFrame(
+                    platformRenderData->animationFrames,
+                    platform->textureIndex,
+                    platformRenderData->spacing,
+                    platformRenderData->animationSpeed
+                );
+            }
+
+            if(frameToDraw >= 0 && frameToDraw < (int)platformRenderData->animationFrames.size())
+            {
+                DrawSprite(platform->phys, platformRenderData, frameToDraw);
+            }
+        }
+        else
+        {
+            Color platformColor = DECO;
+
+            if(platformType == PlatformType::MOVING_VERTICAL) platformColor = VERTICAL_MOVING_PLATFORM;
+            else if(platformType == PlatformType::MOVING_HORIZONTAL) platformColor = HORIZONTAL_MOVING_PLATFORM;
+            else if(platformType == PlatformType::FALLING) platformColor = FALLING_PLATFORM;
+            else if(platformType == PlatformType::DISAPPEARING) platformColor = DISAPPEARING_PLATFORM;
+
+            DrawRectangleRec(*platform->phys.GetMainAABB(), platformColor);
         }
     }
 

@@ -3,7 +3,7 @@
 #include "raylib.h"
 #include "entity.h"
 
-const Vector2 DESPAWN_LOCATION = {-10000,  -10000};
+const Vector2 DESPAWN_LOCATION = {1000 * gridSize,  1000 * gridSize};
 
 enum class PlatformType
 {
@@ -18,10 +18,15 @@ class Platform
 {
 private:
 
-    float timer = 0.0f; 
+    float timer = 0.3f; 
     float maxTime = 0.3f;
 
+    float respawnTimer = 1.0f;
+    float respawnMaxTime = 1.0f;
+
 public:
+
+    Vector2 ogPosition = {0,0};
 
     GameObject phys = {};
 
@@ -42,11 +47,30 @@ public:
     inline void SetTimer(float time)
     {
         this->timer = time;
+        this->maxTime = time;
+    }
+
+    inline void SetRespawnTimer(float time)
+    {
+        this->respawnTimer = time;
+        this->respawnMaxTime = time;
     }
 
     inline bool IsInactive()
     {
-        return phys.transform.position.x == DESPAWN_LOCATION.x && phys.transform.position.y == DESPAWN_LOCATION.y;
+        if(phys.transform.position.x >= DESPAWN_LOCATION.x || phys.transform.position.x <= -DESPAWN_LOCATION.x)
+            return true;
+
+        if(gravity >= 0)
+        {
+            if(phys.transform.position.y >= DESPAWN_LOCATION.y) return true;
+        }
+        else
+        {
+            if(phys.transform.position.y <= -DESPAWN_LOCATION.y) return true;
+        }
+
+        return false;
     }
 
     void Update(float dt, int iterations);
