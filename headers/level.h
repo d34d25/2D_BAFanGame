@@ -104,39 +104,44 @@ private:
         }
     }
 
-    inline bool IsOneWayUpDown(TileType type)
+    inline bool IsOneWayUpDown(Tile tile)
     {
-        return type == TileType::ONE_WAY_UP || type == TileType::ONE_WAY_DOWN;  
+        if(tile.type == TileType::ONE_WAY)
+        {
+            if(tile.gameObj.direction == Direction::UP || tile.gameObj.direction == Direction::DOWN)
+                return true;
+        }
+
+        return false;
     }
 
-    inline bool IsOneWayRightLeft(TileType type)
+    inline bool IsOneWayRightLeft(Tile tile)
     {
-        return type == TileType::ONE_WAY_RIGHT || type == TileType::ONE_WAY_LEFT;
+        if(tile.type == TileType::ONE_WAY)
+        {
+            if(tile.gameObj.direction == Direction::RIGHT || tile.gameObj.direction == Direction::LEFT)
+                return true;
+        }
+
+        return false;
     }
 
-    inline bool IsTileOneWay(TileType type)
+    inline bool IsTileOneWay(Tile tile)
     {
-        return IsOneWayRightLeft(type) || IsOneWayUpDown(type);
+        return IsOneWayRightLeft(tile) || IsOneWayUpDown(tile);
     }
 
-    inline bool IsTileWind(TileType type)
+    inline bool IsTileNotJumpTrigger(Tile tile)
     {
-        return type == TileType::WIND_UP ||
-        type == TileType::WIND_DOWN ||
-        type == TileType::WIND_LEFT ||
-        type == TileType::WIND_RIGHT;
-    }
+        TileType type = tile.type;
 
-    inline bool IsTileNotJumpTrigger(TileType type)
-    {
         return type == TileType::TRAMPOLINE ||
         type == TileType::GRAVITY_CHANGER ||
         type == TileType::GOAL ||
-        type == TileType::ONE_WAY_RIGHT ||
-        type == TileType::ONE_WAY_LEFT ||
+        IsOneWayRightLeft(tile) ||
         type == TileType::PLATFORM_STOP ||
         (type > TileType::SPIKE_START && type < TileType::SPIKE_END) ||
-        IsTileWind(type) ||
+        type == TileType::WIND ||
         type == TileType::WATER;
     }
 

@@ -29,10 +29,7 @@ enum class TileType
 
     SOLID,
 
-    ONE_WAY_UP,
-    ONE_WAY_DOWN,
-    ONE_WAY_RIGHT,
-    ONE_WAY_LEFT,
+    ONE_WAY,
 
     TREADMILL_RIGHT,
     TREADMILL_LEFT,
@@ -41,10 +38,7 @@ enum class TileType
     
     GRAVITY_CHANGER,
 
-    WIND_UP,
-    WIND_DOWN,
-    WIND_LEFT,
-    WIND_RIGHT,
+    WIND,
 
     WATER,
 
@@ -139,20 +133,14 @@ const std::vector<TileTypeList> TILE_TYPE_LIST = {
 
     {TileType::GRAVITY_CHANGER, GRAVITY_CHANGER, "GRAVITY_CHANGER"},
 
-    {TileType::WIND_UP, WHITE, "WIND_UP"},
-    {TileType::WIND_DOWN, WHITE, "WIND_DOWN"},
-    {TileType::WIND_LEFT, WHITE, "WIND_LEFT"},
-    {TileType::WIND_RIGHT, WHITE, "WIND_RIGHT"},
+    {TileType::WIND, WHITE, "WIND"},
 
     {TileType::WATER, SKYBLUE, "WATER"},
     
     {TileType::TREADMILL_RIGHT, TREADMILL_RIGHT, "TREADMILL_RIGHT"},
     {TileType::TREADMILL_LEFT, TREADMILL_LEFT, "TREADMILL_LEFT"},
 
-    {TileType::ONE_WAY_UP, ONE_WAY_UP, "ONE_WAY_UP"},
-    {TileType::ONE_WAY_DOWN, ONE_WAY_DOWN, "ONE_WAY_DOWN"},
-    {TileType::ONE_WAY_RIGHT, ONE_WAY_RIGHT, "ONE_WAY_RIGHT"},
-    {TileType::ONE_WAY_LEFT, ONE_WAY_LEFT, "ONE_WAY_LEFT"},
+    {TileType::ONE_WAY, ONE_WAY_UP, "ONE_WAY"},
 
     {TileType::SPIKE, SPIKE, "SPIKE"},
     {TileType::SPIKE_DOUBLE, SPIKE, "SPIKE_DOUBLE"},
@@ -271,7 +259,7 @@ extern std::vector<SpriteRenderData> spikesSmallRenderData;
 
 
 //wind tiles
-extern std::vector<SpriteRenderData> windRenderData_Up;
+extern std::vector<SpriteRenderData> windRenderData;
 
 extern std::vector<SpriteRenderData> windRenderData_Down;
 
@@ -314,13 +302,7 @@ inline std::vector<SpriteRenderData>* GetTileActiveRenderDataList(TileType type)
 
     //wind tiles
     
-    case TileType::WIND_UP: return &windRenderData_Up;
-
-    case TileType::WIND_DOWN: return &windRenderData_Down;
-
-    case TileType::WIND_LEFT: return &windRenderData_Left;
-
-    case TileType::WIND_RIGHT: return &windRenderData_Right;
+    case TileType::WIND: return &windRenderData;
 
     //water
 

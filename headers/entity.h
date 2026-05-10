@@ -12,6 +12,11 @@ const float MASS = 1;
 
 const Vector2 MAX_SPEED = {600,600};
 
+enum class Direction
+{
+    UP, RIGHT, DOWN, LEFT
+};
+
 struct Transform2D
 {
     Vector2 position = {0,0};
@@ -108,9 +113,19 @@ struct Hitbox
     }
 };
 
+struct EntityData
+{
+    bool flipX = false;
+    bool flipY = false;
+};
+
 struct GameObject
 {
     Transform2D transform = {};
+
+    EntityData data = {};
+
+    Direction direction = Direction::UP;
 
     std::vector<Hitbox> hitboxes = {};
 
@@ -199,8 +214,40 @@ struct SpriteRenderData
     float animationSpeed = 5.0f;
 };
 
-struct EntityData
+inline Direction CalculateDirection(float angle, EntityData data)
 {
-    bool flipX = false;
-    bool flipY = false;
+    //un-flipped
+
+    if(angle == 0 && !data.flipY) return Direction::UP;
+
+    if(angle == 90 && !data.flipX) return Direction::RIGHT;
+
+    if(angle == 180 && !data.flipY) return Direction::DOWN;
+
+    if(angle == 270 && !data.flipX) return Direction::LEFT;
+
+    //fliped
+
+    if(angle == 0 && data.flipY) return Direction::DOWN;
+
+    if(angle == 90 && data.flipX) return Direction::LEFT;
+
+    if(angle == 180 && data.flipY) return Direction::UP;
+
+    if(angle == 270 && data.flipX) return Direction::RIGHT;
+
+    return Direction::UP;
+};
+
+inline const char* GetDirectionText(Direction direction)
+{
+    switch (direction)
+    {
+    case Direction::UP: return "UP";
+    case Direction::RIGHT: return "RIGHT";
+    case Direction::DOWN: return "DOWN";
+    case Direction::LEFT: return "LEFT";
+    
+    default: return "UNDEFINED DIRECTION";
+    }
 };

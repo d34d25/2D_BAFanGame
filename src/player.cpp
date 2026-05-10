@@ -29,8 +29,12 @@ Player::Player(Vector2 position)
 
     bool explodes = false;
 
+    Vector2 characterFrameSize = {0,0};
+
+    Vector2 weaponFrameSize = {0,0};
+
     character = Character::YUZU;
-    
+
     switch (character)
     {
     case Character::MOMOI:
@@ -44,10 +48,6 @@ Player::Player(Vector2 position)
         weaponRenderData.offset.x = 25.0f;
         weaponRenderData.offset.y = 16.0f;
 
-        characterRenderData.animationFrames = CropImage(
-            playerTexture, {12,18}
-        );
-
         bulletData.fireRate = 0.2f;
         bulletData.spread = 8.0f;
 
@@ -55,6 +55,10 @@ Player::Player(Vector2 position)
 
         bulletData.mainColor = MOMOI_PINK;
         bulletData.backColor = MOMOI_PINK_BG;
+
+        characterFrameSize = {12,18};
+
+        weaponFrameSize = {32,8};
 
         break;
     case Character::MIDORI:
@@ -73,6 +77,10 @@ Player::Player(Vector2 position)
 
         bulletData.mainColor = MIDORI_GREEN;
         bulletData.backColor = MIDORI_GREEN_BG;
+
+        characterFrameSize = {12,18};
+
+        weaponFrameSize = {32,10};
 
         break;
     case Character::YUZU:
@@ -98,6 +106,10 @@ Player::Player(Vector2 position)
 
         explodes = true;
 
+        characterFrameSize = {14,15};
+
+        weaponFrameSize = {19,10};
+
         break;
     case Character::ARIS:
 
@@ -117,6 +129,10 @@ Player::Player(Vector2 position)
 
         bulletData.mainColor = ARIS_PURPLE;
         bulletData.backColor = ARIS_PURPLE_BG;
+
+        characterFrameSize = {12,15};
+
+        weaponFrameSize = {33,10};
 
         break;
     case Character::MOMOI_CHAQUENA:
@@ -138,6 +154,10 @@ Player::Player(Vector2 position)
         bulletData.mainColor = MOMOI_PINK;
         bulletData.backColor = MOMOI_PINK_BG;
 
+        characterFrameSize = {14,17};
+
+        weaponFrameSize = {26,8};
+
         break;
     default:
         break;
@@ -155,6 +175,10 @@ Player::Player(Vector2 position)
 
     characterRenderData.sourceTexture = &playerTexture;
     weaponRenderData.sourceTexture = &weaponTexture;
+
+    characterRenderData.animationFrames = CropImage(*characterRenderData.sourceTexture, characterFrameSize);
+
+    weaponRenderData.animationFrames = CropImage(*weaponRenderData.sourceTexture, weaponFrameSize);
 
     bulletpool = std::make_unique<BulletPool>(30, bulletLifeTime, bulletData.radius, bulletData.mainColor, bulletData.backColor, explodes);
 }

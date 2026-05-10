@@ -97,10 +97,9 @@ inline void SolveCollisionsOneWayUpDown(GameObject * objA, GameObject* objB, boo
 }
 
 inline void ApplyWind(
-    GameObject* objA, GameObject* objB, 
-    bool up, bool down, 
-    bool left, bool right, 
-    bool isEdgeUp, bool isEdgeDown, 
+    GameObject* objA, GameObject* objB,
+    Direction direction, 
+    bool isEdgeUp, bool isEdgeDown,
     bool gravityUp
 )
 {
@@ -109,6 +108,14 @@ inline void ApplyWind(
         std::cout<<"THE BODY A IS NULLPTR AT APPLY WIND"<<"\n";
         return;
     }
+    
+    bool up = direction == Direction::UP;
+    
+    bool down = direction == Direction::DOWN;
+
+    bool left = direction == Direction::LEFT;
+
+    bool right = direction == Direction::RIGHT;
 
     float windForce = 1600 * objA->body->damping;
 

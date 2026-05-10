@@ -24,13 +24,7 @@ std::vector<SpriteRenderData> spikesSmallRenderData = {};
 
 //wind tiles
 
-std::vector<SpriteRenderData> windRenderData_Up = {};
-
-std::vector<SpriteRenderData> windRenderData_Down = {};
-
-std::vector<SpriteRenderData> windRenderData_Left = {};
-
-std::vector<SpriteRenderData> windRenderData_Right = {};
+std::vector<SpriteRenderData> windRenderData = {};
 
 //water
 
@@ -76,7 +70,7 @@ SpriteRenderData LoadRenderData(const char* path, Vector2 frameSize, int spacing
 
     renderData.sourceTexture = &textureCache[key];
 
-    std::vector<Rectangle> allFrames = CropImage(*renderData.sourceTexture, frameSize);
+    std::vector<Rectangle> allFrames = CropImage(*renderData.sourceTexture, frameSize, 1);
 
     if(endFrame <= 0 || endFrame > (int)allFrames.size()) endFrame = (int)allFrames.size();
 
@@ -127,10 +121,7 @@ void LoadAssets()
 
     //wind tiles
 
-    windRenderData_Up.push_back(LoadRenderData("assets/tiles/wind-up.png", {16,16}, 3));
-    windRenderData_Down.push_back(LoadRenderData("assets/tiles/wind-down.png", {16,16}, 3));
-    windRenderData_Left.push_back(LoadRenderData("assets/tiles/wind-left.png", {16,16}, 3));
-    windRenderData_Right.push_back(LoadRenderData("assets/tiles/wind-right.png", {16,16}, 3));
+    windRenderData.push_back(LoadRenderData("assets/tiles/wind-up.png", {16,16}, 3));
 
     //water
 
@@ -174,10 +165,7 @@ void UnloadAssets()
 
     CleanUp(movingPlatformRenderData_Vertical);
 
-    CleanUp(windRenderData_Up);
-    CleanUp(windRenderData_Down);
-    CleanUp(windRenderData_Left);
-    CleanUp(windRenderData_Right);
+    CleanUp(windRenderData);
 
     CleanUp(waterRenderData);
 }

@@ -29,6 +29,12 @@ private:
 
     int currentVariant = 0;
 
+    int currentAngle = 0;
+
+    Direction currentDirection = Direction::UP;
+
+    EntityData currentData = {};
+
     Tile tempLevel[LAYERS][ROWS][COLS];
 
     Camera2D camera = {};
@@ -60,6 +66,11 @@ private:
         IsKeyPressed(KEY_SEVEN) || 
         IsKeyPressed(KEY_EIGHT) || 
         IsKeyPressed(KEY_NINE);
+    }
+
+    inline bool IsDirectionChangeKeyPressed()
+    {
+        return IsKeyPressed(KEY_E) || IsKeyPressed(KEY_Q) || IsKeyPressed(KEY_H) || IsKeyPressed(KEY_V);
     }
 
     inline Vector2 GetMouseGridPosition(IntPair mousePosition)

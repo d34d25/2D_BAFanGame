@@ -94,6 +94,12 @@ void LevelEditor::Update()
         currentVariant = 0;
 
         currentTexture = 0;
+
+        currentAngle = 0;
+
+        currentData = {false, false};
+
+        currentDirection = Direction::UP;
     }
 
     float mouseWheel = GetMouseWheelMove();
@@ -106,6 +112,29 @@ void LevelEditor::Update()
         else if(mouseWheel < 0) camera.zoom -= cameraZoomFactor;
 
         camera.zoom = Clamp(camera.zoom, 0.1f,10.0f);
+    }
+
+    if(IsDirectionChangeKeyPressed())
+    {
+        if(IsKeyPressed(KEY_E))
+        {
+            currentAngle += 90;
+
+            if(currentAngle >= 360) currentAngle = 0;
+        }
+
+        if(IsKeyPressed(KEY_Q))
+        {
+            currentAngle -= 90;
+
+            if(currentAngle < 0) currentAngle = 270;
+        }
+
+        if(IsKeyPressed(KEY_H)) currentData.flipX = !currentData.flipX;
+
+        if(IsKeyPressed(KEY_V)) currentData.flipY = !currentData.flipY;
+
+        currentDirection = CalculateDirection(currentAngle, currentData);
     }
 
     //variant cycling
@@ -232,6 +261,12 @@ void LevelEditor::Update()
             targetTile.gameObj.transform.position = GetMouseGridPosition(mouseMatrixPosition);
 
             targetTile.gameObj.transform.scale = tileScale;
+
+            targetTile.gameObj.transform.angle = currentAngle;
+
+            targetTile.gameObj.data = currentData;
+
+            targetTile.gameObj.direction = currentDirection;
         }
 
     }
@@ -308,8 +343,6 @@ void LevelEditor::Draw()
 
                 TileType type = tile.type;
 
-                int tileTextureId = tile.textureIndex;
-
                 if(type == TileType::VOID || type >= TileType::COUNT) continue;
 
                 Color color = GetTileColor(type);
@@ -329,7 +362,7 @@ void LevelEditor::Draw()
                     offsetY = tileSize.y;
                 }
 
-                if(tileTextureId < 0 || !tileRenderData)
+                if(tile.textureIndex < 0 || !tileRenderData)
                 {
                     if(IsColorOf(color, BLANK)) continue;
 
@@ -337,7 +370,7 @@ void LevelEditor::Draw()
                 }
                 else 
                 {
-                    DrawTile(tileRenderData, tileTextureId, tile.gameObj.transform, layerTint);
+                    DrawSprite(tile.gameObj.transform, tileRenderData, tile.gameObj.data, tile.textureIndex, layerTint);
                 }
             }
         }
@@ -356,6 +389,7 @@ void LevelEditor::Draw()
 
     previewTransform.position = GetMouseGridPosition(mouseMatrixPosition);
     previewTransform.scale = tileScale;
+    previewTransform.angle = currentAngle;
 
     float offsetX = 0;
     float offsetY = 0;
@@ -382,7 +416,7 @@ void LevelEditor::Draw()
         previewColor = WHITE;
         previewColor.a = 100;
 
-        DrawTile(activeRenderData, currentTexture, previewTransform, previewColor);
+        DrawSprite(previewTransform, activeRenderData, currentData, currentTexture, previewColor);
     }
 
     //grid
@@ -428,4 +462,11 @@ void LevelEditor::Draw()
     DrawText(TextFormat("tileType: %i", currentTileType ), 10, ypos + spacing * 3,20,BLACK);
 
     DrawText(TextFormat("current layer: %i", currentLayer), 10, ypos + spacing * 4, 20, RED);
+
+    DrawText(TextFormat("current angle: %i", currentAngle), 10, ypos + spacing * 5, 20, RED);
+
+    DrawText(TextFormat("current flip x: %i", currentData.flipX), 10, ypos + spacing * 6, 20, RED);
+    DrawText(TextFormat("current flip y: %i", currentData.flipY), 10, ypos + spacing * 7, 20, RED);
+
+    DrawText(GetDirectionText(currentDirection), 10, ypos + spacing * 8, 20, RED);
 }

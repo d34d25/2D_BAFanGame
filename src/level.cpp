@@ -71,7 +71,9 @@ void Level::InitLevel(const char *levelPath, float dt, int iterations)
                         platformHeight = gridSize;
                     }
 
-                    platform->phys.transform.position = tile->gameObj.transform.position;
+                    platform->phys.transform = tile->gameObj.transform;
+                    platform->phys.data = tile->gameObj.data;
+                    platform->phys.direction = tile->gameObj.direction;
 
                     platform->phys.hitboxes.push_back(Hitbox{{0,0}, {platformWidth, platformHeight}});
 
@@ -222,28 +224,7 @@ void Level::InitLevel(const char *levelPath, float dt, int iterations)
                 }
                 break;
 
-                case TileType::ONE_WAY_UP:
-                {
-                    tile->gameObj.canEntityCollidePhysically = true;
-                    tile->gameObj.canPlatformCollidePhysically = true;
-                }
-                break;
-
-                case TileType::ONE_WAY_DOWN:
-                {
-                    tile->gameObj.canEntityCollidePhysically = true;
-                    tile->gameObj.canPlatformCollidePhysically = true;
-                }
-                break;
-
-                case TileType::ONE_WAY_RIGHT:
-                {
-                    tile->gameObj.canEntityCollidePhysically = true;
-                    tile->gameObj.canPlatformCollidePhysically = true;
-                }
-                break;
-
-                case TileType::ONE_WAY_LEFT:
+                case TileType::ONE_WAY:
                 {
                     tile->gameObj.canEntityCollidePhysically = true;
                     tile->gameObj.canPlatformCollidePhysically = true;
@@ -265,27 +246,11 @@ void Level::InitLevel(const char *levelPath, float dt, int iterations)
 
                     SpriteRenderData* spikeRenderData = GetTileActiveRenderData(TileType::SPIKE);
 
-                    int orientation = 4;
-
-                    if(spikeRenderData)
+                    auto AddSpikeHitbox = [&](float widthFactor, float heightFactor, float offsetX, float offsetY)
                     {
-                        int logicalIndex = tile->textureIndex / spikeRenderData->spacing;
-
-                        int totalOrientations = spikeRenderData->maxFrames / spikeRenderData->spacing;
-
-                        orientation = logicalIndex % totalOrientations;
-                    }
-
-                    auto AddSpikeHitbox = [&](float widthFactor, float heightFactor, float offsetX, float offsetY, float defaultFactor)
-                    {
-                        if(orientation == 2 || orientation == 3)
+                        if(tile->gameObj.direction == Direction::LEFT || tile->gameObj.direction == Direction::RIGHT)
                         {
                             std::swap(widthFactor, heightFactor);
-                        }
-                        else if(orientation >= 4)
-                        {
-                            widthFactor = defaultFactor;
-                            heightFactor = defaultFactor;
                         }
 
                         Vector2 size = {tile->gameObj.GetMainAABB()->width * widthFactor, tile->gameObj.GetMainAABB()->height * heightFactor};
@@ -295,14 +260,14 @@ void Level::InitLevel(const char *levelPath, float dt, int iterations)
                         offset.x = offsetX;
                         offset.y = offsetY;
 
-                        switch (orientation)
+                        switch (tile->gameObj.direction)
                         {
-                            case 1: offset.y = -offsetY; break;
+                            case Direction::DOWN: offset.y = -offsetY; break;
 
-                            case 2: offset = {offsetY, offsetX}; break;
-                            case 3: offset = {-offsetY, offsetX}; break;
+                            case Direction::LEFT: offset = {offsetY, offsetX}; break;
+                            case Direction::RIGHT: offset = {-offsetY, offsetX}; break;
 
-                            case 4: offset = {0,0}; break;
+                            default: break;
                         }
 
                         tile->gameObj.AddSubHitbox(offset, size);
@@ -318,8 +283,8 @@ void Level::InitLevel(const char *levelPath, float dt, int iterations)
                         float correctionY_A = 12;
                         float correctionY_B = -9;
 
-                        AddSpikeHitbox(wFactor, hFactor,0 ,correctionY_A, 0.8f);
-                        AddSpikeHitbox(hFactor * 0.5f, wFactor * 0.5f, 0 ,correctionY_B, 0.8f);
+                        AddSpikeHitbox(wFactor, hFactor,0 ,correctionY_A);
+                        AddSpikeHitbox(hFactor * 0.5f, wFactor * 0.5f, 0 ,correctionY_B);
                     }
                         break;
 
@@ -336,11 +301,11 @@ void Level::InitLevel(const char *levelPath, float dt, int iterations)
 
                         float correctionY_B = 5;
 
-                        AddSpikeHitbox(wFactor, hFactor,correctionX_A, correctionY_A, 0.6f);
-                        AddSpikeHitbox(hFactor * 0.5f, wFactor * 0.5f,correctionX_A, correctionY_B, 0.6f);
+                        AddSpikeHitbox(wFactor, hFactor,correctionX_A, correctionY_A);
+                        AddSpikeHitbox(hFactor * 0.5f, wFactor * 0.5f,correctionX_A, correctionY_B);
 
-                        AddSpikeHitbox(wFactor, hFactor,correctionX_B, correctionY_A, 0.6f);
-                        AddSpikeHitbox(hFactor * 0.5f, wFactor * 0.5f,correctionX_B, correctionY_B, 0.6f);
+                        AddSpikeHitbox(wFactor, hFactor,correctionX_B, correctionY_A);
+                        AddSpikeHitbox(hFactor * 0.5f, wFactor * 0.5f,correctionX_B, correctionY_B);
                     }
                     break;
 
@@ -353,8 +318,8 @@ void Level::InitLevel(const char *levelPath, float dt, int iterations)
 
                         float correctionY_B = 5;
 
-                        AddSpikeHitbox(wFactor, hFactor, 0, correctionY_A, 0.6f);
-                        AddSpikeHitbox(hFactor * 0.5f, wFactor * 0.5f, 0, correctionY_B, 0.6f);
+                        AddSpikeHitbox(wFactor, hFactor, 0, correctionY_A);
+                        AddSpikeHitbox(hFactor * 0.5f, wFactor * 0.5f, 0, correctionY_B);
                     }
                     break;
 
@@ -414,7 +379,7 @@ void Level::DiscreteUpdate()
 
                 const Tile& tile = level[l][i][j];
 
-                if(!IsTileOneWay(tile.type))
+                if(!IsTileOneWay(tile))
                 {
                     SolveCollisions(
                         &player.phys, &objTile, 
@@ -423,11 +388,11 @@ void Level::DiscreteUpdate()
                         false
                     );
                 }
-                else if(IsOneWayRightLeft(tile.type))
+                else if(IsOneWayRightLeft(tile))
                 {
                     SolveCollisionsOneWayLeftRight(
                         &player.phys, &objTile,
-                        tile.type == TileType::ONE_WAY_RIGHT
+                        tile.gameObj.direction == Direction::RIGHT
                     );
                 }
             }
@@ -455,7 +420,7 @@ void Level::DiscreteUpdate()
 
                 const Tile& tile = level[l][i][j];
 
-                if(!IsTileOneWay(tile.type))
+                if(!IsTileOneWay(tile))
                 {
                     SolveCollisions(
                         &player.phys, &objTile, 
@@ -464,12 +429,12 @@ void Level::DiscreteUpdate()
                         false
                     );
                 }
-                else if(IsOneWayUpDown(tile.type))
+                else if(IsOneWayUpDown(tile))
                 {
                     SolveCollisionsOneWayUpDown
                     (
                         &player.phys, &objTile,
-                        tile.type == TileType::ONE_WAY_UP,
+                        tile.gameObj.direction == Direction::UP,
                         isGravityUp,
                         false
                     );
@@ -550,7 +515,7 @@ void Level::DiscreteUpdate()
 
                 if(objTile.hitboxes.empty()) continue;
 
-                if(IsOneWayRightLeft(tile.type)) continue;
+                if(IsOneWayRightLeft(tile)) continue;
 
                 if(tile.type == TileType::PLATFORM_STOP) continue;
 
@@ -567,19 +532,16 @@ void Level::DiscreteUpdate()
                         }
                     }
                     
-                    if(IsTileWind(tile.type) && !player.windApplied)
+                    if(tile.type == TileType::WIND && !player.windApplied)
                     {
-                        bool isEdgeUp = tile.type == TileType::WIND_UP && IsTileEmpty(l, i, j - 1, level, TileType::VOID);
+                        bool isEdgeUp = tile.gameObj.direction == Direction::UP && IsTileEmpty(l, i, j - 1, level, TileType::VOID);
 
-                        bool isEdgeDown = tile.type == TileType::WIND_DOWN && IsTileEmpty(l, i, j + 1, level, TileType::VOID);
+                        bool isEdgeDown = tile.gameObj.direction == Direction::DOWN && IsTileEmpty(l, i, j + 1, level, TileType::VOID);
 
                         ApplyWind(
                             &player.phys,
                             &objTile,
-                            tile.type == TileType::WIND_UP,
-                            tile.type == TileType::WIND_DOWN,
-                            tile.type == TileType::WIND_LEFT,
-                            tile.type == TileType::WIND_RIGHT,
+                            tile.gameObj.direction,
                             isEdgeUp,
                             isEdgeDown,
                             isGravityUp
@@ -596,7 +558,7 @@ void Level::DiscreteUpdate()
                     }
                 }
 
-                if(IsTileNotJumpTrigger(tile.type)) continue;
+                if(IsTileNotJumpTrigger(tile)) continue;
 
                 if(tile.type == TileType::TREADMILL_LEFT || tile.type == TileType::TREADMILL_RIGHT)
                 {
@@ -606,16 +568,16 @@ void Level::DiscreteUpdate()
 
                 if(CheckCollisionRecs(player.GetJumpDetector(), *objTile.GetMainAABB()) && player.IsFalling())
                 {
-                    if(!IsOneWayUpDown(tile.type)) player.wasGrounded = true;
-                    else if(IsOneWayUpDown(tile.type))
+                    if(!IsOneWayUpDown(tile)) player.wasGrounded = true;
+                    else if(IsOneWayUpDown(tile))
                     {
-                        if(tile.type == TileType::ONE_WAY_UP &&
+                        if(tile.gameObj.direction == Direction::UP &&
                             IsAbove(*player.phys.GetMainAABB(), *objTile.GetMainAABB(), 0.0f)
                         )
                         {
                             player.wasGrounded = true;
                         }
-                        else if(tile.type == TileType::ONE_WAY_DOWN &&
+                        else if(tile.gameObj.direction == Direction::DOWN &&
                             IsBelow(*player.phys.GetMainAABB(), *objTile.GetMainAABB(), 0.0f)
                         )
                         {
@@ -717,7 +679,7 @@ void Level::DrawLevel()
 
             if(frameToDraw >= 0 && frameToDraw < (int)platformRenderData->animationFrames.size())
             {
-                DrawTile(platformRenderData, frameToDraw, platform->phys.transform);
+                DrawSprite(platform->phys.transform, platformRenderData, platform->phys.data, frameToDraw);
             }
         }
         else
@@ -761,7 +723,7 @@ void Level::DrawLevel()
 
                     if(frameToDraw >= 0 && frameToDraw < (int)tileRenderData->animationFrames.size())
                     {
-                        DrawTile(tileRenderData, frameToDraw, tile.gameObj.transform);
+                        DrawSprite(tile.gameObj.transform, tileRenderData, tile.gameObj.data, frameToDraw);
                     }
                 }
                 else
@@ -779,7 +741,7 @@ void Level::DrawLevel()
 
     DrawSprite(
         player.phys.transform,
-        player.characterRenderData,
+        &player.characterRenderData,
         player.entityData,
         player.currentFrame
     );
@@ -807,7 +769,7 @@ void Level::DrawLevel()
 
     DrawSprite(
         player.phys.transform,
-        player.weaponRenderData,
+        &player.weaponRenderData,
         player.entityData,
         player.currentFrame
     );
@@ -857,7 +819,7 @@ void Level::DebugDrawing()
 
                 DrawAABB(*tileObj.GetMainAABB(), RED);
 
-                for(int h = 0; h < tileObj.hitboxes.size(); h++)
+                for(int h = 1; h < tileObj.hitboxes.size(); h++)
                 {
                     DrawAABB(*tileObj.GetSubAABB(h), MAGENTA);
                 }

@@ -19,13 +19,11 @@ inline void DrawAABB(Rectangle aabb, Color color)
     DrawLineEx({aabb.x, aabb.y + aabb.height}, {aabb.x + aabb.width, aabb.y + aabb.height}, thickness, color);
 }
 
-inline std::vector<Rectangle> CropImage(const Texture2D& sourceTexture, Vector2 size)
+inline std::vector<Rectangle> CropImage(const Texture2D& sourceTexture, Vector2 size, int gap = 0)
 {
     std::vector<Rectangle> frames = {};
 
     if(sourceTexture.id <= 0 || size.x == 0 || size.y == 0) return frames;
-
-    int gap = 1;
 
     int framesPerRow = sourceTexture.width / ((int)size.x + gap);
     int framesPerCol = sourceTexture.height / ((int)size.y + gap);
@@ -56,27 +54,57 @@ inline int GetCurrentFrame(const std::vector<Rectangle>& frames, int index, int 
 
 inline void DrawSprite(
     const Transform2D& transform,
-    const SpriteRenderData& renderData,
+    SpriteRenderData* renderData,
     const EntityData& entityData,
-    int currentFrame = 0
+    int currentFrame = 0,
+    Color color = WHITE
 )
 {
 
-    Rectangle sourceRect = Rectangle{0,0, (float)renderData.sourceTexture->width, (float)renderData.sourceTexture->height};
+    if(!renderData || currentFrame < 0 || currentFrame >= renderData->animationFrames.size())
+        return;
 
-    if(!renderData.animationFrames.empty() && currentFrame < renderData.animationFrames.size())
+    Rectangle sourceRect = renderData->animationFrames[currentFrame];
+
+    switch ((int)transform.angle)
     {
-        sourceRect = renderData.animationFrames[currentFrame];
+    case 0:
+    {
+        if(entityData.flipX) sourceRect.width = -sourceRect.width;
+        if(entityData.flipY) sourceRect.height = -sourceRect.height;
     }
+    break;
 
-    if(entityData.flipX) sourceRect.width = -sourceRect.width;
-    if(entityData.flipY) sourceRect.height = -sourceRect.height;
+    case 90:
+    {
+        if(entityData.flipY) sourceRect.width = -sourceRect.width;
+        if(entityData.flipX) sourceRect.height = -sourceRect.height;
+    }
+    break;
+
+    case 180:
+    {
+        if(entityData.flipX) sourceRect.width = -sourceRect.width;
+        if(entityData.flipY) sourceRect.height = -sourceRect.height;
+    }
+    break;
+
+    case 270:
+    {
+        if(entityData.flipY) sourceRect.width = -sourceRect.width;
+        if(entityData.flipX) sourceRect.height = -sourceRect.height;
+    }
+    break;
+    
+    default:
+        break;
+    }
 
     float width = fabs(sourceRect.width) * transform.scale;
     float height = fabs(sourceRect.height) * transform.scale;
 
-    float offsetX = entityData.flipX ? -renderData.offset.x : renderData.offset.x;
-    float offsetY = entityData.flipY ? -renderData.offset.y : renderData.offset.y;
+    float offsetX = entityData.flipX ? -renderData->offset.x : renderData->offset.x;
+    float offsetY = entityData.flipY ? -renderData->offset.y : renderData->offset.y;
 
     Rectangle destRect = {
         roundf(transform.position.x + offsetX),
@@ -88,34 +116,10 @@ inline void DrawSprite(
     Vector2 origin = {width * 0.5f, height * 0.5f};
 
     DrawTexturePro(
-        *renderData.sourceTexture,
+        *renderData->sourceTexture,
         sourceRect,
         destRect,
         origin,
-        transform.angle,
-        WHITE
-    );
-}
-
-inline void DrawTile(SpriteRenderData* renderData, int frameIndex, const Transform2D& transform, Color color = WHITE)
-{
-    if(!renderData || frameIndex < 0 || frameIndex >= renderData->animationFrames.size())
-        return;
-
-    Rectangle source = renderData->animationFrames[frameIndex];
-
-    float width = source.width * transform.scale;
-    float height = source.height * transform.scale;
-
-    Rectangle dest = {transform.position.x, transform.position.y, width, height};
-
-    Vector2 origin = {width * 0.5f, height * 0.5f};
-
-    DrawTexturePro(
-        *renderData->sourceTexture,
-        source,
-        dest,
-        origin, 
         transform.angle,
         color
     );
