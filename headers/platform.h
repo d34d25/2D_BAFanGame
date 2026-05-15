@@ -8,10 +8,26 @@ const Vector2 DESPAWN_LOCATION = {1000 * gridSize,  1000 * gridSize};
 enum class PlatformType
 {
     NONE,
-    MOVING_HORIZONTAL,
-    MOVING_VERTICAL,
+    
     FALLING,
-    DISAPPEARING
+    DISAPPEARING,
+
+    ROTATING_SPIKE_SINGLE,
+    ROTATING_SPIKE_DOUBLE,
+
+    MOVING_START,
+
+    MOVING_X,
+
+    MOVING_HORIZONTAL,
+    MOVING_SPIKE_HORIZONTAL,
+    
+    MOVING_Y,
+
+    MOVING_VERTICAL,
+    MOVING_SPIKE_VERTICAL,
+
+    MOVING_END
 };
 
 class Platform
@@ -74,4 +90,19 @@ public:
     }
 
     void Update(float dt, int iterations);
+
+    void UpdateInactive(float dt, int iterations);
 };
+
+inline bool IsPlatformSpike(PlatformType type)
+{
+    switch (type)
+    {
+    case PlatformType::MOVING_SPIKE_HORIZONTAL: return true;
+    case PlatformType::MOVING_SPIKE_VERTICAL: return true;
+    
+    default: return false;
+    }
+
+    return false;
+}

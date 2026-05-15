@@ -50,6 +50,12 @@ void Level::InitLevel(const char *levelPath, float dt, int iterations)
                 Tile* tile = &level[l][i][j];
                 TileType type = tile->type;
 
+                if(type == TileType::PLAYER_SPAWN)
+                {
+                    player.phys.transform.position = tile->gameObj.transform.position;
+                    player.spawnPos = player.phys.transform.position;
+                }
+
                 if(IsTypeInvalid(type)) level[l][i][j].type = TileType::VOID;
 
                 //platforms...
@@ -60,15 +66,22 @@ void Level::InitLevel(const char *levelPath, float dt, int iterations)
                 {
                     Platform* platform = new Platform();
 
-                    float platformWidth = gridSize * 3.0f;
-                    float platformHeight = gridSize * 0.3f;
+                    float platformWidth = gridSize;
+                    float platformHeight = gridSize;
 
                     platform->gravity = gravity;
 
-                    if(type == TileType::FALLING_PLATFORM || type == TileType::DISAPPEARING_PLATFORM)
+                    switch (type)
                     {
-                        platformWidth = gridSize;
-                        platformHeight = gridSize;
+                    case TileType::VERTICAL_MOVING_PLATFORM:
+                    case TileType::HORIZONALT_MOVING_PLATFORM:
+                    {
+                        platformWidth = gridSize * 3.0f;
+                        platformHeight = gridSize * 0.3f;
+                    }
+                    break;
+                    
+                    default: break;
                     }
 
                     platform->phys.transform = tile->gameObj.transform;
@@ -127,21 +140,47 @@ void Level::InitLevel(const char *levelPath, float dt, int iterations)
                     }
                     break;
 
-                    default:
-                        break;
+                    case TileType::VERTICAL_MOVING_SPIKE:
+                    {
+                        platform->type = PlatformType::MOVING_SPIKE_VERTICAL;
+
+                        platform->phys.body->velocity.y = -platformSpeed;
+
+                        platform->updateRequired = true;
+
+                        float factor = 0.8f;
+
+                        platform->phys.AddSubHitbox({0,0}, {platformWidth * factor, platformHeight * factor});
+                    }
+                    break;
+
+                    case TileType::HORIZONTAL_MOVING_SPIKE:
+                    {
+                        platform->type = PlatformType::MOVING_SPIKE_HORIZONTAL;
+
+                        platform->phys.body->velocity.x = platformSpeed;
+
+                        platform->updateRequired = true;
+
+                        float factor = 0.8f;
+
+                        platform->phys.AddSubHitbox({0,0}, {platformWidth * factor, platformHeight * factor});
+                    }
+                    break;
+
+                    default: break;
                     }
 
                     platformList.push_back(platform);
                 }
 
-                if(type == TileType::PLAYER_SPAWN)
-                {
-                    player.phys.transform.position = tile->gameObj.transform.position;
-                    player.spawnPos = player.phys.transform.position;
-                }
-
                 //actual tiles
-                if(IsNotRealTile(type)) continue;
+                if(IsNotRealTile(type))
+                {
+                    if(tile->type != TileType::VOID) tile->type == TileType::VOID;
+
+                    continue;
+                }
 
                 tile->gameObj.transform.scale = tileScale;
 
@@ -533,22 +572,29 @@ void Level::DiscreteUpdate()
 
         if(platform->IsInactive())
         {
-            platform->Update(dt, iterations);
+            platform->UpdateInactive(dt, iterations);
             continue;
         }
 
-        if(platform->updateRequired)
+        bool isMovingPlatform = platform->type > PlatformType::MOVING_START && platform->type < PlatformType::MOVING_END;
+
+        bool isRespawnPlatform = platform->type == PlatformType::FALLING || platform->type == PlatformType::DISAPPEARING;
+
+        //moving platforms update culling
+        if(IsPlatformFarFromPlayer(platform->phys.transform.position, MAX_DISTANCE_PLATFORM_PLAYER_SQR * 5) && isMovingPlatform) continue;
+
+        //platforms update culling
+        if(IsPlatformFarFromPlayer(platform->phys.transform.position) && !isRespawnPlatform && !isMovingPlatform) continue;
+
+        if(platform->updateRequired) platform->Update(dt, iterations);
+
+        if(!IsPlatformSpike(platform->type))
         {
-            platform->Update(dt, iterations);
-
-            if(platform->IsInactive()) continue;
+            SolveCollisionsOneWayUpDown(
+                &player.phys, &platform->phys,
+                true, isGravityUp, true
+            );
         }
-        else if(IsPlatformFarFromPlayer(platform->phys.transform.position)) continue;
-
-        SolveCollisionsOneWayUpDown(
-            &player.phys, &platform->phys,
-            true, isGravityUp, true
-        );
 
         if(CheckCollisionRecs(player.GetJumpDetector(), *platform->phys.GetMainAABB()) && player.IsFalling())
         {
@@ -560,7 +606,16 @@ void Level::DiscreteUpdate()
             }
         }
 
-        bool isMovingPlatform = platform->type == PlatformType::MOVING_HORIZONTAL || platform->type == PlatformType::MOVING_VERTICAL;
+        for(int h = 1; h < platform->phys.hitboxes.size(); h++)
+        {
+            if(CheckCollisionRecs(*player.phys.GetMainAABB(), *platform->phys.GetSubAABB(h)))
+            {
+                if(IsPlatformSpike(platform->type))
+                {
+                    player.wasTouchingSpike = true;
+                }
+            }
+        }
 
         if(!isMovingPlatform) continue;
 
@@ -582,7 +637,9 @@ void Level::DiscreteUpdate()
 
                     if(!objTile.canPlatformCollidePhysically) continue;
 
-                    SolveCollisions_Platform(&platform->phys, &level[l][i][j].gameObj, platform->type == PlatformType::MOVING_HORIZONTAL);
+                    if(!CheckCollisionRecs(*platform->phys.GetMainAABB(), *objTile.GetMainAABB())) continue;
+
+                    SolveCollisions_Platform(&platform->phys, &level[l][i][j].gameObj, (platform->type > PlatformType::MOVING_X && platform->type < PlatformType::MOVING_Y));
                 }
             }
         }
@@ -803,6 +860,11 @@ void Level::DebugDrawing()
         }
 
         DrawAABB(*platform->phys.GetMainAABB(), RED);
+
+        for(int h = 1; h < platform->phys.hitboxes.size(); h++)
+        {
+            DrawAABB(*platform->phys.GetSubAABB(h), MAGENTA);
+        }
     }
 
     for(int l = 0; l < LAYERS; l++)

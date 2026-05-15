@@ -52,6 +52,19 @@ enum class TileType
 
     SPIKE_END,
 
+    MISC_START,
+
+    GOAL,
+
+    PLATFORM_STOP,
+
+    PLAYER_SPAWN, //not a real tile
+
+    MISC_END,
+
+    DECO,
+
+    //platforms
     PLATFORM_START,
 
     HORIZONALT_MOVING_PLATFORM,
@@ -59,24 +72,10 @@ enum class TileType
     FALLING_PLATFORM,
     DISAPPEARING_PLATFORM,
 
+    VERTICAL_MOVING_SPIKE,
+    HORIZONTAL_MOVING_SPIKE,
+
     PLATFORM_END,
-
-    MISC_START,
-
-    GOAL,
-
-    PLATFORM_STOP,
-
-    //non real tiles
-    LOGIC_START,
-
-    PLAYER_SPAWN,
-
-    LOGIC_END,
-
-    MISC_END,
-
-    DECO,
 
     COUNT
 };
@@ -100,10 +99,6 @@ inline bool IsTypeInvalid(TileType type)
     case TileType::MISC_START:
 
     case TileType::MISC_END:
-
-    case TileType::LOGIC_START:
-
-    case TileType::LOGIC_END:
 
     case TileType::COUNT:
 
@@ -150,6 +145,10 @@ const std::vector<TileTypeList> TILE_TYPE_LIST = {
     {TileType::VERTICAL_MOVING_PLATFORM, VERTICAL_MOVING_PLATFORM, "VERTICAL_MOVING_PLATFORM"},
     {TileType::FALLING_PLATFORM, FALLING_PLATFORM, "FALLING_PLATFORM"},
     {TileType::DISAPPEARING_PLATFORM, DISAPPEARING_PLATFORM, "DISAPPEARING_PLATFORM"},
+
+    {TileType::VERTICAL_MOVING_SPIKE, SPIKE, "VERTICAL_MOVING_SPIKE"},
+
+    {TileType::HORIZONTAL_MOVING_SPIKE, SPIKE, "HORIZONTAL_MOVING_SPIKE"},
 
     {TileType::PLAYER_SPAWN, PLAYER_SPAWN, "PLAYER_SPAWN"},
 

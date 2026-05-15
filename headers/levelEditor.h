@@ -64,7 +64,7 @@ private:
         IsKeyPressed(KEY_FIVE) || 
         IsKeyPressed(KEY_SIX) || 
         IsKeyPressed(KEY_SEVEN) || 
-        IsKeyPressed(KEY_EIGHT) || 
+        IsKeyPressed(KEY_EIGHT) ||
         IsKeyPressed(KEY_NINE);
     }
 

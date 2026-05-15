@@ -363,12 +363,20 @@ void LevelEditor::Draw()
                 float offsetX = 0;
                 float offsetY = 0;
 
-                if(type == TileType::HORIZONALT_MOVING_PLATFORM || type == TileType::VERTICAL_MOVING_PLATFORM)
+                switch (type)
+                {
+                case TileType::VERTICAL_MOVING_PLATFORM:
+                case TileType::HORIZONALT_MOVING_PLATFORM:
                 {
                     tileSize.x = gridSize * 3.0f;
                     tileSize.y = gridSize * 0.3f;
+
                     offsetX = -gridSize;
                     offsetY = tileSize.y;
+                }
+                break;
+
+                default: break;
                 }
 
                 if(tile.textureIndex < 0 || !tileRenderData)
@@ -403,12 +411,20 @@ void LevelEditor::Draw()
     float offsetX = 0;
     float offsetY = 0;
 
-    if(currentTileType == (int)TileType::HORIZONALT_MOVING_PLATFORM || currentTileType == (int)TileType::VERTICAL_MOVING_PLATFORM)
+    switch ((TileType)currentTileType)
+    {
+    case TileType::VERTICAL_MOVING_PLATFORM:
+    case TileType::HORIZONALT_MOVING_PLATFORM:
     {
         tileSize.x = gridSize * 3.0f;
         tileSize.y = gridSize * 0.3f;
+
         offsetX = -gridSize;
-        offsetY =  tileSize.y;
+        offsetY = tileSize.y;
+    }
+    break;
+
+    default: break;
     }
 
     if(currentTexture < 0 || !activeRenderData)

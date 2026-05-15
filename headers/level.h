@@ -157,16 +157,16 @@ private:
 
         if(IsTypeInvalid(type)) return true;
 
-        if(type >=  TileType::LOGIC_START && type <= TileType::LOGIC_END) return true;
+        if(type == TileType::PLAYER_SPAWN) return true;
 
         if(type >= TileType::PLATFORM_START && type <= TileType::PLATFORM_END) return true;
 
         return false;
     }
 
-    inline bool IsPlatformFarFromPlayer(Vector2 platformPosition)
+    inline bool IsPlatformFarFromPlayer(Vector2 platformPosition, float maxDistance = MAX_DISTANCE_PLATFORM_PLAYER_SQR)
     {
-        return Vector2LengthSqr(Vector2Subtract(platformPosition, player.phys.transform.position)) > MAX_DISTANCE_PLATFORM_PLAYER_SQR;
+        return Vector2LengthSqr(Vector2Subtract(platformPosition, player.phys.transform.position)) > maxDistance;
     }
 
     inline bool IsTileSpike(TileType type)

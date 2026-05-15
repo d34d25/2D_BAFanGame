@@ -22,31 +22,6 @@ void Platform::Update(float dt, int iterations)
 
     float subDt = dt / iterations;
 
-    if(IsInactive())
-    {
-        respawnTimer -= subDt;
-
-        if(respawnTimer <= 0.0f)
-        {
-            timer = maxTime;
-
-            phys.transform.position = ogPosition;
-
-            respawnTimer = respawnMaxTime;
-
-            phys.body->hasGravity = false;
-            phys.body->velocity = {0,0};
-
-            phys.UpdateHitboxes();
-
-            updateRequired = false;
-        }
-
-        return;
-    }
-
-    if(!updateRequired) return;
-
     if(isFalling || isDisappearing)
     {
         if(timer > 0.0f)
@@ -85,4 +60,29 @@ void Platform::Update(float dt, int iterations)
     phys.body->UpdatePositionY(dt, iterations, &phys.transform.position.y);
 
     phys.UpdateHitboxes();
+}
+
+void Platform::UpdateInactive(float dt, int iterations)
+{
+    if(!IsInactive()) return;
+
+    float subDt = dt / iterations;
+
+    respawnTimer -= subDt;
+
+    if(respawnTimer <= 0.0f)
+    {
+        timer = maxTime;
+
+        phys.transform.position = ogPosition;
+
+        respawnTimer = respawnMaxTime;
+
+        phys.body->hasGravity = false;
+        phys.body->velocity = {0,0};
+
+        phys.UpdateHitboxes();
+
+        updateRequired = false;
+    }
 }
