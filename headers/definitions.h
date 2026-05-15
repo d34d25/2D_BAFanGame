@@ -38,10 +38,11 @@ static constexpr int COLS = 70;
 
 static constexpr int LAYERS = 2;
 
-static constexpr int gridSize = 48;
+static constexpr int GRID_SIZE = 48;
 
-static constexpr int tileScale = 3;
+static constexpr int TILE_SCALE = 3;
 
+static constexpr int ROTATING_SPIKE_MAX_HITBOX = 6;
 
 //these colors can be re used for futures tiles / platforms
 

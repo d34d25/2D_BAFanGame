@@ -75,6 +75,9 @@ enum class TileType
     VERTICAL_MOVING_SPIKE,
     HORIZONTAL_MOVING_SPIKE,
 
+    ROTATING_SPIKE_SINGLE,
+    ROTATING_SPIKE_DOUBLE,
+
     PLATFORM_END,
 
     COUNT
@@ -150,6 +153,10 @@ const std::vector<TileTypeList> TILE_TYPE_LIST = {
 
     {TileType::HORIZONTAL_MOVING_SPIKE, SPIKE, "HORIZONTAL_MOVING_SPIKE"},
 
+    {TileType::ROTATING_SPIKE_SINGLE, SPIKE, "ROTATING_SPIKE_SINGLE"},
+
+    {TileType::ROTATING_SPIKE_DOUBLE, SPIKE, "ROTATING_SPIKE_DOUBLE"},
+
     {TileType::PLAYER_SPAWN, PLAYER_SPAWN, "PLAYER_SPAWN"},
 
     {TileType::DECO, DECO, "DECO"},
@@ -190,8 +197,8 @@ inline bool IsTileEmptyInverted(int l, int i, int j,Tile(&levelTiles)[LAYERS][RO
 
 inline TileRange CalculateTileRange(int x, int y, int range)
 {
-    int gridX = x / gridSize;
-    int gridY = y / gridSize;
+    int gridX = x / GRID_SIZE;
+    int gridY = y / GRID_SIZE;
 
     TileRange rangeTiles = {};
 
@@ -232,7 +239,7 @@ inline const char* GetTileTypeText(TileType type)
 
 inline Vector2 GetTileCenter(int i, int j)
 {
-    return {i * gridSize + gridSize * 0.5f, j * gridSize + gridSize * 0.5f};
+    return {i * GRID_SIZE + GRID_SIZE * 0.5f, j * GRID_SIZE + GRID_SIZE * 0.5f};
 }
 
 //textures

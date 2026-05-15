@@ -1,6 +1,7 @@
 #include "level.h"
 
 #include <iostream>
+#include <algorithm>
 
 Level::Level() : player({0, 0})
 {
@@ -31,7 +32,7 @@ void Level::InitLevel(const char *levelPath, float dt, int iterations)
 
     camera.zoom = 1.2f;
 
-    float step = 1.0f / (float)gridSize;
+    float step = 1.0f / (float)GRID_SIZE;
 
     camera.zoom = roundf(camera.zoom / step) * step;
 
@@ -66,8 +67,8 @@ void Level::InitLevel(const char *levelPath, float dt, int iterations)
                 {
                     Platform* platform = new Platform();
 
-                    float platformWidth = gridSize;
-                    float platformHeight = gridSize;
+                    float platformWidth = GRID_SIZE;
+                    float platformHeight = GRID_SIZE;
 
                     platform->gravity = gravity;
 
@@ -76,8 +77,8 @@ void Level::InitLevel(const char *levelPath, float dt, int iterations)
                     case TileType::VERTICAL_MOVING_PLATFORM:
                     case TileType::HORIZONALT_MOVING_PLATFORM:
                     {
-                        platformWidth = gridSize * 3.0f;
-                        platformHeight = gridSize * 0.3f;
+                        platformWidth = GRID_SIZE * 3.0f;
+                        platformHeight = GRID_SIZE * 0.3f;
                     }
                     break;
                     
@@ -144,6 +145,8 @@ void Level::InitLevel(const char *levelPath, float dt, int iterations)
                     {
                         platform->type = PlatformType::MOVING_SPIKE_VERTICAL;
 
+                        platformSpeed *= 1.5f;
+
                         platform->phys.body->velocity.y = -platformSpeed;
 
                         platform->updateRequired = true;
@@ -158,6 +161,8 @@ void Level::InitLevel(const char *levelPath, float dt, int iterations)
                     {
                         platform->type = PlatformType::MOVING_SPIKE_HORIZONTAL;
 
+                        platformSpeed *= 1.5f;
+
                         platform->phys.body->velocity.x = platformSpeed;
 
                         platform->updateRequired = true;
@@ -168,11 +173,84 @@ void Level::InitLevel(const char *levelPath, float dt, int iterations)
                     }
                     break;
 
+                    case TileType::ROTATING_SPIKE_SINGLE:
+                    {
+                        platform->type = PlatformType::ROTATING_SPIKE_SINGLE;
+
+                        platform->updateRequired = true;
+
+                        platform->phys.body->velocity.x = platformSpeed;
+
+                        if(platform->phys.data.flipX) platform->phys.body->velocity.x = -platformSpeed;
+
+                        float size = GRID_SIZE * 0.5f;
+                        
+                        for(int h = 0; h < ROTATING_SPIKE_MAX_HITBOX; h++)
+                        {
+                            Vector2 offset = {0,0};
+
+                            if(h >= 0)
+                            {
+                                float multiplier = (float)h * size;
+
+                                offset.x = platform->phys.data.flipX ? -multiplier : multiplier;
+                                offset.y = platform->phys.data.flipY ? multiplier : -multiplier;
+
+                                platform->phys.AddSubHitbox(offset, {size,size});
+                            }
+                        }
+                    }
+                    break;
+
+                    case TileType::ROTATING_SPIKE_DOUBLE:
+                    {
+                        platform->type = PlatformType::ROTATING_SPIKE_DOUBLE;
+
+                        platform->updateRequired = true;
+
+                        platform->phys.body->velocity.x = platformSpeed;
+
+                        if(platform->phys.data.flipX) platform->phys.body->velocity.x = -platformSpeed;
+
+                        float size = GRID_SIZE * 0.5f;
+                        
+                        for(int h = 0; h < ROTATING_SPIKE_MAX_HITBOX * 2.0f; h++)
+                        {
+                            if(h == ROTATING_SPIKE_MAX_HITBOX) continue;
+
+                            Vector2 offset = {0,0};
+
+                            float armSide = (h < ROTATING_SPIKE_MAX_HITBOX) ? 1.0f : -1.0f;
+                            int localH = h % ROTATING_SPIKE_MAX_HITBOX;
+
+                            if(localH >= 0)
+                            {
+                                float multiplier = (float)localH * size * armSide;
+
+                                offset.x = platform->phys.data.flipX ? -multiplier : multiplier;
+                                offset.y = platform->phys.data.flipY ? multiplier : -multiplier;
+
+                                platform->phys.AddSubHitbox(offset, {size,size});
+                            }
+                        }
+                    }
+                    break;
+
                     default: break;
                     }
 
                     platformList.push_back(platform);
                 }
+
+                std::stable_sort(platformList.begin(), platformList.end(), [](Platform* a, Platform* b)
+                {
+                    bool isASpike = IsPlatformSpike(a->type);
+                    bool isBSpike = IsPlatformSpike(b->type);
+
+                    if(isASpike != isBSpike) return !isASpike;
+
+                    return false;
+                });
 
                 //actual tiles
                 if(IsNotRealTile(type))
@@ -182,7 +260,7 @@ void Level::InitLevel(const char *levelPath, float dt, int iterations)
                     continue;
                 }
 
-                tile->gameObj.transform.scale = tileScale;
+                tile->gameObj.transform.scale = TILE_SCALE;
 
                 //decorational tiles don't need a physical body
                 if(level[l][i][j].type == TileType::DECO) continue;
@@ -206,7 +284,7 @@ void Level::InitLevel(const char *levelPath, float dt, int iterations)
 
                 tile->gameObj.body = new SimpleBody2D();
 
-                tile->gameObj.hitboxes.push_back(Hitbox{{0,0}, {gridSize, gridSize}});
+                tile->gameObj.hitboxes.push_back(Hitbox{{0,0}, {GRID_SIZE, GRID_SIZE}});
 
                 tile->gameObj.UpdateHitboxes();
 
@@ -744,7 +822,7 @@ void Level::DrawLevel()
                     if(IsColorOf(color, BLANK)) continue;
 
                     if(!tile.gameObj.hitboxes.empty()) DrawRectangleRec(*tile.gameObj.GetMainAABB(), color);
-                    else DrawRectangle(i * gridSize, j * gridSize, gridSize, gridSize, color);
+                    else DrawRectangle(i * GRID_SIZE, j * GRID_SIZE, GRID_SIZE, GRID_SIZE, color);
                 }
             }
         }
@@ -754,9 +832,7 @@ void Level::DrawLevel()
     {
         Platform* platform = platformList[i];
 
-        if(!platform) continue;
-
-        if(IsPlatformFarFromPlayer(platform->phys.transform.position)) continue;
+        if(!platform || IsPlatformFarFromPlayer(platform->phys.transform.position)) continue;
 
         PlatformType& platformType = platform->type;
 
@@ -790,7 +866,15 @@ void Level::DrawLevel()
             else if(platformType == PlatformType::FALLING) platformColor = FALLING_PLATFORM;
             else if(platformType == PlatformType::DISAPPEARING) platformColor = DISAPPEARING_PLATFORM;
 
-            DrawRectangleRec(*platform->phys.GetMainAABB(), platformColor);
+            if(!IsPlatformSpike(platformType))
+                DrawRectangleRec(*platform->phys.GetMainAABB(), platformColor);
+            else
+            {
+                for(int h = 1; h < platform->phys.hitboxes.size(); h++)
+                {
+                    DrawRectangleRec(*platform->phys.GetSubAABB(h), SPIKE);
+                }
+            }
         }
     }
 
@@ -818,7 +902,7 @@ void Level::DrawLevel()
 
             if(!e) continue;
 
-            DrawExplosion(e->position.x, e->position.y, e->radius, e->renderData, 0, tileScale);
+            DrawExplosion(e->position.x, e->position.y, e->radius, e->renderData, 0, TILE_SCALE);
         }
     }
 
@@ -916,14 +1000,14 @@ void Level::DebugDrawing()
     Color gridColor = GRAY;
     gridColor.a = (int)(255 * 0.5f);
 
-    for(int i = 0; i <= ROWS * gridSize; i+= gridSize)
+    for(int i = 0; i <= ROWS * GRID_SIZE; i+= GRID_SIZE)
     {
-        DrawLine(i, 0, i, ROWS * gridSize, gridColor);
+        DrawLine(i, 0, i, ROWS * GRID_SIZE, gridColor);
     }
 
-    for(int j = 0; j <= COLS * gridSize; j+= gridSize)
+    for(int j = 0; j <= COLS * GRID_SIZE; j+= GRID_SIZE)
     {
-        DrawLine(0, j, COLS * gridSize, j, gridColor);
+        DrawLine(0, j, COLS * GRID_SIZE, j, gridColor);
     }
 
     DrawAABB(*player.phys.GetMainAABB(), ORANGE);

@@ -96,7 +96,7 @@ private:
             if(mouseWheel > 0) camera.zoom += cameraFactor;
             else if(mouseWheel < 0) camera.zoom -= cameraFactor;
 
-            float step = 1.0f / (float)gridSize;
+            float step = 1.0f / (float)GRID_SIZE;
 
             camera.zoom = roundf(camera.zoom / step) * step;
 

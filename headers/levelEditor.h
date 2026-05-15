@@ -76,14 +76,16 @@ private:
     inline Vector2 GetMouseGridPosition(IntPair mousePosition)
     {
         return {
-            mousePosition.x * gridSize + gridSize * 0.5f,
-            mousePosition.y * gridSize + gridSize * 0.5f
+            mousePosition.x * GRID_SIZE + GRID_SIZE * 0.5f,
+            mousePosition.y * GRID_SIZE + GRID_SIZE * 0.5f
         };
     }
 
     void ExportLevel();
     
     const char* levelPath;
+
+    void DrawRotatingSpikes(int currentType, Vector2 position, float size, EntityData data, Color color);
 
 public:
 

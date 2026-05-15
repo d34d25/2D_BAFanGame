@@ -132,7 +132,7 @@ inline void DrawBullet(int x, int y, float radius, Color mainColor, Color backCo
     DrawCircle(x, y, radius, mainColor);
 };
 
-inline void DrawExplosion(int x, int y, float radius, SpriteRenderData* renderData, int frameIndex = 0, float scale = tileScale, Color color = WHITE)
+inline void DrawExplosion(int x, int y, float radius, SpriteRenderData* renderData, int frameIndex = 0, float scale = TILE_SCALE, Color color = WHITE)
 {
     if(renderData)
     {

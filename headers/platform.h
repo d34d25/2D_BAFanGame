@@ -3,7 +3,7 @@
 #include "raylib.h"
 #include "entity.h"
 
-const Vector2 DESPAWN_LOCATION = {1000 * gridSize,  1000 * gridSize};
+const Vector2 DESPAWN_LOCATION = {1000 * GRID_SIZE,  1000 * GRID_SIZE};
 
 enum class PlatformType
 {
@@ -39,6 +39,8 @@ private:
 
     float respawnTimer = 1.0f;
     float respawnMaxTime = 1.0f;
+
+    float rotationAngle = 0.0f;
 
 public:
 
@@ -100,7 +102,8 @@ inline bool IsPlatformSpike(PlatformType type)
     {
     case PlatformType::MOVING_SPIKE_HORIZONTAL: return true;
     case PlatformType::MOVING_SPIKE_VERTICAL: return true;
-    
+    case PlatformType::ROTATING_SPIKE_SINGLE: return true;
+    case PlatformType::ROTATING_SPIKE_DOUBLE: return true;
     default: return false;
     }
 

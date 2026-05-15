@@ -21,7 +21,7 @@ struct Transform2D
 {
     Vector2 position = {0,0};
 
-    float scale = tileScale;
+    float scale = TILE_SCALE;
 
     float angle = 0.0f; //in degrees
 };
@@ -110,6 +110,12 @@ struct Hitbox
     {
         aabb.x = (transform.position.x - aabb.width * 0.5f) + offset.x;
         aabb.y = (transform.position.y - aabb.height * 0.5f) + offset.y;
+    }
+
+    inline void Update(const Vector2& position)
+    {
+        aabb.x = (position.x - aabb.width * 0.5f) + offset.x;
+        aabb.y = (position.y - aabb.height * 0.5f) + offset.y;
     }
 };
 
