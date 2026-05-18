@@ -131,20 +131,6 @@ private:
         return IsOneWayRightLeft(tile) || IsOneWayUpDown(tile);
     }
 
-    inline bool IsTileNotJumpTrigger(Tile tile)
-    {
-        TileType type = tile.type;
-
-        return type == TileType::TRAMPOLINE ||
-        type == TileType::GRAVITY_CHANGER ||
-        type == TileType::GOAL ||
-        IsOneWayRightLeft(tile) ||
-        type == TileType::PLATFORM_STOP ||
-        (type > TileType::SPIKE_START && type < TileType::SPIKE_END) ||
-        type == TileType::WIND ||
-        type == TileType::WATER;
-    }
-
     void DiscreteUpdate();
 
     void DebugDrawing();

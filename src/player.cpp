@@ -196,6 +196,12 @@ void Player::Update(float dt, int iterations)
 {
     float subDt = dt / iterations;
 
+    float jumpVel = -9000;
+
+    float jump = jumpVel;
+
+    if(entityData.flipY) jump = -jumpVel;
+
     //lateral movement
 
     float moveForce = 400 * phys.body->damping;
@@ -213,19 +219,51 @@ void Player::Update(float dt, int iterations)
         entityData.flipX = false;
     }
 
+    //ladder
+
+    if(inLadder && (IsKeyDown(KEY_UP) || IsKeyDown(KEY_DOWN))) climbing = true;
+
+    if(climbing)
+    {
+        if(!inLadder)
+        {
+            climbing = false;
+            phys.body->hasGravity = true;
+        }
+        else
+        {
+            phys.transform.position.x = laddedSnapPosX;
+
+            phys.body->hasGravity = false;
+
+            phys.body->velocity = {0,0};
+            phys.body->altVelocity = {0,0};
+
+            float climbingSpeed = 200.0f;
+
+            if(IsKeyDown(KEY_UP)) phys.body->velocity.y = -climbingSpeed;
+            else if(IsKeyDown(KEY_DOWN)) phys.body->velocity.y = climbingSpeed;
+
+            if(IsKeyPressed(KEY_Z))
+            {
+                climbing = false;
+
+                phys.body->velocity.y = jump * 0.1f;
+            }
+        }
+    }
+    else
+    {
+        phys.body->hasGravity = true;
+    }
+
     //jump
-
-    float jumpVel = -9000;
-
-    float jump = jumpVel;
-
-    if(entityData.flipY) jump = -jumpVel;
 
     if(isJumping)
     {
         phys.body->hasGravity = false;
     }
-    else
+    else if(!isJumping && !climbing)
     {
         phys.body->hasGravity = true;
     }

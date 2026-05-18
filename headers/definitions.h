@@ -32,6 +32,8 @@ static constexpr Color FALLING_PLATFORM = Color{200,100,0,255};
 
 static constexpr Color DISAPPEARING_PLATFORM = Color{200,100,140,255};
 
+static constexpr Color LADDER = Color{0, 200,255,255};
+
 static constexpr int ROWS = 70;
 
 static constexpr int COLS = 70;
@@ -45,8 +47,6 @@ static constexpr int TILE_SCALE = 3;
 static constexpr int ROTATING_SPIKE_MAX_HITBOX = 6;
 
 //these colors can be re used for futures tiles / platforms
-
-//static constexpr Color ONE_WAY_DOWN = Color{0, 200,255,255};
 
 //static constexpr Color ONE_WAY_RIGHT = Color{0, 200,190,255};
 

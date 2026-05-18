@@ -83,6 +83,9 @@ public:
 
     bool inWater = false;
 
+    bool inLadder = false;
+    bool climbing = false;
+
     //current frame flags
     bool isGrounded = false;
     bool isTouchingGravityChanger = false;
@@ -104,6 +107,8 @@ public:
     BulletProperties bulletData = {};
 
     std::unique_ptr<BulletPool> bulletpool = {};
+
+    float laddedSnapPosX = 0.0f;
 
     Player(Vector2 position);
 
@@ -151,6 +156,8 @@ public:
 
         isJumping = false;
         isGrounded = false;
+
+        ResetFalgs();
     }
 
     inline bool IsFalling()
@@ -175,5 +182,23 @@ public:
         isGrounded = wasGrounded;
         isTouchingGravityChanger = wasTouchingGravityChanger;
         isTouchingSpike = wasTouchingSpike;
+    }
+
+    inline bool IsPressingDown()
+    {
+        if(!entityData.flipY && IsKeyDown(KEY_DOWN)) return true;
+        
+        if(entityData.flipY && IsKeyDown(KEY_UP)) return true;
+
+        return false;
+    }
+
+    inline bool IsPressingUp()
+    {
+        if(!entityData.flipY && IsKeyDown(KEY_UP)) return true;
+        
+        if(entityData.flipY && IsKeyDown(KEY_DOWN)) return true;
+
+        return false;
     }
 };

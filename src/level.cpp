@@ -296,13 +296,8 @@ void Level::InitLevel(const char *levelPath, float dt, int iterations)
                 {
                     tile->gameObj.canEntityCollidePhysically = true;
                     tile->gameObj.canPlatformCollidePhysically = true;
-                }
-                break;
 
-                case TileType::GOAL:
-                {
-                    tile->gameObj.canEntityCollidePhysically = false;
-                    tile->gameObj.canPlatformCollidePhysically = false;
+                    tile->isJumpTrigger = true;
                 }
                 break;
 
@@ -332,6 +327,8 @@ void Level::InitLevel(const char *levelPath, float dt, int iterations)
                     tile->gameObj.canEntityCollidePhysically = true;
                     tile->gameObj.canPlatformCollidePhysically = true;
 
+                    tile->isJumpTrigger = true;
+
                     tile->gameObj.body->velocity.x = treadmillVel;
                 }
                 break;
@@ -341,6 +338,8 @@ void Level::InitLevel(const char *levelPath, float dt, int iterations)
                     tile->gameObj.canEntityCollidePhysically = true;
                     tile->gameObj.canPlatformCollidePhysically = true;
 
+                    tile->isJumpTrigger = true;
+
                     tile->gameObj.body->velocity.x = -treadmillVel;
                 }
                 break;
@@ -349,6 +348,14 @@ void Level::InitLevel(const char *levelPath, float dt, int iterations)
                 {
                     tile->gameObj.canEntityCollidePhysically = true;
                     tile->gameObj.canPlatformCollidePhysically = true;
+
+                    if(IsOneWayUpDown(*tile)) tile->isJumpTrigger = true;
+                }
+                break;
+
+                case TileType::LADDER:
+                {
+                    tile->gameObj.canPlatformCollidePhysically = true;
                 }
                 break;
 
@@ -356,6 +363,7 @@ void Level::InitLevel(const char *levelPath, float dt, int iterations)
                 {
                     tile->gameObj.canEntityCollidePhysically = false;
                     tile->gameObj.canPlatformCollidePhysically = false;
+                    tile->isJumpTrigger = false;
                 }
                 break;
                 }
@@ -444,6 +452,12 @@ void Level::InitLevel(const char *levelPath, float dt, int iterations)
                     }
                     break;
 
+                    case TileType::SPIKE_BALL:
+                    {
+                        AddSpikeHitbox(0.8f,0.8f,0.0f,0.0f);
+                    }
+                    break;
+
                     default: break;
                     }
                 }
@@ -480,6 +494,8 @@ void Level::DiscreteUpdate()
 
     player.Update(dt, iterations);
 
+    player.inLadder = false;
+
     //X pass
 
     player.phys.UpdatePositionX(dt, iterations);
@@ -490,20 +506,18 @@ void Level::DiscreteUpdate()
         {
             for(int j = playerTileRange.startY; j <= playerTileRange.endY; j++)
             {
-                GameObject& objTile = level[l][i][j].gameObj;
+                Tile& tile = level[l][i][j];
 
-                if(!objTile.body || objTile.hitboxes.empty()) continue;
+                if(!tile.gameObj.body || tile.gameObj.hitboxes.empty()) continue;
 
-                if(!objTile.canEntityCollidePhysically) continue;
+                if(!tile.gameObj.canEntityCollidePhysically) continue;
 
-                if(!CheckCollisionRecs(*player.phys.GetMainAABB(), *objTile.GetMainAABB())) continue;
-
-                const Tile& tile = level[l][i][j];
+                if(!CheckCollisionRecs(*player.phys.GetMainAABB(), *tile.gameObj.GetMainAABB())) continue;
 
                 if(!IsTileOneWay(tile))
                 {
                     SolveCollisions(
-                        &player.phys, &objTile, 
+                        &player.phys, &tile.gameObj, 
                         true, isGravityUp, 
                         tile.type == TileType::TRAMPOLINE,
                         false
@@ -512,7 +526,7 @@ void Level::DiscreteUpdate()
                 else if(IsOneWayRightLeft(tile))
                 {
                     SolveCollisionsOneWayLeftRight(
-                        &player.phys, &objTile,
+                        &player.phys, &tile.gameObj,
                         tile.gameObj.direction == Direction::RIGHT
                     );
                 }
@@ -531,15 +545,17 @@ void Level::DiscreteUpdate()
         {
             for(int j = playerTileRange.startY; j <= playerTileRange.endY; j++)
             {
-                GameObject& objTile = level[l][i][j].gameObj;
+                Tile& tile = level[l][i][j];
 
-                const Tile& tile = level[l][i][j];
+                GameObject& objTile = tile.gameObj;
 
                 if(IsNotRealTile(tile.type)) continue;
 
                 if(!objTile.body || objTile.hitboxes.empty()) continue;
 
                 if(!CheckCollisionRecs(*player.phys.GetMainAABB(), *objTile.GetMainAABB())) continue;
+
+                bool isTileJumpTrigger = tile.isJumpTrigger;
 
                 if(objTile.canEntityCollidePhysically)
                 {
@@ -572,7 +588,79 @@ void Level::DiscreteUpdate()
 
                 if(CheckCollisionRecs(*player.phys.GetMainAABB(), *objTile.GetMainAABB()))
                 {
-                    if(tile.type == TileType::GRAVITY_CHANGER) player.wasTouchingGravityChanger = true;
+                    switch (tile.type)
+                    {
+                    case TileType::GRAVITY_CHANGER: player.wasTouchingGravityChanger = true; break;
+                    case TileType::WIND:
+                    {
+                        if(!player.windApplied)
+                        {
+                            bool isEdgeUp = tile.gameObj.direction == Direction::UP && IsTileEmpty(l, i, j - 1, level, TileType::VOID);
+
+                            bool isEdgeDown = tile.gameObj.direction == Direction::DOWN && IsTileEmpty(l, i, j + 1, level, TileType::VOID);
+
+                            ApplyWind(
+                                &player.phys,
+                                &objTile,
+                                tile.gameObj.direction,
+                                isEdgeUp,
+                                isEdgeDown,
+                                isGravityUp
+                            );
+
+                            player.windApplied = true;
+                        }
+                    }
+                    break;
+
+                    case TileType::WATER:
+                    {
+                        if(!player.inWater)
+                        {
+                            ApplyWaterPhysics(&player.phys, isGravityUp);
+
+                            player.inWater = true;
+                        }
+                    }
+                    break;
+
+                    case TileType::LADDER:
+                    {
+                        if(!player.inLadder)
+                        {
+                            player.inLadder = true;
+
+                            player.laddedSnapPosX = tile.gameObj.transform.position.x;
+                        }
+
+                        bool isEdgeUp = IsTileEmpty(l, i, j - 1, level, TileType::VOID);
+
+                        bool isEdgeDown = IsTileEmpty(l, i, j + 1, level, TileType::VOID);
+
+                        if((!isGravityUp && isEdgeUp) || (isGravityUp && isEdgeDown))
+                        {
+                            if((IsAbove(*player.phys.GetMainAABB(), *objTile.GetMainAABB(), 1.0f) && !isGravityUp) || 
+                            (IsBelow(*player.phys.GetMainAABB(), *objTile.GetMainAABB(), 1.0f) && isGravityUp))
+                            {
+                                if(!player.IsPressingDown())
+                                {
+                                    SolveCollisionsOneWayUpDown(&player.phys, &objTile, true, isGravityUp, true);
+
+                                    player.inLadder = false;
+                                    isTileJumpTrigger = true;
+                                }
+                            }
+                            else 
+                            {
+                                isTileJumpTrigger = false;
+                            }
+                        }
+                    }
+                    break;
+                    
+                    default:
+                        break;
+                    }
 
                     if(IsTileSpike(tile.type))
                     {
@@ -582,34 +670,9 @@ void Level::DiscreteUpdate()
                                 player.wasTouchingSpike = true;
                         }
                     }
-                    
-                    if(tile.type == TileType::WIND && !player.windApplied)
-                    {
-                        bool isEdgeUp = tile.gameObj.direction == Direction::UP && IsTileEmpty(l, i, j - 1, level, TileType::VOID);
-
-                        bool isEdgeDown = tile.gameObj.direction == Direction::DOWN && IsTileEmpty(l, i, j + 1, level, TileType::VOID);
-
-                        ApplyWind(
-                            &player.phys,
-                            &objTile,
-                            tile.gameObj.direction,
-                            isEdgeUp,
-                            isEdgeDown,
-                            isGravityUp
-                        );
-
-                        player.windApplied = true;
-                    }
-
-                    if(tile.type == TileType::WATER && !player.inWater)
-                    {
-                        ApplyWaterPhysics(&player.phys, isGravityUp);
-
-                        player.inWater = true;
-                    }
                 }
 
-                if(IsTileNotJumpTrigger(tile)) continue;
+                if(!isTileJumpTrigger) continue;
 
                 if(tile.type == TileType::TREADMILL_LEFT || tile.type == TileType::TREADMILL_RIGHT)
                 {

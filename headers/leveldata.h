@@ -42,6 +42,8 @@ enum class TileType
 
     WATER,
 
+    LADDER,
+
     TILE_END,
 
     SPIKE_START,
@@ -49,6 +51,7 @@ enum class TileType
     SPIKE,
     SPIKE_DOUBLE,
     SPIKE_SMALL,
+    SPIKE_BALL,
 
     SPIKE_END,
 
@@ -134,6 +137,8 @@ const std::vector<TileTypeList> TILE_TYPE_LIST = {
     {TileType::WIND, WHITE, "WIND"},
 
     {TileType::WATER, SKYBLUE, "WATER"},
+
+    {TileType::LADDER, LADDER, "LADDER"},
     
     {TileType::TREADMILL_RIGHT, TREADMILL_RIGHT, "TREADMILL_RIGHT"},
     {TileType::TREADMILL_LEFT, TREADMILL_LEFT, "TREADMILL_LEFT"},
@@ -143,6 +148,7 @@ const std::vector<TileTypeList> TILE_TYPE_LIST = {
     {TileType::SPIKE, SPIKE, "SPIKE"},
     {TileType::SPIKE_DOUBLE, SPIKE, "SPIKE_DOUBLE"},
     {TileType::SPIKE_SMALL, SPIKE, "SPIKE_SMALL"},
+    {TileType::SPIKE_BALL, SPIKE, "SPIKE_BALL"},
 
     {TileType::HORIZONALT_MOVING_PLATFORM, HORIZONTAL_MOVING_PLATFORM, "HORIZONALT_MOVING_PLATFORM"},
     {TileType::VERTICAL_MOVING_PLATFORM, VERTICAL_MOVING_PLATFORM, "VERTICAL_MOVING_PLATFORM"},
@@ -170,6 +176,8 @@ struct Tile
 
     int variantIndex = 0;
     
+    bool isJumpTrigger = false;
+
     GameObject gameObj = {};
 };
 
