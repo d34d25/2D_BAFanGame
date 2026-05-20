@@ -168,6 +168,11 @@ struct GameObject
         return hitboxes[index].aabb;
     }
 
+    inline Rectangle& GetAABB(int index)
+    {
+        return hitboxes[index].aabb;
+    }
+
     inline void AddSubHitbox(const Vector2& offset, const Vector2& size)
     {
         if(hitboxes.size() >= 1)

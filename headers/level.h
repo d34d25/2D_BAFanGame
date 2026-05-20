@@ -14,6 +14,8 @@ const float MAX_DISTANCE_PLATFORM_PLAYER_SQR = 800 * 800;
 
 const float MAX_DISTANCE_PLATFORM_PLAYER_SQR_5X = MAX_DISTANCE_PLATFORM_PLAYER_SQR * 5;
 
+const float REC_TO_CIRCLE_RADIUS_MULTIPLIER = 1.5f; //this ensures that the circle don't cut the corners of the AABB
+
 const float GRAVITY = 3500.0f;
 
 class Level
@@ -33,6 +35,8 @@ private:
     Tile level[LAYERS][ROWS][COLS];
 
     std::vector<Platform> platformList = {};
+
+    std::vector<Platform*> platformCache = {};
 
     Camera2D camera = {};
 
@@ -162,4 +166,20 @@ public:
     void UpdateLevel();
 
     void DrawLevel();
+
+    inline int GetPlatformCount()
+    {
+        return (int)platformList.size();
+    }
+
+    inline int GetPlayerPlatformCache_Physics()
+    {
+        return (int)player.platformCache_physics.size();
+    }
+
+    inline int GetPlayerPlatformCache_Render()
+    {
+        return (int)player.platformCache_rendering.size();
+    }
+
 };

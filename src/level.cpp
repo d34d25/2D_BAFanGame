@@ -469,11 +469,15 @@ void Level::InitLevel(const char *levelPath, float dt, int iterations)
         return false;
     });
 
-    std::cout<<"Total platform count"<<(int)platformList.size()<<"\n"; 
+    player.platformCache_physics.reserve(60);
+    player.platformCache_rendering.reserve(600);
 }
 
 void Level::UpdateLevel()
 {
+    player.platformCache_physics.clear();
+    player.platformCache_rendering.clear();
+
     LowFrequencyDiscreteUpdate();
 
     for(int iteraion = 0; iteraion < iterations; iteraion++)
@@ -490,6 +494,11 @@ void Level::UpdateLevel()
 
 void Level::LowFrequencyDiscreteUpdate()
 {
+    float playerRadius = player.phys.GetMainAABB().width * REC_TO_CIRCLE_RADIUS_MULTIPLIER;
+
+    float updateRadius = GRID_SIZE * 25.0f;
+    float renderRadius = GRID_SIZE * 15.0f;
+
     for(int p = 0; p < platformList.size(); p++)
     {
         Platform& platform = platformList[p];
@@ -507,39 +516,71 @@ void Level::LowFrequencyDiscreteUpdate()
         bool isRespawnPlatform = platform.type == PlatformType::FALLING || platform.type == PlatformType::DISAPPEARING;
 
         //moving platforms update culling
-        if(IsPlatformFarFromPlayer(platform.phys.transform.position, MAX_DISTANCE_PLATFORM_PLAYER_SQR_5X) && isMovingPlatform) continue;
+        //if(IsPlatformFarFromPlayer(platform.phys.transform.position, MAX_DISTANCE_PLATFORM_PLAYER_SQR_5X) && isMovingPlatform) continue;
 
         //platforms update culling
-        if(IsPlatformFarFromPlayer(platform.phys.transform.position) && !isRespawnPlatform && !isMovingPlatform) continue;
+        //if(IsPlatformFarFromPlayer(platform.phys.transform.position) && !isRespawnPlatform && !isMovingPlatform) continue;
+
+        if(!CheckCollisionCircles(
+            player.phys.transform.position,
+            playerRadius,
+            platform.phys.transform.position,
+            updateRadius
+        )) continue;
+
+        if(CheckCollisionCircles(
+            player.phys.transform.position,
+            player.phys.GetMainAABB().height * REC_TO_CIRCLE_RADIUS_MULTIPLIER,
+            platform.phys.transform.position,
+            renderRadius
+        ))
+        {
+            player.platformCache_rendering.push_back(&platform);
+        }
 
         if(platform.updateRequired) platform.Update(dt, 1);
 
-        if(!isMovingPlatform) continue;
-        
-        TileRange platformRange = CalculateTileRange(
+        if(isMovingPlatform)
+        {
+            TileRange platformRange = CalculateTileRange(
             platform.phys.transform.position.x,
             platform.phys.transform.position.y,
             collisionTileCheckRange
-        );
+            );
 
-        for(int l = 0; l < LAYERS; l++)
-        {
-            for(int i = platformRange.startX; i <= platformRange.endX; i++)
+            for(int l = 0; l < LAYERS; l++)
             {
-                for(int j = platformRange.startY; j <= platformRange.endY; j++)
+                for(int i = platformRange.startX; i <= platformRange.endX; i++)
                 {
-                    GameObject& objTile = level[l][i][j].gameObj;
+                    for(int j = platformRange.startY; j <= platformRange.endY; j++)
+                    {
+                        GameObject& objTile = level[l][i][j].gameObj;
 
-                    if(!objTile.canPlatformCollidePhysically) continue;
+                        if(!objTile.canPlatformCollidePhysically) continue;
 
-                    if(objTile.hitboxes.empty()) continue;
+                        if(objTile.hitboxes.empty()) continue;
 
-                    if(!CheckCollisionCircles(platform.phys.transform.position, platform.phys.GetMainAABB().width, 
-                    objTile.transform.position, objTile.GetMainAABB().width)) continue;
-
-                    SolveCollisions_Platform(&platform.phys, &objTile, (platform.type > PlatformType::MOVING_X && platform.type < PlatformType::MOVING_Y));
+                        if(CheckCollisionCircles(
+                            platform.phys.transform.position, 
+                            platform.phys.GetMainAABB().width * REC_TO_CIRCLE_RADIUS_MULTIPLIER,
+                            objTile.transform.position,
+                            objTile.GetMainAABB().width * REC_TO_CIRCLE_RADIUS_MULTIPLIER
+                        ))
+                        {
+                            SolveCollisions_Platform(&platform.phys, &objTile, (platform.type > PlatformType::MOVING_X && platform.type < PlatformType::MOVING_Y));
+                        }
+                    }
                 }
             }
+        }
+
+        if(CheckCollisionCircles(
+            player.phys.transform.position,
+            player.phys.GetMainAABB().width * REC_TO_CIRCLE_RADIUS_MULTIPLIER,
+            platform.phys.transform.position, GRID_SIZE * 5.0f
+        ))
+        {
+            player.platformCache_physics.push_back(&platform);
         }
     }
 }
@@ -576,9 +617,9 @@ void Level::HighFrequencyDiscreteUpdate()
 
                 if(!CheckCollisionCircles(
                     player.phys.transform.position,
-                    player.phys.GetMainAABB().height,
+                    player.phys.GetMainAABB().height * REC_TO_CIRCLE_RADIUS_MULTIPLIER,
                     tile.gameObj.transform.position,
-                    tile.gameObj.GetMainAABB().width
+                    tile.gameObj.GetMainAABB().width * REC_TO_CIRCLE_RADIUS_MULTIPLIER
                 )) continue;
 
                 if(!IsTileOneWay(tile))
@@ -619,9 +660,9 @@ void Level::HighFrequencyDiscreteUpdate()
 
                 if(!CheckCollisionCircles(
                     player.phys.transform.position,
-                    player.phys.GetMainAABB().height,
+                    player.phys.GetMainAABB().height * REC_TO_CIRCLE_RADIUS_MULTIPLIER,
                     objTile.transform.position,
-                    objTile.GetMainAABB().width
+                    objTile.GetMainAABB().width * REC_TO_CIRCLE_RADIUS_MULTIPLIER
                 )) continue;
 
                 bool isTileJumpTrigger = tile.isJumpTrigger;
@@ -774,43 +815,43 @@ void Level::HighFrequencyDiscreteUpdate()
 
     //player vs platforms
 
-    for(int i = 0; i < platformList.size(); i++)
+    for(int i = 0; i < player.platformCache_physics.size(); i++)
     {
-        Platform& platform = platformList[i];
+        Platform* platform = player.platformCache_physics[i];
 
-        if(!platform.phys.hasBody) continue;
+        for(int h = 1; h < platform->phys.hitboxes.size(); h++)
+        {
+            if(CheckCollisionRecs(player.phys.GetMainAABB(), platform->phys.GetSubAABB(h)))
+            {
+                if(IsPlatformSpike(platform->type))
+                {
+                    player.wasTouchingSpike = true;
+                }
+            }
+        }
 
         if(!CheckCollisionCircles(
-            player.phys.transform.position, player.phys.GetMainAABB().height,
-            platform.phys.transform.position, platform.phys.GetMainAABB().width
+            player.phys.transform.position,
+            player.phys.GetMainAABB().height * REC_TO_CIRCLE_RADIUS_MULTIPLIER,
+            platform->phys.transform.position,
+            platform->phys.GetMainAABB().width * REC_TO_CIRCLE_RADIUS_MULTIPLIER
         )) continue;
         
-        if(!IsPlatformSpike(platform.type))
+        if(!IsPlatformSpike(platform->type))
         {
             SolveCollisionsOneWayUpDown(
-                &player.phys, &platform.phys,
+                &player.phys, &platform->phys,
                 true, isGravityUp, true
             );
         }
 
-        if(CheckCollisionRecs(player.GetJumpDetector(), platform.phys.GetMainAABB()) && player.IsFalling())
+        if(CheckCollisionRecs(player.GetJumpDetector(), platform->phys.GetMainAABB()) && player.IsFalling())
         {
-            if(!isGravityUp && IsAbove(player.phys.GetMainAABB(), platform.phys.GetMainAABB(), 0.0f) || 
-            (isGravityUp && IsBelow(player.phys.GetMainAABB(), platform.phys.GetMainAABB(), 0.0f)))
+            if(!isGravityUp && IsAbove(player.phys.GetMainAABB(), platform->phys.GetMainAABB(), 0.0f) || 
+            (isGravityUp && IsBelow(player.phys.GetMainAABB(), platform->phys.GetMainAABB(), 0.0f)))
             {
-                platform.updateRequired = true;
+                platform->updateRequired = true;
                 player.wasGrounded = true;
-            }
-        }
-
-        for(int h = 1; h < platform.phys.hitboxes.size(); h++)
-        {
-            if(CheckCollisionRecs(player.phys.GetMainAABB(), platform.phys.GetSubAABB(h)))
-            {
-                if(IsPlatformSpike(platform.type))
-                {
-                    player.wasTouchingSpike = true;
-                }
             }
         }
     }
@@ -919,25 +960,21 @@ void Level::DrawLevel()
         }
     }
 
-    for(int i = 0; i < platformList.size(); i++)
+    for(int i = 0; i < player.platformCache_rendering.size(); i++)
     {
-        Platform& platform = platformList[i];
+        Platform* platform = player.platformCache_rendering[i];
 
-        if(IsPlatformFarFromPlayer(platform.phys.transform.position)) continue;
-
-        PlatformType& platformType = platform.type;
-
-        SpriteRenderData* platformRenderData =  GetPlatformActiveRenderData(platformType, platform.variantIndex);
+        SpriteRenderData* platformRenderData =  GetPlatformActiveRenderData(platform->type, platform->variantIndex);
 
         if(platformRenderData)
         {
-            int frameToDraw = platform.textureIndex;
+            int frameToDraw = platform->textureIndex;
 
             if(platformRenderData->spacing != 1)
             {
                 frameToDraw = GetCurrentFrame(
                     platformRenderData->animationFrames,
-                    platform.textureIndex,
+                    platform->textureIndex,
                     platformRenderData->spacing,
                     platformRenderData->animationSpeed,
                     currentTime
@@ -946,25 +983,25 @@ void Level::DrawLevel()
 
             if(frameToDraw >= 0 && frameToDraw < (int)platformRenderData->animationFrames.size())
             {
-                DrawSprite(platform.phys, platformRenderData, frameToDraw);
+                DrawSprite(platform->phys, platformRenderData, frameToDraw);
             }
         }
         else
         {
             Color platformColor = DECO;
 
-            if(platformType == PlatformType::MOVING_VERTICAL) platformColor = VERTICAL_MOVING_PLATFORM;
-            else if(platformType == PlatformType::MOVING_HORIZONTAL) platformColor = HORIZONTAL_MOVING_PLATFORM;
-            else if(platformType == PlatformType::FALLING) platformColor = FALLING_PLATFORM;
-            else if(platformType == PlatformType::DISAPPEARING) platformColor = DISAPPEARING_PLATFORM;
+            if(platform->type == PlatformType::MOVING_VERTICAL) platformColor = VERTICAL_MOVING_PLATFORM;
+            else if(platform->type == PlatformType::MOVING_HORIZONTAL) platformColor = HORIZONTAL_MOVING_PLATFORM;
+            else if(platform->type == PlatformType::FALLING) platformColor = FALLING_PLATFORM;
+            else if(platform->type == PlatformType::DISAPPEARING) platformColor = DISAPPEARING_PLATFORM;
 
-            if(!IsPlatformSpike(platformType))
-                DrawRectangleRec(platform.phys.GetMainAABB(), platformColor);
+            if(!IsPlatformSpike(platform->type))
+                DrawRectangleRec(platform->phys.GetMainAABB(), platformColor);
             else
             {
-                for(int h = 1; h < platform.phys.hitboxes.size(); h++)
+                for(int h = 1; h < platform->phys.hitboxes.size(); h++)
                 {
-                    DrawRectangleRec(platform.phys.GetSubAABB(h), SPIKE);
+                    DrawRectangleRec(platform->phys.GetSubAABB(h), SPIKE);
                 }
             }
         }
@@ -1020,24 +1057,21 @@ void Level::DebugDrawing()
         renderTileCheckRange
     );
 
-    for(int i = 0; i < platformList.size(); i++)
+    for(int i = 0; i < player.platformCache_rendering.size(); i++)
     {
-        Platform& platform = platformList[i];
+        Platform* platform = player.platformCache_rendering[i];
 
-        if(!IsPlatformFarFromPlayer(platform.phys.transform.position))
+        DrawLine(
+            player.phys.transform.position.x, player.phys.transform.position.y, 
+            platform->phys.transform.position.x, platform->phys.transform.position.y, 
+            RED
+        );
+
+        DrawAABB(platform->phys.GetMainAABB(), RED);
+
+        for(int h = 1; h < platform->phys.hitboxes.size(); h++)
         {
-            DrawLine(
-                player.phys.transform.position.x, player.phys.transform.position.y, 
-                platform.phys.transform.position.x, platform.phys.transform.position.y, 
-                RED
-            );
-        }
-
-        DrawAABB(platform.phys.GetMainAABB(), RED);
-
-        for(int h = 1; h < platform.phys.hitboxes.size(); h++)
-        {
-            DrawAABB(platform.phys.GetSubAABB(h), MAGENTA);
+            DrawAABB(platform->phys.GetSubAABB(h), MAGENTA);
         }
     }
 

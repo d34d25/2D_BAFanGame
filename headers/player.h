@@ -5,7 +5,9 @@
 
 #include "bullet.h"
 
-#include<iostream>
+#include <iostream>
+
+#include "platform.h"
 
 const Color MOMOI_PINK = Color{255,30,150,255};
 const Color MOMOI_PINK_BG = Color{255,180,230,255};
@@ -107,6 +109,9 @@ public:
     BulletProperties bulletData = {};
 
     std::unique_ptr<BulletPool> bulletpool = {};
+
+    std::vector<Platform*> platformCache_physics = {};
+    std::vector<Platform*> platformCache_rendering = {};
 
     float laddedSnapPosX = 0.0f;
 

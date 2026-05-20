@@ -43,8 +43,18 @@ int main()
 
     bool editorMode = false;
 
+    const int MAX_LAST_FRAMES = 120;
+
+    double lastPhysicsFrames[MAX_LAST_FRAMES] = {0.0};
+    int lastPhysicsCount = 0;
+    int lastPhysicsIndex = 0;
+
     int physicsStepCount = 0;
     double totalPhysicsTime = 0.0;
+
+    double lastDrawingFrames[MAX_LAST_FRAMES] = {0.0};
+    int lastDrawingCount = 0;
+    int lastDrawingIndex = 0;
 
     double totalDrawingTime = 0.0;
     int drawingStepCount = 0;
@@ -71,10 +81,16 @@ int main()
             
             double physicsTime = std::chrono::duration<double, std::milli>(allPhysicsTimerEnd - allPhysicsTimerStart).count();
 
-            std::cout<<"Total UpdateLevel time: "<<physicsTime<<" ms \n";
+            if(!editorMode) std::cout<<"Total UpdateLevel time: "<<physicsTime<<" ms \n";
 
             totalPhysicsTime += physicsTime;
             physicsStepCount++;
+
+            lastPhysicsFrames[lastPhysicsIndex] = physicsTime;
+
+            lastPhysicsIndex = (lastPhysicsIndex + 1) % MAX_LAST_FRAMES;
+
+            if(lastPhysicsCount < MAX_LAST_FRAMES) lastPhysicsCount++;
 
             accumulator -= fixedDt;
         }
@@ -95,15 +111,21 @@ int main()
         auto drawingEnd = std::chrono::high_resolution_clock::now();
         
         double drawingTime = std::chrono::duration<double, std::milli>(drawingEnd - drawingStart).count();
-        std::cout<<"Drawing total time: "<<drawingTime<<" ms \n";
+        if(!editorMode) std::cout<<"Drawing total time: "<<drawingTime<<" ms \n";
 
         totalDrawingTime += drawingTime;
         drawingStepCount++;
 
+        lastDrawingFrames[lastDrawingIndex] = drawingTime;
+
+        lastDrawingIndex = (lastDrawingIndex + 1) % MAX_LAST_FRAMES;
+
+        if(lastDrawingCount < MAX_LAST_FRAMES) lastDrawingCount++;
+
         EndDrawing();
     }
 
-    std::cout<<"====================================================\n";
+    std::cout<<"========================AVERAGE MS (ALL FRAMES)===========================\n";
 
     if(physicsStepCount > 0)
     {
@@ -118,6 +140,34 @@ int main()
 
         std::cout<<"Average drawing time: "<<avgDrawingTime<<" ms (over "<<drawingStepCount<<" frames)\n";
     }
+
+    std::cout<<"=====================AVERAGE MS (LAST 120 FRAMES)===========================\n";
+
+    if(lastPhysicsCount > 0)
+    {
+        double sum = 0.0f;
+
+        for(int i = 0; i < lastPhysicsCount; i++) sum += lastPhysicsFrames[i];
+
+        double avgPhysicsLastTime = sum / lastPhysicsCount;
+
+        std::cout<<"Average last physics time: "<<avgPhysicsLastTime<<" ms (over "<<MAX_LAST_FRAMES<<" frames)\n";
+    }
+
+    if(lastDrawingCount > 0)
+    {
+        double sum = 0.0f;
+
+        for(int i = 0; i < lastDrawingCount; i++) sum += lastDrawingFrames[i];
+
+        double avgDrawingLastTime = sum / lastDrawingCount;
+
+        std::cout<<"Average last drawing time: "<<avgDrawingLastTime<<" ms (over "<<MAX_LAST_FRAMES<<" frames)\n";
+    }
+
+    std::cout<<"total platform count: "<<testLevel.GetPlatformCount()<<"(not all processed at once)\n";
+    std::cout<<"total player physics platform cache count: "<<testLevel.GetPlayerPlatformCache_Physics()<<"\n";
+    std::cout<<"total player render platform cache count: "<<testLevel.GetPlayerPlatformCache_Render()<<"\n";
 
     CloseWindow();
 
