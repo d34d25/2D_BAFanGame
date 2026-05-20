@@ -6,6 +6,8 @@
 
 #include "levelEditor.h"
 
+#include <chrono>
+
 int main()
 {
     const int SCREEN_WIDTH = 800 * 2;
@@ -41,6 +43,12 @@ int main()
 
     bool editorMode = false;
 
+    int physicsStepCount = 0;
+    double totalPhysicsTime = 0.0;
+
+    double totalDrawingTime = 0.0;
+    int drawingStepCount = 0;
+
     while (!WindowShouldClose())
     {
         //update
@@ -54,8 +62,19 @@ int main()
             //wrap that logic in a level manager
             //hud and transitions and level switching are drawn and managed there
             
+            auto allPhysicsTimerStart = std::chrono::high_resolution_clock::now();
+
             if(!editorMode) testLevel.UpdateLevel();
             else editor.Update();
+
+            auto allPhysicsTimerEnd = std::chrono::high_resolution_clock::now();
+            
+            double physicsTime = std::chrono::duration<double, std::milli>(allPhysicsTimerEnd - allPhysicsTimerStart).count();
+
+            std::cout<<"Total UpdateLevel time: "<<physicsTime<<" ms \n";
+
+            totalPhysicsTime += physicsTime;
+            physicsStepCount++;
 
             accumulator -= fixedDt;
         }
@@ -64,6 +83,8 @@ int main()
 
         BeginDrawing();
 
+        auto drawingStart = std::chrono::high_resolution_clock::now();
+
         ClearBackground(LIGHTGRAY);
 
         if(!editorMode) testLevel.DrawLevel();
@@ -71,7 +92,31 @@ int main()
 
         DrawFPS(10,10);
 
+        auto drawingEnd = std::chrono::high_resolution_clock::now();
+        
+        double drawingTime = std::chrono::duration<double, std::milli>(drawingEnd - drawingStart).count();
+        std::cout<<"Drawing total time: "<<drawingTime<<" ms \n";
+
+        totalDrawingTime += drawingTime;
+        drawingStepCount++;
+
         EndDrawing();
+    }
+
+    std::cout<<"====================================================\n";
+
+    if(physicsStepCount > 0)
+    {
+        double avgPhysicsTime = totalPhysicsTime / physicsStepCount;
+
+        std::cout<<"Average physics time: "<<avgPhysicsTime<<" ms (over "<<physicsStepCount<<" frames)\n";
+    }
+
+    if(drawingStepCount > 0)
+    {
+        double avgDrawingTime = totalDrawingTime / drawingStepCount;
+
+        std::cout<<"Average drawing time: "<<avgDrawingTime<<" ms (over "<<drawingStepCount<<" frames)\n";
     }
 
     CloseWindow();

@@ -12,6 +12,8 @@
 
 const float MAX_DISTANCE_PLATFORM_PLAYER_SQR = 800 * 800;
 
+const float MAX_DISTANCE_PLATFORM_PLAYER_SQR_5X = MAX_DISTANCE_PLATFORM_PLAYER_SQR * 5;
+
 const float GRAVITY = 3500.0f;
 
 class Level
@@ -30,7 +32,7 @@ private:
 
     Tile level[LAYERS][ROWS][COLS];
 
-    std::vector<Platform*> platformList = {};
+    std::vector<Platform> platformList = {};
 
     Camera2D camera = {};
 
@@ -44,16 +46,7 @@ private:
             {
                 for(int j = 0; j < COLS; j++)
                 {
-                    Tile& tile = level[l][i][j];
-
-                    tile.textureIndex = 0;
-                    tile.type = TileType::VOID;
-
-                    if(tile.gameObj.body)
-                    {
-                        delete tile.gameObj.body;
-                        tile.gameObj.body = nullptr;
-                    }
+                    level[l][i][j] = {};
                 }
             }
         }
@@ -61,17 +54,11 @@ private:
 
     inline void ClearPlatformList()
     {
-        for(int i = 0; i < platformList.size(); i++)
-        {
-            if(platformList[i])
-                delete platformList[i];
-        }
-
         platformList.clear();
     }
 
     inline void UpdateCamera(
-        Vector2 target, Vector2 offset
+       const Vector2& target, const Vector2& offset
     )
     {
         Vector2 desired = Vector2Add(target, offset);
@@ -104,7 +91,7 @@ private:
         }
     }
 
-    inline bool IsOneWayUpDown(Tile tile)
+    inline bool IsOneWayUpDown(const Tile& tile)
     {
         if(tile.type == TileType::ONE_WAY)
         {
@@ -115,7 +102,7 @@ private:
         return false;
     }
 
-    inline bool IsOneWayRightLeft(Tile tile)
+    inline bool IsOneWayRightLeft(const Tile& tile)
     {
         if(tile.type == TileType::ONE_WAY)
         {
@@ -126,18 +113,20 @@ private:
         return false;
     }
 
-    inline bool IsTileOneWay(Tile tile)
+    inline bool IsTileOneWay(const Tile& tile)
     {
         return IsOneWayRightLeft(tile) || IsOneWayUpDown(tile);
     }
 
-    void DiscreteUpdate();
+    void LowFrequencyDiscreteUpdate();
+
+    void HighFrequencyDiscreteUpdate();
 
     void DebugDrawing();
 
     void DebugTextDrawing();
 
-    inline bool IsNotRealTile(TileType type)
+    inline bool IsNotRealTile(const TileType& type)
     {
         if(type == TileType::VOID) return true;
 
@@ -150,12 +139,12 @@ private:
         return false;
     }
 
-    inline bool IsPlatformFarFromPlayer(Vector2 platformPosition, float maxDistance = MAX_DISTANCE_PLATFORM_PLAYER_SQR)
+    inline bool IsPlatformFarFromPlayer(const Vector2& platformPosition, float maxDistance = MAX_DISTANCE_PLATFORM_PLAYER_SQR)
     {
         return Vector2LengthSqr(Vector2Subtract(platformPosition, player.phys.transform.position)) > maxDistance;
     }
 
-    inline bool IsTileSpike(TileType type)
+    inline bool IsTileSpike(const TileType& type)
     {
         return (type > TileType::SPIKE_START && type < TileType::SPIKE_END);
     }

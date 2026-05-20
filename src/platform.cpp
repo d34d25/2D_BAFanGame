@@ -1,20 +1,6 @@
 #include "platform.h"
 #include <iostream>
 
-Platform::Platform()
-{
-    phys.body = new SimpleBody2D();
-}
-
-Platform::~Platform()
-{
-    if(phys.body)
-    {
-        delete phys.body;
-        phys.body = nullptr;
-    }
-}
-
 void Platform::Update(float dt, int iterations)
 {
     bool isFalling = type == PlatformType::FALLING;
@@ -38,9 +24,9 @@ void Platform::Update(float dt, int iterations)
         }
         else if(isFalling)
         {
-            phys.body->hasGravity = true;
+            phys.body.hasGravity = true;
 
-            phys.body->UpdateVelocity(dt, iterations, gravity);
+            phys.body.UpdateVelocity(dt, iterations, gravity);
 
             respawnTimer -= subDt;
 
@@ -54,7 +40,7 @@ void Platform::Update(float dt, int iterations)
     }
     else if(isRotatingSpike)
     {
-        rotationAngle = phys.body->velocity.x * 0.01f * subDt;
+        rotationAngle = phys.body.velocity.x * 0.01f * subDt;
 
         float cosA = cosf(rotationAngle);
         float sinA = sinf(rotationAngle);
@@ -71,12 +57,12 @@ void Platform::Update(float dt, int iterations)
     }
     else
     {
-        phys.body->AddVelocities();
+        phys.body.AddVelocities();
     }
 
-    phys.body->UpdatePositionX(dt, iterations, &phys.transform.position.x);
+    phys.body.UpdatePositionX(dt, iterations, &phys.transform.position.x);
 
-    phys.body->UpdatePositionY(dt, iterations, &phys.transform.position.y);
+    phys.body.UpdatePositionY(dt, iterations, &phys.transform.position.y);
 
     phys.UpdateHitboxes();
 }
@@ -97,8 +83,8 @@ void Platform::UpdateInactive(float dt, int iterations)
 
         respawnTimer = respawnMaxTime;
 
-        phys.body->hasGravity = false;
-        phys.body->velocity = {0,0};
+        phys.body.hasGravity = false;
+        phys.body.velocity = {0,0};
 
         phys.UpdateHitboxes();
 

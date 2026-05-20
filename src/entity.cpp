@@ -24,11 +24,3 @@ void SimpleBody2D::UpdateVelocity(float dt, int iterations, float gravity)
 
     altVelocity = {0,0};
 }
-
-GameObject::~GameObject()
-{
-    if(body)
-    {
-        body = nullptr;
-    }
-}

@@ -50,4 +50,5 @@ static constexpr int ROTATING_SPIKE_MAX_HITBOX = 6;
 
 //static constexpr Color ONE_WAY_RIGHT = Color{0, 200,190,255};
 
-//static constexpr Color ONE_WAY_LEFT = Color{0, 230,160,255}; 
+//static constexpr Color ONE_WAY_LEFT = Color{0, 230,160,255};
+

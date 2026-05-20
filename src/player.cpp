@@ -6,17 +6,17 @@ Player::Player(Vector2 position)
 
     phys.transform.position = position;
 
-    phys.body = new SimpleBody2D();
+    phys.body = {};
 
-    phys.body->hasGravity = true;
+    phys.body.hasGravity = true;
 
     phys.hitboxes.push_back(Hitbox{{0,0}, {20,46}});
 
     //jump detector
-    phys.AddSubHitbox({0,0}, {phys.GetMainAABB()->width * 0.9f, phys.GetMainAABB()->height * 0.5f});
+    phys.AddSubHitbox({0,0}, {phys.GetMainAABB().width * 0.9f, phys.GetMainAABB().height * 0.5f});
 
     //for treadmills only
-    phys.AddSubHitbox({0,0}, {phys.GetMainAABB()->width, phys.GetMainAABB()->height * 0.5f});
+    phys.AddSubHitbox({0,0}, {phys.GetMainAABB().width, phys.GetMainAABB().height * 0.5f});
 
     phys.UpdateHitboxes();
 
@@ -185,11 +185,6 @@ Player::Player(Vector2 position)
 
 Player::~Player()
 {
-    if(phys.body)
-    {
-        delete phys.body;
-        phys.body = nullptr;
-    }
 }
 
 void Player::Update(float dt, int iterations)
@@ -204,17 +199,17 @@ void Player::Update(float dt, int iterations)
 
     //lateral movement
 
-    float moveForce = 400 * phys.body->damping;
+    float moveForce = 400 * phys.body.damping;
 
     if(IsKeyDown(KEY_LEFT))
     {
-        phys.body->force.x -= moveForce;
+        phys.body.force.x -= moveForce;
         
         entityData.flipX = true;
     }
     else if(IsKeyDown(KEY_RIGHT))
     {
-        phys.body->force.x += moveForce;
+        phys.body.force.x += moveForce;
 
         entityData.flipX = false;
     }
@@ -228,47 +223,47 @@ void Player::Update(float dt, int iterations)
         if(!inLadder)
         {
             climbing = false;
-            phys.body->hasGravity = true;
+            phys.body.hasGravity = true;
         }
         else
         {
             phys.transform.position.x = laddedSnapPosX;
 
-            phys.body->hasGravity = false;
+            phys.body.hasGravity = false;
 
-            phys.body->velocity = {0,0};
-            phys.body->altVelocity = {0,0};
+            phys.body.velocity = {0,0};
+            phys.body.altVelocity = {0,0};
 
             float climbingSpeed = 200.0f;
 
-            if(IsKeyDown(KEY_UP)) phys.body->velocity.y = -climbingSpeed;
-            else if(IsKeyDown(KEY_DOWN)) phys.body->velocity.y = climbingSpeed;
+            if(IsKeyDown(KEY_UP)) phys.body.velocity.y = -climbingSpeed;
+            else if(IsKeyDown(KEY_DOWN)) phys.body.velocity.y = climbingSpeed;
 
             if(IsKeyPressed(KEY_Z))
             {
                 climbing = false;
 
-                phys.body->velocity.y = jump * 0.1f;
+                phys.body.velocity.y = jump * 0.1f;
             }
         }
     }
     else
     {
-        phys.body->hasGravity = true;
+        phys.body.hasGravity = true;
     }
 
     //jump
 
     if(isJumping)
     {
-        phys.body->hasGravity = false;
+        phys.body.hasGravity = false;
     }
     else if(!isJumping && !climbing)
     {
-        phys.body->hasGravity = true;
+        phys.body.hasGravity = true;
     }
 
-    if(!isGrounded && std::abs(phys.body->velocity.y) <= 0.1f) isJumping = false;
+    if(!isGrounded && std::abs(phys.body.velocity.y) <= 0.1f) isJumping = false;
 
     if(isGrounded)
     {
@@ -287,7 +282,7 @@ void Player::Update(float dt, int iterations)
 
         if(isJumping)
         {
-            phys.body->velocity.y += jump * subDt;
+            phys.body.velocity.y += jump * subDt;
 
             if(jumpTime <= 0.0f) isJumping = false;
         }
@@ -297,14 +292,9 @@ void Player::Update(float dt, int iterations)
         isJumping = false;
     }
 
-    if(IsKeyDown(KEY_C))
-    {
-        currentFrame = GetCurrentFrame(characterRenderData.animationFrames, 0, 1, 5.0f);
-    }
-
     //update
     
-    phys.body->UpdateVelocity(dt, iterations, gravity);   
+    phys.body.UpdateVelocity(dt, iterations, gravity);   
 }
 
 void Player::Shoot(float dt)
@@ -328,7 +318,7 @@ void Player::Shoot(float dt)
 
     Vector2 initialVel = {0,0};
 
-    initialVel.x = bulletData.speed * cosf(radians) + phys.body->velocity.x;
+    initialVel.x = bulletData.speed * cosf(radians) + phys.body.velocity.x;
     initialVel.y = bulletData.speed * sinf(radians);
 
     if(bulletData.fireTimer > 0.0f) bulletData.fireTimer -= dt;

@@ -41,13 +41,13 @@ inline std::vector<Rectangle> CropImage(const Texture2D& sourceTexture, Vector2 
     return frames;
 }
 
-inline int GetCurrentFrame(const std::vector<Rectangle>& frames, int index, int spacing, float animationSpeed)
+inline int GetCurrentFrame(const std::vector<Rectangle>& frames, const int index, int spacing, float animationSpeed, double currentTime)
 {
     if(frames.empty()) return 0;
 
     int frameCount = (spacing <= 0) ? (int)frames.size() : spacing;
 
-    int frame = (int)(GetTime() * animationSpeed) % frameCount;
+    int frame = (int)(currentTime * animationSpeed) % frameCount;
 
     return index + frame;
 }

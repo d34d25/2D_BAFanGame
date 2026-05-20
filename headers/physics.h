@@ -42,54 +42,42 @@ inline bool IsBelow(const Rectangle& aabb_A, const Rectangle& aabb_B, float offs
 
 inline void SolveCollisionsOneWayLeftRight(GameObject * objA, GameObject* objB, bool isRight)
 {
-    if(!objA->body)
-    {
-        std::cout<<"THE BODY A IS NULLPTR AT SOLVE COLLISIONS ONE WAY RIGHT LEFT"<<"\n";
-        return;
-    }
-
     bool isLeft = !isRight;
 
     float offset = 6.0f;
 
-    if(isLeft) if(IsLeft(*objA->GetMainAABB(), *objB->GetMainAABB(), offset) || objA->body->velocity.x <= 0.0f) return;
+    if(isLeft) if(IsLeft(objA->GetMainAABB(), objB->GetMainAABB(), offset) || objA->body.velocity.x <= 0.0f) return;
 
-    if(isRight) if(IsRight(*objA->GetMainAABB(), *objB->GetMainAABB(), offset) || objA->body->velocity.x >= 0.0f) return;
+    if(isRight) if(IsRight(objA->GetMainAABB(), objB->GetMainAABB(), offset) || objA->body.velocity.x >= 0.0f) return;
 
     SolveCollisions(objA, objB, true, false, false, false);
 }
 
 inline void SolveCollisionsOneWayUpDown(GameObject * objA, GameObject* objB, bool isUp ,bool gravityUp, bool isPlatform)
 {
-    if(!objA->body)
-    {
-        std::cout<<"THE BODY A IS NULLPTR AT SOLVE COLLISIONS ONE WAY UP DOWN"<<"\n";
-        return;
-    }
-
     bool isDown = !isUp;
 
     float offset = 15.0f;
 
     if(!isPlatform)
     {
-        if(isUp) if(!IsAbove(*objA->GetMainAABB(), *objB->GetMainAABB(), offset) || objA->body->velocity.y <= 0.0f) return;
+        if(isUp) if(!IsAbove(objA->GetMainAABB(), objB->GetMainAABB(), offset) || objA->body.velocity.y <= 0.0f) return;
 
-        if(isDown) if(!IsBelow(*objA->GetMainAABB(), *objB->GetMainAABB(), offset) || objA->body->velocity.y >= 0.0f) return;
+        if(isDown) if(!IsBelow(objA->GetMainAABB(), objB->GetMainAABB(), offset) || objA->body.velocity.y >= 0.0f) return;
     }
     else
     {
         if(!gravityUp)
         {
-            if(isUp) if(!IsAbove(*objA->GetMainAABB(), *objB->GetMainAABB(), offset) || objA->body->velocity.y <= 0.0f) return;
+            if(isUp) if(!IsAbove(objA->GetMainAABB(), objB->GetMainAABB(), offset) || objA->body.velocity.y <= 0.0f) return;
 
-            if(isDown) if(!IsBelow(*objA->GetMainAABB(), *objB->GetMainAABB(), offset) || objA->body->velocity.y >= 0.0f) return;
+            if(isDown) if(!IsBelow(objA->GetMainAABB(), objB->GetMainAABB(), offset) || objA->body.velocity.y >= 0.0f) return;
         }
         else
         {
-            if(isDown) if(!IsAbove(*objA->GetMainAABB(), *objB->GetMainAABB(), offset) || objA->body->velocity.y <= 0.0f) return;
+            if(isDown) if(!IsAbove(objA->GetMainAABB(), objB->GetMainAABB(), offset) || objA->body.velocity.y <= 0.0f) return;
 
-            if(isUp) if(!IsBelow(*objA->GetMainAABB(), *objB->GetMainAABB(), offset) || objA->body->velocity.y >= 0.0f) return;
+            if(isUp) if(!IsBelow(objA->GetMainAABB(), objB->GetMainAABB(), offset) || objA->body.velocity.y >= 0.0f) return;
         }
     }    
 
@@ -102,13 +90,7 @@ inline void ApplyWind(
     bool isEdgeUp, bool isEdgeDown,
     bool gravityUp
 )
-{
-    if(!objA->body)
-    {
-        std::cout<<"THE BODY A IS NULLPTR AT APPLY WIND"<<"\n";
-        return;
-    }
-    
+{ 
     bool up = direction == Direction::UP;
     
     bool down = direction == Direction::DOWN;
@@ -117,55 +99,49 @@ inline void ApplyWind(
 
     bool right = direction == Direction::RIGHT;
 
-    float windForce = 1600 * objA->body->damping;
+    float windForce = 1600 * objA->body.damping;
 
     bool isEdge = (!gravityUp && isEdgeUp) || (gravityUp && isEdgeDown);
 
-    float offset = objB->GetMainAABB()->height * 0.8f;
+    float offset = objB->GetMainAABB().height * 0.8f;
 
-    bool above = IsAbove(*objA->GetMainAABB(), *objB->GetMainAABB(), offset);
+    bool above = IsAbove(objA->GetMainAABB(), objB->GetMainAABB(), offset);
 
-    bool below = IsBelow(*objA->GetMainAABB(), *objB->GetMainAABB(), offset);
+    bool below = IsBelow(objA->GetMainAABB(), objB->GetMainAABB(), offset);
 
     bool onTop = !gravityUp ? above : below;
 
-    bool falling = !gravityUp ? objA->body->velocity.y > 0 : objA->body->velocity.y < 0;
+    bool falling = !gravityUp ? objA->body.velocity.y > 0 : objA->body.velocity.y < 0;
 
     if(isEdge && onTop && falling) return;
     
     if(right || left)
     {
-        windForce = 350 * objA->body->damping;
+        windForce = 350 * objA->body.damping;
     }
 
     if(up)
     {
-        objA->body->force.y -= windForce;
+        objA->body.force.y -= windForce;
     }
     else if(down)
     {
-        objA->body->force.y += windForce;
+        objA->body.force.y += windForce;
     }
     else if(right)
     {
-        objA->body->force.x += windForce;
+        objA->body.force.x += windForce;
     }
     else if(left)
     {
-        objA->body->force.x -= windForce;
+        objA->body.force.x -= windForce;
     }
 }
 
 inline void ApplyWaterPhysics(GameObject* objA, bool gravityUp)
 {
-    if(!objA->body)
-    {
-        std::cout<<"THE BODY A IS NULLPTR AT APPLY WATER PHYSICS"<<"\n";
-        return;
-    }
+    float force = 700 * objA->body.damping;
 
-    float force = 700 * objA->body->damping;
-
-    if(!gravityUp) objA->body->force.y -= force;
-    else objA->body->force.y += force;
+    if(!gravityUp) objA->body.force.y -= force;
+    else objA->body.force.y += force;
 }

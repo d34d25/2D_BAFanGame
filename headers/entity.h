@@ -135,14 +135,16 @@ struct GameObject
 
     std::vector<Hitbox> hitboxes = {};
 
-    SimpleBody2D* body = nullptr;
+    SimpleBody2D body = {};
 
     bool canEntityCollidePhysically = false;
     bool canPlatformCollidePhysically = false;
 
+    bool hasBody = false;
+
     GameObject() = default;
 
-    ~GameObject();
+    ~GameObject() = default;
 
     inline void UpdateHitboxes()
     {
@@ -154,19 +156,19 @@ struct GameObject
         }
     }
 
-    inline Rectangle* GetMainAABB()
+    inline Rectangle& GetMainAABB()
     {
-        return &hitboxes[0].aabb;
+        return hitboxes[0].aabb;
     }
 
-    inline Rectangle* GetSubAABB(int index)
+    inline Rectangle& GetSubAABB(int index)
     {
-        if(index < 1) return &hitboxes[1].aabb;
+        if(index < 1) return hitboxes[1].aabb;
 
-        return &hitboxes[index].aabb;
+        return hitboxes[index].aabb;
     }
 
-    inline void AddSubHitbox(Vector2 offset, Vector2 size)
+    inline void AddSubHitbox(const Vector2& offset, const Vector2& size)
     {
         if(hitboxes.size() >= 1)
         {
@@ -180,25 +182,19 @@ struct GameObject
 
     inline void UpdateVelocity(float dt, int iterations, float gravity)
     {
-        if(!body) return;
-
-        body->UpdateVelocity(dt, iterations, gravity);
+        body.UpdateVelocity(dt, iterations, gravity);
     }
 
     inline void UpdatePositionX(float dt, int iterations)
     {
-        if(!body) return;
-
-        body->UpdatePositionX(dt, iterations, &transform.position.x);
+        body.UpdatePositionX(dt, iterations, &transform.position.x);
         
         UpdateHitboxes();
     }
 
     inline void UpdatePositionY(float dt, int iterations)
     {
-        if(!body) return;
-
-        body->UpdatePositionY(dt, iterations, &transform.position.y);
+        body.UpdatePositionY(dt, iterations, &transform.position.y);
         
         UpdateHitboxes();
     }

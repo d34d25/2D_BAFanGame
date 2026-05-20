@@ -58,9 +58,9 @@ public:
 
     float gravity = 0.0f;
 
-    Platform();
+    Platform() = default;
 
-    ~Platform();
+    ~Platform() = default;
 
     inline void SetTimer(float time)
     {
