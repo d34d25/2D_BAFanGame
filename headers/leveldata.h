@@ -83,6 +83,12 @@ enum class TileType
 
     PLATFORM_END,
 
+    ENEMY_START,
+
+    ENEMY_DUMMY,
+
+    ENEMY_END,
+
     COUNT
 };
 
@@ -105,6 +111,10 @@ inline bool IsTypeInvalid(TileType type)
     case TileType::MISC_START:
 
     case TileType::MISC_END:
+
+    case TileType::ENEMY_START:
+
+    case TileType::ENEMY_END:
 
     case TileType::COUNT:
 
@@ -166,6 +176,8 @@ const std::vector<TileTypeList> TILE_TYPE_LIST = {
     {TileType::PLAYER_SPAWN, PLAYER_SPAWN, "PLAYER_SPAWN"},
 
     {TileType::DECO, DECO, "DECO"},
+
+    {TileType::ENEMY_DUMMY, ENEMY_DUMMY, "ENEMY_DUMMY"},
 };
 
 struct Tile

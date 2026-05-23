@@ -8,7 +8,7 @@
 #include "drawing.h"
 #include "platform.h"
 #include "leveldata.h"
-
+#include "enemy.h"
 
 const float MAX_DISTANCE_PLATFORM_PLAYER_SQR = 800 * 800;
 
@@ -26,6 +26,8 @@ private:
 
     int iterations = 1;
 
+    int lowFrequencyCounter = 0;
+
     int collisionTileCheckRange = 2;
 
     int renderTileCheckRange = 15;
@@ -36,7 +38,7 @@ private:
 
     std::vector<Platform> platformList = {};
 
-    std::vector<Platform*> platformCache = {};
+    std::vector<Enemy> enemyList = {};
 
     Camera2D camera = {};
 
@@ -122,9 +124,11 @@ private:
         return IsOneWayRightLeft(tile) || IsOneWayUpDown(tile);
     }
 
-    void LowFrequencyDiscreteUpdate();
+    void LowFrequencyUpdate(); //less than 60 fps
 
-    void HighFrequencyDiscreteUpdate();
+    void MediumFrequencyDiscreteUpdate(); //60 fps
+
+    void HighFrequencyDiscreteUpdate(); //60 fps at 10 iterations (600 times total)
 
     void DebugDrawing();
 
@@ -140,6 +144,8 @@ private:
 
         if(type >= TileType::PLATFORM_START && type <= TileType::PLATFORM_END) return true;
 
+        if(type >= TileType::ENEMY_START && type <= TileType::ENEMY_END) return true;
+
         return false;
     }
 
@@ -151,6 +157,21 @@ private:
     inline bool IsTileSpike(const TileType& type)
     {
         return (type > TileType::SPIKE_START && type < TileType::SPIKE_END);
+    }
+
+    inline bool CanEnemyCollideWithTile(const TileType& type)
+    {
+        switch (type)
+        {
+        case TileType::SOLID:
+        case TileType::TRAMPOLINE:
+        case TileType::TREADMILL_LEFT:
+        case TileType::TREADMILL_RIGHT:
+        case TileType::ONE_WAY:
+        case TileType::WATER:
+            return true;
+        default: return false;
+        }
     }
 
 public:
@@ -172,6 +193,11 @@ public:
         return (int)platformList.size();
     }
 
+    inline int GetPlayerPlatformCache_Update()
+    {
+        return (int)player.platformCache_update.size();
+    }
+
     inline int GetPlayerPlatformCache_Physics()
     {
         return (int)player.platformCache_physics.size();
@@ -182,4 +208,18 @@ public:
         return (int)player.platformCache_rendering.size();
     }
 
+    inline int GetEnemyCount()
+    {
+        return (int)enemyList.size();
+    }
+
+    inline int GetPlayerEnemyCache()
+    {
+        return (int)player.enemyCache.size();
+    }
+
+    inline int GetPlayerEnemyCache_Physics()
+    {
+        return (int)player.enemyCache_physics.size();
+    }
 };

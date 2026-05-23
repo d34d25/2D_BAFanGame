@@ -9,6 +9,8 @@
 
 #include "platform.h"
 
+#include "enemy.h"
+
 const Color MOMOI_PINK = Color{255,30,150,255};
 const Color MOMOI_PINK_BG = Color{255,180,230,255};
 
@@ -110,8 +112,12 @@ public:
 
     std::unique_ptr<BulletPool> bulletpool = {};
 
+    std::vector<Platform*> platformCache_update = {};
     std::vector<Platform*> platformCache_physics = {};
     std::vector<Platform*> platformCache_rendering = {};
+
+    std::vector<Enemy*> enemyCache = {};
+    std::vector<Enemy*> enemyCache_physics = {};
 
     float laddedSnapPosX = 0.0f;
 

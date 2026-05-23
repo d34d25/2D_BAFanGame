@@ -2,7 +2,7 @@
 
 void SolveCollisions(GameObject *objA, GameObject *objB, bool isX, bool gravityUp, bool isTrampoline, bool isPlatform)
 {
-    if(!CheckCollisionRecs(objA->GetMainAABB(), objB->GetMainAABB())) return;
+    //if(!CheckCollisionRecs(objA->GetMainAABB(), objB->GetMainAABB())) return;
 
     float overlap = 0;
 
@@ -68,7 +68,7 @@ void SolveCollisions(GameObject *objA, GameObject *objB, bool isX, bool gravityU
 
 void SolveCollisions_Platform(GameObject *objA, GameObject *objB, bool isX)
 {
-    if(!CheckCollisionRecs(objA->GetMainAABB(), objB->GetMainAABB())) return;
+    //if(!CheckCollisionRecs(objA->GetMainAABB(), objB->GetMainAABB())) return;
 
     float offset = 0.001f;
 

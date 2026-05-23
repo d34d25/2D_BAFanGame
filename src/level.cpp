@@ -16,7 +16,7 @@ Level::~Level()
     UnloadAssets();
 }
 
-void Level::InitLevel(const char *levelPath, float dt, int iterations)
+void Level::InitLevel(const char* levelPath, float dt, int iterations)
 {
     this->iterations = iterations;
 
@@ -244,6 +244,46 @@ void Level::InitLevel(const char *levelPath, float dt, int iterations)
                     platformList.push_back(platform);
                 }
 
+                //enemies
+
+                bool isEnemy = type > TileType::ENEMY_START && type < TileType::ENEMY_END;
+
+                if(isEnemy)
+                {
+                    Enemy enemy = Enemy();
+
+                    enemy.spawnPosition = tile->gameObj.transform.position;
+
+                    enemy.gameObj.transform.position = enemy.spawnPosition;
+
+                    enemy.gameObj.hasBody = true;
+
+                    enemy.gameObj.body = {};
+
+                    enemy.gameObj.hitboxes.push_back(Hitbox{{0,0}, {20,38}});
+
+                    enemy.gameObj.UpdateHitboxes();
+
+                    enemy.spawnData = tile->gameObj.data;
+                    enemy.gameObj.data = enemy.spawnData;
+
+                    enemy.gravity = gravity;
+
+                    enemy.gameObj.body.hasGravity = true;
+
+                    switch (type)
+                    {
+                    case TileType::ENEMY_DUMMY:
+                        enemy.type = EnemyType::DUMMY;
+                    break;
+                    
+                    default:
+                    break;
+                    }
+
+                    enemyList.push_back(enemy);
+                }
+
                 //actual tiles
                 if(IsNotRealTile(type))
                 {
@@ -469,16 +509,25 @@ void Level::InitLevel(const char *levelPath, float dt, int iterations)
         return false;
     });
 
+    player.platformCache_update.reserve(800);
     player.platformCache_physics.reserve(60);
     player.platformCache_rendering.reserve(600);
+
+    player.enemyCache.reserve(800);
 }
 
 void Level::UpdateLevel()
 {
-    player.platformCache_physics.clear();
-    player.platformCache_rendering.clear();
+    lowFrequencyCounter++;
 
-    LowFrequencyDiscreteUpdate();
+    //% 2 for 30 fps
+    if(lowFrequencyCounter % 4 == 0)
+    {
+        LowFrequencyUpdate();
+        lowFrequencyCounter = 0;
+    }
+
+    MediumFrequencyDiscreteUpdate();
 
     for(int iteraion = 0; iteraion < iterations; iteraion++)
     {
@@ -492,12 +541,14 @@ void Level::UpdateLevel()
     UpdateCamera(player.phys.transform.position, {0, -100});
 }
 
-void Level::LowFrequencyDiscreteUpdate()
+void Level::LowFrequencyUpdate()
 {
-    float playerRadius = player.phys.GetMainAABB().width * REC_TO_CIRCLE_RADIUS_MULTIPLIER;
+    player.platformCache_update.clear();
 
-    float updateRadius = GRID_SIZE * 25.0f;
-    float renderRadius = GRID_SIZE * 15.0f;
+    player.enemyCache.clear();
+    
+    float playerRadius = player.phys.GetMainAABB().width * REC_TO_CIRCLE_RADIUS_MULTIPLIER;
+    float platformUpdateRadius = GRID_SIZE * 25.0f;
 
     for(int p = 0; p < platformList.size(); p++)
     {
@@ -511,40 +562,86 @@ void Level::LowFrequencyDiscreteUpdate()
             continue;
         }
 
-        bool isMovingPlatform = platform.type > PlatformType::MOVING_START && platform.type < PlatformType::MOVING_END;
-
-        bool isRespawnPlatform = platform.type == PlatformType::FALLING || platform.type == PlatformType::DISAPPEARING;
-
-        //moving platforms update culling
-        //if(IsPlatformFarFromPlayer(platform.phys.transform.position, MAX_DISTANCE_PLATFORM_PLAYER_SQR_5X) && isMovingPlatform) continue;
-
-        //platforms update culling
-        //if(IsPlatformFarFromPlayer(platform.phys.transform.position) && !isRespawnPlatform && !isMovingPlatform) continue;
-
-        if(!CheckCollisionCircles(
+        if(CheckCollisionCircles(
             player.phys.transform.position,
             playerRadius,
             platform.phys.transform.position,
-            updateRadius
-        )) continue;
+            platformUpdateRadius
+        ))
+        {
+            player.platformCache_update.push_back(&platform);
+        }
+    }
+
+    float enemySpawnRadius = GRID_SIZE * 14.0f;
+    float enemyDespawnRadius = GRID_SIZE * 17.0f;
+
+    for(int e = 0; e < enemyList.size(); e++)
+    {
+        Enemy& enemy = enemyList[e];
+
+        float despawnDistanceSqr = std::abs(Vector2DistanceSqr(player.phys.transform.position, enemy.gameObj.transform.position));
+        float spawnDistanceSqr = std::abs(Vector2DistanceSqr(player.phys.transform.position, enemy.spawnPosition));
+
+        if(despawnDistanceSqr > enemyDespawnRadius * enemyDespawnRadius)
+        {
+            enemy.isActive = false;
+        }
+        else if(!enemy.isActive)
+        {
+            if(spawnDistanceSqr <= enemyDespawnRadius * enemyDespawnRadius &&
+            spawnDistanceSqr >= enemySpawnRadius * enemySpawnRadius)
+            {
+                enemy.Respawn();
+                enemy.isActive = true;
+            }
+        }
+
+        if(enemy.isActive)
+        {
+            player.enemyCache.push_back(&enemy);
+        }
+    }
+}
+
+void Level::MediumFrequencyDiscreteUpdate()
+{
+    player.platformCache_physics.clear();
+    player.platformCache_rendering.clear();
+
+    player.enemyCache_physics.clear();
+
+    float playerRadius = player.phys.GetMainAABB().height * REC_TO_CIRCLE_RADIUS_MULTIPLIER;
+
+    float renderRadius = GRID_SIZE * 15.0f;
+
+    for(int p = 0; p < player.platformCache_update.size(); p++)
+    {
+        Platform* platform = player.platformCache_update[p];
+
+        if(!platform) continue;
+
+        bool isMovingPlatform = platform->type > PlatformType::MOVING_START && platform->type < PlatformType::MOVING_END;
+
+        bool isRespawnPlatform = platform->type == PlatformType::FALLING || platform->type == PlatformType::DISAPPEARING;
 
         if(CheckCollisionCircles(
             player.phys.transform.position,
             player.phys.GetMainAABB().height * REC_TO_CIRCLE_RADIUS_MULTIPLIER,
-            platform.phys.transform.position,
+            platform->phys.transform.position,
             renderRadius
         ))
         {
-            player.platformCache_rendering.push_back(&platform);
+            player.platformCache_rendering.push_back(platform);
         }
 
-        if(platform.updateRequired) platform.Update(dt, 1);
+        if(platform->updateRequired) platform->Update(dt, 1);
 
         if(isMovingPlatform)
         {
             TileRange platformRange = CalculateTileRange(
-            platform.phys.transform.position.x,
-            platform.phys.transform.position.y,
+            platform->phys.transform.position.x,
+            platform->phys.transform.position.y,
             collisionTileCheckRange
             );
 
@@ -561,13 +658,16 @@ void Level::LowFrequencyDiscreteUpdate()
                         if(objTile.hitboxes.empty()) continue;
 
                         if(CheckCollisionCircles(
-                            platform.phys.transform.position, 
-                            platform.phys.GetMainAABB().width * REC_TO_CIRCLE_RADIUS_MULTIPLIER,
+                            platform->phys.transform.position, 
+                            platform->phys.GetMainAABB().width * REC_TO_CIRCLE_RADIUS_MULTIPLIER,
                             objTile.transform.position,
                             objTile.GetMainAABB().width * REC_TO_CIRCLE_RADIUS_MULTIPLIER
                         ))
                         {
-                            SolveCollisions_Platform(&platform.phys, &objTile, (platform.type > PlatformType::MOVING_X && platform.type < PlatformType::MOVING_Y));
+                            if(CheckCollisionRecs(platform->phys.GetMainAABB(), objTile.GetMainAABB()))
+                            {
+                                SolveCollisions_Platform(&platform->phys, &objTile, (platform->type > PlatformType::MOVING_X && platform->type < PlatformType::MOVING_Y));
+                            }
                         }
                     }
                 }
@@ -576,11 +676,30 @@ void Level::LowFrequencyDiscreteUpdate()
 
         if(CheckCollisionCircles(
             player.phys.transform.position,
-            player.phys.GetMainAABB().width * REC_TO_CIRCLE_RADIUS_MULTIPLIER,
-            platform.phys.transform.position, GRID_SIZE * 5.0f
+            playerRadius,
+            platform->phys.transform.position, 
+            GRID_SIZE * 5.0f
         ))
         {
-            player.platformCache_physics.push_back(&platform);
+            player.platformCache_physics.push_back(platform);
+        }
+    }
+
+    //player vs enemy cache
+    for(int e = 0; e < player.enemyCache.size(); e++)
+    {
+        Enemy* enemy = player.enemyCache[e];
+
+        if(!enemy) continue;
+
+        if(CheckCollisionCircles(
+            player.phys.transform.position,
+            playerRadius,
+            enemy->gameObj.transform.position,
+            GRID_SIZE * 3.0f
+        ))
+        {
+            player.enemyCache_physics.push_back(enemy);
         }
     }
 }
@@ -588,6 +707,8 @@ void Level::LowFrequencyDiscreteUpdate()
 void Level::HighFrequencyDiscreteUpdate()
 {
     bool isGravityUp = gravity < 0;
+
+    float playerRadius = player.phys.GetMainAABB().height * REC_TO_CIRCLE_RADIUS_MULTIPLIER;
 
     TileRange playerTileRange = CalculateTileRange(
         player.phys.transform.position.x,
@@ -617,26 +738,29 @@ void Level::HighFrequencyDiscreteUpdate()
 
                 if(!CheckCollisionCircles(
                     player.phys.transform.position,
-                    player.phys.GetMainAABB().height * REC_TO_CIRCLE_RADIUS_MULTIPLIER,
+                    playerRadius,
                     tile.gameObj.transform.position,
                     tile.gameObj.GetMainAABB().width * REC_TO_CIRCLE_RADIUS_MULTIPLIER
                 )) continue;
 
-                if(!IsTileOneWay(tile))
+                if(CheckCollisionRecs(player.phys.GetMainAABB(), tile.gameObj.GetMainAABB()))
                 {
-                    SolveCollisions(
-                        &player.phys, &tile.gameObj, 
-                        true, isGravityUp, 
-                        tile.type == TileType::TRAMPOLINE,
-                        false
-                    );
-                }
-                else if(IsOneWayRightLeft(tile))
-                {
-                    SolveCollisionsOneWayLeftRight(
-                        &player.phys, &tile.gameObj,
-                        tile.gameObj.direction == Direction::RIGHT
-                    );
+                    if(!IsTileOneWay(tile))
+                    {
+                        SolveCollisions(
+                            &player.phys, &tile.gameObj, 
+                            true, isGravityUp, 
+                            tile.type == TileType::TRAMPOLINE,
+                            false
+                        );
+                    }
+                    else if(IsOneWayRightLeft(tile))
+                    {
+                        SolveCollisionsOneWayLeftRight(
+                            &player.phys, &tile.gameObj,
+                            tile.gameObj.direction == Direction::RIGHT
+                        );
+                    }
                 }
             }
         }
@@ -660,7 +784,7 @@ void Level::HighFrequencyDiscreteUpdate()
 
                 if(!CheckCollisionCircles(
                     player.phys.transform.position,
-                    player.phys.GetMainAABB().height * REC_TO_CIRCLE_RADIUS_MULTIPLIER,
+                    playerRadius,
                     objTile.transform.position,
                     objTile.GetMainAABB().width * REC_TO_CIRCLE_RADIUS_MULTIPLIER
                 )) continue;
@@ -669,24 +793,27 @@ void Level::HighFrequencyDiscreteUpdate()
 
                 if(objTile.canEntityCollidePhysically)
                 {
-                    if(!IsTileOneWay(tile))
+                    if(CheckCollisionRecs(player.phys.GetMainAABB(), objTile.GetMainAABB()))
                     {
-                        SolveCollisions(
-                            &player.phys, &objTile, 
-                            false, isGravityUp, 
-                            tile.type == TileType::TRAMPOLINE,
-                            false
-                        );
-                    }
-                    else if(IsOneWayUpDown(tile))
-                    {
-                        SolveCollisionsOneWayUpDown
-                        (
-                            &player.phys, &objTile,
-                            tile.gameObj.direction == Direction::UP,
-                            isGravityUp,
-                            false
-                        );
+                        if(!IsTileOneWay(tile))
+                        {
+                            SolveCollisions(
+                                &player.phys, &objTile, 
+                                false, isGravityUp, 
+                                tile.type == TileType::TRAMPOLINE,
+                                false
+                            );
+                        }
+                        else if(IsOneWayUpDown(tile))
+                        {
+                            SolveCollisionsOneWayUpDown
+                            (
+                                &player.phys, &objTile,
+                                tile.gameObj.direction == Direction::UP,
+                                isGravityUp,
+                                false
+                            );
+                        }
                     }
                 }
 
@@ -839,10 +966,13 @@ void Level::HighFrequencyDiscreteUpdate()
         
         if(!IsPlatformSpike(platform->type))
         {
-            SolveCollisionsOneWayUpDown(
-                &player.phys, &platform->phys,
-                true, isGravityUp, true
-            );
+            if(CheckCollisionRecs(player.phys.GetMainAABB(), platform->phys.GetMainAABB()))
+            {
+                SolveCollisionsOneWayUpDown(
+                    &player.phys, &platform->phys,
+                    true, isGravityUp, true
+                );
+            }
         }
 
         if(CheckCollisionRecs(player.GetJumpDetector(), platform->phys.GetMainAABB()) && player.IsFalling())
@@ -856,6 +986,147 @@ void Level::HighFrequencyDiscreteUpdate()
         }
     }
    
+    //player vs enemies
+
+    //enemies vs tiles
+
+    for(int e = 0; e < player.enemyCache.size(); e++)
+    {
+        Enemy* enemy = player.enemyCache[e];
+
+        float enemyRadius = enemy->gameObj.GetMainAABB().height * REC_TO_CIRCLE_RADIUS_MULTIPLIER;
+
+        TileRange enemyTileRange = CalculateTileRange(
+            enemy->gameObj.transform.position.x,
+            enemy->gameObj.transform.position.y,
+            collisionTileCheckRange
+        );
+
+        enemy->Update(dt, iterations);
+
+        enemy->ResetFlags();
+
+        //enemy x pass
+        enemy->gameObj.UpdatePositionX(dt, iterations);
+
+        for(int l = 0; l < LAYERS; l++)
+        {
+            for(int i = enemyTileRange.startX; i <= enemyTileRange.endX; i++)
+            {
+                for(int j = enemyTileRange.startY; j <= enemyTileRange.endY; j++)
+                {
+                    Tile& tile = level[l][i][j];
+
+                    if(!tile.gameObj.canEntityCollidePhysically) continue;
+
+                    if(!CanEnemyCollideWithTile(tile.type)) continue; 
+
+                    if(!tile.gameObj.hasBody || tile.gameObj.hitboxes.empty()) continue;
+
+                    if(!CheckCollisionCircles(
+                        enemy->gameObj.transform.position,
+                        enemyRadius,
+                        tile.gameObj.transform.position,
+                        tile.gameObj.GetMainAABB().width * REC_TO_CIRCLE_RADIUS_MULTIPLIER
+                    )) continue;
+
+                    if(CheckCollisionRecs(
+                        enemy->gameObj.GetMainAABB(),
+                        tile.gameObj.GetMainAABB()
+                    ))
+                    {
+                        if(!IsTileOneWay(tile))
+                        {
+                            SolveCollisions(
+                                &enemy->gameObj, &tile.gameObj, 
+                                true, isGravityUp, 
+                                tile.type == TileType::TRAMPOLINE,
+                                false
+                            );
+                        }
+                        else if(IsOneWayRightLeft(tile))
+                        {
+                            SolveCollisionsOneWayLeftRight(
+                                &enemy->gameObj, &tile.gameObj,
+                                tile.gameObj.direction == Direction::RIGHT
+                            );
+                        }
+                    }
+                }
+            }
+        }
+
+        //enemy y pass
+        enemy->gameObj.UpdatePositionY(dt, iterations);
+
+        for(int l = 0; l < LAYERS; l++)
+        {
+            for(int i = enemyTileRange.startX; i <= enemyTileRange.endX; i++)
+            {
+                for(int j = enemyTileRange.startY; j <= enemyTileRange.endY; j++)
+                {
+                    Tile& tile = level[l][i][j];
+
+                    if(!tile.gameObj.canEntityCollidePhysically) continue;
+
+                    if(!CanEnemyCollideWithTile(tile.type)) continue; 
+
+                    if(!tile.gameObj.hasBody || tile.gameObj.hitboxes.empty()) continue;
+
+                    if(!CheckCollisionCircles(
+                        enemy->gameObj.transform.position,
+                        enemyRadius,
+                        tile.gameObj.transform.position,
+                        tile.gameObj.GetMainAABB().width * REC_TO_CIRCLE_RADIUS_MULTIPLIER
+                    )) continue;
+
+                    if(CheckCollisionRecs(
+                        enemy->gameObj.GetMainAABB(),
+                        tile.gameObj.GetMainAABB()
+                    ))
+                    {
+                        if(!IsTileOneWay(tile))
+                        {
+                            SolveCollisions(
+                                &enemy->gameObj, &tile.gameObj, 
+                                false, false, 
+                                tile.type == TileType::TRAMPOLINE,
+                                false
+                            );
+                        }
+                        else if(IsOneWayUpDown(tile))
+                        {
+                            SolveCollisionsOneWayUpDown
+                            (
+                                &enemy->gameObj, &tile.gameObj,
+                                tile.gameObj.direction == Direction::UP,
+                                false,
+                                false
+                            );
+                        }
+
+                        switch (tile.type)
+                        {
+                        case TileType::WATER:
+                        {
+                            if(!enemy->inWater)
+                            {
+                                ApplyWaterPhysics(&enemy->gameObj, false);
+                                
+                                enemy->inWater = true;
+                            }
+                        }
+                        break;
+                        
+                        default:
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     if(!player.isTouchingGravityChanger && player.wasTouchingGravityChanger)
     {
         player.isGrounded = false;
@@ -1007,6 +1278,13 @@ void Level::DrawLevel()
         }
     }
 
+    for(int i = 0; i < player.enemyCache.size(); i++)
+    {
+        Enemy* enemy = player.enemyCache[i];
+
+        DrawRectangleRec(enemy->gameObj.GetMainAABB(), ENEMY_DUMMY);
+    }
+
     DrawSprite(
         player.phys.transform,
         &player.characterRenderData,
@@ -1042,7 +1320,7 @@ void Level::DrawLevel()
         player.currentFrame
     );
 
-    //DebugDrawing();
+    DebugDrawing();
 
     EndMode2D();
 
@@ -1108,6 +1386,18 @@ void Level::DebugDrawing()
 
                 DrawLineEx(tileObj.transform.position, lineEnd, 1.0f ,GREEN);
             }
+        }
+    }
+
+    for(int i = 0; i < player.enemyCache.size(); i++)
+    {
+        Enemy* enemy = player.enemyCache[i];
+
+        DrawAABB(enemy->gameObj.GetMainAABB(), RED);
+
+        for(int h = 1; h < enemy->gameObj.hitboxes.size(); h++)
+        {
+            DrawAABB(enemy->gameObj.GetSubAABB(h), MAGENTA);
         }
     }
     

@@ -152,6 +152,8 @@ void LevelEditor::Update()
 
         if(IsKeyPressed(KEY_FIVE)) currentTileType = (int)TileType::DECO;
 
+        if(IsKeyPressed(KEY_SIX)) currentTileType = (int)TileType::ENEMY_START + 1;
+
         activeRenderData = GetTileActiveRenderData((TileType)currentTileType, 0);
 
         activeRenderDataList = GetTileActiveRenderDataList((TileType)currentTileType);
@@ -268,6 +270,11 @@ void LevelEditor::Update()
         {
             start = (int)TileType::MISC_START;
             end = (int)TileType::MISC_END;
+        }
+        else if(currentTileType >=(int)TileType::ENEMY_START && currentTileType <= (int)TileType::ENEMY_END)
+        {
+            start = (int)TileType::ENEMY_START;
+            end = (int)TileType::ENEMY_END;
         }
         else
         {

@@ -17,6 +17,7 @@ int main()
 
     SetTargetFPS(60);
 
+    //normal frequency
     float accumulator = 0.0f;
     float fixedDt = 1.0f / 60.0f;
 
@@ -165,9 +166,22 @@ int main()
         std::cout<<"Average last drawing time: "<<avgDrawingLastTime<<" ms (over "<<MAX_LAST_FRAMES<<" frames)\n";
     }
 
-    std::cout<<"total platform count: "<<testLevel.GetPlatformCount()<<"(not all processed at once)\n";
+    std::cout<<"total platform count: "<<testLevel.GetPlatformCount()<<"\n";
+
+    std::cout<<"\n";
+
+    std::cout<<"total player update platform cache count: "<<testLevel.GetPlayerPlatformCache_Update()<<"\n";
     std::cout<<"total player physics platform cache count: "<<testLevel.GetPlayerPlatformCache_Physics()<<"\n";
     std::cout<<"total player render platform cache count: "<<testLevel.GetPlayerPlatformCache_Render()<<"\n";
+
+    std::cout<<"\n";
+
+    std::cout<<"total enemy count: "<<testLevel.GetEnemyCount()<<"\n";
+
+    std::cout<<"total player enemy cache count: "<<testLevel.GetPlayerEnemyCache()<<"\n";
+    std::cout<<"total player enemy physics cache count: "<<testLevel.GetPlayerEnemyCache_Physics()<<"\n";
+
+    std::cout<<"\n";
 
     CloseWindow();
 
