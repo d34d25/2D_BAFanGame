@@ -281,6 +281,11 @@ void Level::InitLevel(const char* levelPath, float dt, int iterations)
                     break;
                     }
 
+                    float nearPlayer = GRID_SIZE * 15.0f;
+
+                    if(Vector2DistanceSqr(player.spawnPos, enemy.spawnPosition) <= nearPlayer * nearPlayer)
+                        enemy.isActive = true;
+
                     enemyList.push_back(enemy);
                 }
 
@@ -573,15 +578,15 @@ void Level::LowFrequencyUpdate()
         }
     }
 
-    float enemySpawnRadius = GRID_SIZE * 14.0f;
+    float enemySpawnRadius = GRID_SIZE * 15.0f;
     float enemyDespawnRadius = GRID_SIZE * 17.0f;
 
     for(int e = 0; e < enemyList.size(); e++)
     {
         Enemy& enemy = enemyList[e];
 
-        float despawnDistanceSqr = std::abs(Vector2DistanceSqr(player.phys.transform.position, enemy.gameObj.transform.position));
-        float spawnDistanceSqr = std::abs(Vector2DistanceSqr(player.phys.transform.position, enemy.spawnPosition));
+        float despawnDistanceSqr = Vector2DistanceSqr(player.phys.transform.position, enemy.gameObj.transform.position);
+        float spawnDistanceSqr = Vector2DistanceSqr(player.phys.transform.position, enemy.spawnPosition);
 
         if(despawnDistanceSqr > enemyDespawnRadius * enemyDespawnRadius)
         {
@@ -1166,6 +1171,12 @@ void Level::HighFrequencyDiscreteUpdate()
             platform.gravity = gravity;
         }
 
+        for(int i = 0; i < enemyList.size(); i++)
+        {
+            enemyList[i].isActive = true;
+            enemyList[i].Respawn();
+        }
+
         player.Respawn();
     }
 
@@ -1222,7 +1233,7 @@ void Level::DrawLevel()
                 {
                     Color color = GetTileColor(tile.type);
 
-                    if(IsColorOf(color, BLANK)) continue;
+                    if(IsColorOf(color, BLANK) || tile.type == TileType::PLATFORM_STOP) continue;
 
                     if(!tile.gameObj.hitboxes.empty()) DrawRectangleRec(tile.gameObj.GetMainAABB(), color);
                     else DrawRectangle(i * GRID_SIZE, j * GRID_SIZE, GRID_SIZE, GRID_SIZE, color);
@@ -1320,7 +1331,7 @@ void Level::DrawLevel()
         player.currentFrame
     );
 
-    DebugDrawing();
+    //DebugDrawing();
 
     EndMode2D();
 
@@ -1363,7 +1374,11 @@ void Level::DebugDrawing()
 
                 if(tileObj.hitboxes.empty()) continue;
 
-                DrawAABB(tileObj.GetMainAABB(), RED);
+                Color mainAABBColor = RED;
+
+                if(level[l][i][j].type == TileType::PLATFORM_STOP) mainAABBColor = BLUE;
+
+                DrawAABB(tileObj.GetMainAABB(), mainAABBColor);
 
                 for(int h = 1; h < tileObj.hitboxes.size(); h++)
                 {

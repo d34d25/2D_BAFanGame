@@ -17,7 +17,6 @@ int main()
 
     SetTargetFPS(60);
 
-    //normal frequency
     float accumulator = 0.0f;
     float fixedDt = 1.0f / 60.0f;
 
@@ -42,7 +41,7 @@ int main()
     testLevel.screenWidth = SCREEN_WIDTH;
     testLevel.screenHeight = SCREEN_HEIGHT;
 
-    bool editorMode = false;
+    bool editorMode = true;
 
     const int MAX_LAST_FRAMES = 120;
 
