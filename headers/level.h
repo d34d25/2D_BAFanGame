@@ -188,6 +188,8 @@ public:
 
     void DrawLevel();
 
+    void ResetLevel(bool* isGravityUp);
+
     inline int GetPlatformCount()
     {
         return (int)platformList.size();

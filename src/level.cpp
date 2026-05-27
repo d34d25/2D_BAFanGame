@@ -297,21 +297,43 @@ void Level::InitLevel(const char* levelPath, float dt, int iterations)
                     continue;
                 }
 
+                int upLeftArray[3] = {l, i - 1, j - 1};
+                int upArray[3] = {l, i, j - 1};
+                int upRightArray[3] = {l, i + 1, j - 1};
+
+                int rightArray[3] = {l, i + 1, j};
+                int downRightArray[3] = {l, i +1, j + 1};
+                int downArray[3] = {l, i, j + 1};
+
+                int downLeftArray[3] = {l, i - 1, j + 1};
+                int leftArray[3] = {l, i - 1, j};
+
+                tile->neighborsTypes[0] = GetTileType(upLeftArray, level);
+                tile->neighborsTypes[1] = GetTileType(upArray, level);
+                tile->neighborsTypes[2] = GetTileType(upRightArray, level);
+
+                tile->neighborsTypes[3] = GetTileType(rightArray, level);
+                tile->neighborsTypes[4] = GetTileType(downRightArray, level);
+                tile->neighborsTypes[5] = GetTileType(downArray, level);
+
+                tile->neighborsTypes[6] = GetTileType(downLeftArray, level);
+                tile->neighborsTypes[7] = GetTileType(leftArray, level);
+
                 tile->gameObj.transform.scale = TILE_SCALE;
 
                 //decorational tiles don't need a physical body
                 if(level[l][i][j].type == TileType::DECO) continue;
 
-                bool upLeft = IsTileEmptyInverted(l, i - 1, j - 1, level, TileType::SOLID);
-                bool up = IsTileEmptyInverted(l, i, j - 1, level, TileType::SOLID);
-                bool upRight = IsTileEmptyInverted(l, i + 1, j - 1, level, TileType::SOLID);
+                bool upLeft = IsTileNotEqual(upLeftArray, level, TileType::SOLID);
+                bool up = IsTileNotEqual(upArray, level, TileType::SOLID);
+                bool upRight = IsTileNotEqual(upRightArray, level, TileType::SOLID);
 
-                bool right = IsTileEmptyInverted(l, i + 1, j, level, TileType::SOLID);
-                bool downRight = IsTileEmptyInverted(l, i + 1, j + 1, level, TileType::SOLID);
-                bool down = IsTileEmptyInverted(l, i, j + 1, level, TileType::SOLID);
+                bool right = IsTileNotEqual(rightArray, level, TileType::SOLID);
+                bool downRight = IsTileNotEqual(downRightArray, level, TileType::SOLID);
+                bool down = IsTileNotEqual(downArray, level, TileType::SOLID);
 
-                bool downLeft = IsTileEmptyInverted(l, i - 1, j + 1, level, TileType::SOLID);
-                bool left = IsTileEmptyInverted(l, i, j - 1, level, TileType::SOLID);
+                bool downLeft = IsTileNotEqual(downLeftArray, level, TileType::SOLID);
+                bool left = IsTileNotEqual(leftArray, level, TileType::SOLID);
 
                 bool isEdge = upLeft || up || upRight ||
                 right || downRight || down ||
@@ -837,9 +859,13 @@ void Level::HighFrequencyDiscreteUpdate()
                     {
                         if(!player.windApplied)
                         {
-                            bool isEdgeUp = tile.gameObj.direction == Direction::UP && IsTileEmpty(l, i, j - 1, level, TileType::VOID);
+                            bool isEdgeUp = tile.gameObj.direction == Direction::UP && 
+                            (tile.GetNeighborType(NeighborDirection::UP) == TileType::VOID ||
+                            tile.GetNeighborType(NeighborDirection::UP) == TileType::DECO);
 
-                            bool isEdgeDown = tile.gameObj.direction == Direction::DOWN && IsTileEmpty(l, i, j + 1, level, TileType::VOID);
+                            bool isEdgeDown = tile.gameObj.direction == Direction::DOWN &&
+                            (tile.GetNeighborType(NeighborDirection::DOWN) == TileType::VOID ||
+                            tile.GetNeighborType(NeighborDirection::DOWN) == TileType::DECO);
 
                             ApplyWind(
                                 &player.phys,
@@ -875,9 +901,11 @@ void Level::HighFrequencyDiscreteUpdate()
                             player.laddedSnapPosX = tile.gameObj.transform.position.x;
                         }
 
-                        bool isEdgeUp = IsTileEmpty(l, i, j - 1, level, TileType::VOID);
+                        bool isEdgeUp = tile.GetNeighborType(NeighborDirection::UP) == TileType::VOID ||
+                        tile.GetNeighborType(NeighborDirection::UP) == TileType::DECO;
 
-                        bool isEdgeDown = IsTileEmpty(l, i, j + 1, level, TileType::VOID);
+                        bool isEdgeDown = tile.GetNeighborType(NeighborDirection::DOWN) == TileType::VOID ||
+                        tile.GetNeighborType(NeighborDirection::DOWN) == TileType::DECO;
 
                         if((!isGravityUp && isEdgeUp) || (isGravityUp && isEdgeDown))
                         {
@@ -909,7 +937,10 @@ void Level::HighFrequencyDiscreteUpdate()
                         for(int h = 0; h < objTile.hitboxes.size(); h++)
                         {
                             if(CheckCollisionRecs(player.phys.GetMainAABB(), objTile.GetSubAABB(h)))
+                            {
                                 player.wasTouchingSpike = true;
+                                break;
+                            }
                         }
                     }
                 }
@@ -1155,34 +1186,41 @@ void Level::HighFrequencyDiscreteUpdate()
 
     if(!player.isTouchingSpike && player.wasTouchingSpike)
     {
-        if(gravity < 0) gravity *= -1;
-
-        isGravityUp = gravity < 0;
-
-        player.gravity = gravity;
-        player.entityData.flipY = isGravityUp;
-
-        for(int i = 0; i < platformList.size(); i++)
-        {
-            Platform& platform = platformList[i];
-
-            if(!(platform.type == PlatformType::FALLING) || platform.updateRequired) continue;
-
-            platform.gravity = gravity;
-        }
-
-        for(int i = 0; i < enemyList.size(); i++)
-        {
-            enemyList[i].isActive = true;
-            enemyList[i].Respawn();
-        }
-
-        player.Respawn();
+        ResetLevel(&isGravityUp);
     }
 
     //booleans update
 
     player.UpdateFlags();
+}
+
+void Level::ResetLevel(bool* isGravityUp)
+{
+    if(gravity < 0) gravity *= -1;
+
+    bool gravityUp = gravity < 0;
+
+    isGravityUp = &gravityUp;
+
+    player.gravity = gravity;
+    player.entityData.flipY = gravityUp;
+
+    for(int i = 0; i < platformList.size(); i++)
+    {
+        Platform& platform = platformList[i];
+
+        if(!(platform.type == PlatformType::FALLING) || platform.updateRequired) continue;
+
+        platform.gravity = gravity;
+    }
+
+    for(int i = 0; i < enemyList.size(); i++)
+    {
+        enemyList[i].isActive = true;
+        enemyList[i].Respawn();
+    }
+
+    player.Respawn();
 }
 
 void Level::DrawLevel()

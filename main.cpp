@@ -41,7 +41,7 @@ int main()
     testLevel.screenWidth = SCREEN_WIDTH;
     testLevel.screenHeight = SCREEN_HEIGHT;
 
-    bool editorMode = true;
+    bool editorMode = false;
 
     const int MAX_LAST_FRAMES = 120;
 

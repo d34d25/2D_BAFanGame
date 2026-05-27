@@ -237,7 +237,17 @@ void Player::Update(float dt, int iterations)
             float climbingSpeed = 200.0f;
 
             if(IsKeyDown(KEY_UP)) phys.body.velocity.y = -climbingSpeed;
-            else if(IsKeyDown(KEY_DOWN)) phys.body.velocity.y = climbingSpeed;
+            else if(IsKeyDown(KEY_DOWN))
+            {
+                phys.body.velocity.y = climbingSpeed;
+
+                if(isGrounded)
+                {
+                    climbing = false;
+                    inLadder = false;
+                    phys.body.hasGravity = true;
+                }
+            } 
 
             if(IsKeyPressed(KEY_Z))
             {

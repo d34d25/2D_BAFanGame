@@ -180,6 +180,20 @@ const std::vector<TileTypeList> TILE_TYPE_LIST = {
     {TileType::ENEMY_DUMMY, ENEMY_DUMMY, "ENEMY_DUMMY"},
 };
 
+enum class NeighborDirection
+{
+    UP_LEFT,
+    UP,
+    UP_RIGHT,
+
+    RIGHT,
+    DOWN_RIGHT,
+    DOWN,
+
+    DOWN_LEFT,
+    LEFT
+};
+
 struct Tile
 {
     TileType type = TileType::VOID;
@@ -191,6 +205,13 @@ struct Tile
     bool isJumpTrigger = false;
 
     GameObject gameObj = {};
+
+    TileType neighborsTypes[8] = {TileType::VOID};
+
+    inline TileType GetNeighborType(NeighborDirection direction)
+    {
+        return neighborsTypes[(int)direction];
+    }
 };
 
 inline bool IsColorOf(Color colorA, Color colorB)
@@ -201,18 +222,40 @@ inline bool IsColorOf(Color colorA, Color colorB)
     colorA.a == colorB.a;
 }
 
-inline bool IsTileEmpty(int l, int i, int j, Tile(&levelTiles)[LAYERS][ROWS][COLS], TileType emptyType = TileType::VOID)
+inline bool IsTileEqual(int l, int i, int j, const Tile(&levelTiles)[LAYERS][ROWS][COLS], TileType tileType = TileType::VOID)
 {
     if(i < 0 || i >= ROWS || j < 0 || j >= COLS || l < 0 || l >= LAYERS) return true;
 
-    return levelTiles[l][i][j].type == emptyType;
+    return levelTiles[l][i][j].type == tileType;
 }
 
-inline bool IsTileEmptyInverted(int l, int i, int j,Tile(&levelTiles)[LAYERS][ROWS][COLS], TileType emptyType = TileType::VOID)
+inline bool IsTileEqual(const int(&matrixPosition)[3], const Tile(&levelTiles)[LAYERS][ROWS][COLS], TileType tileType = TileType::VOID)
+{
+    return IsTileEqual(matrixPosition[0], matrixPosition[1], matrixPosition[2], levelTiles, tileType);
+}
+
+inline bool IsTileNotEqual(int l, int i, int j, const Tile(&levelTiles)[LAYERS][ROWS][COLS], TileType tileType = TileType::VOID)
 {
     if(i < 0 || i >= ROWS || j < 0 || j >= COLS || l < 0 || l >= LAYERS) return true;
 
-    return levelTiles[l][i][j].type != emptyType;
+    return levelTiles[l][i][j].type != tileType;
+}
+
+inline bool IsTileNotEqual(const int(&matrixPosition)[3], const Tile(&levelTiles)[LAYERS][ROWS][COLS], TileType tileType = TileType::VOID)
+{
+    return IsTileNotEqual(matrixPosition[0], matrixPosition[1], matrixPosition[2], levelTiles, tileType);
+}
+
+inline TileType GetTileType(int l, int i, int j, const Tile(&levelTiles)[LAYERS][ROWS][COLS])
+{
+    if(i < 0 || i >= ROWS || j < 0 || j >= COLS || l < 0 || l >= LAYERS) return TileType::VOID;
+
+    return levelTiles[l][i][j].type;
+}
+
+inline TileType GetTileType(const int(&matrixPosition)[3], const Tile(&levelTiles)[LAYERS][ROWS][COLS])
+{
+    return GetTileType(matrixPosition[0], matrixPosition[1], matrixPosition[2], levelTiles);
 }
 
 inline TileRange CalculateTileRange(int x, int y, int range)
