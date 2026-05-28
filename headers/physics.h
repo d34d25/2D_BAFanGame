@@ -1,12 +1,23 @@
 #pragma once
 
 #include "entity.h"
+#include "bullet.h"
 
 #include <iostream>
+
+struct CCD_CollisionResult
+{
+    bool collision = false;
+
+    float entryTime = 0.0f;
+    float exitTime = 0.0f;
+};
 
 void SolveCollisions(GameObject* objA, GameObject* objB, bool isX, bool gravityUp, bool isTrampoline, bool isPlatform);
 
 void SolveCollisions_Platform(GameObject* objA, GameObject* objB, bool isX);
+
+CCD_CollisionResult CheckCollisionsBulletVsEntity_CCD(Bullet* bullet, GameObject* target, float dt);
 
 inline bool IsLeft(const Rectangle& aabb_A, const Rectangle& aabb_B, float offset)
 {

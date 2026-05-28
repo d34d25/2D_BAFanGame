@@ -16,6 +16,8 @@ BulletPool::BulletPool(
 
         tempBullet->mainColor = mainColor;
         tempBullet->backColor = backColor;
+
+        tempBullet->ogMainColor = mainColor;
         
         bullets.push_back(std::move(tempBullet));
 

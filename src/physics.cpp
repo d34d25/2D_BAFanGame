@@ -101,3 +101,94 @@ void SolveCollisions_Platform(GameObject *objA, GameObject *objB, bool isX)
 
     objA->UpdateHitboxes();
 }
+
+CCD_CollisionResult CheckCollisionsBulletVsEntity_CCD(Bullet *bullet, GameObject *target, float dt)
+{
+    CCD_CollisionResult result = {};
+
+    Vector2 relativeVelocity = Vector2Scale(Vector2Subtract(target->body.GetFinalVelocity(), bullet->velocity), dt);
+
+    float minSpeed = 0.00001f;
+
+    if((fabs(relativeVelocity.x) < minSpeed) && (fabs(relativeVelocity.y) < minSpeed)) return result;
+
+    Rectangle aabb = target->GetMainAABB();
+
+    float minX = aabb.x - bullet->radius;
+    float maxX = aabb.x + aabb.width + bullet->radius;
+
+    float minY = aabb.y - bullet->radius;
+    float maxY = aabb.y + aabb.height + bullet->radius;
+
+    double frameStart = 0.0;
+    double frameEnd = 1.0;
+    
+    if(fabs(relativeVelocity.x) < minSpeed)
+    {
+        if(bullet->posititon.x < minX || bullet->posititon.x > maxX)
+            return result;
+    }
+    else
+    {
+        double entryTime = (minX - bullet->posititon.x) / relativeVelocity.x;
+        double exitTime = (maxX - bullet->posititon.x) / relativeVelocity.x;
+
+        if(entryTime > exitTime) std::swap(entryTime, exitTime);
+
+        if(entryTime > 1.0 || exitTime < 0.0) return result;
+
+        entryTime = std::max(entryTime, 0.0);
+        exitTime = std::min(exitTime, 1.0);
+
+        if(entryTime > exitTime) return result;
+
+        frameStart = std::max(frameStart, entryTime);
+        frameEnd = std::min(frameEnd, exitTime);
+
+        if(frameStart > frameEnd) return result;
+    }
+
+    if(fabs(relativeVelocity.y) < minSpeed)
+    {
+        if(bullet->posititon.y < minY || bullet->posititon.y > maxY)
+            return result;
+    }
+    else
+    {
+        double entryTime = (minY - bullet->posititon.y) / relativeVelocity.y;
+        double exitTime = (maxY - bullet->posititon.y) / relativeVelocity.y;
+
+        if(entryTime > exitTime) std::swap(entryTime, exitTime);
+
+        if(entryTime > 1.0 || exitTime < 0.0) return result;
+
+        entryTime = std::max(entryTime, 0.0);
+        exitTime = std::min(exitTime, 1.0);
+
+        if(entryTime > exitTime) return result;
+
+        frameStart = std::max(frameStart, entryTime);
+        frameEnd = std::min(frameEnd, exitTime);
+
+        if(frameStart > frameEnd) return result;
+    }
+
+    float hitX = bullet->posititon.x + relativeVelocity.x * frameStart;
+    float hitY = bullet->posititon.y + relativeVelocity.y * frameStart;
+
+    float closestX = Clamp(hitX, aabb.x, aabb.x + aabb.width);
+    float closestY = Clamp(hitY, aabb.y, aabb.y + aabb.height);
+
+    float distX = hitX - closestX;
+    float distY = hitY - closestY;
+    
+    float distanceSquared = (distX * distX) + (distY * distY);
+
+    if(distanceSquared > bullet->radius * bullet->radius) return result;
+
+    result.collision = true;
+    result.entryTime = frameStart;
+    result.exitTime = frameEnd;
+
+    return result;
+}

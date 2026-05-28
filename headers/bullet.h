@@ -55,6 +55,8 @@ public:
 
     Color backColor = BLACK;
 
+    Color ogMainColor = RAYWHITE;
+
     Bullet() = default;
 
     ~Bullet() = default;

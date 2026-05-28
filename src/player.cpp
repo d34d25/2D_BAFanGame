@@ -23,9 +23,9 @@ Player::Player(Vector2 position)
     bulletData = {};
     bulletData.angle = 0;
     bulletData.fireTimer = 0.0f;
-    bulletData.speed = 500;
+    bulletData.speed = 0; //500
 
-    float bulletLifeTime = 2.0f;
+    float bulletLifeTime = 20.0f;//2.0f
 
     bool explodes = false;
 
@@ -33,7 +33,7 @@ Player::Player(Vector2 position)
 
     Vector2 weaponFrameSize = {0,0};
 
-    character = Character::YUZU;
+    character = Character::ARIS;
 
     switch (character)
     {
@@ -300,6 +300,41 @@ void Player::Update(float dt, int iterations)
     else
     {
         isJumping = false;
+    }
+
+    //bullet manual control (testing)
+
+    for(int i = 0; i < bulletpool->activeBullets.size(); i++)
+    {
+        Bullet* bullet = bulletpool->activeBullets[i];
+
+        float bulletSpeed = 100;
+
+        if(IsKeyDown(KEY_W))
+        {
+            bullet->velocity.y = -bulletSpeed;
+        }
+        else if(IsKeyDown(KEY_S))
+        {
+            bullet->velocity.y = bulletSpeed;
+        }
+        else
+        {
+            bullet->velocity.y = 0;
+        }
+
+        if(IsKeyDown(KEY_A))
+        {
+            bullet->velocity.x = -bulletSpeed;
+        }
+        else if(IsKeyDown(KEY_D))
+        {
+            bullet->velocity.x = bulletSpeed;
+        }
+        else
+        {
+            bullet->velocity.x = 0;
+        }
     }
 
     //update

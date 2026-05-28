@@ -125,6 +125,8 @@ int main()
         EndDrawing();
     }
 
+    std::cout<<"\n";
+
     std::cout<<"========================AVERAGE MS (ALL FRAMES)===========================\n";
 
     if(physicsStepCount > 0)
@@ -141,6 +143,7 @@ int main()
         std::cout<<"Average drawing time: "<<avgDrawingTime<<" ms (over "<<drawingStepCount<<" frames)\n";
     }
 
+    std::cout<<"\n";
     std::cout<<"=====================AVERAGE MS (LAST 120 FRAMES)===========================\n";
 
     if(lastPhysicsCount > 0)
