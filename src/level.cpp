@@ -560,32 +560,7 @@ void Level::UpdateLevel()
         HighFrequencyDiscreteUpdate();
     }
 
-    player.bulletpool.get()->UpdateBullets(dt);
-
-    for(int i = 0; i < player.bulletpool->activeBullets.size(); i++)
-    {
-        Bullet* bullet = player.bulletpool->activeBullets[i];
-
-        if(!bullet) continue;
-
-        for(int e = 0; e < player.enemyCache.size(); e++)
-        {
-            Enemy* enemy = player.enemyCache[e];
-
-            if(!enemy) continue;
-
-            CCD_CollisionResult result = CheckCollisionsBulletVsEntity_CCD(bullet, &enemy->gameObj, dt);
-
-            if(result.collision)
-            {
-                bullet->mainColor = Color{255,0,0,255};
-            }
-            else
-            {
-                bullet->mainColor = bullet->ogMainColor;
-            }
-        }
-    }
+    CCD_Update();
 
     player.Shoot(dt);
 
@@ -1216,6 +1191,36 @@ void Level::HighFrequencyDiscreteUpdate()
     //booleans update
 
     player.UpdateFlags();
+}
+
+void Level::CCD_Update()
+{
+    player.bulletpool.get()->UpdateBullets(dt);
+
+    for(int i = 0; i < player.bulletpool->activeBullets.size(); i++)
+    {
+        Bullet* bullet = player.bulletpool->activeBullets[i];
+
+        if(!bullet) continue;
+
+        for(int e = 0; e < player.enemyCache.size(); e++)
+        {
+            Enemy* enemy = player.enemyCache[e];
+
+            if(!enemy) continue;
+
+            CCD_CollisionResult result = CheckCollisionsBulletVsEntity_CCD(bullet, &enemy->gameObj, dt);
+
+            if(result.collision)
+            {
+                bullet->mainColor = Color{255,0,0,255};
+            }
+            else
+            {
+                bullet->mainColor = bullet->ogMainColor;
+            }
+        }
+    }
 }
 
 void Level::ResetLevel(bool* isGravityUp)

@@ -308,7 +308,7 @@ void Player::Update(float dt, int iterations)
     {
         Bullet* bullet = bulletpool->activeBullets[i];
 
-        float bulletSpeed = 100;
+        float bulletSpeed = 1000;
 
         if(IsKeyDown(KEY_W))
         {
