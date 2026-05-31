@@ -25,7 +25,7 @@ Player::Player(Vector2 position)
     bulletData.fireTimer = 0.0f;
     bulletData.speed = 500;
 
-    float bulletLifeTime = 20.0f;//2.0f
+    float bulletLifeTime = 2.0f;//2.0f
 
     bool explodes = false;
 
@@ -33,7 +33,7 @@ Player::Player(Vector2 position)
 
     Vector2 weaponFrameSize = {0,0};
 
-    character = Character::ARIS;
+    character = Character::YUZU;
 
     switch (character)
     {

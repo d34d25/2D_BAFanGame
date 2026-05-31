@@ -37,8 +37,7 @@ private:
     float timer = 0.3f; 
     float maxTime = 0.3f;
 
-    float respawnTimer = 1.0f;
-    float respawnMaxTime = 1.0f;
+    float respawnMaxTime = 0.4f;
 
     float rotationAngle = 0.0f;
 
@@ -57,6 +56,8 @@ public:
     bool updateRequired = false;
 
     float gravity = 0.0f;
+
+    float respawnTimer = 1.0f;
 
     Platform() = default;
 
@@ -79,7 +80,7 @@ public:
         if(gameObj.transform.position.x >= DESPAWN_LOCATION.x || gameObj.transform.position.x <= -DESPAWN_LOCATION.x)
             return true;
 
-        if(gameObj.transform.position.y >= DESPAWN_LOCATION.x || gameObj.transform.position.y <= -DESPAWN_LOCATION.x)
+        if(gameObj.transform.position.y >= DESPAWN_LOCATION.y || gameObj.transform.position.y <= -DESPAWN_LOCATION.y)
             return true;
 
         return false;

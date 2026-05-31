@@ -140,6 +140,8 @@ void Level::InitLevel(const char* levelPath, float dt, int iterations)
                     case TileType::DISAPPEARING_PLATFORM:
                     {
                         platform.type = PlatformType::DISAPPEARING;
+
+                        platform.SetRespawnTimer(1.0f);
                     }
                     break;
 
@@ -605,6 +607,10 @@ void Level::LowFrequencyUpdate()
         {
             platform.UpdateInactive(dt, 1);
             continue;
+        }
+        else if(platform.type == PlatformType::FALLING && platform.respawnTimer >= 0.0f && platform.updateRequired)
+        {
+            platform.Update(dt, 1);
         }
 
         if(CheckCollisionCircles(
@@ -1445,7 +1451,7 @@ void Level::DrawLevel()
         player.currentFrame
     );
 
-    DebugDrawing();
+    //DebugDrawing();
 
     EndMode2D();
 
