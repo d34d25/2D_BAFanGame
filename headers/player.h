@@ -65,9 +65,9 @@ private:
             offset.y = -offset.y;
         }
 
-        spawnPos.x = phys.transform.position.x + offset.x + textureWidth;
+        spawnPos.x = gameObj.transform.position.x + offset.x + textureWidth;
 
-        spawnPos.y = phys.transform.position.y + offset.y;
+        spawnPos.y = gameObj.transform.position.y + offset.y;
 
         return spawnPos;
     }
@@ -100,7 +100,7 @@ public:
 
     Vector2 spawnPos = {0,0};
 
-    GameObject phys = {};
+    GameObject gameObj = {};
 
     SpriteRenderData characterRenderData = {};
 
@@ -129,41 +129,41 @@ public:
 
     void Shoot(float dt);
 
-    inline Rectangle GetJumpDetector()
+    inline Rectangle& GetJumpDetector()
     {
         float offset = 5.0f;
 
         int dir = entityData.flipY ? -1 : 1;
 
-        float centerY = phys.GetMainAABB().y + phys.GetMainAABB().height * 0.5f;
+        float centerY = gameObj.GetMainAABB().y + gameObj.GetMainAABB().height * 0.5f;
 
-        if(dir == 1) phys.GetSubAABB(1).y = centerY + offset;
-        else phys.GetSubAABB(1).y = centerY - offset - phys.GetSubAABB(1).height;
+        if(dir == 1) gameObj.GetSubAABB(1).y = centerY + offset;
+        else gameObj.GetSubAABB(1).y = centerY - offset - gameObj.GetSubAABB(1).height;
         
-        return phys.GetSubAABB(1);
+        return gameObj.GetSubAABB(1);
     }
 
-    inline Rectangle GetTreadmillDetector()
+    inline Rectangle& GetTreadmillDetector()
     {
         float offset = 5.0f;
 
         int dir = entityData.flipY ? -1 : 1;
 
-        float centerY = phys.GetMainAABB().y + phys.GetMainAABB().height * 0.5f;
+        float centerY = gameObj.GetMainAABB().y + gameObj.GetMainAABB().height * 0.5f;
 
-        if(dir == 1) phys.GetSubAABB(2).y = centerY + offset;
-        else phys.GetSubAABB(2).y = centerY - offset - phys.GetSubAABB(2).height;
+        if(dir == 1) gameObj.GetSubAABB(2).y = centerY + offset;
+        else gameObj.GetSubAABB(2).y = centerY - offset - gameObj.GetSubAABB(2).height;
         
-        return phys.GetSubAABB(2);
+        return gameObj.GetSubAABB(2);
     }
 
     inline void Respawn()
     {
-        phys.transform.position = spawnPos;
+        gameObj.transform.position = spawnPos;
 
-        phys.body.velocity = {0,0};
+        gameObj.body.velocity = {0,0};
 
-        phys.body.altVelocity = {0,0};
+        gameObj.body.altVelocity = {0,0};
 
         isJumping = false;
         isGrounded = false;
@@ -173,8 +173,8 @@ public:
 
     inline bool IsFalling()
     {
-        if(entityData.flipY) return phys.body.velocity.y <= 0;
-        else return phys.body.velocity.y >= 0;
+        if(entityData.flipY) return gameObj.body.velocity.y <= 0;
+        else return gameObj.body.velocity.y >= 0;
     }
 
     inline void ResetFalgs()

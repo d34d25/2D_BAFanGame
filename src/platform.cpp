@@ -20,19 +20,19 @@ void Platform::Update(float dt, int iterations)
 
         if(isDisappearing)
         {
-            phys.transform.position = DESPAWN_LOCATION;
+            gameObj.transform.position = DESPAWN_LOCATION;
         }
         else if(isFalling)
         {
-            phys.body.hasGravity = true;
+            gameObj.body.hasGravity = true;
 
-            phys.body.UpdateVelocity(dt, iterations, gravity);
+            gameObj.body.UpdateVelocity(dt, iterations, gravity);
 
             respawnTimer -= subDt;
 
             if(respawnTimer <= 0.0f)
             {
-                phys.transform.position = DESPAWN_LOCATION;
+                gameObj.transform.position = DESPAWN_LOCATION;
 
                 respawnTimer = 0.0f;
             }
@@ -40,31 +40,31 @@ void Platform::Update(float dt, int iterations)
     }
     else if(isRotatingSpike)
     {
-        rotationAngle = phys.body.velocity.x * 0.01f * subDt;
+        rotationAngle = gameObj.body.velocity.x * 0.01f * subDt;
 
         float cosA = cosf(rotationAngle);
         float sinA = sinf(rotationAngle);
 
         float size = GRID_SIZE * 0.5f;
 
-        for(int h = 1; h < phys.hitboxes.size(); h++)
+        for(int h = 1; h < gameObj.hitboxes.size(); h++)
         {
-            Vector2 offset = phys.hitboxes[h].offset;
+            Vector2 offset = gameObj.hitboxes[h].offset;
 
-            phys.hitboxes[h].offset.x = offset.x * cosA - offset.y * sinA;
-            phys.hitboxes[h].offset.y = offset.x * sinA + offset.y * cosA;
+            gameObj.hitboxes[h].offset.x = offset.x * cosA - offset.y * sinA;
+            gameObj.hitboxes[h].offset.y = offset.x * sinA + offset.y * cosA;
         }
     }
     else
     {
-        phys.body.AddVelocities();
+        gameObj.body.AddVelocities();
     }
 
-    phys.body.UpdatePositionX(dt, iterations, &phys.transform.position.x);
+    gameObj.body.UpdatePositionX(dt, iterations, &gameObj.transform.position.x);
 
-    phys.body.UpdatePositionY(dt, iterations, &phys.transform.position.y);
+    gameObj.body.UpdatePositionY(dt, iterations, &gameObj.transform.position.y);
 
-    phys.UpdateHitboxes();
+    gameObj.UpdateHitboxes();
 }
 
 void Platform::UpdateInactive(float dt, int iterations)
@@ -79,14 +79,14 @@ void Platform::UpdateInactive(float dt, int iterations)
     {
         timer = maxTime;
 
-        phys.transform.position = ogPosition;
+        gameObj.transform.position = ogPosition;
 
         respawnTimer = respawnMaxTime;
 
-        phys.body.hasGravity = false;
-        phys.body.velocity = {0,0};
+        gameObj.body.hasGravity = false;
+        gameObj.body.velocity = {0,0};
 
-        phys.UpdateHitboxes();
+        gameObj.UpdateHitboxes();
 
         updateRequired = false;
     }

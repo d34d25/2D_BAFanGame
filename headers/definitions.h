@@ -36,6 +36,8 @@ static constexpr Color LADDER = Color{0, 200,255,255};
 
 static constexpr Color ENEMY_DUMMY = Color{217,160,102,255};
 
+static constexpr Color ENEMY_YUUKA = Color{85,56,171,255};
+
 static constexpr int ROWS = 70;
 
 static constexpr int COLS = 70;

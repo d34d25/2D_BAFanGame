@@ -81,7 +81,7 @@ int main()
             
             double physicsTime = std::chrono::duration<double, std::milli>(allPhysicsTimerEnd - allPhysicsTimerStart).count();
 
-            if(!editorMode) std::cout<<"Total UpdateLevel time: "<<physicsTime<<" ms \n";
+            //if(!editorMode) std::cout<<"Total UpdateLevel time: "<<physicsTime<<" ms \n";
 
             totalPhysicsTime += physicsTime;
             physicsStepCount++;
@@ -111,7 +111,7 @@ int main()
         auto drawingEnd = std::chrono::high_resolution_clock::now();
         
         double drawingTime = std::chrono::duration<double, std::milli>(drawingEnd - drawingStart).count();
-        if(!editorMode) std::cout<<"Drawing total time: "<<drawingTime<<" ms \n";
+        //if(!editorMode) std::cout<<"Drawing total time: "<<drawingTime<<" ms \n";
 
         totalDrawingTime += drawingTime;
         drawingStepCount++;

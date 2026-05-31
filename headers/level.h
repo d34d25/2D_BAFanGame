@@ -34,6 +34,8 @@ private:
 
     float gravity = 500;
 
+    bool isGravityUp = false;
+
     Tile level[LAYERS][ROWS][COLS];
 
     std::vector<Platform> platformList = {};
@@ -153,7 +155,7 @@ private:
 
     inline bool IsPlatformFarFromPlayer(const Vector2& platformPosition, float maxDistance = MAX_DISTANCE_PLATFORM_PLAYER_SQR)
     {
-        return Vector2LengthSqr(Vector2Subtract(platformPosition, player.phys.transform.position)) > maxDistance;
+        return Vector2LengthSqr(Vector2Subtract(platformPosition, player.gameObj.transform.position)) > maxDistance;
     }
 
     inline bool IsTileSpike(const TileType& type)
@@ -190,7 +192,7 @@ public:
 
     void DrawLevel();
 
-    void ResetLevel(bool* isGravityUp);
+    void ResetLevel();
 
     inline int GetPlatformCount()
     {

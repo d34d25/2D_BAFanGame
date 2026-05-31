@@ -4,26 +4,26 @@ Player::Player(Vector2 position)
 {
     spawnPos = position;
 
-    phys.transform.position = position;
+    gameObj.transform.position = position;
 
-    phys.body = {};
+    gameObj.body = {};
 
-    phys.body.hasGravity = true;
+    gameObj.body.hasGravity = true;
 
-    phys.hitboxes.push_back(Hitbox{{0,0}, {20,46}});
+    gameObj.hitboxes.push_back(Hitbox{{0,0}, {20,46}});
 
     //jump detector
-    phys.AddSubHitbox({0,0}, {phys.GetMainAABB().width * 0.9f, phys.GetMainAABB().height * 0.5f});
+    gameObj.AddSubHitbox({0,0}, {gameObj.GetMainAABB().width * 0.9f, gameObj.GetMainAABB().height * 0.5f});
 
     //for treadmills only
-    phys.AddSubHitbox({0,0}, {phys.GetMainAABB().width, phys.GetMainAABB().height * 0.5f});
+    gameObj.AddSubHitbox({0,0}, {gameObj.GetMainAABB().width, gameObj.GetMainAABB().height * 0.5f});
 
-    phys.UpdateHitboxes();
+    gameObj.UpdateHitboxes();
 
     bulletData = {};
     bulletData.angle = 0;
     bulletData.fireTimer = 0.0f;
-    bulletData.speed = 0; //500
+    bulletData.speed = 500;
 
     float bulletLifeTime = 20.0f;//2.0f
 
@@ -199,17 +199,17 @@ void Player::Update(float dt, int iterations)
 
     //lateral movement
 
-    float moveForce = 400 * phys.body.damping;
+    float moveForce = 400 * gameObj.body.damping;
 
     if(IsKeyDown(KEY_LEFT))
     {
-        phys.body.force.x -= moveForce;
+        gameObj.body.force.x -= moveForce;
         
         entityData.flipX = true;
     }
     else if(IsKeyDown(KEY_RIGHT))
     {
-        phys.body.force.x += moveForce;
+        gameObj.body.force.x += moveForce;
 
         entityData.flipX = false;
     }
@@ -223,29 +223,29 @@ void Player::Update(float dt, int iterations)
         if(!inLadder)
         {
             climbing = false;
-            phys.body.hasGravity = true;
+            gameObj.body.hasGravity = true;
         }
         else
         {
-            phys.transform.position.x = laddedSnapPosX;
+            gameObj.transform.position.x = laddedSnapPosX;
 
-            phys.body.hasGravity = false;
+            gameObj.body.hasGravity = false;
 
-            phys.body.velocity = {0,0};
-            phys.body.altVelocity = {0,0};
+            gameObj.body.velocity = {0,0};
+            gameObj.body.altVelocity = {0,0};
 
             float climbingSpeed = 200.0f;
 
-            if(IsKeyDown(KEY_UP)) phys.body.velocity.y = -climbingSpeed;
+            if(IsKeyDown(KEY_UP)) gameObj.body.velocity.y = -climbingSpeed;
             else if(IsKeyDown(KEY_DOWN))
             {
-                phys.body.velocity.y = climbingSpeed;
+                gameObj.body.velocity.y = climbingSpeed;
 
                 if(isGrounded)
                 {
                     climbing = false;
                     inLadder = false;
-                    phys.body.hasGravity = true;
+                    gameObj.body.hasGravity = true;
                 }
             } 
 
@@ -253,27 +253,27 @@ void Player::Update(float dt, int iterations)
             {
                 climbing = false;
 
-                phys.body.velocity.y = jump * 0.1f;
+                gameObj.body.velocity.y = jump * 0.1f;
             }
         }
     }
     else
     {
-        phys.body.hasGravity = true;
+        gameObj.body.hasGravity = true;
     }
 
     //jump
 
     if(isJumping)
     {
-        phys.body.hasGravity = false;
+        gameObj.body.hasGravity = false;
     }
     else if(!isJumping && !climbing)
     {
-        phys.body.hasGravity = true;
+        gameObj.body.hasGravity = true;
     }
 
-    if(!isGrounded && std::abs(phys.body.velocity.y) <= 0.1f) isJumping = false;
+    if(!isGrounded && std::abs(gameObj.body.velocity.y) <= 0.1f) isJumping = false;
 
     if(isGrounded)
     {
@@ -292,7 +292,7 @@ void Player::Update(float dt, int iterations)
 
         if(isJumping)
         {
-            phys.body.velocity.y += jump * subDt;
+            gameObj.body.velocity.y += jump * subDt;
 
             if(jumpTime <= 0.0f) isJumping = false;
         }
@@ -304,11 +304,11 @@ void Player::Update(float dt, int iterations)
 
     //bullet manual control (testing)
 
-    for(int i = 0; i < bulletpool->activeBullets.size(); i++)
+    /*for(int i = 0; i < bulletpool->activeBullets.size(); i++)
     {
         Bullet* bullet = bulletpool->activeBullets[i];
 
-        float bulletSpeed = 1000;
+        float bulletSpeed = 5000;
 
         if(IsKeyDown(KEY_W))
         {
@@ -335,11 +335,11 @@ void Player::Update(float dt, int iterations)
         {
             bullet->velocity.x = 0;
         }
-    }
+    }*/
 
     //update
     
-    phys.body.UpdateVelocity(dt, iterations, gravity);   
+    gameObj.body.UpdateVelocity(dt, iterations, gravity);   
 }
 
 void Player::Shoot(float dt)
@@ -363,7 +363,7 @@ void Player::Shoot(float dt)
 
     Vector2 initialVel = {0,0};
 
-    initialVel.x = bulletData.speed * cosf(radians) + phys.body.velocity.x;
+    initialVel.x = bulletData.speed * cosf(radians) + gameObj.body.velocity.x;
     initialVel.y = bulletData.speed * sinf(radians);
 
     if(bulletData.fireTimer > 0.0f) bulletData.fireTimer -= dt;

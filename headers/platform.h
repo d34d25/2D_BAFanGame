@@ -46,7 +46,7 @@ public:
 
     Vector2 ogPosition = {0,0};
 
-    GameObject phys = {};
+    GameObject gameObj = {};
 
     PlatformType type = PlatformType::NONE;
 
@@ -76,17 +76,11 @@ public:
 
     inline bool IsInactive()
     {
-        if(phys.transform.position.x >= DESPAWN_LOCATION.x || phys.transform.position.x <= -DESPAWN_LOCATION.x)
+        if(gameObj.transform.position.x >= DESPAWN_LOCATION.x || gameObj.transform.position.x <= -DESPAWN_LOCATION.x)
             return true;
 
-        if(gravity >= 0)
-        {
-            if(phys.transform.position.y >= DESPAWN_LOCATION.y) return true;
-        }
-        else
-        {
-            if(phys.transform.position.y <= -DESPAWN_LOCATION.y) return true;
-        }
+        if(gameObj.transform.position.y >= DESPAWN_LOCATION.x || gameObj.transform.position.y <= -DESPAWN_LOCATION.x)
+            return true;
 
         return false;
     }

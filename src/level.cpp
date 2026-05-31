@@ -53,8 +53,8 @@ void Level::InitLevel(const char* levelPath, float dt, int iterations)
 
                 if(type == TileType::PLAYER_SPAWN)
                 {
-                    player.phys.transform.position = tile->gameObj.transform.position;
-                    player.spawnPos = player.phys.transform.position;
+                    player.gameObj.transform.position = tile->gameObj.transform.position;
+                    player.spawnPos = player.gameObj.transform.position;
                 }
 
                 if(IsTypeInvalid(type)) level[l][i][j].type = TileType::VOID;
@@ -67,7 +67,7 @@ void Level::InitLevel(const char* levelPath, float dt, int iterations)
                 {
                     Platform platform = Platform();
 
-                    platform.phys.hasBody = true;
+                    platform.gameObj.hasBody = true;
 
                     float platformWidth = GRID_SIZE;
                     float platformHeight = GRID_SIZE;
@@ -87,15 +87,15 @@ void Level::InitLevel(const char* levelPath, float dt, int iterations)
                     default: break;
                     }
 
-                    platform.phys.transform = tile->gameObj.transform;
-                    platform.phys.data = tile->gameObj.data;
-                    platform.phys.direction = tile->gameObj.direction;
+                    platform.gameObj.transform = tile->gameObj.transform;
+                    platform.gameObj.data = tile->gameObj.data;
+                    platform.gameObj.direction = tile->gameObj.direction;
 
-                    platform.ogPosition = platform.phys.transform.position;
+                    platform.ogPosition = platform.gameObj.transform.position;
 
-                    platform.phys.hitboxes.push_back(Hitbox{{0,0}, {platformWidth, platformHeight}});
+                    platform.gameObj.hitboxes.push_back(Hitbox{{0,0}, {platformWidth, platformHeight}});
 
-                    platform.phys.UpdateHitboxes();
+                    platform.gameObj.UpdateHitboxes();
 
                     float platformSpeed = 100.0f;
 
@@ -113,7 +113,7 @@ void Level::InitLevel(const char* levelPath, float dt, int iterations)
                     {
                         platform.type = PlatformType::MOVING_HORIZONTAL;
 
-                        platform.phys.body.velocity.x = platformSpeed;
+                        platform.gameObj.body.velocity.x = platformSpeed;
 
                         platform.updateRequired = true;
                     }
@@ -123,7 +123,7 @@ void Level::InitLevel(const char* levelPath, float dt, int iterations)
                     {
                         platform.type = PlatformType::MOVING_VERTICAL;
 
-                        platform.phys.body.velocity.y = -platformSpeed;
+                        platform.gameObj.body.velocity.y = -platformSpeed;
 
                         platform.updateRequired = true;
                     }
@@ -133,7 +133,7 @@ void Level::InitLevel(const char* levelPath, float dt, int iterations)
                     {
                         platform.type = PlatformType::FALLING;
 
-                        platform.phys.body.hasGravity = true;
+                        platform.gameObj.body.hasGravity = true;
                     }
                     break;
 
@@ -149,13 +149,13 @@ void Level::InitLevel(const char* levelPath, float dt, int iterations)
 
                         platformSpeed *= 1.5f;
 
-                        platform.phys.body.velocity.y = -platformSpeed;
+                        platform.gameObj.body.velocity.y = -platformSpeed;
 
                         platform.updateRequired = true;
 
                         float factor = 0.8f;
 
-                        platform.phys.AddSubHitbox({0,0}, {platformWidth * factor, platformHeight * factor});
+                        platform.gameObj.AddSubHitbox({0,0}, {platformWidth * factor, platformHeight * factor});
                     }
                     break;
 
@@ -165,13 +165,13 @@ void Level::InitLevel(const char* levelPath, float dt, int iterations)
 
                         platformSpeed *= 1.5f;
 
-                        platform.phys.body.velocity.x = platformSpeed;
+                        platform.gameObj.body.velocity.x = platformSpeed;
 
                         platform.updateRequired = true;
 
                         float factor = 0.8f;
 
-                        platform.phys.AddSubHitbox({0,0}, {platformWidth * factor, platformHeight * factor});
+                        platform.gameObj.AddSubHitbox({0,0}, {platformWidth * factor, platformHeight * factor});
                     }
                     break;
 
@@ -181,9 +181,9 @@ void Level::InitLevel(const char* levelPath, float dt, int iterations)
 
                         platform.updateRequired = true;
 
-                        platform.phys.body.velocity.x = platformSpeed;
+                        platform.gameObj.body.velocity.x = platformSpeed;
 
-                        if(platform.phys.data.flipX) platform.phys.body.velocity.x = -platformSpeed;
+                        if(platform.gameObj.data.flipX) platform.gameObj.body.velocity.x = -platformSpeed;
 
                         float size = GRID_SIZE * 0.5f;
                         
@@ -195,10 +195,10 @@ void Level::InitLevel(const char* levelPath, float dt, int iterations)
                             {
                                 float multiplier = (float)h * size;
 
-                                offset.x = platform.phys.data.flipX ? -multiplier : multiplier;
-                                offset.y = platform.phys.data.flipY ? multiplier : -multiplier;
+                                offset.x = platform.gameObj.data.flipX ? -multiplier : multiplier;
+                                offset.y = platform.gameObj.data.flipY ? multiplier : -multiplier;
 
-                                platform.phys.AddSubHitbox(offset, {size,size});
+                                platform.gameObj.AddSubHitbox(offset, {size,size});
                             }
                         }
                     }
@@ -210,9 +210,9 @@ void Level::InitLevel(const char* levelPath, float dt, int iterations)
 
                         platform.updateRequired = true;
 
-                        platform.phys.body.velocity.x = platformSpeed;
+                        platform.gameObj.body.velocity.x = platformSpeed;
 
-                        if(platform.phys.data.flipX) platform.phys.body.velocity.x = -platformSpeed;
+                        if(platform.gameObj.data.flipX) platform.gameObj.body.velocity.x = -platformSpeed;
 
                         float size = GRID_SIZE * 0.5f;
                         
@@ -229,10 +229,10 @@ void Level::InitLevel(const char* levelPath, float dt, int iterations)
                             {
                                 float multiplier = (float)localH * size * armSide;
 
-                                offset.x = platform.phys.data.flipX ? -multiplier : multiplier;
-                                offset.y = platform.phys.data.flipY ? multiplier : -multiplier;
+                                offset.x = platform.gameObj.data.flipX ? -multiplier : multiplier;
+                                offset.y = platform.gameObj.data.flipY ? multiplier : -multiplier;
 
-                                platform.phys.AddSubHitbox(offset, {size,size});
+                                platform.gameObj.AddSubHitbox(offset, {size,size});
                             }
                         }
                     }
@@ -271,15 +271,32 @@ void Level::InitLevel(const char* levelPath, float dt, int iterations)
 
                     enemy.gameObj.body.hasGravity = true;
 
+                    Hitbox jumpDetector = {
+                        {0,0},
+                        {enemy.gameObj.GetMainAABB().width * 0.9f, enemy.gameObj.GetMainAABB().height * 0.5f}
+                    };
+
                     switch (type)
                     {
                     case TileType::ENEMY_DUMMY:
+                    {
                         enemy.type = EnemyType::DUMMY;
+                        enemy.testColor = ENEMY_DUMMY;
+                    }
+                    break;
+
+                    case TileType::ENEMY_YUUKA:
+                    {
+                        enemy.type = EnemyType::YUUKA;
+                        enemy.testColor = ENEMY_YUUKA;
+                    }
                     break;
                     
                     default:
                     break;
                     }
+
+                    enemy.gameObj.hitboxes.push_back(jumpDetector);
 
                     float nearPlayer = GRID_SIZE * 15.0f;
 
@@ -564,7 +581,9 @@ void Level::UpdateLevel()
 
     player.Shoot(dt);
 
-    UpdateCamera(player.phys.transform.position, {0, -100});
+    UpdateCamera(player.gameObj.transform.position, {0, -100});
+
+    if(IsKeyPressed(KEY_R)) ResetLevel();
 }
 
 void Level::LowFrequencyUpdate()
@@ -573,14 +592,14 @@ void Level::LowFrequencyUpdate()
 
     player.enemyCache.clear();
     
-    float playerRadius = player.phys.GetMainAABB().width * REC_TO_CIRCLE_RADIUS_MULTIPLIER;
+    float playerRadius = player.gameObj.GetMainAABB().width * REC_TO_CIRCLE_RADIUS_MULTIPLIER;
     float platformUpdateRadius = GRID_SIZE * 25.0f;
 
     for(int p = 0; p < platformList.size(); p++)
     {
         Platform& platform = platformList[p];
 
-        if(!platform.phys.hasBody) continue;
+        if(!platform.gameObj.hasBody) continue;
 
         if(platform.IsInactive())
         {
@@ -589,9 +608,9 @@ void Level::LowFrequencyUpdate()
         }
 
         if(CheckCollisionCircles(
-            player.phys.transform.position,
+            player.gameObj.transform.position,
             playerRadius,
-            platform.phys.transform.position,
+            platform.gameObj.transform.position,
             platformUpdateRadius
         ))
         {
@@ -606,8 +625,8 @@ void Level::LowFrequencyUpdate()
     {
         Enemy& enemy = enemyList[e];
 
-        float despawnDistanceSqr = Vector2DistanceSqr(player.phys.transform.position, enemy.gameObj.transform.position);
-        float spawnDistanceSqr = Vector2DistanceSqr(player.phys.transform.position, enemy.spawnPosition);
+        float despawnDistanceSqr = Vector2DistanceSqr(player.gameObj.transform.position, enemy.gameObj.transform.position);
+        float spawnDistanceSqr = Vector2DistanceSqr(player.gameObj.transform.position, enemy.spawnPosition);
 
         if(despawnDistanceSqr > enemyDespawnRadius * enemyDespawnRadius)
         {
@@ -637,7 +656,7 @@ void Level::MediumFrequencyDiscreteUpdate()
 
     player.enemyCache_physics.clear();
 
-    float playerRadius = player.phys.GetMainAABB().height * REC_TO_CIRCLE_RADIUS_MULTIPLIER;
+    float playerRadius = player.gameObj.GetMainAABB().height * REC_TO_CIRCLE_RADIUS_MULTIPLIER;
 
     float renderRadius = GRID_SIZE * 15.0f;
 
@@ -652,9 +671,9 @@ void Level::MediumFrequencyDiscreteUpdate()
         bool isRespawnPlatform = platform->type == PlatformType::FALLING || platform->type == PlatformType::DISAPPEARING;
 
         if(CheckCollisionCircles(
-            player.phys.transform.position,
-            player.phys.GetMainAABB().height * REC_TO_CIRCLE_RADIUS_MULTIPLIER,
-            platform->phys.transform.position,
+            player.gameObj.transform.position,
+            player.gameObj.GetMainAABB().height * REC_TO_CIRCLE_RADIUS_MULTIPLIER,
+            platform->gameObj.transform.position,
             renderRadius
         ))
         {
@@ -666,8 +685,8 @@ void Level::MediumFrequencyDiscreteUpdate()
         if(isMovingPlatform)
         {
             TileRange platformRange = CalculateTileRange(
-            platform->phys.transform.position.x,
-            platform->phys.transform.position.y,
+            platform->gameObj.transform.position.x,
+            platform->gameObj.transform.position.y,
             collisionTileCheckRange
             );
 
@@ -684,15 +703,15 @@ void Level::MediumFrequencyDiscreteUpdate()
                         if(objTile.hitboxes.empty()) continue;
 
                         if(CheckCollisionCircles(
-                            platform->phys.transform.position, 
-                            platform->phys.GetMainAABB().width * REC_TO_CIRCLE_RADIUS_MULTIPLIER,
+                            platform->gameObj.transform.position, 
+                            platform->gameObj.GetMainAABB().width * REC_TO_CIRCLE_RADIUS_MULTIPLIER,
                             objTile.transform.position,
                             objTile.GetMainAABB().width * REC_TO_CIRCLE_RADIUS_MULTIPLIER
                         ))
                         {
-                            if(CheckCollisionRecs(platform->phys.GetMainAABB(), objTile.GetMainAABB()))
+                            if(CheckCollisionRecs(platform->gameObj.GetMainAABB(), objTile.GetMainAABB()))
                             {
-                                SolveCollisions_Platform(&platform->phys, &objTile, (platform->type > PlatformType::MOVING_X && platform->type < PlatformType::MOVING_Y));
+                                SolveCollisions_Platform(&platform->gameObj, &objTile, (platform->type > PlatformType::MOVING_X && platform->type < PlatformType::MOVING_Y));
                             }
                         }
                     }
@@ -701,9 +720,9 @@ void Level::MediumFrequencyDiscreteUpdate()
         }
 
         if(CheckCollisionCircles(
-            player.phys.transform.position,
+            player.gameObj.transform.position,
             playerRadius,
-            platform->phys.transform.position, 
+            platform->gameObj.transform.position, 
             GRID_SIZE * 5.0f
         ))
         {
@@ -719,7 +738,7 @@ void Level::MediumFrequencyDiscreteUpdate()
         if(!enemy) continue;
 
         if(CheckCollisionCircles(
-            player.phys.transform.position,
+            player.gameObj.transform.position,
             playerRadius,
             enemy->gameObj.transform.position,
             GRID_SIZE * 3.0f
@@ -727,18 +746,20 @@ void Level::MediumFrequencyDiscreteUpdate()
         {
             player.enemyCache_physics.push_back(enemy);
         }
+
+        enemy->UpdateAI(dt, 1, player.gameObj.transform.position);
     }
 }
 
 void Level::HighFrequencyDiscreteUpdate()
 {
-    bool isGravityUp = gravity < 0;
+    isGravityUp = gravity < 0;
 
-    float playerRadius = player.phys.GetMainAABB().height * REC_TO_CIRCLE_RADIUS_MULTIPLIER;
+    float playerRadius = player.gameObj.GetMainAABB().height * REC_TO_CIRCLE_RADIUS_MULTIPLIER;
 
     TileRange playerTileRange = CalculateTileRange(
-        player.phys.transform.position.x,
-        player.phys.transform.position.y,
+        player.gameObj.transform.position.x,
+        player.gameObj.transform.position.y,
         collisionTileCheckRange
     );
 
@@ -748,7 +769,7 @@ void Level::HighFrequencyDiscreteUpdate()
 
     //player X pass
 
-    player.phys.UpdatePositionX(dt, iterations);
+    player.gameObj.UpdatePositionX(dt, iterations);
 
     for(int l = 0; l < LAYERS; l++)
     {
@@ -763,18 +784,18 @@ void Level::HighFrequencyDiscreteUpdate()
                 if(!tile.gameObj.hasBody || tile.gameObj.hitboxes.empty()) continue;
 
                 if(!CheckCollisionCircles(
-                    player.phys.transform.position,
+                    player.gameObj.transform.position,
                     playerRadius,
                     tile.gameObj.transform.position,
                     tile.gameObj.GetMainAABB().width * REC_TO_CIRCLE_RADIUS_MULTIPLIER
                 )) continue;
 
-                if(CheckCollisionRecs(player.phys.GetMainAABB(), tile.gameObj.GetMainAABB()))
+                if(CheckCollisionRecs(player.gameObj.GetMainAABB(), tile.gameObj.GetMainAABB()))
                 {
                     if(!IsTileOneWay(tile))
                     {
                         SolveCollisions(
-                            &player.phys, &tile.gameObj, 
+                            &player.gameObj, &tile.gameObj, 
                             true, isGravityUp, 
                             tile.type == TileType::TRAMPOLINE,
                             false
@@ -783,7 +804,7 @@ void Level::HighFrequencyDiscreteUpdate()
                     else if(IsOneWayRightLeft(tile))
                     {
                         SolveCollisionsOneWayLeftRight(
-                            &player.phys, &tile.gameObj,
+                            &player.gameObj, &tile.gameObj,
                             tile.gameObj.direction == Direction::RIGHT
                         );
                     }
@@ -794,7 +815,7 @@ void Level::HighFrequencyDiscreteUpdate()
 
     //player Y pass
 
-    player.phys.UpdatePositionY(dt, iterations);
+    player.gameObj.UpdatePositionY(dt, iterations);
 
     for(int l = 0; l < LAYERS; l++)
     {
@@ -809,7 +830,7 @@ void Level::HighFrequencyDiscreteUpdate()
                 if(!objTile.hasBody || objTile.hitboxes.empty()) continue;
 
                 if(!CheckCollisionCircles(
-                    player.phys.transform.position,
+                    player.gameObj.transform.position,
                     playerRadius,
                     objTile.transform.position,
                     objTile.GetMainAABB().width * REC_TO_CIRCLE_RADIUS_MULTIPLIER
@@ -819,12 +840,12 @@ void Level::HighFrequencyDiscreteUpdate()
 
                 if(objTile.canEntityCollidePhysically)
                 {
-                    if(CheckCollisionRecs(player.phys.GetMainAABB(), objTile.GetMainAABB()))
+                    if(CheckCollisionRecs(player.gameObj.GetMainAABB(), objTile.GetMainAABB()))
                     {
                         if(!IsTileOneWay(tile))
                         {
                             SolveCollisions(
-                                &player.phys, &objTile, 
+                                &player.gameObj, &objTile, 
                                 false, isGravityUp, 
                                 tile.type == TileType::TRAMPOLINE,
                                 false
@@ -834,7 +855,7 @@ void Level::HighFrequencyDiscreteUpdate()
                         {
                             SolveCollisionsOneWayUpDown
                             (
-                                &player.phys, &objTile,
+                                &player.gameObj, &objTile,
                                 tile.gameObj.direction == Direction::UP,
                                 isGravityUp,
                                 false
@@ -849,7 +870,7 @@ void Level::HighFrequencyDiscreteUpdate()
                 
                 if(IsOneWayRightLeft(tile)) continue;
 
-                if(CheckCollisionRecs(player.phys.GetMainAABB(), objTile.GetMainAABB()))
+                if(CheckCollisionRecs(player.gameObj.GetMainAABB(), objTile.GetMainAABB()))
                 {
                     switch (tile.type)
                     {
@@ -867,7 +888,7 @@ void Level::HighFrequencyDiscreteUpdate()
                             tile.GetNeighborType(NeighborDirection::DOWN) == TileType::DECO);
 
                             ApplyWind(
-                                &player.phys,
+                                &player.gameObj,
                                 &objTile,
                                 tile.gameObj.direction,
                                 isEdgeUp,
@@ -884,7 +905,7 @@ void Level::HighFrequencyDiscreteUpdate()
                     {
                         if(!player.inWater)
                         {
-                            ApplyWaterPhysics(&player.phys, isGravityUp);
+                            ApplyWaterPhysics(&player.gameObj, isGravityUp);
 
                             player.inWater = true;
                         }
@@ -908,12 +929,12 @@ void Level::HighFrequencyDiscreteUpdate()
 
                         if((!isGravityUp && isEdgeUp) || (isGravityUp && isEdgeDown))
                         {
-                            if((IsAbove(player.phys.GetMainAABB(), objTile.GetMainAABB(), 1.0f) && !isGravityUp) || 
-                            (IsBelow(player.phys.GetMainAABB(), objTile.GetMainAABB(), 1.0f) && isGravityUp))
+                            if((IsAbove(player.gameObj.GetMainAABB(), objTile.GetMainAABB(), 1.0f) && !isGravityUp) || 
+                            (IsBelow(player.gameObj.GetMainAABB(), objTile.GetMainAABB(), 1.0f) && isGravityUp))
                             {
                                 if(!player.IsPressingDown())
                                 {
-                                    SolveCollisionsOneWayUpDown(&player.phys, &objTile, true, isGravityUp, true);
+                                    SolveCollisionsOneWayUpDown(&player.gameObj, &objTile, true, isGravityUp, true);
 
                                     player.inLadder = false;
                                     isTileJumpTrigger = true;
@@ -935,7 +956,7 @@ void Level::HighFrequencyDiscreteUpdate()
                     {
                         for(int h = 0; h < objTile.hitboxes.size(); h++)
                         {
-                            if(CheckCollisionRecs(player.phys.GetMainAABB(), objTile.GetSubAABB(h)))
+                            if(CheckCollisionRecs(player.gameObj.GetMainAABB(), objTile.GetSubAABB(h)))
                             {
                                 player.wasTouchingSpike = true;
                                 break;
@@ -949,7 +970,7 @@ void Level::HighFrequencyDiscreteUpdate()
                 if(tile.type == TileType::TREADMILL_LEFT || tile.type == TileType::TREADMILL_RIGHT)
                 {
                     if(CheckCollisionRecs(player.GetTreadmillDetector(), objTile.GetMainAABB()) && player.IsFalling())
-                        player.phys.body.altVelocity = objTile.body.velocity;
+                        player.gameObj.body.altVelocity = objTile.body.velocity;
                 }
 
                 if(CheckCollisionRecs(player.GetJumpDetector(), objTile.GetMainAABB()) && player.IsFalling())
@@ -958,13 +979,13 @@ void Level::HighFrequencyDiscreteUpdate()
                     else if(IsOneWayUpDown(tile))
                     {
                         if(tile.gameObj.direction == Direction::UP &&
-                            IsAbove(player.phys.GetMainAABB(), objTile.GetMainAABB(), 0.0f)
+                            IsAbove(player.gameObj.GetMainAABB(), objTile.GetMainAABB(), 0.0f)
                         )
                         {
                             player.wasGrounded = true;
                         }
                         else if(tile.gameObj.direction == Direction::DOWN &&
-                            IsBelow(player.phys.GetMainAABB(), objTile.GetMainAABB(), 0.0f)
+                            IsBelow(player.gameObj.GetMainAABB(), objTile.GetMainAABB(), 0.0f)
                         )
                         {
                             player.wasGrounded = true;
@@ -981,9 +1002,9 @@ void Level::HighFrequencyDiscreteUpdate()
     {
         Platform* platform = player.platformCache_physics[i];
 
-        for(int h = 1; h < platform->phys.hitboxes.size(); h++)
+        for(int h = 1; h < platform->gameObj.hitboxes.size(); h++)
         {
-            if(CheckCollisionRecs(player.phys.GetMainAABB(), platform->phys.GetSubAABB(h)))
+            if(CheckCollisionRecs(player.gameObj.GetMainAABB(), platform->gameObj.GetSubAABB(h)))
             {
                 if(IsPlatformSpike(platform->type))
                 {
@@ -993,27 +1014,27 @@ void Level::HighFrequencyDiscreteUpdate()
         }
 
         if(!CheckCollisionCircles(
-            player.phys.transform.position,
-            player.phys.GetMainAABB().height * REC_TO_CIRCLE_RADIUS_MULTIPLIER,
-            platform->phys.transform.position,
-            platform->phys.GetMainAABB().width * REC_TO_CIRCLE_RADIUS_MULTIPLIER
+            player.gameObj.transform.position,
+            player.gameObj.GetMainAABB().height * REC_TO_CIRCLE_RADIUS_MULTIPLIER,
+            platform->gameObj.transform.position,
+            platform->gameObj.GetMainAABB().width * REC_TO_CIRCLE_RADIUS_MULTIPLIER
         )) continue;
         
         if(!IsPlatformSpike(platform->type))
         {
-            if(CheckCollisionRecs(player.phys.GetMainAABB(), platform->phys.GetMainAABB()))
+            if(CheckCollisionRecs(player.gameObj.GetMainAABB(), platform->gameObj.GetMainAABB()))
             {
                 SolveCollisionsOneWayUpDown(
-                    &player.phys, &platform->phys,
+                    &player.gameObj, &platform->gameObj,
                     true, isGravityUp, true
                 );
             }
         }
 
-        if(CheckCollisionRecs(player.GetJumpDetector(), platform->phys.GetMainAABB()) && player.IsFalling())
+        if(CheckCollisionRecs(player.GetJumpDetector(), platform->gameObj.GetMainAABB()) && player.IsFalling())
         {
-            if(!isGravityUp && IsAbove(player.phys.GetMainAABB(), platform->phys.GetMainAABB(), 0.0f) || 
-            (isGravityUp && IsBelow(player.phys.GetMainAABB(), platform->phys.GetMainAABB(), 0.0f)))
+            if(!isGravityUp && IsAbove(player.gameObj.GetMainAABB(), platform->gameObj.GetMainAABB(), 0.0f) || 
+            (isGravityUp && IsBelow(player.gameObj.GetMainAABB(), platform->gameObj.GetMainAABB(), 0.0f)))
             {
                 platform->updateRequired = true;
                 player.wasGrounded = true;
@@ -1102,8 +1123,6 @@ void Level::HighFrequencyDiscreteUpdate()
                 {
                     Tile& tile = level[l][i][j];
 
-                    if(!tile.gameObj.canEntityCollidePhysically) continue;
-
                     if(!CanEnemyCollideWithTile(tile.type)) continue; 
 
                     if(!tile.gameObj.hasBody || tile.gameObj.hitboxes.empty()) continue;
@@ -1115,31 +1134,39 @@ void Level::HighFrequencyDiscreteUpdate()
                         tile.gameObj.GetMainAABB().width * REC_TO_CIRCLE_RADIUS_MULTIPLIER
                     )) continue;
 
-                    if(CheckCollisionRecs(
+                    if(tile.gameObj.canEntityCollidePhysically)
+                    {
+                        if(CheckCollisionRecs(
                         enemy->gameObj.GetMainAABB(),
                         tile.gameObj.GetMainAABB()
-                    ))
+                        ))
+                        {
+                            if(!IsTileOneWay(tile))
+                            {
+                                SolveCollisions(
+                                    &enemy->gameObj, &tile.gameObj, 
+                                    false, false, 
+                                    tile.type == TileType::TRAMPOLINE,
+                                    false
+                                );
+                            }
+                            else if(IsOneWayUpDown(tile))
+                            {
+                                SolveCollisionsOneWayUpDown
+                                (
+                                    &enemy->gameObj, &tile.gameObj,
+                                    tile.gameObj.direction == Direction::UP,
+                                    false,
+                                    false
+                                );
+                            }
+                        }
+                    }
+                    
+                    if(IsOneWayRightLeft(tile)) continue;
+                    
+                    if(CheckCollisionRecs(enemy->gameObj.GetMainAABB(),tile.gameObj.GetMainAABB()))
                     {
-                        if(!IsTileOneWay(tile))
-                        {
-                            SolveCollisions(
-                                &enemy->gameObj, &tile.gameObj, 
-                                false, false, 
-                                tile.type == TileType::TRAMPOLINE,
-                                false
-                            );
-                        }
-                        else if(IsOneWayUpDown(tile))
-                        {
-                            SolveCollisionsOneWayUpDown
-                            (
-                                &enemy->gameObj, &tile.gameObj,
-                                tile.gameObj.direction == Direction::UP,
-                                false,
-                                false
-                            );
-                        }
-
                         switch (tile.type)
                         {
                         case TileType::WATER:
@@ -1157,9 +1184,33 @@ void Level::HighFrequencyDiscreteUpdate()
                             break;
                         }
                     }
+
+                    if(!tile.isJumpTrigger) continue;
+
+                    if(CheckCollisionRecs(enemy->GetJumpDetector(), tile.gameObj.GetMainAABB()))
+                    {
+                        if(!IsOneWayUpDown(tile)) enemy->wasGrounded = true;
+                        else if(IsOneWayUpDown(tile))
+                        {
+                            if(tile.gameObj.direction == Direction::UP &&
+                                IsAbove(enemy->gameObj.GetMainAABB(), tile.gameObj.GetMainAABB(), 0.0f)
+                            )
+                            {
+                                enemy->wasGrounded = true;
+                            }
+                            else if(tile.gameObj.direction == Direction::DOWN &&
+                                IsBelow(enemy->gameObj.GetMainAABB(), tile.gameObj.GetMainAABB(), 0.0f)
+                            )
+                            {
+                                enemy->wasGrounded = true;
+                            }
+                        }
+                    }
                 }
             }
         }
+
+        enemy->UpdateFlags();
     }
 
     if(!player.isTouchingGravityChanger && player.wasTouchingGravityChanger)
@@ -1185,7 +1236,7 @@ void Level::HighFrequencyDiscreteUpdate()
 
     if(!player.isTouchingSpike && player.wasTouchingSpike)
     {
-        ResetLevel(&isGravityUp);
+        ResetLevel();
     }
 
     //booleans update
@@ -1213,17 +1264,13 @@ void Level::CCD_Update()
 
             if(result.collision)
             {
-                bullet->mainColor = Color{255,0,0,255};
-            }
-            else
-            {
-                bullet->mainColor = bullet->ogMainColor;
+                bullet->didHit =  true;
             }
         }
     }
 }
 
-void Level::ResetLevel(bool* isGravityUp)
+void Level::ResetLevel()
 {
     if(gravity < 0) gravity *= -1;
 
@@ -1259,8 +1306,8 @@ void Level::DrawLevel()
     BeginMode2D(camera);
 
     TileRange playerTileRange = CalculateTileRange(
-        player.phys.transform.position.x,
-        player.phys.transform.position.y,
+        player.gameObj.transform.position.x,
+        player.gameObj.transform.position.y,
         renderTileCheckRange
     );
 
@@ -1332,7 +1379,7 @@ void Level::DrawLevel()
 
             if(frameToDraw >= 0 && frameToDraw < (int)platformRenderData->animationFrames.size())
             {
-                DrawSprite(platform->phys, platformRenderData, frameToDraw);
+                DrawSprite(platform->gameObj, platformRenderData, frameToDraw);
             }
         }
         else
@@ -1345,12 +1392,12 @@ void Level::DrawLevel()
             else if(platform->type == PlatformType::DISAPPEARING) platformColor = DISAPPEARING_PLATFORM;
 
             if(!IsPlatformSpike(platform->type))
-                DrawRectangleRec(platform->phys.GetMainAABB(), platformColor);
+                DrawRectangleRec(platform->gameObj.GetMainAABB(), platformColor);
             else
             {
-                for(int h = 1; h < platform->phys.hitboxes.size(); h++)
+                for(int h = 1; h < platform->gameObj.hitboxes.size(); h++)
                 {
-                    DrawRectangleRec(platform->phys.GetSubAABB(h), SPIKE);
+                    DrawRectangleRec(platform->gameObj.GetSubAABB(h), SPIKE);
                 }
             }
         }
@@ -1360,11 +1407,11 @@ void Level::DrawLevel()
     {
         Enemy* enemy = player.enemyCache[i];
 
-        DrawRectangleRec(enemy->gameObj.GetMainAABB(), ENEMY_DUMMY);
+        DrawRectangleRec(enemy->gameObj.GetMainAABB(), enemy->testColor);
     }
 
     DrawSprite(
-        player.phys.transform,
+        player.gameObj.transform,
         &player.characterRenderData,
         player.entityData,
         player.currentFrame
@@ -1392,13 +1439,13 @@ void Level::DrawLevel()
     }
 
     DrawSprite(
-        player.phys.transform,
+        player.gameObj.transform,
         &player.weaponRenderData,
         player.entityData,
         player.currentFrame
     );
 
-    //DebugDrawing();
+    DebugDrawing();
 
     EndMode2D();
 
@@ -1408,8 +1455,8 @@ void Level::DrawLevel()
 void Level::DebugDrawing()
 {
     TileRange playerTileRange = CalculateTileRange(
-        player.phys.transform.position.x,
-        player.phys.transform.position.y,
+        player.gameObj.transform.position.x,
+        player.gameObj.transform.position.y,
         renderTileCheckRange
     );
 
@@ -1418,16 +1465,16 @@ void Level::DebugDrawing()
         Platform* platform = player.platformCache_rendering[i];
 
         DrawLine(
-            player.phys.transform.position.x, player.phys.transform.position.y, 
-            platform->phys.transform.position.x, platform->phys.transform.position.y, 
+            player.gameObj.transform.position.x, player.gameObj.transform.position.y, 
+            platform->gameObj.transform.position.x, platform->gameObj.transform.position.y, 
             RED
         );
 
-        DrawAABB(platform->phys.GetMainAABB(), RED);
+        DrawAABB(platform->gameObj.GetMainAABB(), RED);
 
-        for(int h = 1; h < platform->phys.hitboxes.size(); h++)
+        for(int h = 1; h < platform->gameObj.hitboxes.size(); h++)
         {
-            DrawAABB(platform->phys.GetSubAABB(h), MAGENTA);
+            DrawAABB(platform->gameObj.GetSubAABB(h), MAGENTA);
         }
     }
 
@@ -1481,6 +1528,8 @@ void Level::DebugDrawing()
         {
             DrawAABB(enemy->gameObj.GetSubAABB(h), MAGENTA);
         }
+
+        DrawAABB(enemy->GetJumpDetector(), GOLD);
     }
     
     for(int i = 0; i < player.bulletpool->activeBullets.size(); i++)
@@ -1490,6 +1539,8 @@ void Level::DebugDrawing()
         if(!b) continue;
 
         DrawCircleLines(b->posititon.x, b->posititon.y, b->radius, RED);
+
+        DrawLine(b->posititon.x, b->posititon.y, b->posititon.x + b->velocity.x, b->posititon.y + b->velocity.y, BLUE);
     }
 
 
@@ -1506,7 +1557,7 @@ void Level::DebugDrawing()
         DrawLine(0, j, COLS * GRID_SIZE, j, gridColor);
     }
 
-    DrawAABB(player.phys.GetMainAABB(), ORANGE);
+    DrawAABB(player.gameObj.GetMainAABB(), ORANGE);
 
     DrawAABB(player.GetJumpDetector(), GREEN);
 }
@@ -1515,12 +1566,12 @@ void Level::DebugTextDrawing()
 {
     DrawText(TextFormat("Iterations: %i", iterations), 10, 60, 20, SKYBLUE);
 
-    DrawText(TextFormat("Player X speed: %.4f", player.phys.body.velocity.x), 10, 100, 20, GRAY);
-    DrawText(TextFormat("Player Y speed: %.4f", player.phys.body.velocity.y), 10, 120, 20, GRAY);
+    DrawText(TextFormat("Player X speed: %.4f", player.gameObj.body.velocity.x), 10, 100, 20, GRAY);
+    DrawText(TextFormat("Player Y speed: %.4f", player.gameObj.body.velocity.y), 10, 120, 20, GRAY);
 
-    DrawText(TextFormat("Player alt X speed: %.4f", player.phys.body.altVelocity.x), 10, 160, 20, GRAY);
-    DrawText(TextFormat("Player alt Y speed: %.4f", player.phys.body.altVelocity.y), 10, 180, 20, GRAY);
+    DrawText(TextFormat("Player alt X speed: %.4f", player.gameObj.body.altVelocity.x), 10, 160, 20, GRAY);
+    DrawText(TextFormat("Player alt Y speed: %.4f", player.gameObj.body.altVelocity.y), 10, 180, 20, GRAY);
 
-    DrawText(TextFormat("Player final X speed: %.4f", player.phys.body.GetFinalVelocity().x), 10, 220, 20, GRAY);
-    DrawText(TextFormat("Player final Y speed: %.4f", player.phys.body.GetFinalVelocity().y), 10, 240, 20, GRAY);
+    DrawText(TextFormat("Player final X speed: %.4f", player.gameObj.body.GetFinalVelocity().x), 10, 220, 20, GRAY);
+    DrawText(TextFormat("Player final Y speed: %.4f", player.gameObj.body.GetFinalVelocity().y), 10, 240, 20, GRAY);
 }

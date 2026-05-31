@@ -87,6 +87,8 @@ enum class TileType
 
     ENEMY_DUMMY,
 
+    ENEMY_YUUKA,
+
     ENEMY_END,
 
     COUNT
@@ -177,7 +179,10 @@ const std::vector<TileTypeList> TILE_TYPE_LIST = {
 
     {TileType::DECO, DECO, "DECO"},
 
+    //enemies / bosses
     {TileType::ENEMY_DUMMY, ENEMY_DUMMY, "ENEMY_DUMMY"},
+
+    {TileType::ENEMY_YUUKA, ENEMY_YUUKA, "ENEMY_YUUKA"},
 };
 
 enum class NeighborDirection
