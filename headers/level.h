@@ -69,6 +69,8 @@ private:
        const Vector2& target, const Vector2& offset
     )
     {
+        //change the target relative to the speed of the player
+        //so the camera points a bit ahead of where the player is moving
         Vector2 desired = Vector2Add(target, offset);
 
         camera.target = Vector2Lerp(camera.target, desired, 0.1f);

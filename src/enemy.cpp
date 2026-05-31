@@ -1,11 +1,9 @@
 #include "enemy.h"
 #include <iostream>
 
-void Enemy::YuukaBehaivour(float dt, int iterations, const Vector2& playerPos)
+void Enemy::YuukaBehaivour(float dt, const Vector2& playerPos)
 {
-    float moveForce = 800 * gameObj.body.damping;
-
-    float subDt = dt / iterations;
+    float moveSpeed = 200;
 
     if(stateTimer <= 0.0f)
     {
@@ -22,9 +20,13 @@ void Enemy::YuukaBehaivour(float dt, int iterations, const Vector2& playerPos)
     {
     case 0:
     {
+        maxTime = 0.5f;
+
         float distToPlayerSqr = Vector2LengthSqr(playerPos - gameObj.transform.position);
 
-        float minDist = 1.5f * GRID_SIZE * 1.5f * GRID_SIZE;
+        const float NUM_OF_TILES = 2.0f;
+
+        float minDist = NUM_OF_TILES * GRID_SIZE * NUM_OF_TILES * GRID_SIZE;
 
         if(isJumping)
         {
@@ -37,29 +39,50 @@ void Enemy::YuukaBehaivour(float dt, int iterations, const Vector2& playerPos)
 
         if(!isGrounded && std::abs(gameObj.body.velocity.y <= 0.1f)) isJumping = false;
 
-        if(!isJumping)
+        if(gameObj.body.velocity.y <= 0)
         {
             jumpTime = maxJumpTime;
 
-            if(gameObj.transform.position.x > playerPos.x)
+            float xPosDifference = playerPos.x - gameObj.transform.position.x;
+
+            float offset = 7.0f;
+
+            if(std::abs(xPosDifference) > offset)
             {
-                gameObj.body.force.x -= moveForce;
+                if(xPosDifference > 0)
+                {
+                    gameObj.body.velocity.x = moveSpeed;
+                }
+                else
+                {
+                    gameObj.body.velocity.x = -moveSpeed;
+                }
             }
             else
             {
-                gameObj.body.force.x += moveForce;
+                gameObj.body.velocity.x = 0;
             }
 
             if(distToPlayerSqr <= minDist && distToPlayerSqr >= -minDist)
             {
-                if(isGrounded)isJumping = true;
+                if(isGrounded && timer <= 0.0f) isJumping = true;
             }
+        }
+
+        if(!isGrounded)
+        {
+            timer = maxTime;
+
+            jumpTime -= dt;
+
+            if(jumpTime <= 0.0f) jumpTime = 0.0f;
         }
         else
         {
-            jumpTime -= subDt;
-
-            if(jumpTime <= 0.0f) jumpTime = 0.0f;
+            if(timer > 0.0f)
+            {
+                timer -= dt;
+            }
         }
        
         if(isJumping)
@@ -68,14 +91,14 @@ void Enemy::YuukaBehaivour(float dt, int iterations, const Vector2& playerPos)
 
             isGrounded = false;
 
-            gameObj.body.velocity.y += jumpVel * subDt;
+            gameObj.body.velocity.y += jumpVel * dt;
 
             if(jumpTime <= 0.0f) isJumping = false;
         }
 
-        if(!isJumping && !isGrounded)
+        if(!isJumping && !isGrounded && gameObj.body.velocity.y > 0)
         {
-            gameObj.body.force.y += moveForce * 10;
+            gameObj.body.force.y += moveSpeed * 10;
         }
 
         //WIP
@@ -90,12 +113,12 @@ void Enemy::YuukaBehaivour(float dt, int iterations, const Vector2& playerPos)
     }
 }
 
-void Enemy::UpdateAI(float dt, int iterations, const Vector2 &playerPos)
+void Enemy::UpdateAI(float dt, const Vector2 &playerPos)
 {
     switch (type)
     {
 
-    case EnemyType::YUUKA: YuukaBehaivour(dt, iterations, playerPos); break;
+    case EnemyType::YUUKA: YuukaBehaivour(dt, playerPos); break;
 
     default: break;
     }

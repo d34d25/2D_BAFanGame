@@ -747,7 +747,7 @@ void Level::MediumFrequencyDiscreteUpdate()
             player.enemyCache_physics.push_back(enemy);
         }
 
-        enemy->UpdateAI(dt, 1, player.gameObj.transform.position);
+        enemy->UpdateAI(dt, player.gameObj.transform.position);
     }
 }
 

@@ -13,13 +13,16 @@ class Enemy
 
 private:
 
-    void YuukaBehaivour(float dt, int iterations, const Vector2& playerPos);
+    void YuukaBehaivour(float dt, const Vector2& playerPos);
 
     int currentAttack = 0;
 
     float stateTimer = 0.0f;
 
     int counter = 0; //for various enemies or bosses that need to count something
+    //generic timer for being used inside the enemies patterns
+    float timer = 0.0f;
+    float maxTime = 0.2f;
 
 public:
 
@@ -54,7 +57,7 @@ public:
 
     ~Enemy() = default;
 
-    void UpdateAI(float dt, int iterations, const Vector2& playerPos);
+    void UpdateAI(float dt, const Vector2& playerPos);
 
     void Update(float dt, int iterations);
 
