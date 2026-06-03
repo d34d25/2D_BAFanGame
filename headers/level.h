@@ -16,8 +16,6 @@ const float MAX_DISTANCE_PLATFORM_PLAYER_SQR_5X = MAX_DISTANCE_PLATFORM_PLAYER_S
 
 const float REC_TO_CIRCLE_RADIUS_MULTIPLIER = 1.5f; //this ensures that the circle doesn't cut the corners of the AABB
 
-const float GRAVITY = 3500.0f;
-
 class Level
 {
 private:

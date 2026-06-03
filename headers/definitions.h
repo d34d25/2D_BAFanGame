@@ -50,6 +50,8 @@ static constexpr int TILE_SCALE = 3;
 
 static constexpr int ROTATING_SPIKE_MAX_HITBOX = 6;
 
+const float GRAVITY = 3500.0f;
+
 //these colors can be re used for futures tiles / platforms
 
 //static constexpr Color ONE_WAY_RIGHT = Color{0, 200,190,255};

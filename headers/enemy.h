@@ -47,8 +47,6 @@ public:
 
     //jump
     bool isJumping = false;
-    float jumpTime = 0.0f;
-    float maxJumpTime = 0.3f;
 
     //
     bool isActive = false;

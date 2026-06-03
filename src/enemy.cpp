@@ -1,7 +1,7 @@
 #include "enemy.h"
 #include <iostream>
 
-void Enemy::YuukaBehaivour(float dt, const Vector2& playerPos)
+void Enemy::YuukaBehaivour(float dt, const Vector2 &playerPos)
 {
     float moveSpeed = 200;
 
@@ -24,27 +24,16 @@ void Enemy::YuukaBehaivour(float dt, const Vector2& playerPos)
 
         float distToPlayerSqr = Vector2LengthSqr(playerPos - gameObj.transform.position);
 
-        const float NUM_OF_TILES = 2.0f;
+        const float NUM_OF_TILES = 6.0f;
 
         float minDist = NUM_OF_TILES * GRID_SIZE * NUM_OF_TILES * GRID_SIZE;
 
-        if(isJumping)
-        {
-            gameObj.body.hasGravity = false;
-        }
-        else
-        {
-            gameObj.body.hasGravity = true;
-        }
+        float xPosDifference = playerPos.x - gameObj.transform.position.x;
 
         if(!isGrounded && std::abs(gameObj.body.velocity.y <= 0.1f)) isJumping = false;
 
-        if(gameObj.body.velocity.y <= 0)
+        if(isGrounded)
         {
-            jumpTime = maxJumpTime;
-
-            float xPosDifference = playerPos.x - gameObj.transform.position.x;
-
             float offset = 7.0f;
 
             if(std::abs(xPosDifference) > offset)
@@ -63,19 +52,15 @@ void Enemy::YuukaBehaivour(float dt, const Vector2& playerPos)
                 gameObj.body.velocity.x = 0;
             }
 
-            if(distToPlayerSqr <= minDist && distToPlayerSqr >= -minDist)
+            if(distToPlayerSqr <= minDist)
             {
-                if(isGrounded && timer <= 0.0f) isJumping = true;
+                if(timer <= 0.0f) isJumping = true;
             }
         }
 
         if(!isGrounded)
         {
             timer = maxTime;
-
-            jumpTime -= dt;
-
-            if(jumpTime <= 0.0f) jumpTime = 0.0f;
         }
         else
         {
@@ -87,18 +72,22 @@ void Enemy::YuukaBehaivour(float dt, const Vector2& playerPos)
        
         if(isJumping)
         {
-            float jumpVel = -10000 * 70;
+            float jumpVel = -5000;
 
             isGrounded = false;
 
-            gameObj.body.velocity.y += jumpVel * dt;
+            gameObj.body.velocity.y = jumpVel;
 
-            if(jumpTime <= 0.0f) isJumping = false;
-        }
+            float horizontalBoostFactor = std::abs(xPosDifference) * 0.02f;
 
-        if(!isJumping && !isGrounded && gameObj.body.velocity.y > 0)
-        {
-            gameObj.body.force.y += moveSpeed * 10;
+            if(xPosDifference > 0)
+            {
+                gameObj.body.velocity.x = moveSpeed * horizontalBoostFactor;
+            }
+            else
+            {
+                gameObj.body.velocity.x = -moveSpeed * horizontalBoostFactor;
+            }
         }
 
         //WIP
