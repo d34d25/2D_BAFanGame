@@ -4,6 +4,9 @@
 #include "platform.h"
 #include <vector>
 
+const int TILES_PER_ROOM_WIDHT = 20;
+const int TILES_PER_ROOM_HEIGHT = 20;
+
 struct IntPair
 {
     int x = 0;
@@ -30,6 +33,16 @@ private:
     int currentVariant = 0;
 
     int currentAngle = 0;
+
+    bool roomMode = false;
+
+    std::vector<Room> rooms = {};
+
+    bool drawingRoom = false;
+
+    Vector2 roomStartCell = {0,0};
+
+    float roomGrid = GRID_SIZE * 20.0f;
 
     Direction currentDirection = Direction::UP;
 
@@ -81,15 +94,52 @@ private:
         };
     }
 
+    inline Vector2 GetMouseCell(IntPair mousePosition)
+    {
+        return {
+            (float)mousePosition.x * GRID_SIZE,
+            (float)mousePosition.y * GRID_SIZE
+        };
+    }
+
+    inline void ResetRooms()
+    {
+        rooms.clear();
+
+        float roomWidth = (float)(TILES_PER_ROOM_WIDHT * GRID_SIZE);
+        float roomHeight = (float)(TILES_PER_ROOM_HEIGHT * GRID_SIZE);
+
+        int worldScreenCols = COLS / TILES_PER_ROOM_WIDHT;
+        int worldScreenRows = ROWS / TILES_PER_ROOM_HEIGHT;
+
+        for(int i = 0; i < worldScreenRows; i++)
+        {
+            for(int j = 0; j < worldScreenCols; j++)
+            {
+                Room roomUnit;
+                roomUnit.aabb = {
+                    j * roomWidth,
+                    i * roomHeight,
+                    roomWidth,
+                    roomHeight
+                };
+
+                rooms.push_back(roomUnit);
+            }
+        }
+    }
+
     void ExportLevel();
     
     const char* levelPath;
+
+    const char* roomPath;
 
     void DrawRotatingSpikes(int currentType, Vector2 position, float size, EntityData data, Color color);
 
 public:
 
-    LevelEditor(int screenWidth, int screenHeight, const char* levelPath);
+    LevelEditor(int screenWidth, int screenHeight, const char* levelPath, const char* roomPath);
 
     ~LevelEditor();
 

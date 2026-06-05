@@ -3,9 +3,8 @@
 #include "raylib.h"
 #include "entity.h"
 
-inline void DrawAABB(Rectangle aabb, Color color)
+inline void DrawAABB(Rectangle aabb, Color color, float thickness = 1.0f)
 {
-    float thickness = 1.0f;
     //up-left to up-right
     DrawLineEx({aabb.x, aabb.y}, {aabb.x + aabb.width, aabb.y}, thickness, color);
     
@@ -17,6 +16,21 @@ inline void DrawAABB(Rectangle aabb, Color color)
 
     //down-left to down-right
     DrawLineEx({aabb.x, aabb.y + aabb.height}, {aabb.x + aabb.width, aabb.y + aabb.height}, thickness, color);
+}
+
+inline void DrawAABB(float x, float y, float width, float height, Color color, float thickness = 1.0f)
+{
+    //up-left to up-right
+    DrawLineEx({x, y}, {x + width, y}, thickness, color);
+    
+    //up-left to down-left
+    DrawLineEx({x, y}, {x, y + height}, thickness, color);
+
+    //up-right to down-right
+    DrawLineEx({x + width, y}, {x + width, y + height}, thickness, color);
+
+    //down-left to down-right
+    DrawLineEx({x, y + height}, {x + width, y + height}, thickness, color);
 }
 
 inline std::vector<Rectangle> CropImage(const Texture2D& sourceTexture, Vector2 size, int gap = 0)

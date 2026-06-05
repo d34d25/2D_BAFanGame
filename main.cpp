@@ -22,12 +22,13 @@ int main()
 
     Level testLevel = Level();
 
-    LevelEditor editor = LevelEditor(SCREEN_WIDTH,SCREEN_HEIGHT, "levels/testLevel");
+    LevelEditor editor = LevelEditor(SCREEN_WIDTH,SCREEN_HEIGHT, "levels/testLevel", "levels/testRooms");
 
     int iterations = 10;
 
     testLevel.InitLevel(
         "levels/testLevel",
+        "levels/testRooms",
         fixedDt,
         iterations
     );
@@ -41,7 +42,7 @@ int main()
     testLevel.screenWidth = SCREEN_WIDTH;
     testLevel.screenHeight = SCREEN_HEIGHT;
 
-    bool editorMode = false;
+    bool editorMode = true;
 
     const int MAX_LAST_FRAMES = 120;
 

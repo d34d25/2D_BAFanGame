@@ -13,7 +13,19 @@ void LevelEditor::ExportLevel()
     }
     else 
     {
-        std::cout<<"LEVEL EXPORT FAILED"<<std::endl;
+        std::cout<<"LEVEL EXPORT FAILED"<<"\n";
+    }
+
+    int roomCount = rooms.size();
+    int roomDataSize = sizeof(Room) * roomCount;
+
+    if(SaveFileData("testRooms", rooms.data(), roomDataSize))
+    {
+        std::cout<<"ROOMS EXPORT SUCCEED"<<"\n";
+    }
+    else
+    {
+        std::cout<<"ROOMS EXPORT FAILED"<<"\n";
     }
 }
 
@@ -82,9 +94,11 @@ void LevelEditor::DrawRotatingSpikes(int currentType, Vector2 position, float si
     }
 }
 
-LevelEditor::LevelEditor(int screenWidth, int screenHeight, const char* levelPath)
+LevelEditor::LevelEditor(int screenWidth, int screenHeight, const char* levelPath, const char* roomPath)
 {
     this->levelPath = levelPath;
+
+    this->roomPath = roomPath;
 
     camera.zoom = 1.0f;
 
@@ -101,6 +115,8 @@ LevelEditor::LevelEditor(int screenWidth, int screenHeight, const char* levelPat
 
     camera.target = {(float)halfWorldWidth, (float)halfWorldHeight};
 
+    ResetRooms();
+    
     LoadAssets();
 
     currentTexture = 0;
@@ -131,6 +147,8 @@ void LevelEditor::Update()
 
     if(!activeRenderDataList) currentVariant = 0;
 
+    float mouseWheel = GetMouseWheelMove();
+
     if(IsKeyPressed(KEY_TAB))
     {
         currentLayer++;
@@ -138,38 +156,21 @@ void LevelEditor::Update()
         if(currentLayer >= LAYERS) currentLayer = 0;
     }
 
-    if(IsNumKeyPressed())
+    if(IsKeyDown(KEY_LEFT_SHIFT) && IsKeyPressed(KEY_C))
     {
-        if(IsKeyPressed(KEY_ZERO)) currentTileType = (int)TileType::VOID;
+        for(int l = 0; l < LAYERS; l++)
+        {
+            for(int i = 0; i < ROWS; i++)
+            {
+                for(int j = 0; j < COLS; j++)
+                {
+                    tempLevel[l][i][j] = {};
+                }
+            }
+        }
 
-        if(IsKeyPressed(KEY_ONE)) currentTileType = (int)TileType::TILE_START + 1;
-
-        if(IsKeyPressed(KEY_TWO)) currentTileType = (int)TileType::SPIKE_START + 1;
-
-        if(IsKeyPressed(KEY_THREE)) currentTileType = (int)TileType::PLATFORM_START + 1;
-
-        if(IsKeyPressed(KEY_FOUR)) currentTileType = (int)TileType::MISC_START + 1;
-
-        if(IsKeyPressed(KEY_FIVE)) currentTileType = (int)TileType::DECO;
-
-        if(IsKeyPressed(KEY_SIX)) currentTileType = (int)TileType::ENEMY_START + 1;
-
-        activeRenderData = GetTileActiveRenderData((TileType)currentTileType, 0);
-
-        activeRenderDataList = GetTileActiveRenderDataList((TileType)currentTileType);
-
-        currentVariant = 0;
-
-        currentTexture = 0;
-
-        currentAngle = 0;
-
-        currentData = {false, false};
-
-        currentDirection = Direction::UP;
+        ResetRooms();
     }
-
-    float mouseWheel = GetMouseWheelMove();
 
     if(IsKeyDown(KEY_LEFT_ALT) && mouseWheel != 0)
     {
@@ -181,110 +182,34 @@ void LevelEditor::Update()
         camera.zoom = Clamp(camera.zoom, 0.1f,10.0f);
     }
 
-    if(IsDirectionChangeKeyPressed())
+    if(IsKeyPressed(KEY_R)) roomMode = !roomMode;
+
+    if(!roomMode)
     {
-        if(IsKeyPressed(KEY_E))
+        if(IsNumKeyPressed())
         {
-            currentAngle += 90;
+            if(IsKeyPressed(KEY_ZERO)) currentTileType = (int)TileType::VOID;
 
-            if(currentAngle >= 360) currentAngle = 0;
-        }
+            if(IsKeyPressed(KEY_ONE)) currentTileType = (int)TileType::TILE_START + 1;
 
-        if(IsKeyPressed(KEY_Q))
-        {
-            currentAngle -= 90;
+            if(IsKeyPressed(KEY_TWO)) currentTileType = (int)TileType::SPIKE_START + 1;
 
-            if(currentAngle < 0) currentAngle = 270;
-        }
+            if(IsKeyPressed(KEY_THREE)) currentTileType = (int)TileType::PLATFORM_START + 1;
 
-        if(IsKeyPressed(KEY_H)) currentData.flipX = !currentData.flipX;
+            if(IsKeyPressed(KEY_FOUR)) currentTileType = (int)TileType::MISC_START + 1;
 
-        if(IsKeyPressed(KEY_V)) currentData.flipY = !currentData.flipY;
+            if(IsKeyPressed(KEY_FIVE)) currentTileType = (int)TileType::DECO;
 
-        currentDirection = CalculateDirection(currentAngle, currentData);
-    }
+            if(IsKeyPressed(KEY_SIX)) currentTileType = (int)TileType::ENEMY_START + 1;
 
-    //variant cycling
-    if(mouseWheel != 0 && IsKeyDown(KEY_SPACE))
-    {
-        std::vector<SpriteRenderData>* activeRenderDataList = GetTileActiveRenderDataList((TileType)currentTileType);
+            activeRenderData = GetTileActiveRenderData((TileType)currentTileType, 0);
 
-        if(activeRenderDataList)
-        {
-            int direction = (mouseWheel > 0) ? 1 : -1;
+            activeRenderDataList = GetTileActiveRenderDataList((TileType)currentTileType);
 
-            currentVariant += direction;
+            currentVariant = 0;
 
-            if(currentVariant < 0) currentVariant = 0;
-            else if(currentVariant >= activeRenderDataList->size()) currentVariant = activeRenderDataList->size() - 1;
-        }
-    }
-
-    //texture cycling
-    if(mouseWheel != 0 && IsKeyDown(KEY_LEFT_SHIFT))
-    {
-        if(activeRenderData && !activeRenderData->animationFrames.empty())
-        {
-            int direction = (mouseWheel > 0) ? 1 : -1;
-
-            currentTexture += activeRenderData->spacing * direction;
-
-            int frameCount = (int)activeRenderData->animationFrames.size();
-
-            if(currentTexture < 0)
-                currentTexture = frameCount - activeRenderData->spacing;
-            else if(currentTexture >= frameCount)
-                currentTexture = 0;
-        }
-        else
-        {
             currentTexture = 0;
-        }
-    }
 
-    //tile type cycling
-    if(mouseWheel != 0 && !IsKeyDown(KEY_LEFT_ALT) && !IsKeyDown(KEY_LEFT_SHIFT) && !IsKeyDown(KEY_SPACE))
-    {
-        int direction = (mouseWheel > 0) ? 1 : -1;
-
-        int start = (int)TileType::VOID;
-
-        int end = (int)TileType::COUNT;
-
-        if(currentTileType >= (int)TileType::TILE_START && currentTileType <= (int)TileType::TILE_END)
-        {
-            start = (int)TileType::TILE_START;
-            end = (int)TileType::TILE_END;
-        }
-        else if(currentTileType >= (int)TileType::SPIKE_START && currentTileType <= (int)TileType::SPIKE_END)
-        {
-            start = (int)TileType::SPIKE_START;
-            end = (int)TileType::SPIKE_END;
-        }
-        else if(currentTileType >= (int)TileType::PLATFORM_START && currentTileType <= (int)TileType::PLATFORM_END)
-        {
-            start = (int)TileType::PLATFORM_START;
-            end = (int)TileType::PLATFORM_END;
-        }
-        else if(currentTileType >= (int)TileType::MISC_START && currentTileType <= (int)TileType::MISC_END)
-        {
-            start = (int)TileType::MISC_START;
-            end = (int)TileType::MISC_END;
-        }
-        else if(currentTileType >=(int)TileType::ENEMY_START && currentTileType <= (int)TileType::ENEMY_END)
-        {
-            start = (int)TileType::ENEMY_START;
-            end = (int)TileType::ENEMY_END;
-        }
-        else
-        {
-            direction = 0;
-        }
-
-        currentTileType += direction;
-
-        if(direction != 0)
-        {
             currentAngle = 0;
 
             currentData = {false, false};
@@ -292,105 +217,326 @@ void LevelEditor::Update()
             currentDirection = Direction::UP;
         }
 
-        while(IsTypeInvalid((TileType)currentTileType))
+        if(IsDirectionChangeKeyPressed())
         {
-            if(currentTileType >= end) currentTileType = start + 1;
-            else if(currentTileType <= start) currentTileType = end - 1;
-            else currentTileType += direction;
-        }
-
-        activeRenderData = GetTileActiveRenderData((TileType)currentTileType, currentVariant);
-
-        if(!activeRenderData || activeRenderData->animationFrames.empty())
-        {
-            currentTexture = 0;
-            currentVariant = 0;
-        }
-        else currentTexture = 0;
-    }
-
-    Tile& targetTile = tempLevel[currentLayer][mouseMatrixPosition.x][mouseMatrixPosition.y];
-
-    if(IsMouseButtonDown(MOUSE_BUTTON_LEFT))
-    {
-        if(currentTileType != (int)TileType::VOID
-            && currentTileType != (int)targetTile.type
-            && !IsTypeInvalid((TileType)currentTileType)
-        )
-        {
-            if((TileType)currentTileType == TileType::PLAYER_SPAWN)
+            if(IsKeyPressed(KEY_E))
             {
-                for(int l = 0; l < LAYERS; l++)
+                currentAngle += 90;
+
+                if(currentAngle >= 360) currentAngle = 0;
+            }
+
+            if(IsKeyPressed(KEY_Q))
+            {
+                currentAngle -= 90;
+
+                if(currentAngle < 0) currentAngle = 270;
+            }
+
+            if(IsKeyPressed(KEY_H)) currentData.flipX = !currentData.flipX;
+
+            if(IsKeyPressed(KEY_V)) currentData.flipY = !currentData.flipY;
+
+            currentDirection = CalculateDirection(currentAngle, currentData);
+        }
+
+        //variant cycling
+        if(mouseWheel != 0 && IsKeyDown(KEY_SPACE))
+        {
+            std::vector<SpriteRenderData>* activeRenderDataList = GetTileActiveRenderDataList((TileType)currentTileType);
+
+            if(activeRenderDataList)
+            {
+                int direction = (mouseWheel > 0) ? 1 : -1;
+
+                currentVariant += direction;
+
+                if(currentVariant < 0) currentVariant = 0;
+                else if(currentVariant >= activeRenderDataList->size()) currentVariant = activeRenderDataList->size() - 1;
+            }
+        }
+
+        //texture cycling
+        if(mouseWheel != 0 && IsKeyDown(KEY_LEFT_SHIFT))
+        {
+            if(activeRenderData && !activeRenderData->animationFrames.empty())
+            {
+                int direction = (mouseWheel > 0) ? 1 : -1;
+
+                currentTexture += activeRenderData->spacing * direction;
+
+                int frameCount = (int)activeRenderData->animationFrames.size();
+
+                if(currentTexture < 0)
+                    currentTexture = frameCount - activeRenderData->spacing;
+                else if(currentTexture >= frameCount)
+                    currentTexture = 0;
+            }
+            else
+            {
+                currentTexture = 0;
+            }
+        }
+
+        //tile type cycling
+        if(mouseWheel != 0 && !IsKeyDown(KEY_LEFT_ALT) && !IsKeyDown(KEY_LEFT_SHIFT) && !IsKeyDown(KEY_SPACE))
+        {
+            int direction = (mouseWheel > 0) ? 1 : -1;
+
+            int start = (int)TileType::VOID;
+
+            int end = (int)TileType::COUNT;
+
+            if(currentTileType >= (int)TileType::TILE_START && currentTileType <= (int)TileType::TILE_END)
+            {
+                start = (int)TileType::TILE_START;
+                end = (int)TileType::TILE_END;
+            }
+            else if(currentTileType >= (int)TileType::SPIKE_START && currentTileType <= (int)TileType::SPIKE_END)
+            {
+                start = (int)TileType::SPIKE_START;
+                end = (int)TileType::SPIKE_END;
+            }
+            else if(currentTileType >= (int)TileType::PLATFORM_START && currentTileType <= (int)TileType::PLATFORM_END)
+            {
+                start = (int)TileType::PLATFORM_START;
+                end = (int)TileType::PLATFORM_END;
+            }
+            else if(currentTileType >= (int)TileType::MISC_START && currentTileType <= (int)TileType::MISC_END)
+            {
+                start = (int)TileType::MISC_START;
+                end = (int)TileType::MISC_END;
+            }
+            else if(currentTileType >=(int)TileType::ENEMY_START && currentTileType <= (int)TileType::ENEMY_END)
+            {
+                start = (int)TileType::ENEMY_START;
+                end = (int)TileType::ENEMY_END;
+            }
+            else
+            {
+                direction = 0;
+            }
+
+            currentTileType += direction;
+
+            if(direction != 0)
+            {
+                currentAngle = 0;
+
+                currentData = {false, false};
+
+                currentDirection = Direction::UP;
+            }
+
+            while(IsTypeInvalid((TileType)currentTileType))
+            {
+                if(currentTileType >= end) currentTileType = start + 1;
+                else if(currentTileType <= start) currentTileType = end - 1;
+                else currentTileType += direction;
+            }
+
+            activeRenderData = GetTileActiveRenderData((TileType)currentTileType, currentVariant);
+
+            if(!activeRenderData || activeRenderData->animationFrames.empty())
+            {
+                currentTexture = 0;
+                currentVariant = 0;
+            }
+            else currentTexture = 0;
+        }
+
+        Tile& targetTile = tempLevel[currentLayer][mouseMatrixPosition.x][mouseMatrixPosition.y];
+
+        if(IsMouseButtonDown(MOUSE_BUTTON_LEFT))
+        {
+            if(currentTileType != (int)TileType::VOID
+                && currentTileType != (int)targetTile.type
+                && !IsTypeInvalid((TileType)currentTileType)
+            )
+            {
+                if((TileType)currentTileType == TileType::PLAYER_SPAWN)
                 {
-                    for(int i = 0; i < ROWS; i++)
+                    for(int l = 0; l < LAYERS; l++)
                     {
-                        for(int j = 0; j < COLS; j++)
+                        for(int i = 0; i < ROWS; i++)
                         {
-                            if(tempLevel[l][i][j].type == TileType::PLAYER_SPAWN)
+                            for(int j = 0; j < COLS; j++)
                             {
-                                tempLevel[l][i][j] = {};
+                                if(tempLevel[l][i][j].type == TileType::PLAYER_SPAWN)
+                                {
+                                    tempLevel[l][i][j] = {};
+                                }
                             }
                         }
-                    }
-                }   
+                    }   
+                }
+
+                targetTile.type = (TileType)currentTileType;
+                targetTile.textureIndex = currentTexture;
+                targetTile.variantIndex = currentVariant;
+
+                targetTile.gameObj.transform.position = GetMouseGridPosition(mouseMatrixPosition);
+
+                targetTile.gameObj.transform.scale = TILE_SCALE;
+
+                targetTile.gameObj.transform.angle = currentAngle;
+
+                targetTile.gameObj.data = currentData;
+
+                targetTile.gameObj.direction = currentDirection;
             }
 
-            targetTile.type = (TileType)currentTileType;
-            targetTile.textureIndex = currentTexture;
-            targetTile.variantIndex = currentVariant;
-
-            targetTile.gameObj.transform.position = GetMouseGridPosition(mouseMatrixPosition);
-
-            targetTile.gameObj.transform.scale = TILE_SCALE;
-
-            targetTile.gameObj.transform.angle = currentAngle;
-
-            targetTile.gameObj.data = currentData;
-
-            targetTile.gameObj.direction = currentDirection;
         }
-
-    }
-    else if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT))
-    {
-        if(currentTileType != (int)TileType::VOID)
+        else if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT))
         {
-            targetTile = {};
-        }
-    }
-
-    if(IsKeyDown(KEY_LEFT_SHIFT) && IsKeyPressed(KEY_C))
-    {
-        for(int i = 0; i < ROWS; i++)
-        {
-            for(int j = 0; j < COLS; j++)
+            if(currentTileType != (int)TileType::VOID)
             {
-                tempLevel[currentLayer][i][j] = {};
+                targetTile = {};
             }
         }
-    }
 
-    if(IsKeyDown(KEY_LEFT_SHIFT) && IsKeyPressed(KEY_C) && IsKeyDown(KEY_LEFT_CONTROL))
-    {
-        for(int l = 0; l < LAYERS; i++)
+        if(IsKeyDown(KEY_LEFT_SHIFT) && IsKeyPressed(KEY_C) && IsKeyDown(KEY_LEFT_CONTROL))
         {
-            for(int i = 0; i < ROWS; i++)
+            for(int l = 0; l < LAYERS; i++)
             {
-                for(int j = 0; j < COLS; j++)
+                for(int i = 0; i < ROWS; i++)
                 {
-                    tempLevel[l][i][j] = {};
+                    for(int j = 0; j < COLS; j++)
+                    {
+                        tempLevel[l][i][j] = {};
+                    }
                 }
             }
         }
     }
+    else
+    {
+        Vector2 mouseWorldPos = GetScreenToWorld2D(GetMousePosition(), camera);
 
+        int hoveredRoomIndex = -1;
+
+        for(int i = 0; i < rooms.size(); i++)
+        {
+            if(CheckCollisionPointRec(mouseWorldPos, rooms[i].aabb))
+            {
+                hoveredRoomIndex = i;
+                break;
+            }
+        }
+
+        if(hoveredRoomIndex > -1)
+        {
+            Rectangle currentAABB = rooms[hoveredRoomIndex].aabb;
+
+            Vector2 threshold = {currentAABB.width * 0.1f, currentAABB.height * 0.1f};
+
+            Vector2 targetNeigbourPos = {
+                currentAABB.x + currentAABB.width * 0.5f,
+                currentAABB.y + currentAABB.height * 0.5f
+            };
+
+            bool shifting = false;
+
+            if(mouseWorldPos.x < currentAABB.x + threshold.x)
+            {
+                targetNeigbourPos.x -= currentAABB.width;
+                shifting = true;
+            }
+            else if(mouseWorldPos.x > (currentAABB.x + currentAABB.width) - threshold.x)
+            {
+                targetNeigbourPos.x += currentAABB.width;
+                shifting = true;
+            }
+            else if(mouseWorldPos.y < currentAABB.y + threshold.y)
+            {
+                targetNeigbourPos.y -= currentAABB.height;
+                shifting = true;
+            }
+            else if(mouseWorldPos.y > (currentAABB.y + currentAABB.height) - threshold.y)
+            {
+                targetNeigbourPos.y += currentAABB.height;
+                shifting = true;
+            }
+
+            if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && shifting)
+            {
+                int neighbourIndex = -1;
+
+                for(int i = 0; i < rooms.size(); i++)
+                {
+                    if(i != hoveredRoomIndex && CheckCollisionPointRec(targetNeigbourPos, rooms[i].aabb))
+                    {
+                        neighbourIndex = i;
+                        break;
+                    }
+                }
+
+                if(neighbourIndex > -1)
+                {
+                    Rectangle neighborAABB = rooms[neighbourIndex].aabb;
+
+                    bool validHorizontal = (currentAABB.y == neighborAABB.y && currentAABB.height == neighborAABB.height);
+                    bool validVertical = (currentAABB.x == neighborAABB.x && currentAABB.width == neighborAABB.width);
+
+                    if(validHorizontal || validVertical)
+                    {
+                        Vector2 min = {
+                            std::min(currentAABB.x, neighborAABB.x),
+                            std::min(currentAABB.y, neighborAABB.y)
+                        };
+
+                        Vector2 max = {
+                            std::max(currentAABB.x + currentAABB.width, neighborAABB.x + neighborAABB.width),
+                            std::max(currentAABB.y + currentAABB.height, neighborAABB.y + neighborAABB.height)
+                        };
+
+                        rooms[hoveredRoomIndex].aabb = {min.x, min.y, max.x - min.x, max.y - min.y};
+
+                        rooms.erase(rooms.begin() + neighbourIndex);
+
+                        std::cout<<"rooms merged \n";
+                    }
+                }
+            }
+
+            if(IsMouseButtonPressed(MOUSE_BUTTON_RIGHT))
+            {
+                Rectangle roomToSplit = rooms[hoveredRoomIndex].aabb;
+
+                float roomWidth = (float)(TILES_PER_ROOM_WIDHT * GRID_SIZE);
+                float roomHeight = (float)(TILES_PER_ROOM_HEIGHT * GRID_SIZE);
+
+                int colsInRoom = (int)roundf(roomToSplit.width / roomWidth);
+                int rowsInRoom = (int)roundf(roomToSplit.height / roomHeight);
+
+                rooms.erase(rooms.begin() + hoveredRoomIndex);
+
+                for(int i = 0; i < rowsInRoom; i++)
+                {
+                    for(int j = 0; j < colsInRoom; j++)
+                    {
+                        Room baseUnit;
+                        baseUnit.aabb = {
+                            roomToSplit.x + (j * roomWidth),
+                            roomToSplit.y + (i * roomHeight),
+                            roomWidth,
+                            roomHeight
+                        };
+
+                        rooms.push_back(baseUnit);
+                    }
+                }
+            }
+        }
+    }
+   
     if(IsKeyPressed(KEY_F5))
     {
         ExportLevel();
     }
     else if(IsKeyPressed(KEY_F9))
     {
-        LoadLevelData(levelPath, tempLevel);
+        LoadLevelData(levelPath, tempLevel, roomPath, rooms);
     }
 }
 
@@ -473,63 +619,82 @@ void LevelEditor::Draw()
         }
     }
 
-    //preview
-    Color color = GetTileColor((TileType)currentTileType);
-
-    Color previewColor = color;
-
-    if(currentTileType != (int)TileType::VOID) previewColor.a = 50;
-
-    Vector2 tileSize = {GRID_SIZE, GRID_SIZE};
-    
-    Transform2D previewTransform;
-
-    previewTransform.position = GetMouseGridPosition(mouseMatrixPosition);
-    previewTransform.scale = TILE_SCALE;
-    previewTransform.angle = currentAngle;
-
-    float offsetX = 0;
-    float offsetY = 0;
-
-    switch ((TileType)currentTileType)
+    if(!roomMode)
     {
-    case TileType::VERTICAL_MOVING_PLATFORM:
-    case TileType::HORIZONALT_MOVING_PLATFORM:
-    {
-        tileSize.x = GRID_SIZE * 3.0f;
-        tileSize.y = GRID_SIZE * 0.3f;
+        //preview
+        Color color = GetTileColor((TileType)currentTileType);
 
-        offsetX = -GRID_SIZE;
-        offsetY = tileSize.y;
-    }
-    break;
+        Color previewColor = color;
 
-    default: break;
-    }
+        if(currentTileType != (int)TileType::VOID) previewColor.a = 50;
 
-    if(currentTexture < 0 || !activeRenderData)
-    {
-        if(currentTileType == (int)TileType::ROTATING_SPIKE_SINGLE ||
-        currentTileType == (int)TileType::ROTATING_SPIKE_DOUBLE)
+        Vector2 tileSize = {GRID_SIZE, GRID_SIZE};
+        
+        Transform2D previewTransform;
+
+        previewTransform.position = GetMouseGridPosition(mouseMatrixPosition);
+        previewTransform.scale = TILE_SCALE;
+        previewTransform.angle = currentAngle;
+
+        float offsetX = 0;
+        float offsetY = 0;
+
+        switch ((TileType)currentTileType)
         {
-            DrawRotatingSpikes(currentTileType, previewTransform.position, GRID_SIZE * 0.5f, currentData, previewColor);
+        case TileType::VERTICAL_MOVING_PLATFORM:
+        case TileType::HORIZONALT_MOVING_PLATFORM:
+        {
+            tileSize.x = GRID_SIZE * 3.0f;
+            tileSize.y = GRID_SIZE * 0.3f;
+
+            offsetX = -GRID_SIZE;
+            offsetY = tileSize.y;
+        }
+        break;
+
+        default: break;
+        }
+
+        if(currentTexture < 0 || !activeRenderData)
+        {
+            if(currentTileType == (int)TileType::ROTATING_SPIKE_SINGLE ||
+            currentTileType == (int)TileType::ROTATING_SPIKE_DOUBLE)
+            {
+                DrawRotatingSpikes(currentTileType, previewTransform.position, GRID_SIZE * 0.5f, currentData, previewColor);
+            }
+            else
+            {
+                DrawRectangle(
+                    previewTransform.position.x - (GRID_SIZE * 0.5f) + offsetX, 
+                    previewTransform.position.y - (GRID_SIZE * 0.5f) + offsetY,
+                    tileSize.x, tileSize.y, 
+                    previewColor
+                );
+            }
         }
         else
         {
-            DrawRectangle(
-                previewTransform.position.x - (GRID_SIZE * 0.5f) + offsetX, 
-                previewTransform.position.y - (GRID_SIZE * 0.5f) + offsetY,
-                tileSize.x, tileSize.y, 
-                previewColor
-            );
+            previewColor = WHITE;
+            previewColor.a = 100;
+
+            DrawSprite(previewTransform, activeRenderData, currentData, currentTexture, previewColor);
         }
     }
-    else
-    {
-        previewColor = WHITE;
-        previewColor.a = 100;
+    
 
-        DrawSprite(previewTransform, activeRenderData, currentData, currentTexture, previewColor);
+    Color roomColorPreview = DARKGREEN;
+    roomColorPreview.a = 150;
+    Color roomColor = PURPLE;
+
+    if(roomMode)
+    {
+       
+
+    }
+
+    for(int i = 0; i < rooms.size(); i++)
+    {
+        DrawAABB(rooms[i].aabb, roomColor, 6.0f);
     }
 
     //grid
@@ -582,4 +747,6 @@ void LevelEditor::Draw()
     DrawText(TextFormat("current flip y: %i", currentData.flipY), 10, ypos + spacing * 7, 20, RED);
 
     DrawText(GetDirectionText(currentDirection), 10, ypos + spacing * 8, 20, RED);
+
+    DrawText(TextFormat("room mode: %i", roomMode), 10, ypos + spacing * 9, 20, DARKGREEN);
 }

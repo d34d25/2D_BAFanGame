@@ -219,6 +219,11 @@ struct Tile
     }
 };
 
+struct Room
+{
+    Rectangle aabb = {};
+};
+
 inline bool IsColorOf(Color colorA, Color colorB)
 {
     return colorA.r == colorB.r && 
@@ -424,7 +429,7 @@ inline SpriteRenderData* GetPlatformActiveRenderData(PlatformType type, int inde
     return nullptr;
 }
 
-inline void LoadLevelData(const char* levelPath, Tile(&destination)[LAYERS][ROWS][COLS])
+inline void LoadLevelData(const char* levelPath, Tile(&destination)[LAYERS][ROWS][COLS], const char* roomPath, std::vector<Room>& rooms)
 {
     int dataSize = 0;
 
@@ -437,4 +442,25 @@ inline void LoadLevelData(const char* levelPath, Tile(&destination)[LAYERS][ROWS
     memcpy(destination, fileData, dataSize);
     
     UnloadFileData(fileData);
+
+    int roomDataSize = 0;
+
+    unsigned char* roomFileData = LoadFileData(roomPath, &roomDataSize);
+
+    if(roomFileData == nullptr) return;
+
+    int roomCount = roomDataSize / sizeof(Room);
+
+    if(roomCount > 0)
+    {
+        rooms.resize(roomCount);
+
+        memcpy(rooms.data(), roomFileData, roomDataSize);
+    }
+    else
+    {
+        rooms.clear();
+    }
+
+    UnloadFileData(roomFileData);
 }

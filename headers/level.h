@@ -36,13 +36,22 @@ private:
 
     Tile level[LAYERS][ROWS][COLS];
 
+    std::vector<Room> rooms = {};
+
     std::vector<Platform> platformList = {};
 
     std::vector<Enemy> enemyList = {};
 
+    std::vector<std::vector<Enemy>> enemyBuckets = {};
+
+    int previousRoomIndex = -1;
+    int currentRoomIndex = -1;
+
     Camera2D camera = {};
 
     Player player;
+
+    void ResetRoom();
 
     inline void ClearTileMatrix()
     {
@@ -186,7 +195,7 @@ public:
 
     ~Level();
 
-    void InitLevel(const char* levelPath, float dt, int iterations);
+    void InitLevel(const char* levelPath, const char* roomPath ,float dt, int iterations);
 
     void UpdateLevel();
 

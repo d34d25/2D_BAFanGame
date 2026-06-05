@@ -16,7 +16,7 @@ Level::~Level()
     UnloadAssets();
 }
 
-void Level::InitLevel(const char* levelPath, float dt, int iterations)
+void Level::InitLevel(const char* levelPath, const char* roomPath ,float dt, int iterations)
 {
     this->iterations = iterations;
 
@@ -40,7 +40,7 @@ void Level::InitLevel(const char* levelPath, float dt, int iterations)
 
     ClearPlatformList();
 
-    LoadLevelData(levelPath, level);
+    LoadLevelData(levelPath, level, roomPath, rooms);
 
     for(int l = 0; l < LAYERS; l++)
     {
@@ -555,6 +555,22 @@ void Level::InitLevel(const char* levelPath, float dt, int iterations)
         return false;
     });
 
+    enemyBuckets.resize(rooms.size());
+
+    for(int i = 0; i < enemyList.size(); i++)
+    {
+        for(int r = 0; r < rooms.size(); r++)
+        {    
+            if(CheckCollisionPointRec(enemyList[i].spawnPosition, rooms[r].aabb))
+            {
+                enemyBuckets[r].push_back(std::move(enemyList[i]));
+                break;
+            }
+        }
+    }
+
+    enemyList.clear();
+
     player.platformCache_update.reserve(800);
     player.platformCache_physics.reserve(60);
     player.platformCache_rendering.reserve(600);
@@ -583,9 +599,30 @@ void Level::UpdateLevel()
 
     player.Shoot(dt);
 
-    UpdateCamera(player.gameObj.transform.position, {0, -100});
+    UpdateCamera(player.gameObj.transform.position, {0, -300});
 
     if(IsKeyPressed(KEY_R)) ResetLevel();
+}
+
+void Level::ResetRoom()
+{
+    if(previousRoomIndex > -1 && previousRoomIndex < enemyBuckets.size())
+    {
+        for(Enemy& enemy : enemyBuckets[previousRoomIndex])
+        {
+            enemy.isActive = false;
+            enemy.Respawn();
+        }
+    }
+
+    if(currentRoomIndex > -1 && currentRoomIndex < enemyBuckets.size())
+    {
+        for(Enemy& enemy : enemyBuckets[currentRoomIndex])
+        {
+            enemy.isActive = true;
+            enemy.Respawn();
+        }
+    }
 }
 
 void Level::LowFrequencyUpdate()
@@ -624,33 +661,59 @@ void Level::LowFrequencyUpdate()
         }
     }
 
+    int roomIndex = -1;
+
+    for(int r = 0; r < rooms.size(); r++)
+    {
+        if(CheckCollisionPointRec(player.gameObj.transform.position, rooms[r].aabb))
+        {
+            roomIndex = r;
+            break;
+        }
+    }
+
+    if(roomIndex != currentRoomIndex)
+    {
+        previousRoomIndex = currentRoomIndex;
+        currentRoomIndex = roomIndex;
+
+        ResetRoom();
+    }
+
     float enemySpawnRadius = GRID_SIZE * 15.0f;
     float enemyDespawnRadius = GRID_SIZE * 17.0f;
 
-    for(int e = 0; e < enemyList.size(); e++)
+    if(currentRoomIndex > -1)
     {
-        Enemy& enemy = enemyList[e];
+        std::vector<Enemy>& activeBucket = enemyBuckets[currentRoomIndex];
 
-        float despawnDistanceSqr = Vector2DistanceSqr(player.gameObj.transform.position, enemy.gameObj.transform.position);
-        float spawnDistanceSqr = Vector2DistanceSqr(player.gameObj.transform.position, enemy.spawnPosition);
+        std::cout<<"activeBucket size: "<<(int)activeBucket.size()<<"\n";
 
-        if(despawnDistanceSqr > enemyDespawnRadius * enemyDespawnRadius)
+        for(int e = 0; e < activeBucket.size(); e++)
         {
-            enemy.isActive = false;
-        }
-        else if(!enemy.isActive)
-        {
-            if(spawnDistanceSqr <= enemyDespawnRadius * enemyDespawnRadius &&
-            spawnDistanceSqr >= enemySpawnRadius * enemySpawnRadius)
+            Enemy& enemy = activeBucket[e];
+
+            float despawnDistanceSqr = Vector2DistanceSqr(player.gameObj.transform.position, enemy.gameObj.transform.position);
+            float spawnDistanceSqr = Vector2DistanceSqr(player.gameObj.transform.position, enemy.spawnPosition);
+
+            if(despawnDistanceSqr > enemyDespawnRadius * enemyDespawnRadius)
             {
-                enemy.Respawn();
-                enemy.isActive = true;
+                enemy.isActive = false;
             }
-        }
+            else if(!enemy.isActive)
+            {
+                if(spawnDistanceSqr <= enemyDespawnRadius * enemyDespawnRadius &&
+                spawnDistanceSqr >= enemySpawnRadius * enemySpawnRadius)
+                {
+                    enemy.Respawn();
+                    enemy.isActive = true;
+                }
+            }
 
-        if(enemy.isActive)
-        {
-            player.enemyCache.push_back(&enemy);
+            if(enemy.isActive)
+            {
+                player.enemyCache.push_back(&enemy);
+            }
         }
     }
 }
@@ -1451,7 +1514,7 @@ void Level::DrawLevel()
         player.currentFrame
     );
 
-    //DebugDrawing();
+    DebugDrawing();
 
     EndMode2D();
 
@@ -1547,6 +1610,23 @@ void Level::DebugDrawing()
         DrawCircleLines(b->posititon.x, b->posititon.y, b->radius, RED);
 
         DrawLine(b->posititon.x, b->posititon.y, b->posititon.x + b->velocity.x, b->posititon.y + b->velocity.y, BLUE);
+    }
+
+
+    for(int i = 0; i < rooms.size(); i++)
+    {
+        Room& room = rooms[i];
+
+        Color roomColor = PURPLE;
+
+        roomColor.a = 150;
+
+        DrawAABB(room.aabb, roomColor, 3.0f);
+
+        if(CheckCollisionRecs(player.gameObj.GetMainAABB(), room.aabb))
+        {
+            DrawAABB(room.aabb, RED, 3.0f);
+        }
     }
 
 
