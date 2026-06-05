@@ -30,7 +30,7 @@ void Level::InitLevel(const char* levelPath, const char* roomPath ,float dt, int
 
     camera.target = {0,0};
 
-    camera.zoom = 1.2f;
+    camera.zoom = CAMERA_ZOOM;
 
     float step = 1.0f / (float)GRID_SIZE;
 
@@ -599,9 +599,11 @@ void Level::UpdateLevel()
 
     player.Shoot(dt);
 
-    UpdateCamera(player.gameObj.transform.position, {0, -300});
+    UpdateCamera(player.gameObj.transform.position, {0, -100});
 
     if(IsKeyPressed(KEY_R)) ResetLevel();
+
+    if(IsKeyPressed(KEY_R) && IsKeyDown(KEY_LEFT_SHIFT)) camera.zoom = CAMERA_ZOOM;
 }
 
 void Level::ResetRoom()
@@ -687,14 +689,12 @@ void Level::LowFrequencyUpdate()
     {
         std::vector<Enemy>& activeBucket = enemyBuckets[currentRoomIndex];
 
-        std::cout<<"activeBucket size: "<<(int)activeBucket.size()<<"\n";
-
         for(int e = 0; e < activeBucket.size(); e++)
         {
             Enemy& enemy = activeBucket[e];
 
-            float despawnDistanceSqr = Vector2DistanceSqr(player.gameObj.transform.position, enemy.gameObj.transform.position);
-            float spawnDistanceSqr = Vector2DistanceSqr(player.gameObj.transform.position, enemy.spawnPosition);
+            float despawnDistanceSqr = Vector2DistanceSqr(camera.target, enemy.gameObj.transform.position);
+            float spawnDistanceSqr = Vector2DistanceSqr(camera.target, enemy.spawnPosition);
 
             if(despawnDistanceSqr > enemyDespawnRadius * enemyDespawnRadius)
             {
@@ -1323,6 +1323,13 @@ void Level::CCD_Update()
 
         if(!bullet) continue;
 
+        Rectangle& currentRoom = rooms[currentRoomIndex].aabb;
+
+        if(currentRoomIndex > -1)
+        {
+            if(!CheckCollisionPointRec(bullet->posititon, currentRoom)) bullet->didHit = true;
+        }
+
         for(int e = 0; e < player.enemyCache.size(); e++)
         {
             Enemy* enemy = player.enemyCache[e];
@@ -1374,10 +1381,29 @@ void Level::DrawLevel()
 
     BeginMode2D(camera);
 
+    int roomStartX = 0;
+    int roomStartY = 0;
+
+    int roomEndX = ROWS - 1;
+    int roomEndY = COLS - 1;
+
+    if(currentRoomIndex > -1)
+    {
+        Rectangle& currentRoom = rooms[currentRoomIndex].aabb;
+
+        roomStartX = (int)(currentRoom.x / GRID_SIZE);
+        roomStartY = (int)(currentRoom.y / GRID_SIZE);
+
+        roomEndX = (int)((currentRoom.x + currentRoom.width) / GRID_SIZE) - 1;
+        roomEndY = (int)((currentRoom.y + currentRoom.height) / GRID_SIZE) - 1;
+    }
+    
     TileRange playerTileRange = CalculateTileRange(
-        player.gameObj.transform.position.x,
-        player.gameObj.transform.position.y,
-        renderTileCheckRange
+        camera.target.x,
+        camera.target.y,
+        renderTileCheckRange,
+        roomStartX, roomStartY,
+        roomEndX, roomEndY
     );
 
     for(int l = 0; l < LAYERS; l++)
@@ -1486,6 +1512,14 @@ void Level::DrawLevel()
         player.currentFrame
     );
 
+    /*for(int r = 0; r < rooms.size(); r++)
+    {
+        if(!CheckCollisionPointRec(player.gameObj.transform.position, rooms[r].aabb))
+        {
+            DrawRectangleRec(rooms[r].aabb, BLACK);
+        }
+    }*/
+
     for(int i = 0; i < player.bulletpool->activeBullets.size(); i++)
     {
         Bullet* b = player.bulletpool->activeBullets[i];
@@ -1514,7 +1548,7 @@ void Level::DrawLevel()
         player.currentFrame
     );
 
-    DebugDrawing();
+    //DebugDrawing();
 
     EndMode2D();
 
@@ -1561,11 +1595,11 @@ void Level::DebugDrawing()
 
                 if(level[l][i][j].type == TileType::PLATFORM_STOP) mainAABBColor = BLUE;
 
-                DrawAABB(tileObj.GetMainAABB(), mainAABBColor);
+                DrawAABB(tileObj.GetMainAABB(), mainAABBColor, 2.0f);
 
                 for(int h = 1; h < tileObj.hitboxes.size(); h++)
                 {
-                    DrawAABB(tileObj.GetSubAABB(h), MAGENTA);
+                    DrawAABB(tileObj.GetSubAABB(h), MAGENTA, 1.25f);
                 }
 
                 Vector2 lineEnd = tileObj.transform.position;
@@ -1612,7 +1646,6 @@ void Level::DebugDrawing()
         DrawLine(b->posititon.x, b->posititon.y, b->posititon.x + b->velocity.x, b->posititon.y + b->velocity.y, BLUE);
     }
 
-
     for(int i = 0; i < rooms.size(); i++)
     {
         Room& room = rooms[i];
@@ -1628,7 +1661,6 @@ void Level::DebugDrawing()
             DrawAABB(room.aabb, RED, 3.0f);
         }
     }
-
 
     Color gridColor = GRAY;
     gridColor.a = (int)(255 * 0.5f);

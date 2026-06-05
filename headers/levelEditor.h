@@ -4,8 +4,8 @@
 #include "platform.h"
 #include <vector>
 
-const int TILES_PER_ROOM_WIDHT = 20;
-const int TILES_PER_ROOM_HEIGHT = 20;
+const int TILES_PER_ROOM_WIDHT = 16;
+const int TILES_PER_ROOM_HEIGHT = 16;
 
 struct IntPair
 {
@@ -37,12 +37,6 @@ private:
     bool roomMode = false;
 
     std::vector<Room> rooms = {};
-
-    bool drawingRoom = false;
-
-    Vector2 roomStartCell = {0,0};
-
-    float roomGrid = GRID_SIZE * 20.0f;
 
     Direction currentDirection = Direction::UP;
 

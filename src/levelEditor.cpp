@@ -435,30 +435,24 @@ void LevelEditor::Update()
                 currentAABB.y + currentAABB.height * 0.5f
             };
 
-            bool shifting = false;
-
             if(mouseWorldPos.x < currentAABB.x + threshold.x)
             {
                 targetNeigbourPos.x -= currentAABB.width;
-                shifting = true;
             }
             else if(mouseWorldPos.x > (currentAABB.x + currentAABB.width) - threshold.x)
             {
                 targetNeigbourPos.x += currentAABB.width;
-                shifting = true;
             }
             else if(mouseWorldPos.y < currentAABB.y + threshold.y)
             {
                 targetNeigbourPos.y -= currentAABB.height;
-                shifting = true;
             }
             else if(mouseWorldPos.y > (currentAABB.y + currentAABB.height) - threshold.y)
             {
                 targetNeigbourPos.y += currentAABB.height;
-                shifting = true;
             }
 
-            if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && shifting)
+            if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
             {
                 int neighbourIndex = -1;
 
@@ -493,8 +487,6 @@ void LevelEditor::Update()
                         rooms[hoveredRoomIndex].aabb = {min.x, min.y, max.x - min.x, max.y - min.y};
 
                         rooms.erase(rooms.begin() + neighbourIndex);
-
-                        std::cout<<"rooms merged \n";
                     }
                 }
             }
@@ -515,15 +507,15 @@ void LevelEditor::Update()
                 {
                     for(int j = 0; j < colsInRoom; j++)
                     {
-                        Room baseUnit;
-                        baseUnit.aabb = {
+                        Room unitRoom;
+                        unitRoom.aabb = {
                             roomToSplit.x + (j * roomWidth),
                             roomToSplit.y + (i * roomHeight),
                             roomWidth,
                             roomHeight
                         };
 
-                        rooms.push_back(baseUnit);
+                        rooms.push_back(unitRoom);
                     }
                 }
             }
@@ -681,20 +673,9 @@ void LevelEditor::Draw()
         }
     }
     
-
-    Color roomColorPreview = DARKGREEN;
-    roomColorPreview.a = 150;
-    Color roomColor = PURPLE;
-
-    if(roomMode)
-    {
-       
-
-    }
-
     for(int i = 0; i < rooms.size(); i++)
     {
-        DrawAABB(rooms[i].aabb, roomColor, 6.0f);
+        DrawAABB(rooms[i].aabb, PURPLE, 6.0f);
     }
 
     //grid

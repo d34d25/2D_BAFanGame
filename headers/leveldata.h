@@ -268,18 +268,20 @@ inline TileType GetTileType(const int(&matrixPosition)[3], const Tile(&levelTile
     return GetTileType(matrixPosition[0], matrixPosition[1], matrixPosition[2], levelTiles);
 }
 
-inline TileRange CalculateTileRange(int x, int y, int range)
+inline TileRange CalculateTileRange(int x, int y, int range, 
+    int minX = 0, int minY = 0, 
+    int maxX = ROWS - 1, int maxY = COLS - 1)
 {
     int gridX = x / GRID_SIZE;
     int gridY = y / GRID_SIZE;
 
     TileRange rangeTiles = {};
 
-    rangeTiles.startX = fmaxf(0, gridX - range);
-    rangeTiles.endX = fminf(ROWS - 1, gridX + range);
+    rangeTiles.startX = fmaxf(minX, gridX - range);
+    rangeTiles.endX = fminf(maxX, gridX + range);
 
-    rangeTiles.startY = fmaxf(0, gridY - range);
-    rangeTiles.endY = fminf(COLS - 1, gridY + range);
+    rangeTiles.startY = fmaxf(minY, gridY - range);
+    rangeTiles.endY = fminf(maxY, gridY + range);
 
     return rangeTiles;
 }

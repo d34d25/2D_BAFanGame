@@ -16,6 +16,8 @@ const float MAX_DISTANCE_PLATFORM_PLAYER_SQR_5X = MAX_DISTANCE_PLATFORM_PLAYER_S
 
 const float REC_TO_CIRCLE_RADIUS_MULTIPLIER = 1.5f; //this ensures that the circle doesn't cut the corners of the AABB
 
+const float CAMERA_ZOOM = 1.2f;
+
 class Level
 {
 private:
@@ -39,7 +41,6 @@ private:
     std::vector<Room> rooms = {};
 
     std::vector<Platform> platformList = {};
-
     std::vector<Enemy> enemyList = {};
 
     std::vector<std::vector<Enemy>> enemyBuckets = {};
@@ -72,13 +73,64 @@ private:
         platformList.clear();
     }
 
-    inline void UpdateCamera(
-       const Vector2& target, const Vector2& offset
-    )
+    //change the target relative to the speed of the player
+    //so the camera points a bit ahead of where the player is moving
+
+    inline void UpdateCamera(const Vector2& target, const Vector2& offset)
     {
-        //change the target relative to the speed of the player
-        //so the camera points a bit ahead of where the player is moving
+        int roomIndex = -1;
+
+        Rectangle currentRoom = {};
+
+        for(int r = 0; r < rooms.size(); r++)
+        {
+            if(CheckCollisionPointRec(target, rooms[r].aabb))
+            {
+                roomIndex = r;
+                currentRoom = rooms[r].aabb;
+
+                break;
+            }
+        }
+
         Vector2 desired = Vector2Add(target, offset);
+
+        if(roomIndex > -1)
+        {
+            Vector2 halfScreenWorld = {
+                (screenWidth * 0.5f) / camera.zoom,
+                (screenHeight * 0.5f) / camera.zoom
+            };
+
+            Vector2 min = {
+                currentRoom.x + halfScreenWorld.x,
+                currentRoom.y + halfScreenWorld.y
+            };
+
+            Vector2 max = {
+                (currentRoom.x + currentRoom.width) - halfScreenWorld.x,
+                (currentRoom.y + currentRoom.height) - halfScreenWorld.y
+            };
+
+            if(currentRoom.width < (screenWidth / camera.zoom))
+            {
+                desired.x = currentRoom.x + (currentRoom.width * 0.5f);
+            }
+            else
+            {
+                desired.x = Clamp(desired.x, min.x, max.x);
+            }
+
+            if(currentRoom.height < (screenHeight/ camera.zoom))
+            {
+                desired.y = currentRoom.y + (currentRoom.height * 0.5f);
+            }
+            else
+            {
+                desired.y = Clamp(desired.y, min.y, max.y);
+            }
+            
+        }
 
         camera.target = Vector2Lerp(camera.target, desired, 0.1f);
 
