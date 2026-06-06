@@ -4,8 +4,8 @@
 #include "platform.h"
 #include <vector>
 
-const int TILES_PER_ROOM_WIDHT = 16;
-const int TILES_PER_ROOM_HEIGHT = 16;
+const int TILES_PER_ROOM_WIDHT = 20;
+const int TILES_PER_ROOM_HEIGHT = 15;
 
 struct IntPair
 {
@@ -42,7 +42,7 @@ private:
 
     EntityData currentData = {};
 
-    Tile tempLevel[LAYERS][ROWS][COLS];
+    Tile tempLevel[LAYERS][COLS][ROWS];
 
     Camera2D camera = {};
 
@@ -106,14 +106,14 @@ private:
         int worldScreenCols = COLS / TILES_PER_ROOM_WIDHT;
         int worldScreenRows = ROWS / TILES_PER_ROOM_HEIGHT;
 
-        for(int i = 0; i < worldScreenRows; i++)
+        for(int i = 0; i < worldScreenCols; i++)
         {
-            for(int j = 0; j < worldScreenCols; j++)
+            for(int j = 0; j < worldScreenRows; j++)
             {
                 Room roomUnit;
                 roomUnit.aabb = {
-                    j * roomWidth,
-                    i * roomHeight,
+                    i * roomWidth,
+                    j * roomHeight,
                     roomWidth,
                     roomHeight
                 };

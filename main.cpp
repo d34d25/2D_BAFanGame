@@ -8,10 +8,15 @@
 
 #include <chrono>
 
+#include <memory>
+
 int main()
 {
-    const int SCREEN_WIDTH = 800 * 2;
-    const int SCREEN_HEIGHT = 450 * 2;
+    const int SCREEN_WIDTH = 1600;
+    const int SCREEN_HEIGHT = 900;
+
+    const int CANVAS_WIDTH = 1200 - 40;
+    const int CANVAS_HEIGHT = 900 - 30;
 
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "");
 
@@ -20,13 +25,17 @@ int main()
     float accumulator = 0.0f;
     float fixedDt = 1.0f / 60.0f;
 
-    Level testLevel = Level();
+    RenderTexture2D canvas = LoadRenderTexture(CANVAS_WIDTH, CANVAS_HEIGHT);
 
-    LevelEditor editor = LevelEditor(SCREEN_WIDTH,SCREEN_HEIGHT, "levels/testLevel", "levels/testRooms");
+    SetTextureFilter(canvas.texture, TEXTURE_FILTER_POINT);
+
+    std::unique_ptr testLevel = std::make_unique<Level>();
+
+    std::unique_ptr editor = std::make_unique<LevelEditor>(CANVAS_WIDTH,CANVAS_HEIGHT, "levels/testLevel", "levels/testRooms");
 
     int iterations = 10;
 
-    testLevel.InitLevel(
+    testLevel->InitLevel(
         "levels/testLevel",
         "levels/testRooms",
         fixedDt,
@@ -39,8 +48,10 @@ int main()
         return 0;
     }
 
-    testLevel.screenWidth = SCREEN_WIDTH;
-    testLevel.screenHeight = SCREEN_HEIGHT;
+    testLevel->screenWidth = CANVAS_WIDTH;
+    testLevel->screenHeight = CANVAS_HEIGHT;
+
+    testLevel->canvas = canvas;
 
     bool editorMode = false;
 
@@ -75,8 +86,8 @@ int main()
             
             auto allPhysicsTimerStart = std::chrono::high_resolution_clock::now();
 
-            if(!editorMode) testLevel.UpdateLevel();
-            else editor.Update();
+            if(!editorMode) testLevel->UpdateLevel();
+            else editor->Update();
 
             auto allPhysicsTimerEnd = std::chrono::high_resolution_clock::now();
             
@@ -102,10 +113,12 @@ int main()
 
         auto drawingStart = std::chrono::high_resolution_clock::now();
 
-        ClearBackground(LIGHTGRAY);
-
-        if(!editorMode) testLevel.DrawLevel();
-        else editor.Draw();
+        if(!editorMode) testLevel->DrawLevel();
+        else
+        {
+            ClearBackground(LIGHTGRAY);
+            editor->Draw();
+        }
 
         DrawFPS(10,10);
 
@@ -169,22 +182,24 @@ int main()
         std::cout<<"Average last drawing time: "<<avgDrawingLastTime<<" ms (over "<<MAX_LAST_FRAMES<<" frames)\n";
     }
 
-    std::cout<<"total platform count: "<<testLevel.GetPlatformCount()<<"\n";
+    std::cout<<"total platform count: "<<testLevel->GetPlatformCount()<<"\n";
 
     std::cout<<"\n";
 
-    std::cout<<"total player update platform cache count: "<<testLevel.GetPlayerPlatformCache_Update()<<"\n";
-    std::cout<<"total player physics platform cache count: "<<testLevel.GetPlayerPlatformCache_Physics()<<"\n";
-    std::cout<<"total player render platform cache count: "<<testLevel.GetPlayerPlatformCache_Render()<<"\n";
+    std::cout<<"total player update platform cache count: "<<testLevel->GetPlayerPlatformCache_Update()<<"\n";
+    std::cout<<"total player physics platform cache count: "<<testLevel->GetPlayerPlatformCache_Physics()<<"\n";
+    std::cout<<"total player render platform cache count: "<<testLevel->GetPlayerPlatformCache_Render()<<"\n";
 
     std::cout<<"\n";
 
-    std::cout<<"total enemy count: "<<testLevel.GetEnemyCount()<<"\n";
+    std::cout<<"total enemy count: "<<testLevel->GetEnemyCount()<<"\n";
 
-    std::cout<<"total player enemy cache count: "<<testLevel.GetPlayerEnemyCache()<<"\n";
-    std::cout<<"total player enemy physics cache count: "<<testLevel.GetPlayerEnemyCache_Physics()<<"\n";
+    std::cout<<"total player enemy cache count: "<<testLevel->GetPlayerEnemyCache()<<"\n";
+    std::cout<<"total player enemy physics cache count: "<<testLevel->GetPlayerEnemyCache_Physics()<<"\n";
 
     std::cout<<"\n";
+
+    UnloadRenderTexture(canvas);
 
     CloseWindow();
 

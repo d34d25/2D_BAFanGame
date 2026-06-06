@@ -38,9 +38,9 @@ static constexpr Color ENEMY_DUMMY = Color{217,160,102,255};
 
 static constexpr Color ENEMY_YUUKA = Color{85,56,171,255};
 
-static constexpr int ROWS = 100;
+static constexpr int ROWS = 120;
 
-static constexpr int COLS = 100;
+static constexpr int COLS = 160;
 
 static constexpr int LAYERS = 2;
 

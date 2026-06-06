@@ -31,6 +31,8 @@ void Level::InitLevel(const char* levelPath, const char* roomPath ,float dt, int
     camera.target = {0,0};
 
     camera.zoom = CAMERA_ZOOM;
+    
+    camera.rotation = 0.0f;
 
     float step = 1.0f / (float)GRID_SIZE;
 
@@ -44,9 +46,9 @@ void Level::InitLevel(const char* levelPath, const char* roomPath ,float dt, int
 
     for(int l = 0; l < LAYERS; l++)
     {
-        for(int i = 0; i < ROWS; i++)
+        for(int i = 0; i < COLS; i++)
         {
-            for(int j = 0; j < COLS; j++)
+            for(int j = 0; j < ROWS; j++)
             {
                 Tile* tile = &level[l][i][j];
                 TileType type = tile->type;
@@ -571,6 +573,23 @@ void Level::InitLevel(const char* levelPath, const char* roomPath ,float dt, int
 
     enemyList.clear();
 
+
+    platformBuckets.resize(rooms.size());
+
+    for(int i = 0; i < platformList.size(); i++)
+    {
+        for(int r = 0; r < rooms.size(); r++)
+        {
+            if(CheckCollisionPointRec(platformList[i].ogPosition, rooms[r].aabb))
+            {
+                platformBuckets[r].push_back(std::move(platformList[i]));
+                break;
+            }
+        }
+    }
+
+    platformList.clear();
+
     player.platformCache_update.reserve(800);
     player.platformCache_physics.reserve(60);
     player.platformCache_rendering.reserve(600);
@@ -636,33 +655,6 @@ void Level::LowFrequencyUpdate()
     float playerRadius = player.gameObj.GetMainAABB().width * REC_TO_CIRCLE_RADIUS_MULTIPLIER;
     float platformUpdateRadius = GRID_SIZE * 25.0f;
 
-    for(int p = 0; p < platformList.size(); p++)
-    {
-        Platform& platform = platformList[p];
-
-        if(!platform.gameObj.hasBody) continue;
-
-        if(platform.IsInactive())
-        {
-            platform.UpdateInactive(dt, 1);
-            continue;
-        }
-        else if(platform.type == PlatformType::FALLING && platform.respawnTimer >= 0.0f && platform.updateRequired)
-        {
-            platform.Update(dt, 1);
-        }
-
-        if(CheckCollisionCircles(
-            player.gameObj.transform.position,
-            playerRadius,
-            platform.gameObj.transform.position,
-            platformUpdateRadius
-        ))
-        {
-            player.platformCache_update.push_back(&platform);
-        }
-    }
-
     int roomIndex = -1;
 
     for(int r = 0; r < rooms.size(); r++)
@@ -687,11 +679,40 @@ void Level::LowFrequencyUpdate()
 
     if(currentRoomIndex > -1)
     {
-        std::vector<Enemy>& activeBucket = enemyBuckets[currentRoomIndex];
+        std::vector<Enemy>& activeEnemyBucket = enemyBuckets[currentRoomIndex];
 
-        for(int e = 0; e < activeBucket.size(); e++)
+        std::vector<Platform>& activePLatformBucket = platformBuckets[currentRoomIndex];
+
+        for(int p = 0; p < activePLatformBucket.size(); p++)
         {
-            Enemy& enemy = activeBucket[e];
+            Platform& platform = activePLatformBucket[p];
+
+            if(!platform.gameObj.hasBody) continue;
+
+            if(platform.IsInactive())
+            {
+                platform.UpdateInactive(dt, 1);
+                continue;
+            }
+            else if(platform.type == PlatformType::FALLING && platform.respawnTimer >= 0.0f && platform.updateRequired)
+            {
+                platform.Update(dt, 1);
+            }
+
+            if(CheckCollisionCircles(
+                player.gameObj.transform.position,
+                playerRadius,
+                platform.gameObj.transform.position,
+                platformUpdateRadius
+            ))
+            {
+                player.platformCache_update.push_back(&platform);
+            }
+        }
+
+        for(int e = 0; e < activeEnemyBucket.size(); e++)
+        {
+            Enemy& enemy = activeEnemyBucket[e];
 
             float despawnDistanceSqr = Vector2DistanceSqr(camera.target, enemy.gameObj.transform.position);
             float spawnDistanceSqr = Vector2DistanceSqr(camera.target, enemy.spawnPosition);
@@ -825,6 +846,8 @@ void Level::HighFrequencyDiscreteUpdate()
     isGravityUp = gravity < 0;
 
     float playerRadius = player.gameObj.GetMainAABB().height * REC_TO_CIRCLE_RADIUS_MULTIPLIER;
+
+    TileRangeLimits playerTileRangeLimits = GetTileRangeLimits();
 
     TileRange playerTileRange = CalculateTileRange(
         player.gameObj.transform.position.x,
@@ -1293,13 +1316,18 @@ void Level::HighFrequencyDiscreteUpdate()
         player.gravity = gravity;
         player.entityData.flipY = isGravityUp;
 
-        for(int i = 0; i < platformList.size(); i++)
+        std::vector<Platform>& activePLatformBucket = platformBuckets[currentRoomIndex];
+
+        if(currentRoomIndex > -1)
         {
-            Platform& platform = platformList[i];
+            for(int i = 0; i < activePLatformBucket.size(); i++)
+            {
+                Platform& platform = activePLatformBucket[i];
 
-            if(!(platform.type == PlatformType::FALLING) || platform.updateRequired) continue;
+                if(!(platform.type == PlatformType::FALLING) || platform.updateRequired) continue;
 
-            platform.gravity = gravity;
+                platform.gravity = gravity;
+            }
         }
     }
 
@@ -1379,31 +1407,20 @@ void Level::DrawLevel()
 {
     double currentTime = GetTime();
 
+    BeginTextureMode(canvas);
+
+    ClearBackground(LIGHTGRAY);
+
     BeginMode2D(camera);
 
-    int roomStartX = 0;
-    int roomStartY = 0;
-
-    int roomEndX = ROWS - 1;
-    int roomEndY = COLS - 1;
-
-    if(currentRoomIndex > -1)
-    {
-        Rectangle& currentRoom = rooms[currentRoomIndex].aabb;
-
-        roomStartX = (int)(currentRoom.x / GRID_SIZE);
-        roomStartY = (int)(currentRoom.y / GRID_SIZE);
-
-        roomEndX = (int)((currentRoom.x + currentRoom.width) / GRID_SIZE) - 1;
-        roomEndY = (int)((currentRoom.y + currentRoom.height) / GRID_SIZE) - 1;
-    }
+    TileRangeLimits playerTileRangeLimits = GetTileRangeLimits();
     
     TileRange playerTileRange = CalculateTileRange(
         camera.target.x,
         camera.target.y,
         renderTileCheckRange,
-        roomStartX, roomStartY,
-        roomEndX, roomEndY
+        playerTileRangeLimits.minX, playerTileRangeLimits.minY,
+        playerTileRangeLimits.maxX, playerTileRangeLimits.maxY
     );
 
     for(int l = 0; l < LAYERS; l++)
@@ -1512,14 +1529,6 @@ void Level::DrawLevel()
         player.currentFrame
     );
 
-    /*for(int r = 0; r < rooms.size(); r++)
-    {
-        if(!CheckCollisionPointRec(player.gameObj.transform.position, rooms[r].aabb))
-        {
-            DrawRectangleRec(rooms[r].aabb, BLACK);
-        }
-    }*/
-
     for(int i = 0; i < player.bulletpool->activeBullets.size(); i++)
     {
         Bullet* b = player.bulletpool->activeBullets[i];
@@ -1551,6 +1560,31 @@ void Level::DrawLevel()
     //DebugDrawing();
 
     EndMode2D();
+
+    EndTextureMode();
+
+    ClearBackground(BLACK);
+
+    float scale = fminf((float)GetScreenWidth() / screenWidth, 
+    (float)GetScreenHeight() / screenHeight);
+
+    Rectangle sourceRec = {0,0, (float)canvas.texture.width, (float)-canvas.texture.height};
+
+    Rectangle destRec = {
+        ((float)GetScreenWidth() - ((float)screenWidth * scale)) * 0.5f,
+        ((float)GetScreenHeight() - ((float)screenHeight * scale)) * 0.5f,
+        (float)screenWidth * scale,
+        (float)screenHeight * scale
+    };
+
+    DrawTexturePro(
+        canvas.texture,
+        sourceRec,
+        destRec,
+        {0,0},
+        0.0f,
+        WHITE
+    );
 
     //DebugTextDrawing();
 }

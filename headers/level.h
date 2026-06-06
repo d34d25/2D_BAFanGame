@@ -18,6 +18,14 @@ const float REC_TO_CIRCLE_RADIUS_MULTIPLIER = 1.5f; //this ensures that the circ
 
 const float CAMERA_ZOOM = 1.2f;
 
+struct TileRangeLimits
+{
+    int minX = 0;
+    int minY = 0;
+    int maxX = ROWS - 1;
+    int maxY = COLS - 1;
+};
+
 class Level
 {
 private:
@@ -36,7 +44,7 @@ private:
 
     bool isGravityUp = false;
 
-    Tile level[LAYERS][ROWS][COLS];
+    Tile level[LAYERS][COLS][ROWS];
 
     std::vector<Room> rooms = {};
 
@@ -44,6 +52,7 @@ private:
     std::vector<Enemy> enemyList = {};
 
     std::vector<std::vector<Enemy>> enemyBuckets = {};
+    std::vector<std::vector<Platform>> platformBuckets = {};
 
     int previousRoomIndex = -1;
     int currentRoomIndex = -1;
@@ -58,9 +67,9 @@ private:
     {
         for(int l = 0; l < LAYERS; l++)
         {
-            for(int i = 0; i < ROWS; i++)
+            for(int i = 0; i < COLS; i++)
             {
-                for(int j = 0; j < COLS; j++)
+                for(int j = 0; j < ROWS; j++)
                 {
                     level[l][i][j] = {};
                 }
@@ -132,7 +141,10 @@ private:
             
         }
 
-        camera.target = Vector2Lerp(camera.target, desired, 0.1f);
+        //camera.target = Vector2Lerp(camera.target, desired, 0.1f);
+
+        camera.target.x = desired.x;
+        camera.target.y = desired.y;
 
         float zoom = camera.zoom;
 
@@ -140,8 +152,6 @@ private:
         camera.target.y = floorf(camera.target.y * zoom) / zoom;
 
         camera.offset = {floorf(screenWidth * 0.5f), floorf(screenHeight * 0.5f)};
-
-        camera.rotation = 0.0f;
 
         int mouseWheel = GetMouseWheelMove();
 
@@ -239,9 +249,30 @@ private:
         }
     }
 
+    inline TileRangeLimits GetTileRangeLimits()
+    {
+        TileRangeLimits rangeLimits = {};
+
+        if(currentRoomIndex > -1)
+        {
+            Rectangle& currentRoom = rooms[currentRoomIndex].aabb;
+
+            rangeLimits = {
+                (int)(currentRoom.x / GRID_SIZE),
+                (int)(currentRoom.y / GRID_SIZE),
+                (int)((currentRoom.x + currentRoom.width) / GRID_SIZE) - 1,
+                (int)((currentRoom.y + currentRoom.height) / GRID_SIZE) - 1
+            };
+        }
+
+        return rangeLimits;
+    }
+
 public:
 
     int screenWidth, screenHeight;
+
+    RenderTexture2D canvas = {};
 
     Level();
 

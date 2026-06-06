@@ -136,8 +136,8 @@ void LevelEditor::Update()
     int i = (int)floor(mouseWorldPos.x / GRID_SIZE);
     int j = (int)floor(mouseWorldPos.y / GRID_SIZE);
 
-    i = Clamp(i, 0, ROWS - 1);
-    j = Clamp(j, 0, COLS - 1);
+    i = Clamp(i, 0, COLS - 1);
+    j = Clamp(j, 0, ROWS - 1);
 
     mouseMatrixPosition = {i,j};
 
@@ -160,9 +160,9 @@ void LevelEditor::Update()
     {
         for(int l = 0; l < LAYERS; l++)
         {
-            for(int i = 0; i < ROWS; i++)
+            for(int i = 0; i < COLS; i++)
             {
-                for(int j = 0; j < COLS; j++)
+                for(int j = 0; j < ROWS; j++)
                 {
                     tempLevel[l][i][j] = {};
                 }
@@ -358,9 +358,9 @@ void LevelEditor::Update()
                 {
                     for(int l = 0; l < LAYERS; l++)
                     {
-                        for(int i = 0; i < ROWS; i++)
+                        for(int i = 0; i < COLS; i++)
                         {
-                            for(int j = 0; j < COLS; j++)
+                            for(int j = 0; j < ROWS; j++)
                             {
                                 if(tempLevel[l][i][j].type == TileType::PLAYER_SPAWN)
                                 {
@@ -397,11 +397,11 @@ void LevelEditor::Update()
 
         if(IsKeyDown(KEY_LEFT_SHIFT) && IsKeyPressed(KEY_C) && IsKeyDown(KEY_LEFT_CONTROL))
         {
-            for(int l = 0; l < LAYERS; i++)
+            for(int l = 0; l < LAYERS; l++)
             {
-                for(int i = 0; i < ROWS; i++)
+                for(int i = 0; i < COLS; i++)
                 {
-                    for(int j = 0; j < COLS; j++)
+                    for(int j = 0; j < ROWS; j++)
                     {
                         tempLevel[l][i][j] = {};
                     }
@@ -681,16 +681,16 @@ void LevelEditor::Draw()
     //grid
     for(int i = 0; i <= worldWidth; i+= GRID_SIZE)
     {
-        if(i == halfWorldWidth) continue;
+        if(i == worldWidth) continue;
 
-        DrawLine(i, 0, i, worldWidth, GRAY);
+        DrawLine(i, 0, i, worldHeight, GRAY);
     }
 
     for(int i = 0; i <= worldHeight; i+= GRID_SIZE)
     {
-        if(i == halfWorldHeight) continue;
+        if(i == worldHeight) continue;
 
-        DrawLine(0, i, worldHeight, i, GRAY);
+        DrawLine(0, i, worldWidth, i, GRAY);
     }
 
     DrawLine(halfWorldWidth, -worldWidth, halfWorldWidth, worldWidth, GREEN);

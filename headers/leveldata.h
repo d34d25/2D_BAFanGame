@@ -232,45 +232,45 @@ inline bool IsColorOf(Color colorA, Color colorB)
     colorA.a == colorB.a;
 }
 
-inline bool IsTileEqual(int l, int i, int j, const Tile(&levelTiles)[LAYERS][ROWS][COLS], TileType tileType = TileType::VOID)
+inline bool IsTileEqual(int l, int i, int j, const Tile(&levelTiles)[LAYERS][COLS][ROWS], TileType tileType = TileType::VOID)
 {
     if(i < 0 || i >= ROWS || j < 0 || j >= COLS || l < 0 || l >= LAYERS) return true;
 
     return levelTiles[l][i][j].type == tileType;
 }
 
-inline bool IsTileEqual(const int(&matrixPosition)[3], const Tile(&levelTiles)[LAYERS][ROWS][COLS], TileType tileType = TileType::VOID)
+inline bool IsTileEqual(const int(&matrixPosition)[3], const Tile(&levelTiles)[LAYERS][COLS][ROWS], TileType tileType = TileType::VOID)
 {
     return IsTileEqual(matrixPosition[0], matrixPosition[1], matrixPosition[2], levelTiles, tileType);
 }
 
-inline bool IsTileNotEqual(int l, int i, int j, const Tile(&levelTiles)[LAYERS][ROWS][COLS], TileType tileType = TileType::VOID)
+inline bool IsTileNotEqual(int l, int i, int j, const Tile(&levelTiles)[LAYERS][COLS][ROWS], TileType tileType = TileType::VOID)
 {
     if(i < 0 || i >= ROWS || j < 0 || j >= COLS || l < 0 || l >= LAYERS) return true;
 
     return levelTiles[l][i][j].type != tileType;
 }
 
-inline bool IsTileNotEqual(const int(&matrixPosition)[3], const Tile(&levelTiles)[LAYERS][ROWS][COLS], TileType tileType = TileType::VOID)
+inline bool IsTileNotEqual(const int(&matrixPosition)[3], const Tile(&levelTiles)[LAYERS][COLS][ROWS], TileType tileType = TileType::VOID)
 {
     return IsTileNotEqual(matrixPosition[0], matrixPosition[1], matrixPosition[2], levelTiles, tileType);
 }
 
-inline TileType GetTileType(int l, int i, int j, const Tile(&levelTiles)[LAYERS][ROWS][COLS])
+inline TileType GetTileType(int l, int i, int j, const Tile(&levelTiles)[LAYERS][COLS][ROWS])
 {
     if(i < 0 || i >= ROWS || j < 0 || j >= COLS || l < 0 || l >= LAYERS) return TileType::VOID;
 
     return levelTiles[l][i][j].type;
 }
 
-inline TileType GetTileType(const int(&matrixPosition)[3], const Tile(&levelTiles)[LAYERS][ROWS][COLS])
+inline TileType GetTileType(const int(&matrixPosition)[3], const Tile(&levelTiles)[LAYERS][COLS][ROWS])
 {
     return GetTileType(matrixPosition[0], matrixPosition[1], matrixPosition[2], levelTiles);
 }
 
 inline TileRange CalculateTileRange(int x, int y, int range, 
     int minX = 0, int minY = 0, 
-    int maxX = ROWS - 1, int maxY = COLS - 1)
+    int maxX = COLS - 1, int maxY = ROWS - 1)
 {
     int gridX = x / GRID_SIZE;
     int gridY = y / GRID_SIZE;
@@ -431,7 +431,7 @@ inline SpriteRenderData* GetPlatformActiveRenderData(PlatformType type, int inde
     return nullptr;
 }
 
-inline void LoadLevelData(const char* levelPath, Tile(&destination)[LAYERS][ROWS][COLS], const char* roomPath, std::vector<Room>& rooms)
+inline void LoadLevelData(const char* levelPath, Tile(&destination)[LAYERS][COLS][ROWS], const char* roomPath, std::vector<Room>& rooms)
 {
     int dataSize = 0;
 
