@@ -34,10 +34,14 @@ class Platform
 {
 private:
 
-    float timer = 0.3f; 
+    float timer = 0.0f; 
     float maxTime = 0.3f;
 
+    
     float respawnMaxTime = 0.4f;
+
+    float ogTime = 0.0f;
+    float ogRespawnTime = 0.0f;
 
     float rotationAngle = 0.0f;
 
@@ -57,21 +61,21 @@ public:
 
     float gravity = 0.0f;
 
-    float respawnTimer = 1.0f;
+    float respawnTimer = 0.0f;
 
     Platform() = default;
 
     ~Platform() = default;
 
-    inline void SetTimer(float time)
+    inline void SetTimerInit(float time)
     {
-        this->timer = time;
+        this->ogTime = time;
         this->maxTime = time;
     }
 
-    inline void SetRespawnTimer(float time)
+    inline void SetRespawnTimerInit(float time)
     {
-        this->respawnTimer = time;
+        this->ogRespawnTime = time;
         this->respawnMaxTime = time;
     }
 
@@ -89,6 +93,30 @@ public:
     void Update(float dt, int iterations);
 
     void UpdateInactive(float dt, int iterations);
+
+    inline void Respawn()
+    {
+        switch (type)
+        {
+        case PlatformType::FALLING:
+        case PlatformType::DISAPPEARING:
+            updateRequired = false;
+        break;
+        
+        default:
+            break;
+        }
+
+        maxTime = ogTime;
+        respawnMaxTime = ogRespawnTime;
+
+        respawnTimer = respawnMaxTime;
+        timer = maxTime;
+
+        gameObj.transform.position = ogPosition;
+
+        gameObj.UpdateHitboxes();
+    }
 };
 
 inline bool IsPlatformSpike(PlatformType type)

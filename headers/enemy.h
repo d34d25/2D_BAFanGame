@@ -93,5 +93,7 @@ public:
         gameObj.data = spawnData;
 
         ResetFlags();
+
+        gameObj.UpdateHitboxes();
     }
 };

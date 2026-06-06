@@ -101,9 +101,9 @@ void Level::InitLevel(const char* levelPath, const char* roomPath ,float dt, int
 
                     float platformSpeed = 100.0f;
 
-                    platform.SetTimer(0.3f);
+                    platform.SetTimerInit(0.3f);
 
-                    platform.SetRespawnTimer(3.0f);
+                    platform.SetRespawnTimerInit(3.0f);
 
                     platform.textureIndex = level[l][i][j].textureIndex;
 
@@ -143,7 +143,7 @@ void Level::InitLevel(const char* levelPath, const char* roomPath ,float dt, int
                     {
                         platform.type = PlatformType::DISAPPEARING;
 
-                        platform.SetRespawnTimer(1.0f);
+                        platform.SetRespawnTimerInit(1.0f);
                     }
                     break;
 
@@ -244,6 +244,8 @@ void Level::InitLevel(const char* levelPath, const char* roomPath ,float dt, int
 
                     default: break;
                     }
+
+                    platform.Respawn();
 
                     platformList.push_back(platform);
                 }
@@ -634,6 +636,11 @@ void Level::ResetRoom()
             enemy.isActive = false;
             enemy.Respawn();
         }
+
+        for(Platform& platform : platformBuckets[previousRoomIndex])
+        {
+            platform.Respawn();
+        }
     }
 
     if(currentRoomIndex > -1 && currentRoomIndex < enemyBuckets.size())
@@ -642,6 +649,11 @@ void Level::ResetRoom()
         {
             enemy.isActive = true;
             enemy.Respawn();
+        }
+
+        for(Platform& platform : platformBuckets[currentRoomIndex])
+        {
+            platform.Respawn();
         }
     }
 }
@@ -677,38 +689,9 @@ void Level::LowFrequencyUpdate()
     float enemySpawnRadius = GRID_SIZE * 15.0f;
     float enemyDespawnRadius = GRID_SIZE * 17.0f;
 
-    if(currentRoomIndex > -1)
+    if(currentRoomIndex > -1 && currentRoomIndex < enemyBuckets.size())
     {
         std::vector<Enemy>& activeEnemyBucket = enemyBuckets[currentRoomIndex];
-
-        std::vector<Platform>& activePLatformBucket = platformBuckets[currentRoomIndex];
-
-        for(int p = 0; p < activePLatformBucket.size(); p++)
-        {
-            Platform& platform = activePLatformBucket[p];
-
-            if(!platform.gameObj.hasBody) continue;
-
-            if(platform.IsInactive())
-            {
-                platform.UpdateInactive(dt, 1);
-                continue;
-            }
-            else if(platform.type == PlatformType::FALLING && platform.respawnTimer >= 0.0f && platform.updateRequired)
-            {
-                platform.Update(dt, 1);
-            }
-
-            if(CheckCollisionCircles(
-                player.gameObj.transform.position,
-                playerRadius,
-                platform.gameObj.transform.position,
-                platformUpdateRadius
-            ))
-            {
-                player.platformCache_update.push_back(&platform);
-            }
-        }
 
         for(int e = 0; e < activeEnemyBucket.size(); e++)
         {
@@ -737,6 +720,38 @@ void Level::LowFrequencyUpdate()
             }
         }
     }
+
+    if(currentRoomIndex > -1 && currentRoomIndex < platformBuckets.size())
+    {
+        std::vector<Platform>& activePLatformBucket = platformBuckets[currentRoomIndex];
+
+        for(int p = 0; p < activePLatformBucket.size(); p++)
+        {
+            Platform& platform = activePLatformBucket[p];
+
+            if(!platform.gameObj.hasBody) continue;
+
+            if(platform.IsInactive())
+            {
+                platform.UpdateInactive(dt, 1);
+                continue;
+            }
+            else if(platform.type == PlatformType::FALLING && platform.respawnTimer >= 0.0f && platform.updateRequired)
+            {
+                platform.Update(dt, 1);
+            }
+
+            if(CheckCollisionCircles(
+                player.gameObj.transform.position,
+                playerRadius,
+                platform.gameObj.transform.position,
+                platformUpdateRadius
+            ))
+            {
+                player.platformCache_update.push_back(&platform);
+            }
+        }
+    }
 }
 
 void Level::MediumFrequencyDiscreteUpdate()
@@ -748,7 +763,7 @@ void Level::MediumFrequencyDiscreteUpdate()
 
     float playerRadius = player.gameObj.GetMainAABB().height * REC_TO_CIRCLE_RADIUS_MULTIPLIER;
 
-    float renderRadius = GRID_SIZE * 15.0f;
+    float renderRadius = GRID_SIZE * 20.0f;
 
     for(int p = 0; p < player.platformCache_update.size(); p++)
     {
@@ -846,8 +861,6 @@ void Level::HighFrequencyDiscreteUpdate()
     isGravityUp = gravity < 0;
 
     float playerRadius = player.gameObj.GetMainAABB().height * REC_TO_CIRCLE_RADIUS_MULTIPLIER;
-
-    TileRangeLimits playerTileRangeLimits = GetTileRangeLimits();
 
     TileRange playerTileRange = CalculateTileRange(
         player.gameObj.transform.position.x,
@@ -1316,10 +1329,10 @@ void Level::HighFrequencyDiscreteUpdate()
         player.gravity = gravity;
         player.entityData.flipY = isGravityUp;
 
-        std::vector<Platform>& activePLatformBucket = platformBuckets[currentRoomIndex];
-
-        if(currentRoomIndex > -1)
+        if(currentRoomIndex > -1 && currentRoomIndex < platformBuckets.size())
         {
+            std::vector<Platform>& activePLatformBucket = platformBuckets[currentRoomIndex];
+
             for(int i = 0; i < activePLatformBucket.size(); i++)
             {
                 Platform& platform = activePLatformBucket[i];
@@ -1350,11 +1363,11 @@ void Level::CCD_Update()
         Bullet* bullet = player.bulletpool->activeBullets[i];
 
         if(!bullet) continue;
-
-        Rectangle& currentRoom = rooms[currentRoomIndex].aabb;
-
-        if(currentRoomIndex > -1)
+        
+        if(currentRoomIndex > -1 && currentRoomIndex < rooms.size())
         {
+            Rectangle& currentRoom = rooms[currentRoomIndex].aabb;
+
             if(!CheckCollisionPointRec(bullet->posititon, currentRoom)) bullet->didHit = true;
         }
 
@@ -1380,24 +1393,33 @@ void Level::ResetLevel()
 
     bool gravityUp = gravity < 0;
 
-    isGravityUp = &gravityUp;
-
     player.gravity = gravity;
     player.entityData.flipY = gravityUp;
 
-    for(int i = 0; i < platformList.size(); i++)
+    for(int i = 0; i < platformBuckets.size(); i++)
     {
-        Platform& platform = platformList[i];
+        for(int j = 0; j < platformBuckets[i].size(); j++)
+        {
+            Platform& platform = platformBuckets[i][j];
 
-        if(!(platform.type == PlatformType::FALLING) || platform.updateRequired) continue;
+            platform.Respawn();
 
-        platform.gravity = gravity;
+            if(platform.type == PlatformType::FALLING)
+            {
+                platform.gravity = gravity;
+            }
+        }
     }
 
-    for(int i = 0; i < enemyList.size(); i++)
+    for(int i = 0; i < enemyBuckets.size(); i++)
     {
-        enemyList[i].isActive = true;
-        enemyList[i].Respawn();
+        for(int j = 0; j < enemyBuckets[i].size(); j++)
+        {
+            Enemy& enemy = enemyBuckets[i][j];
+
+            enemy.Respawn();
+            enemy.isActive = false;
+        }
     }
 
     player.Respawn();
