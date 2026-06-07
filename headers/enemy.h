@@ -13,7 +13,7 @@ class Enemy
 
 private:
 
-    void YuukaBehaivour(float dt, const Vector2& playerPos);
+    void YuukaBehaivour(float dt, const Vector2& playerPos, Vector2* playerVel, const bool isPlayerGrounded, bool* canPlayerMove);
 
     int currentAttack = 0;
 
@@ -23,6 +23,8 @@ private:
     //generic timer for being used inside the enemies patterns
     float timer = 0.0f;
     float maxTime = 0.2f;
+
+    int moveSpeedSign = 1;
 
 public:
 
@@ -36,6 +38,8 @@ public:
 
     Color testColor = ENEMY_DUMMY;
 
+    Rectangle roomSize = {};
+
     float gravity = 0.0f;
 
     //flags
@@ -44,6 +48,8 @@ public:
     bool isGrounded = false;
 
     bool inWater = false;
+
+    bool isTouchingWall = false;
 
     //jump
     bool isJumping = false;
@@ -55,7 +61,7 @@ public:
 
     ~Enemy() = default;
 
-    void UpdateAI(float dt, const Vector2& playerPos);
+    void UpdateAI(float dt, const Vector2& playerPos, Vector2* playerVel, const bool isPlayerGrounded, bool* canPlayerMove);
 
     void Update(float dt, int iterations);
 
@@ -76,6 +82,11 @@ public:
     inline void ResetFlags()
     {
         inWater = false;
+    }
+
+    inline void ResetFlagsAI()
+    {
+        isTouchingWall = false;
         wasGrounded = false;
     }
 

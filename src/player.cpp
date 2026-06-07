@@ -201,142 +201,114 @@ void Player::Update(float dt, int iterations)
 
     float moveForce = 400 * gameObj.body.damping;
 
-    if(IsKeyDown(KEY_LEFT))
+    if(canMove)
     {
-        gameObj.body.force.x -= moveForce;
-        
-        entityData.flipX = true;
-    }
-    else if(IsKeyDown(KEY_RIGHT))
-    {
-        gameObj.body.force.x += moveForce;
-
-        entityData.flipX = false;
-    }
-
-    //ladder
-
-    if(inLadder && (IsKeyDown(KEY_UP) || IsKeyDown(KEY_DOWN))) climbing = true;
-
-    if(climbing)
-    {
-        if(!inLadder)
+        if(IsKeyDown(KEY_LEFT))
         {
-            climbing = false;
-            gameObj.body.hasGravity = true;
+            gameObj.body.force.x -= moveForce;
+            
+            entityData.flipX = true;
+        }
+        else if(IsKeyDown(KEY_RIGHT))
+        {
+            gameObj.body.force.x += moveForce;
+
+            entityData.flipX = false;
+        }
+
+        //ladder
+
+        if(inLadder && (IsKeyDown(KEY_UP) || IsKeyDown(KEY_DOWN))) climbing = true;
+
+        if(climbing)
+        {
+            if(!inLadder)
+            {
+                climbing = false;
+                gameObj.body.hasGravity = true;
+            }
+            else
+            {
+                gameObj.transform.position.x = laddedSnapPosX;
+
+                gameObj.body.hasGravity = false;
+
+                gameObj.body.velocity = {0,0};
+                gameObj.body.altVelocity = {0,0};
+
+                float climbingSpeed = 200.0f;
+
+                if(IsKeyDown(KEY_UP)) gameObj.body.velocity.y = -climbingSpeed;
+                else if(IsKeyDown(KEY_DOWN))
+                {
+                    gameObj.body.velocity.y = climbingSpeed;
+
+                    if(isGrounded)
+                    {
+                        climbing = false;
+                        inLadder = false;
+                        gameObj.body.hasGravity = true;
+                    }
+                } 
+
+                if(IsKeyPressed(KEY_Z))
+                {
+                    climbing = false;
+
+                    gameObj.body.velocity.y = jump * 0.1f;
+                }
+            }
         }
         else
         {
-            gameObj.transform.position.x = laddedSnapPosX;
-
-            gameObj.body.hasGravity = false;
-
-            gameObj.body.velocity = {0,0};
-            gameObj.body.altVelocity = {0,0};
-
-            float climbingSpeed = 200.0f;
-
-            if(IsKeyDown(KEY_UP)) gameObj.body.velocity.y = -climbingSpeed;
-            else if(IsKeyDown(KEY_DOWN))
-            {
-                gameObj.body.velocity.y = climbingSpeed;
-
-                if(isGrounded)
-                {
-                    climbing = false;
-                    inLadder = false;
-                    gameObj.body.hasGravity = true;
-                }
-            } 
-
-            if(IsKeyPressed(KEY_Z))
-            {
-                climbing = false;
-
-                gameObj.body.velocity.y = jump * 0.1f;
-            }
+            gameObj.body.hasGravity = true;
         }
-    }
-    else
-    {
-        gameObj.body.hasGravity = true;
-    }
 
-    //jump
-
-    if(isJumping)
-    {
-        gameObj.body.hasGravity = false;
-    }
-    else if(!isJumping && !climbing)
-    {
-        gameObj.body.hasGravity = true;
-    }
-
-    if(!isGrounded && std::abs(gameObj.body.velocity.y) <= 0.1f) isJumping = false;
-
-    if(isGrounded)
-    {
-        jumpTime = maxJumpTime;
-    }
-    else
-    {
-        jumpTime -= subDt;
-
-        if(jumpTime <= 0.0f) jumpTime = 0.0f; 
-    }
-
-    if(IsKeyDown(KEY_Z))
-    {
-        if(isGrounded) isJumping = true;
+        //jump
 
         if(isJumping)
         {
-            gameObj.body.velocity.y += jump * subDt;
-
-            if(jumpTime <= 0.0f) isJumping = false;
+            gameObj.body.hasGravity = false;
         }
-    }
-    else
-    {
-        isJumping = false;
-    }
-
-    //bullet manual control (testing)
-
-    /*for(int i = 0; i < bulletpool->activeBullets.size(); i++)
-    {
-        Bullet* bullet = bulletpool->activeBullets[i];
-
-        float bulletSpeed = 5000;
-
-        if(IsKeyDown(KEY_W))
+        else if(!isJumping && !climbing)
         {
-            bullet->velocity.y = -bulletSpeed;
+            gameObj.body.hasGravity = true;
         }
-        else if(IsKeyDown(KEY_S))
+
+        if(!isGrounded && std::abs(gameObj.body.velocity.y) <= 0.1f) isJumping = false;
+
+        if(isGrounded)
         {
-            bullet->velocity.y = bulletSpeed;
+            jumpTime = maxJumpTime;
         }
         else
         {
-            bullet->velocity.y = 0;
+            jumpTime -= subDt;
+
+            if(jumpTime <= 0.0f) jumpTime = 0.0f; 
         }
 
-        if(IsKeyDown(KEY_A))
+        if(IsKeyDown(KEY_Z))
         {
-            bullet->velocity.x = -bulletSpeed;
-        }
-        else if(IsKeyDown(KEY_D))
-        {
-            bullet->velocity.x = bulletSpeed;
+            if(isGrounded) isJumping = true;
+
+            if(isJumping)
+            {
+                gameObj.body.velocity.y += jump * subDt;
+
+                if(jumpTime <= 0.0f) isJumping = false;
+            }
         }
         else
         {
-            bullet->velocity.x = 0;
+            isJumping = false;
         }
-    }*/
-
+    }
+    else 
+    {
+        gameObj.body.velocity = {0,0};
+    }
+    
     //update
     
     gameObj.body.UpdateVelocity(dt, iterations, gravity);   

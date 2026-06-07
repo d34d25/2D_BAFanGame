@@ -567,6 +567,8 @@ void Level::InitLevel(const char* levelPath, const char* roomPath ,float dt, int
         {    
             if(CheckCollisionPointRec(enemyList[i].spawnPosition, rooms[r].aabb))
             {
+                enemyList[i].roomSize = rooms[r].aabb;
+
                 enemyBuckets[r].push_back(std::move(enemyList[i]));
                 break;
             }
@@ -574,7 +576,7 @@ void Level::InitLevel(const char* levelPath, const char* roomPath ,float dt, int
     }
 
     enemyList.clear();
-
+    enemyList.shrink_to_fit();
 
     platformBuckets.resize(rooms.size());
 
@@ -591,6 +593,7 @@ void Level::InitLevel(const char* levelPath, const char* roomPath ,float dt, int
     }
 
     platformList.clear();
+    platformList.shrink_to_fit();
 
     player.platformCache_update.reserve(800);
     player.platformCache_physics.reserve(60);
@@ -852,7 +855,12 @@ void Level::MediumFrequencyDiscreteUpdate()
             player.enemyCache_physics.push_back(enemy);
         }
 
-        enemy->UpdateAI(dt, player.gameObj.transform.position);
+        if(lowFrequencyCounter % 2 == 0)
+        {
+            enemy->UpdateAI(dt, player.gameObj.transform.position, &player.gameObj.body.velocity, player.isGrounded, &player.canMove);
+
+            enemy->ResetFlagsAI();
+        }
     }
 }
 
@@ -1196,6 +1204,8 @@ void Level::HighFrequencyDiscreteUpdate()
                         tile.gameObj.GetMainAABB()
                     ))
                     {
+                        enemy->isTouchingWall = true;
+
                         if(!IsTileOneWay(tile))
                         {
                             SolveCollisions(

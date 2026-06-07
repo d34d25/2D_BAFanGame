@@ -95,6 +95,8 @@ public:
     bool isTouchingGravityChanger = false;
     bool isTouchingSpike = false;
 
+    bool canMove = true;
+
     //jump flags
     bool isJumping = false;
 
