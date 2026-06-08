@@ -95,6 +95,8 @@ public:
     bool isTouchingGravityChanger = false;
     bool isTouchingSpike = false;
 
+    bool hitCeiling = false;
+
     bool canMove = true;
 
     //jump flags
@@ -159,6 +161,20 @@ public:
         return gameObj.GetSubAABB(2);
     }
 
+    inline Rectangle& GetCeilingDetector()
+    {
+        float offset = 1.0f;
+
+        int dir = entityData.flipY ? 1 : -1;
+
+        float centerY = gameObj.GetMainAABB().y + gameObj.GetMainAABB().height * 0.5f;
+
+        if(dir == 1) gameObj.GetSubAABB(1).y = centerY + offset;
+        else gameObj.GetSubAABB(1).y = centerY - offset - gameObj.GetSubAABB(1).height;
+        
+        return gameObj.GetSubAABB(1);
+    }
+
     inline void Respawn()
     {
         gameObj.transform.position = spawnPos;
@@ -190,6 +206,8 @@ public:
         inWater = false;
         
         inLadder = false;
+
+        hitCeiling = false;
     }
 
     inline void UpdateFlags()

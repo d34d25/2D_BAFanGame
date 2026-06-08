@@ -275,6 +275,8 @@ void Level::InitLevel(const char* levelPath, const char* roomPath ,float dt, int
 
                     enemy.gravity = gravity;
 
+                    enemy.ogGravity = enemy.gravity;
+
                     enemy.gameObj.body.hasGravity = true;
 
                     Hitbox jumpDetector = {
@@ -975,6 +977,26 @@ void Level::HighFrequencyDiscreteUpdate()
                             );
                         }
                     }
+
+                    if(CheckCollisionRecs(player.GetCeilingDetector(), objTile.GetMainAABB()))
+                    {
+                        if(!IsOneWayUpDown(tile)) player.hitCeiling = true;
+                        else if(IsOneWayUpDown(tile))
+                        {
+                            if(tile.gameObj.direction == Direction::UP &&
+                                IsAbove(player.gameObj.GetMainAABB(), objTile.GetMainAABB(), 0.0f)
+                            )
+                            {
+                                player.hitCeiling = true;
+                            }
+                            else if(tile.gameObj.direction == Direction::DOWN &&
+                                IsBelow(player.gameObj.GetMainAABB(), objTile.GetMainAABB(), 0.0f)
+                            )
+                            {
+                                player.hitCeiling = true;
+                            }
+                        }
+                    }
                 }
 
                 //tile triggers and non solid tiles
@@ -1274,6 +1296,26 @@ void Level::HighFrequencyDiscreteUpdate()
                                     false,
                                     false
                                 );
+                            }
+                        }
+
+                        if(CheckCollisionRecs(enemy->GetCeilingDetector(), tile.gameObj.GetMainAABB()))
+                        {
+                            if(!IsOneWayUpDown(tile)) enemy->hitCeiling = true;
+                            else if(IsOneWayUpDown(tile))
+                            {
+                                if(tile.gameObj.direction == Direction::UP &&
+                                    IsAbove(enemy->gameObj.GetMainAABB(), tile.gameObj.GetMainAABB(), 0.0f)
+                                )
+                                {
+                                    enemy->hitCeiling = true;
+                                }
+                                else if(tile.gameObj.direction == Direction::DOWN &&
+                                    IsBelow(enemy->gameObj.GetMainAABB(), tile.gameObj.GetMainAABB(), 0.0f)
+                                )
+                                {
+                                    enemy->hitCeiling = true;
+                                }
                             }
                         }
                     }
@@ -1589,7 +1631,7 @@ void Level::DrawLevel()
         player.currentFrame
     );
 
-    //DebugDrawing();
+    DebugDrawing();
 
     EndMode2D();
 
@@ -1699,6 +1741,7 @@ void Level::DebugDrawing()
         }
 
         DrawAABB(enemy->GetJumpDetector(), GOLD);
+        DrawAABB(enemy->GetCeilingDetector(), YELLOW);
     }
     
     for(int i = 0; i < player.bulletpool->activeBullets.size(); i++)
@@ -1744,6 +1787,8 @@ void Level::DebugDrawing()
     DrawAABB(player.gameObj.GetMainAABB(), ORANGE);
 
     DrawAABB(player.GetJumpDetector(), GREEN);
+
+    DrawAABB(player.GetCeilingDetector(), DARKGREEN);
 }
 
 void Level::DebugTextDrawing()

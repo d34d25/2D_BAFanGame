@@ -191,7 +191,7 @@ void Player::Update(float dt, int iterations)
 {
     float subDt = dt / iterations;
 
-    float jumpVel = -9000;
+    float jumpVel = -12000;
 
     float jump = jumpVel;
 
@@ -266,16 +266,7 @@ void Player::Update(float dt, int iterations)
 
         //jump
 
-        if(isJumping)
-        {
-            gameObj.body.hasGravity = false;
-        }
-        else if(!isJumping && !climbing)
-        {
-            gameObj.body.hasGravity = true;
-        }
-
-        if(!isGrounded && std::abs(gameObj.body.velocity.y) <= 0.1f) isJumping = false;
+        if(!isGrounded && hitCeiling) isJumping = false;
 
         if(isGrounded)
         {
@@ -292,11 +283,13 @@ void Player::Update(float dt, int iterations)
         {
             if(isGrounded) isJumping = true;
 
-            if(isJumping)
+            if(isJumping && jumpTime > 0.0f)
             {
                 gameObj.body.velocity.y += jump * subDt;
-
-                if(jumpTime <= 0.0f) isJumping = false;
+            }
+            else
+            {
+                isJumping = false;
             }
         }
         else

@@ -15,12 +15,14 @@ void Enemy::YuukaBehaivour(float dt, const Vector2& playerPos, Vector2* playerVe
 
         gameObj.body.hasGravity = true;
 
+        gravity = ogGravity;
+
         int roll = GetRandomValue(0,100);
 
         if(roll <= 50) moveSpeedSign = -1;
         else moveSpeedSign = 1;
 
-        if (roll <= 50) currentAttack = 0;
+        if (roll <= 80) currentAttack = 0;
         else currentAttack = 1;
 
         counter = 0;
@@ -33,6 +35,8 @@ void Enemy::YuukaBehaivour(float dt, const Vector2& playerPos, Vector2* playerVe
     // stomp
     case 0:
     {
+        gravity = ogGravity * 2.0f;
+
         moveSpeedSign = 1;
 
         maxTime = 0.5f;
@@ -43,7 +47,7 @@ void Enemy::YuukaBehaivour(float dt, const Vector2& playerPos, Vector2* playerVe
 
         float minDist = NUM_OF_TILES * GRID_SIZE * NUM_OF_TILES * GRID_SIZE;
 
-        if(!isGrounded && gameObj.body.velocity.y <= 0.1f) isJumping = false;
+        if(!isGrounded && hitCeiling) isJumping = false;
 
         if(isGrounded && distToPlayerSqr <= minDist)
         {
@@ -80,9 +84,11 @@ void Enemy::YuukaBehaivour(float dt, const Vector2& playerPos, Vector2* playerVe
        
         if(isJumping)
         {
+            isGrounded = false;
+
             float xPosDifference = playerPos.x - gameObj.transform.position.x;
 
-            float jumpVel = -5000;
+            float jumpVel = -10000;
 
             isGrounded = false;
 
@@ -98,8 +104,10 @@ void Enemy::YuukaBehaivour(float dt, const Vector2& playerPos, Vector2* playerVe
             {
                 gameObj.body.velocity.x = -moveSpeed * horizontalBoostFactor;
             }
-        }
 
+            isJumping = false;
+        }
+      
         if(stateTimer >= 2.0f)
         {
             stateTimer = 0.0f;
