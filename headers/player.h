@@ -186,6 +186,8 @@ public:
         isJumping = false;
         isGrounded = false;
 
+        canMove = true;
+
         ResetFalgs();
     }
 

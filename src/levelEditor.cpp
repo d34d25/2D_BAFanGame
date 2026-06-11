@@ -681,7 +681,7 @@ void LevelEditor::Draw()
         }
     }
 
-    DrawCircle(targetNeigbourPos.x, targetNeigbourPos.y, 20, RED);
+    if(roomMode) DrawCircle(targetNeigbourPos.x, targetNeigbourPos.y, 20, RED);
     
     for(int i = 0; i < rooms.size(); i++)
     {

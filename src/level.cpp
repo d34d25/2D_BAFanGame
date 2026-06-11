@@ -459,7 +459,7 @@ void Level::InitLevel(const char* levelPath, const char* roomPath ,float dt, int
                 if(IsTileSpike(tile->type))
                 {
                     tile->gameObj.canEntityCollidePhysically = false;
-                    tile->gameObj.canPlatformCollidePhysically = true;
+                    tile->gameObj.canPlatformCollidePhysically = false;
 
                     SpriteRenderData* spikeRenderData = GetTileActiveRenderData(TileType::SPIKE);
 
@@ -674,26 +674,7 @@ void Level::LowFrequencyUpdate()
     float playerRadius = player.gameObj.GetMainAABB().width * REC_TO_CIRCLE_RADIUS_MULTIPLIER;
     float platformUpdateRadius = GRID_SIZE * 25.0f;
 
-    int roomIndex = -1;
-
-    for(int r = 0; r < rooms.size(); r++)
-    {
-        if(CheckCollisionPointRec(player.gameObj.transform.position, rooms[r].aabb))
-        {
-            roomIndex = r;
-            break;
-        }
-    }
-
-    if(roomIndex != currentRoomIndex)
-    {
-        previousRoomIndex = currentRoomIndex;
-        currentRoomIndex = roomIndex;
-
-        rangeLimits = GetTileRangeLimits();
-
-        ResetRoom();
-    }
+    
 
     float enemySpawnRadius = GRID_SIZE * 15.0f;
     float enemyDespawnRadius = GRID_SIZE * 17.0f;
@@ -872,6 +853,32 @@ void Level::MediumFrequencyDiscreteUpdate()
 
 void Level::HighFrequencyDiscreteUpdate()
 {
+    Vector2 playerFuturePos = {
+        player.gameObj.transform.position.x + player.gameObj.body.GetFinalVelocity().x * (dt / iterations),
+        player.gameObj.transform.position.y + player.gameObj.body.GetFinalVelocity().y * (dt / iterations)
+    };
+
+    int roomIndex = -1;
+
+    for(int r = 0; r < rooms.size(); r++)
+    {
+        if(CheckCollisionPointRec(playerFuturePos, rooms[r].aabb))
+        {
+            roomIndex = r;
+            break;
+        }
+    }
+
+    if(roomIndex != currentRoomIndex)
+    {
+        previousRoomIndex = currentRoomIndex;
+        currentRoomIndex = roomIndex;
+
+        rangeLimits = GetTileRangeLimits();
+
+        ResetRoom();
+    }
+
     isGravityUp = gravity < 0;
 
     float playerRadius = player.gameObj.GetMainAABB().height * REC_TO_CIRCLE_RADIUS_MULTIPLIER;
@@ -879,7 +886,9 @@ void Level::HighFrequencyDiscreteUpdate()
     TileRange playerTileRange = CalculateTileRange(
         player.gameObj.transform.position.x,
         player.gameObj.transform.position.y,
-        collisionTileCheckRange
+        collisionTileCheckRange,
+        rangeLimits.minX, rangeLimits.minY,
+        rangeLimits.maxX, rangeLimits.maxY
     );
 
     player.Update(dt, iterations);
