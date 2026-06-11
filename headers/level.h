@@ -61,6 +61,9 @@ private:
 
     Player player;
 
+    //clamps the tile range to the current room
+    TileRangeLimits rangeLimits = {};
+
     void ResetRoom();
 
     inline void ClearTileMatrix()

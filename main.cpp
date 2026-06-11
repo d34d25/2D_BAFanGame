@@ -53,7 +53,7 @@ int main()
 
     testLevel->canvas = canvas;
 
-    bool editorMode = false;
+    bool editorMode = true;
 
     const int MAX_LAST_FRAMES = 120;
 

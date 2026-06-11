@@ -38,6 +38,8 @@ private:
 
     std::vector<Room> rooms = {};
 
+    Vector2 targetNeigbourPos = {0,0};
+
     Direction currentDirection = Direction::UP;
 
     EntityData currentData = {};

@@ -424,32 +424,40 @@ void LevelEditor::Update()
             }
         }
 
-        if(hoveredRoomIndex > -1)
+        if(hoveredRoomIndex > -1 && hoveredRoomIndex < rooms.size())
         {
             Rectangle currentAABB = rooms[hoveredRoomIndex].aabb;
 
-            Vector2 threshold = {currentAABB.width * 0.1f, currentAABB.height * 0.1f};
+            int threshold = GRID_SIZE * 2;
 
-            Vector2 targetNeigbourPos = {
+            //this starts at the center of the current room
+            targetNeigbourPos = {
                 currentAABB.x + currentAABB.width * 0.5f,
                 currentAABB.y + currentAABB.height * 0.5f
             };
 
-            if(mouseWorldPos.x < currentAABB.x + threshold.x)
+            int offset = GRID_SIZE;
+
+            Vector2 displacement = {
+                currentAABB.width * 0.5f + offset,
+                currentAABB.height * 0.5f + offset
+            };
+
+            if(mouseWorldPos.x < currentAABB.x + threshold)
             {
-                targetNeigbourPos.x -= currentAABB.width;
+                targetNeigbourPos.x -= displacement.x;
             }
-            else if(mouseWorldPos.x > (currentAABB.x + currentAABB.width) - threshold.x)
+            else if(mouseWorldPos.x > (currentAABB.x + currentAABB.width) - threshold)
             {
-                targetNeigbourPos.x += currentAABB.width;
+                targetNeigbourPos.x += displacement.x;
             }
-            else if(mouseWorldPos.y < currentAABB.y + threshold.y)
+            else if(mouseWorldPos.y < currentAABB.y + threshold)
             {
-                targetNeigbourPos.y -= currentAABB.height;
+                targetNeigbourPos.y -= displacement.y;
             }
-            else if(mouseWorldPos.y > (currentAABB.y + currentAABB.height) - threshold.y)
+            else if(mouseWorldPos.y > (currentAABB.y + currentAABB.height) - threshold)
             {
-                targetNeigbourPos.y += currentAABB.height;
+                targetNeigbourPos.y += displacement.y;
             }
 
             if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
@@ -465,7 +473,7 @@ void LevelEditor::Update()
                     }
                 }
 
-                if(neighbourIndex > -1)
+                if(neighbourIndex > -1 && neighbourIndex < rooms.size())
                 {
                     Rectangle neighborAABB = rooms[neighbourIndex].aabb;
 
@@ -672,6 +680,8 @@ void LevelEditor::Draw()
             DrawSprite(previewTransform, activeRenderData, currentData, currentTexture, previewColor);
         }
     }
+
+    DrawCircle(targetNeigbourPos.x, targetNeigbourPos.y, 20, RED);
     
     for(int i = 0; i < rooms.size(); i++)
     {
@@ -681,23 +691,23 @@ void LevelEditor::Draw()
     //grid
     for(int i = 0; i <= worldWidth; i+= GRID_SIZE)
     {
-        if(i == worldWidth) continue;
+        //if(i == worldWidth) continue;
 
         DrawLine(i, 0, i, worldHeight, GRAY);
     }
 
     for(int i = 0; i <= worldHeight; i+= GRID_SIZE)
     {
-        if(i == worldHeight) continue;
+        //if(i == worldHeight) continue;
 
         DrawLine(0, i, worldWidth, i, GRAY);
     }
 
-    DrawLine(halfWorldWidth, -worldWidth, halfWorldWidth, worldWidth, GREEN);
+    //DrawLine(halfWorldWidth, -worldWidth, halfWorldWidth, worldWidth, GREEN);
 
-    DrawLine(-worldHeight, halfWorldHeight, worldHeight, halfWorldHeight, GREEN);
+    //DrawLine(-worldHeight, halfWorldHeight, worldHeight, halfWorldHeight, GREEN);
 
-    DrawCircle(halfWorldWidth, halfWorldHeight, 5,GREEN);
+    //DrawCircle(halfWorldWidth, halfWorldHeight, 5,GREEN);
 
     DrawRectangleLines(
         mouseMatrixPosition.x * GRID_SIZE, 

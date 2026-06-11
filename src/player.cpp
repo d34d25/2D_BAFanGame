@@ -94,11 +94,11 @@ Player::Player(Vector2 position)
         weaponRenderData.offset.x = 8.0f;
         weaponRenderData.offset.y = 14.0f;
 
-        bulletData.gravity = gravity;
+        bulletData.gravity = gravity * 2.0f;
 
         bulletData.spread = 0.0f;
         bulletData.radius = 8.0f;
-        bulletData.angle = -80;
+        bulletData.angle = -40;
         bulletData.fireRate = 1.2f;
 
         bulletData.mainColor = YUZU_COLOR;

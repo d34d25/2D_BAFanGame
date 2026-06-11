@@ -38,6 +38,8 @@ void Level::InitLevel(const char* levelPath, const char* roomPath ,float dt, int
 
     camera.zoom = roundf(camera.zoom / step) * step;
 
+    rangeLimits = GetTileRangeLimits();
+
     ClearTileMatrix();
 
     ClearPlatformList();
@@ -687,6 +689,8 @@ void Level::LowFrequencyUpdate()
     {
         previousRoomIndex = currentRoomIndex;
         currentRoomIndex = roomIndex;
+
+        rangeLimits = GetTileRangeLimits();
 
         ResetRoom();
     }
@@ -1408,6 +1412,8 @@ void Level::HighFrequencyDiscreteUpdate()
 
 void Level::CCD_Update()
 {
+    //TileRangeLimits bulletRangeLimits = GetTileRangeLimits();
+
     player.bulletpool.get()->UpdateBullets(dt);
 
     for(int i = 0; i < player.bulletpool->activeBullets.size(); i++)
@@ -1436,6 +1442,38 @@ void Level::CCD_Update()
                 bullet->didHit =  true;
             }
         }
+
+        if(player.bulletpool->explodes)
+        {
+            TileRange bulletRange = CalculateTileRange(
+                bullet->posititon.x, bullet->posititon.y,
+                2.0f, rangeLimits.minX, rangeLimits.minY,
+                rangeLimits.maxX, rangeLimits.maxY 
+            );
+
+            for(int l = 0; l < LAYERS; l++)
+            {
+                for(int i = bulletRange.startX; i <= bulletRange.endX; i++)
+                {
+                    for(int j = bulletRange.startY; j <= bulletRange.endY; j++)
+                    {
+                        Tile& tile = level[l][i][j];
+
+                        if(tile.gameObj.canEntityCollidePhysically)
+                        {
+                            if(CheckCollisionCircleRec(
+                                bullet->posititon, bullet->radius,
+                                tile.gameObj.GetMainAABB()
+                            ))
+                            {
+                                bullet->didHit = true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
     }
 }
 
@@ -1631,7 +1669,7 @@ void Level::DrawLevel()
         player.currentFrame
     );
 
-    DebugDrawing();
+    //DebugDrawing();
 
     EndMode2D();
 
