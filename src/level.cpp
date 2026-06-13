@@ -24,7 +24,7 @@ void Level::InitLevel(const char* levelPath, const char* roomPath ,float dt, int
 
     gravity = GRAVITY;
 
-    player.entityData.flipY = gravity < 0;
+    player.gameObj.data.flipY = gravity < 0;
 
     player.gravity = gravity;
 
@@ -45,6 +45,10 @@ void Level::InitLevel(const char* levelPath, const char* roomPath ,float dt, int
     ClearPlatformList();
 
     LoadLevelData(levelPath, level, roomPath, rooms);
+
+    platformList.reserve(800);
+
+    enemyList.reserve(800);
 
     for(int l = 0; l < LAYERS; l++)
     {
@@ -69,187 +73,39 @@ void Level::InitLevel(const char* levelPath, const char* roomPath ,float dt, int
 
                 if(isPlatform)
                 {
-                    Platform platform = Platform();
+                    platformList.emplace_back();
 
-                    platform.gameObj.hasBody = true;
-
-                    float platformWidth = GRID_SIZE;
-                    float platformHeight = GRID_SIZE;
-
-                    platform.gravity = gravity;
+                    Platform& platform = platformList.back();
 
                     switch (type)
                     {
-                    case TileType::VERTICAL_MOVING_PLATFORM:
-                    case TileType::HORIZONALT_MOVING_PLATFORM:
-                    {
-                        platformWidth = GRID_SIZE * 3.0f;
-                        platformHeight = GRID_SIZE * 0.3f;
-                    }
-                    break;
-                    
-                    default: break;
-                    }
+                    case TileType::HORIZONALT_MOVING_PLATFORM: platform.type = PlatformType::MOVING_HORIZONTAL; break;
 
-                    platform.gameObj.transform = tile->gameObj.transform;
-                    platform.gameObj.data = tile->gameObj.data;
-                    platform.gameObj.direction = tile->gameObj.direction;
+                    case TileType::VERTICAL_MOVING_PLATFORM: platform.type = PlatformType::MOVING_VERTICAL; break;
 
-                    platform.ogPosition = platform.gameObj.transform.position;
+                    case TileType::FALLING_PLATFORM: platform.type = PlatformType::FALLING; break;
 
-                    platform.gameObj.hitboxes.push_back(Hitbox{{0,0}, {platformWidth, platformHeight}});
+                    case TileType::DISAPPEARING_PLATFORM: platform.type = PlatformType::DISAPPEARING; break;
 
-                    platform.gameObj.UpdateHitboxes();
+                    case TileType::VERTICAL_MOVING_SPIKE: platform.type = PlatformType::MOVING_SPIKE_VERTICAL; break;
 
-                    float platformSpeed = 100.0f;
+                    case TileType::HORIZONTAL_MOVING_SPIKE: platform.type = PlatformType::MOVING_SPIKE_HORIZONTAL; break;
 
-                    platform.SetTimerInit(0.3f);
+                    case TileType::ROTATING_SPIKE_SINGLE: platform.type = PlatformType::ROTATING_SPIKE_SINGLE; break;
 
-                    platform.SetRespawnTimerInit(3.0f);
-
-                    platform.textureIndex = level[l][i][j].textureIndex;
-
-                    platform.variantIndex = level[l][i][j].variantIndex;
-
-                    switch (type)
-                    {
-                    case TileType::HORIZONALT_MOVING_PLATFORM:
-                    {
-                        platform.type = PlatformType::MOVING_HORIZONTAL;
-
-                        platform.gameObj.body.velocity.x = platformSpeed;
-
-                        platform.updateRequired = true;
-                    }
-                    break;
-
-                    case TileType::VERTICAL_MOVING_PLATFORM:
-                    {
-                        platform.type = PlatformType::MOVING_VERTICAL;
-
-                        platform.gameObj.body.velocity.y = -platformSpeed;
-
-                        platform.updateRequired = true;
-                    }
-                    break;
-
-                    case TileType::FALLING_PLATFORM:
-                    {
-                        platform.type = PlatformType::FALLING;
-
-                        platform.gameObj.body.hasGravity = true;
-                    }
-                    break;
-
-                    case TileType::DISAPPEARING_PLATFORM:
-                    {
-                        platform.type = PlatformType::DISAPPEARING;
-
-                        platform.SetRespawnTimerInit(1.0f);
-                    }
-                    break;
-
-                    case TileType::VERTICAL_MOVING_SPIKE:
-                    {
-                        platform.type = PlatformType::MOVING_SPIKE_VERTICAL;
-
-                        platformSpeed *= 1.5f;
-
-                        platform.gameObj.body.velocity.y = -platformSpeed;
-
-                        platform.updateRequired = true;
-
-                        float factor = 0.8f;
-
-                        platform.gameObj.AddSubHitbox({0,0}, {platformWidth * factor, platformHeight * factor});
-                    }
-                    break;
-
-                    case TileType::HORIZONTAL_MOVING_SPIKE:
-                    {
-                        platform.type = PlatformType::MOVING_SPIKE_HORIZONTAL;
-
-                        platformSpeed *= 1.5f;
-
-                        platform.gameObj.body.velocity.x = platformSpeed;
-
-                        platform.updateRequired = true;
-
-                        float factor = 0.8f;
-
-                        platform.gameObj.AddSubHitbox({0,0}, {platformWidth * factor, platformHeight * factor});
-                    }
-                    break;
-
-                    case TileType::ROTATING_SPIKE_SINGLE:
-                    {
-                        platform.type = PlatformType::ROTATING_SPIKE_SINGLE;
-
-                        platform.updateRequired = true;
-
-                        platform.gameObj.body.velocity.x = platformSpeed;
-
-                        if(platform.gameObj.data.flipX) platform.gameObj.body.velocity.x = -platformSpeed;
-
-                        float size = GRID_SIZE * 0.5f;
-                        
-                        for(int h = 0; h < ROTATING_SPIKE_MAX_HITBOX; h++)
-                        {
-                            Vector2 offset = {0,0};
-
-                            if(h >= 0)
-                            {
-                                float multiplier = (float)h * size;
-
-                                offset.x = platform.gameObj.data.flipX ? -multiplier : multiplier;
-                                offset.y = platform.gameObj.data.flipY ? multiplier : -multiplier;
-
-                                platform.gameObj.AddSubHitbox(offset, {size,size});
-                            }
-                        }
-                    }
-                    break;
-
-                    case TileType::ROTATING_SPIKE_DOUBLE:
-                    {
-                        platform.type = PlatformType::ROTATING_SPIKE_DOUBLE;
-
-                        platform.updateRequired = true;
-
-                        platform.gameObj.body.velocity.x = platformSpeed;
-
-                        if(platform.gameObj.data.flipX) platform.gameObj.body.velocity.x = -platformSpeed;
-
-                        float size = GRID_SIZE * 0.5f;
-                        
-                        for(int h = 0; h < ROTATING_SPIKE_MAX_HITBOX * 2.0f; h++)
-                        {
-                            if(h == ROTATING_SPIKE_MAX_HITBOX) continue;
-
-                            Vector2 offset = {0,0};
-
-                            float armSide = (h < ROTATING_SPIKE_MAX_HITBOX) ? 1.0f : -1.0f;
-                            int localH = h % ROTATING_SPIKE_MAX_HITBOX;
-
-                            if(localH >= 0)
-                            {
-                                float multiplier = (float)localH * size * armSide;
-
-                                offset.x = platform.gameObj.data.flipX ? -multiplier : multiplier;
-                                offset.y = platform.gameObj.data.flipY ? multiplier : -multiplier;
-
-                                platform.gameObj.AddSubHitbox(offset, {size,size});
-                            }
-                        }
-                    }
-                    break;
+                    case TileType::ROTATING_SPIKE_DOUBLE: platform.type = PlatformType::ROTATING_SPIKE_DOUBLE; break;
 
                     default: break;
                     }
 
-                    platform.Respawn();
-
-                    platformList.push_back(platform);
+                    platform.InitPlatform(
+                        tile->gameObj.transform,
+                        tile->gameObj.data,
+                        tile->gameObj.direction,
+                        gravity,
+                        tile->textureIndex,
+                        tile->variantIndex
+                    );
                 }
 
                 //enemies
@@ -258,62 +114,30 @@ void Level::InitLevel(const char* levelPath, const char* roomPath ,float dt, int
 
                 if(isEnemy)
                 {
-                    Enemy enemy = Enemy();
+                    enemyList.emplace_back();
 
-                    enemy.spawnPosition = tile->gameObj.transform.position;
-
-                    enemy.gameObj.transform.position = enemy.spawnPosition;
-
-                    enemy.gameObj.hasBody = true;
-
-                    enemy.gameObj.body = {};
-
-                    enemy.gameObj.hitboxes.push_back(Hitbox{{0,0}, {20,38}});
-
-                    enemy.gameObj.UpdateHitboxes();
-
-                    enemy.spawnData = tile->gameObj.data;
-                    enemy.gameObj.data = enemy.spawnData;
-
-                    enemy.gravity = gravity;
-
-                    enemy.ogGravity = enemy.gravity;
-
-                    enemy.gameObj.body.hasGravity = true;
-
-                    Hitbox jumpDetector = {
-                        {0,0},
-                        {enemy.gameObj.GetMainAABB().width * 0.9f, enemy.gameObj.GetMainAABB().height * 0.5f}
-                    };
+                    Enemy& enemy = enemyList.back();
 
                     switch (type)
                     {
-                    case TileType::ENEMY_DUMMY:
-                    {
-                        enemy.type = EnemyType::DUMMY;
-                        enemy.testColor = ENEMY_DUMMY;
-                    }
-                    break;
+                    case TileType::ENEMY_DUMMY: enemy.type = EnemyType::DUMMY;break; 
 
-                    case TileType::ENEMY_YUUKA:
-                    {
-                        enemy.type = EnemyType::YUUKA;
-                        enemy.testColor = ENEMY_YUUKA;
-                    }
-                    break;
+                    case TileType::ENEMY_YUUKA: enemy.type = EnemyType::YUUKA; break;
                     
                     default:
                     break;
                     }
 
-                    enemy.gameObj.hitboxes.push_back(jumpDetector);
+                    enemy.InitEnemy(
+                        tile->gameObj.transform.position,
+                        tile->gameObj.data,
+                        gravity
+                    );
 
                     float nearPlayer = GRID_SIZE * 15.0f;
 
                     if(Vector2DistanceSqr(player.spawnPos, enemy.spawnPosition) <= nearPlayer * nearPlayer)
                         enemy.isActive = true;
-
-                    enemyList.push_back(enemy);
                 }
 
                 //actual tiles
@@ -625,7 +449,7 @@ void Level::UpdateLevel()
 
     CCD_Update();
 
-    player.Shoot(dt);
+    if(player.canMove) player.Shoot(dt);
 
     UpdateCamera(player.gameObj.transform.position, {0, -100});
 
@@ -673,8 +497,6 @@ void Level::LowFrequencyUpdate()
     
     float playerRadius = player.gameObj.GetMainAABB().width * REC_TO_CIRCLE_RADIUS_MULTIPLIER;
     float platformUpdateRadius = GRID_SIZE * 25.0f;
-
-    
 
     float enemySpawnRadius = GRID_SIZE * 15.0f;
     float enemyDespawnRadius = GRID_SIZE * 17.0f;
@@ -767,7 +589,7 @@ void Level::MediumFrequencyDiscreteUpdate()
 
         if(CheckCollisionCircles(
             player.gameObj.transform.position,
-            player.gameObj.GetMainAABB().height * REC_TO_CIRCLE_RADIUS_MULTIPLIER,
+            playerRadius,
             platform->gameObj.transform.position,
             renderRadius
         ))
@@ -782,7 +604,9 @@ void Level::MediumFrequencyDiscreteUpdate()
             TileRange platformRange = CalculateTileRange(
             platform->gameObj.transform.position.x,
             platform->gameObj.transform.position.y,
-            collisionTileCheckRange
+            collisionTileCheckRange,
+            rangeLimits.minX, rangeLimits.minY,
+            rangeLimits.maxX, rangeLimits.maxY
             );
 
             for(int l = 0; l < LAYERS; l++)
@@ -848,6 +672,8 @@ void Level::MediumFrequencyDiscreteUpdate()
 
             enemy->ResetFlagsAI();
         }
+
+        if(enemy->shooting) enemy->Shoot(dt);
     }
 }
 
@@ -1203,7 +1029,9 @@ void Level::HighFrequencyDiscreteUpdate()
         TileRange enemyTileRange = CalculateTileRange(
             enemy->gameObj.transform.position.x,
             enemy->gameObj.transform.position.y,
-            collisionTileCheckRange
+            collisionTileCheckRange,
+            rangeLimits.minX, rangeLimits.minY,
+            rangeLimits.maxX, rangeLimits.maxY
         );
 
         enemy->Update(dt, iterations);
@@ -1392,7 +1220,7 @@ void Level::HighFrequencyDiscreteUpdate()
         isGravityUp = gravity < 0;
 
         player.gravity = gravity;
-        player.entityData.flipY = isGravityUp;
+        player.gameObj.data.flipY = isGravityUp;
 
         if(currentRoomIndex > -1 && currentRoomIndex < platformBuckets.size())
         {
@@ -1421,8 +1249,6 @@ void Level::HighFrequencyDiscreteUpdate()
 
 void Level::CCD_Update()
 {
-    //TileRangeLimits bulletRangeLimits = GetTileRangeLimits();
-
     player.bulletpool.get()->UpdateBullets(dt);
 
     for(int i = 0; i < player.bulletpool->activeBullets.size(); i++)
@@ -1484,6 +1310,15 @@ void Level::CCD_Update()
         }
         
     }
+
+    for(int i = 0; i < player.enemyCache.size(); i++)
+    {
+        Enemy* enemy = player.enemyCache[i];
+
+        if(!enemy) continue;
+
+        enemy->bulletpool.get()->UpdateBullets(dt);
+    }
 }
 
 void Level::ResetLevel()
@@ -1493,7 +1328,7 @@ void Level::ResetLevel()
     bool gravityUp = gravity < 0;
 
     player.gravity = gravity;
-    player.entityData.flipY = gravityUp;
+    player.gameObj.data.flipY = gravityUp;
 
     for(int i = 0; i < platformBuckets.size(); i++)
     {
@@ -1533,15 +1368,13 @@ void Level::DrawLevel()
     ClearBackground(LIGHTGRAY);
 
     BeginMode2D(camera);
-
-    TileRangeLimits playerTileRangeLimits = GetTileRangeLimits();
     
     TileRange playerTileRange = CalculateTileRange(
         camera.target.x,
         camera.target.y,
         renderTileCheckRange,
-        playerTileRangeLimits.minX, playerTileRangeLimits.minY,
-        playerTileRangeLimits.maxX, playerTileRangeLimits.maxY
+        rangeLimits.minX, rangeLimits.minY,
+        rangeLimits.maxX, rangeLimits.maxY
     );
 
     for(int l = 0; l < LAYERS; l++)
@@ -1646,7 +1479,7 @@ void Level::DrawLevel()
     DrawSprite(
         player.gameObj.transform,
         &player.characterRenderData,
-        player.entityData,
+        player.gameObj.data,
         player.currentFrame
     );
 
@@ -1671,10 +1504,26 @@ void Level::DrawLevel()
         }
     }
 
+    for(int e = 0; e < player.enemyCache.size(); e++)
+    {
+        Enemy* enemy = player.enemyCache[e];
+
+        if(!enemy) continue;
+
+        for(int b = 0; b < enemy->bulletpool->activeBullets.size(); b++)
+        {
+            Bullet* bullet = enemy->bulletpool->activeBullets[b];
+
+            if(!bullet) continue;
+
+            DrawBullet(bullet->posititon.x, bullet->posititon.y, bullet->radius, bullet->mainColor, bullet->backColor);
+        }
+    }
+
     DrawSprite(
         player.gameObj.transform,
         &player.weaponRenderData,
-        player.entityData,
+        player.gameObj.data,
         player.currentFrame
     );
 

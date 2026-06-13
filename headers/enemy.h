@@ -1,6 +1,7 @@
 #pragma once
 
 #include "entity.h"
+#include "bullet.h"
 
 enum class EnemyType
 {
@@ -26,6 +27,29 @@ private:
 
     int moveSpeedSign = 1;
 
+    inline Vector2 GetBulletSpawnPos()
+    {
+        Vector2 spawnPos = {};
+
+        Vector2 offset = {0,0};
+
+        if(gameObj.data.flipX)
+        {
+            offset.x = -offset.x;
+        }
+
+        if(gameObj.data.flipY)
+        {
+            offset.y = -offset.y;
+        }
+
+        spawnPos.x = gameObj.transform.position.x + offset.x;
+
+        spawnPos.y = gameObj.transform.position.y + offset.y;
+
+        return spawnPos;
+    }
+
 public:
 
     Vector2 spawnPosition = {0,0};
@@ -39,6 +63,13 @@ public:
     Color testColor = ENEMY_DUMMY;
 
     Rectangle roomSize = {};
+
+    //bullets
+    bool shooting = false;
+
+    BulletProperties bulletData = {};
+
+    std::unique_ptr<BulletPool> bulletpool = {};
 
     float gravity = 0.0f;
 
@@ -65,9 +96,19 @@ public:
 
     ~Enemy() = default;
 
+    Enemy(Enemy&& other) noexcept = default;
+
+    void InitEnemy(
+        const Vector2& spawnPos,
+        const EntityData& data,
+        float gravity
+    );
+
     void UpdateAI(float dt, const Vector2& playerPos, Vector2* playerVel, const bool isPlayerGrounded, bool* canPlayerMove);
 
     void Update(float dt, int iterations);
+
+    void Shoot(float dt);
 
     inline Rectangle& GetJumpDetector()
     {

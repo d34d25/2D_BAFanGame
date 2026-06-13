@@ -37,7 +37,6 @@ private:
     float timer = 0.0f; 
     float maxTime = 0.3f;
 
-    
     float respawnMaxTime = 0.4f;
 
     float ogTime = 0.0f;
@@ -66,6 +65,15 @@ public:
     Platform() = default;
 
     ~Platform() = default;
+
+    void InitPlatform(
+        const Transform2D& transform,
+        const EntityData& data,
+        const Direction& direction,
+        float gravity,
+        int textureIndex,
+        int variantIndex
+    );
 
     inline void SetTimerInit(float time)
     {

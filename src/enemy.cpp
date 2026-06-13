@@ -17,6 +17,8 @@ void Enemy::YuukaBehaivour(float dt, const Vector2& playerPos, Vector2* playerVe
 
         gravity = ogGravity;
 
+        shooting = false;
+
         int roll = GetRandomValue(0,100);
 
         if(roll <= 50) moveSpeedSign = -1;
@@ -118,6 +120,8 @@ void Enemy::YuukaBehaivour(float dt, const Vector2& playerPos, Vector2* playerVe
     case 1:
     {
         gameObj.body.velocity.x = moveSpeed;
+
+        if(stateTimer >= 0.5f) shooting = true;
         
         if(isTouchingWall)
         {
@@ -135,6 +139,8 @@ void Enemy::YuukaBehaivour(float dt, const Vector2& playerPos, Vector2* playerVe
                 }
 
                 moveSpeedSign *= -1;
+
+                gameObj.data.flipX = !gameObj.data.flipX;
 
                 counter = 1;
             }
@@ -155,7 +161,125 @@ void Enemy::YuukaBehaivour(float dt, const Vector2& playerPos, Vector2* playerVe
     }
 }
 
-void Enemy::UpdateAI(float dt, const Vector2& playerPos, Vector2* playerVel, const bool isPlayerGrounded, bool* canPlayerMove)
+void Enemy::Shoot(float dt)
+{
+    float angle = bulletData.angle;
+
+    float bulletGravity = bulletData.gravity;
+
+    if(gameObj.data.flipX)
+    {
+        angle = 180.0f - angle;
+    }
+
+    if(gameObj.data.flipY)
+    {
+        angle = -angle;
+        bulletGravity = -bulletData.gravity;
+    }
+
+    float radians = GenerateBulletSpread(angle, bulletData.spread) * (PI / 180.0f);
+
+    Vector2 initialVel = {0,0};
+
+    initialVel.x = bulletData.speed * cosf(radians) + gameObj.body.velocity.x;
+    initialVel.y = bulletData.speed * sinf(radians);
+
+    if(bulletData.fireTimer > 0.0f) bulletData.fireTimer -= dt;
+
+    if(shooting)
+    {
+        while((bulletData.fireTimer <= 0.0f))
+        {
+            bulletpool.get()->FireBullet(GetBulletSpawnPos(), initialVel, bulletGravity);
+
+            bulletData.fireTimer = bulletData.fireRate;
+        }
+    }
+}
+
+void Enemy::InitEnemy(
+    const Vector2& spawnPos,
+    const EntityData& data,
+    float gravity
+)
+{
+    spawnPosition = spawnPos;
+    
+    gameObj.transform.position = spawnPosition;
+
+    gameObj.hasBody = true;
+    gameObj.body = {};
+
+    gameObj.UpdateHitboxes();
+
+    spawnData = data;
+
+    gameObj.data = spawnData;
+
+    this->gravity = gravity;
+
+    ogGravity = this->gravity;
+
+    bulletData = {};
+
+    bulletData.explodes = false;
+
+    bulletData.mainColor = GOLD;
+    bulletData.backColor = BLACK;
+
+    Hitbox mainHitbox = {
+        {0,0},
+        {20,38}
+    };
+
+    Hitbox jumpDetector = {
+        {0,0},
+        {mainHitbox.aabb.width * 0.9f, mainHitbox.aabb.height * 0.5f}
+    };
+
+    switch (type)
+    {
+    case EnemyType::DUMMY:
+    {
+        testColor = ENEMY_DUMMY;
+
+        gameObj.body.hasGravity = true;
+    }
+    break;
+
+    case EnemyType::YUUKA:
+    {
+        testColor = ENEMY_YUUKA;
+
+        gameObj.body.hasGravity = true;
+
+        bulletData.angle = 0;
+        bulletData.fireTimer = 0.0f;
+        bulletData.speed = 150;
+        
+        bulletData.fireRate = 1.0f;
+
+        bulletData.spread = 1.0f;
+
+        bulletData.radius = 6.0f;
+
+        bulletData.lifeTime = 2.0f;
+    }
+    break;
+    
+    default:
+        break;
+    }
+
+    gameObj.hitboxes.push_back(mainHitbox);
+
+    gameObj.hitboxes.push_back(jumpDetector);
+
+    bulletpool = std::make_unique<BulletPool>(30, bulletData.lifeTime, bulletData.radius, bulletData.mainColor, bulletData.backColor, bulletData.explodes, 60.0f);
+}
+
+void Enemy::UpdateAI(float dt, const Vector2 &playerPos, Vector2 *playerVel, const bool isPlayerGrounded, bool *canPlayerMove)
 {
     switch (type)
     {

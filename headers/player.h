@@ -53,14 +53,14 @@ private:
 
         float textureWidth = weaponRenderData.sourceTexture->width;
 
-        if(entityData.flipX)
+        if(gameObj.data.flipX)
         {
             offset.x = -offset.x;
 
             textureWidth = -textureWidth;
         }
 
-        if(entityData.flipY)
+        if(gameObj.data.flipY)
         {
             offset.y = -offset.y;
         }
@@ -110,7 +110,7 @@ public:
 
     SpriteRenderData weaponRenderData = {};
 
-    EntityData entityData = {false,false};
+    //EntityData entityData = {false,false};
 
     BulletProperties bulletData = {};
 
@@ -137,7 +137,7 @@ public:
     {
         float offset = 5.0f;
 
-        int dir = entityData.flipY ? -1 : 1;
+        int dir = gameObj.data.flipY ? -1 : 1;
 
         float centerY = gameObj.GetMainAABB().y + gameObj.GetMainAABB().height * 0.5f;
 
@@ -151,7 +151,7 @@ public:
     {
         float offset = 5.0f;
 
-        int dir = entityData.flipY ? -1 : 1;
+        int dir = gameObj.data.flipY ? -1 : 1;
 
         float centerY = gameObj.GetMainAABB().y + gameObj.GetMainAABB().height * 0.5f;
 
@@ -165,7 +165,7 @@ public:
     {
         float offset = 1.0f;
 
-        int dir = entityData.flipY ? 1 : -1;
+        int dir = gameObj.data.flipY ? 1 : -1;
 
         float centerY = gameObj.GetMainAABB().y + gameObj.GetMainAABB().height * 0.5f;
 
@@ -193,7 +193,7 @@ public:
 
     inline bool IsFalling()
     {
-        if(entityData.flipY) return gameObj.body.velocity.y <= 0;
+        if(gameObj.data.flipY) return gameObj.body.velocity.y <= 0;
         else return gameObj.body.velocity.y >= 0;
     }
 
@@ -221,18 +221,18 @@ public:
 
     inline bool IsPressingDown()
     {
-        if(!entityData.flipY && IsKeyDown(KEY_DOWN)) return true;
+        if(!gameObj.data.flipY && IsKeyDown(KEY_DOWN)) return true;
         
-        if(entityData.flipY && IsKeyDown(KEY_UP)) return true;
+        if(gameObj.data.flipY && IsKeyDown(KEY_UP)) return true;
 
         return false;
     }
 
     inline bool IsPressingUp()
     {
-        if(!entityData.flipY && IsKeyDown(KEY_UP)) return true;
+        if(!gameObj.data.flipY && IsKeyDown(KEY_UP)) return true;
         
-        if(entityData.flipY && IsKeyDown(KEY_DOWN)) return true;
+        if(gameObj.data.flipY && IsKeyDown(KEY_DOWN)) return true;
 
         return false;
     }

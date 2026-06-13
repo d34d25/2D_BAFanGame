@@ -25,9 +25,9 @@ Player::Player(Vector2 position)
     bulletData.fireTimer = 0.0f;
     bulletData.speed = 500;
 
-    float bulletLifeTime = 2.0f;//2.0f
+    bulletData.lifeTime = 2.0f;//2.0f
 
-    bool explodes = false;
+    bulletData.explodes = false;
 
     Vector2 characterFrameSize = {0,0};
 
@@ -104,7 +104,7 @@ Player::Player(Vector2 position)
         bulletData.mainColor = YUZU_COLOR;
         bulletData.backColor = YUZU_COLOR_BG;
 
-        explodes = true;
+        bulletData.explodes = true;
 
         characterFrameSize = {14,15};
 
@@ -180,7 +180,7 @@ Player::Player(Vector2 position)
 
     weaponRenderData.animationFrames = CropImage(*weaponRenderData.sourceTexture, weaponFrameSize);
 
-    bulletpool = std::make_unique<BulletPool>(30, bulletLifeTime, bulletData.radius, bulletData.mainColor, bulletData.backColor, explodes);
+    bulletpool = std::make_unique<BulletPool>(30, bulletData.lifeTime, bulletData.radius, bulletData.mainColor, bulletData.backColor, bulletData.explodes);
 }
 
 Player::~Player()
@@ -195,7 +195,7 @@ void Player::Update(float dt, int iterations)
 
     float jump = jumpVel;
 
-    if(entityData.flipY) jump = -jumpVel;
+    if(gameObj.data.flipY) jump = -jumpVel;
 
     //lateral movement
 
@@ -207,13 +207,13 @@ void Player::Update(float dt, int iterations)
         {
             gameObj.body.force.x -= moveForce;
             
-            entityData.flipX = true;
+            gameObj.data.flipX = true;
         }
         else if(IsKeyDown(KEY_RIGHT))
         {
             gameObj.body.force.x += moveForce;
 
-            entityData.flipX = false;
+            gameObj.data.flipX = false;
         }
 
         //ladder
@@ -313,12 +313,12 @@ void Player::Shoot(float dt)
 
     float bulletGravity = bulletData.gravity;
 
-    if(entityData.flipX)
+    if(gameObj.data.flipX)
     {
         angle = 180.0f - angle;
     }
 
-    if(entityData.flipY)
+    if(gameObj.data.flipY)
     {
         angle = -angle;
         bulletGravity = -bulletData.gravity;

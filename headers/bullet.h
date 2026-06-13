@@ -11,11 +11,13 @@ struct BulletProperties
 {
     float fireTimer = 0;
     float fireRate = 1.0f;
+    float lifeTime = 2.0f;
     float gravity = 0;
     float speed = 0;
     float angle = 0;
     float spread = 0;
     float radius = 2.0f;
+    bool explodes = false;
     Color mainColor = RAYWHITE;
     Color backColor = BLACK;
 };
