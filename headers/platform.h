@@ -118,8 +118,8 @@ public:
         maxTime = ogTime;
         respawnMaxTime = ogRespawnTime;
 
-        respawnTimer = respawnMaxTime;
-        timer = maxTime;
+        respawnTimer = 0.0f;
+        timer = 0.0f;
 
         gameObj.transform.position = ogPosition;
 

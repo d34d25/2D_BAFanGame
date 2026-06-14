@@ -177,6 +177,7 @@ Player::Player(Vector2 position)
     SetTextureWrap(weaponTexture, TEXTURE_WRAP_CLAMP);
 
     characterRenderData.sourceTexture = &playerTexture;
+
     weaponRenderData.sourceTexture = &weaponTexture;
 
     characterRenderData.animationFrames = CropImage(*characterRenderData.sourceTexture, characterFrameSize);
@@ -273,20 +274,20 @@ void Player::Update(float dt, int iterations)
 
         if(isGrounded)
         {
-            jumpTime = maxJumpTime;
+            jumpTime = 0.0f;
         }
         else
         {
-            jumpTime -= subDt;
+            jumpTime += subDt;
 
-            if(jumpTime <= 0.0f) jumpTime = 0.0f; 
+            if(jumpTime >= maxJumpTime) jumpTime = maxJumpTime; 
         }
 
         if(IsKeyDown(KEY_Z))
         {
             if(isGrounded) isJumping = true;
 
-            if(isJumping && jumpTime > 0.0f)
+            if(isJumping && jumpTime < maxJumpTime)
             {
                 gameObj.body.velocity.y += jump * subDt;
             }

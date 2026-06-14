@@ -4,6 +4,8 @@
 
 #include "entity.h"
 
+#include "enemy.h"
+
 #include "drawing.h"
 
 #include "platform.h"
@@ -356,6 +358,12 @@ extern std::vector<SpriteRenderData> waterRenderData;
 
 extern std::vector<SpriteRenderData> movingPlatformRenderData_Vertical;
 
+//enemies
+
+extern std::vector<SpriteRenderData> dummyRenderData;
+
+extern std::vector<SpriteRenderData> yuukaRenderData;
+
 void LoadAssets();
 
 void UnloadAssets();
@@ -397,13 +405,13 @@ inline std::vector<SpriteRenderData>* GetTileActiveRenderDataList(TileType type)
     } 
 }
 
-inline SpriteRenderData* GetTileActiveRenderData(TileType type, int index = 0)
+inline SpriteRenderData* GetTileActiveRenderData(TileType type, int variant = 0)
 {
     std::vector<SpriteRenderData>* activeRenderData = GetTileActiveRenderDataList(type);
 
-    if(activeRenderData && index >= 0 && index < (int)activeRenderData->size())
+    if(activeRenderData && variant >= 0 && variant < (int)activeRenderData->size())
     {
-        return &activeRenderData->at(index);
+        return &activeRenderData->at(variant);
     }
 
     return nullptr;
@@ -419,13 +427,37 @@ inline std::vector<SpriteRenderData>* GetPlatformActiveRenderDataList(PlatformTy
     }
 }
 
-inline SpriteRenderData* GetPlatformActiveRenderData(PlatformType type, int index = 0)
+inline SpriteRenderData* GetPlatformActiveRenderData(PlatformType type, int variant = 0)
 {
     std::vector<SpriteRenderData>* activeRenderData = GetPlatformActiveRenderDataList(type);
 
-    if(activeRenderData && index >= 0 && index < (int)activeRenderData->size())
+    if(activeRenderData && variant >= 0 && variant < (int)activeRenderData->size())
     {
-        return &activeRenderData->at(index);
+        return &activeRenderData->at(variant);
+    }
+
+    return nullptr;
+}
+
+inline std::vector<SpriteRenderData>* GetEnemyActiveRenderDataList(EnemyType type)
+{
+    switch (type)
+    {
+    case EnemyType::DUMMY: return &dummyRenderData;
+    
+    case EnemyType::YUUKA: return &yuukaRenderData;
+
+    default: return nullptr;
+    }
+}
+
+inline SpriteRenderData* GetEnemyActiveRenderData(EnemyType type, int variant = 0)
+{
+    std::vector<SpriteRenderData>* activeRenderData = GetEnemyActiveRenderDataList(type);
+
+    if(activeRenderData && variant >= 0 && variant < (int)activeRenderData->size())
+    {
+        return &activeRenderData->at(variant);
     }
 
     return nullptr;

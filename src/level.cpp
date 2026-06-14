@@ -451,7 +451,17 @@ void Level::UpdateLevel()
 
     if(player.canMove) player.Shoot(dt);
 
+    bool isShaking = screenShakeTimer < screenShakeDuration ||
+    screenShakeOffset.x != 0.0f || screenShakeOffset.y != 0.0f;
+
+    if(isShaking)
+    {
+        CalculateScreenShake();
+    }
+
     UpdateCamera(player.gameObj.transform.position, {0, -100});
+
+    camera.offset += screenShakeOffset;
 
     if(IsKeyPressed(KEY_R)) ResetLevel();
 
@@ -668,6 +678,8 @@ void Level::MediumFrequencyDiscreteUpdate()
 
         if(lowFrequencyCounter % 2 == 0)
         {
+            if(enemy->type == EnemyType::YUUKA && enemy->isStomping) TriggerScreenShake(0.5f, 5.0f);
+
             enemy->UpdateAI(dt, player.gameObj.transform.position, &player.gameObj.body.velocity, player.isGrounded, &player.canMove);
 
             enemy->ResetFlagsAI();
@@ -1473,7 +1485,13 @@ void Level::DrawLevel()
     {
         Enemy* enemy = player.enemyCache[i];
 
-        DrawRectangleRec(enemy->gameObj.GetMainAABB(), enemy->testColor);
+        SpriteRenderData* enemyRenderData = GetEnemyActiveRenderData(enemy->type, enemy->variantIndex);
+        
+        if(!enemyRenderData) DrawRectangleRec(enemy->gameObj.GetMainAABB(), enemy->testColor);
+        else
+        {
+            DrawSprite(enemy->gameObj, enemyRenderData, enemy->textureIndex);
+        }
     }
 
     DrawSprite(

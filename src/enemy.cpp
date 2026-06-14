@@ -19,6 +19,8 @@ void Enemy::YuukaBehaivour(float dt, const Vector2& playerPos, Vector2* playerVe
 
         shooting = false;
 
+        isStomping = false;
+
         int roll = GetRandomValue(0,100);
 
         if(roll <= 50) moveSpeedSign = -1;
@@ -101,15 +103,21 @@ void Enemy::YuukaBehaivour(float dt, const Vector2& playerPos, Vector2* playerVe
             if(xPosDifference > 0)
             {
                 gameObj.body.velocity.x = moveSpeed * horizontalBoostFactor;
+                
+                gameObj.data.flipX = false;
             }
             else
             {
                 gameObj.body.velocity.x = -moveSpeed * horizontalBoostFactor;
+
+                gameObj.data.flipX = true;
             }
 
             isJumping = false;
         }
       
+        isStomping = isGrounded;
+
         if(stateTimer >= 2.0f)
         {
             stateTimer = 0.0f;

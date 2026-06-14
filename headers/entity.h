@@ -214,6 +214,7 @@ struct SpriteRenderData
     //animation
     std::vector<Rectangle> animationFrames = {};
 
+    //used for time based animations (passive animations)
     int spacing = 0;
 
     int maxFrames = 1;

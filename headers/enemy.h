@@ -18,8 +18,6 @@ private:
 
     int currentAttack = 0;
 
-    float stateTimer = 0.0f;
-
     int counter = 0; //for various enemies or bosses that need to count something
     //generic timer for being used inside the enemies patterns
     float timer = 0.0f;
@@ -71,6 +69,8 @@ public:
 
     std::unique_ptr<BulletPool> bulletpool = {};
 
+    float stateTimer = 0.0f;
+
     float gravity = 0.0f;
 
     float ogGravity = 0.0f;
@@ -79,6 +79,8 @@ public:
     bool wasGrounded = false;
 
     bool isGrounded = false;
+
+    bool isStomping = false;
 
     bool inWater = false;
 
@@ -91,6 +93,13 @@ public:
 
     //
     bool isActive = false;
+
+    //animation
+
+    //also can be understood as current frame
+    int textureIndex = 0;
+
+    int variantIndex = 0;
 
     Enemy() = default;
 

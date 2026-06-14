@@ -34,12 +34,20 @@ std::vector<SpriteRenderData> waterRenderData = {};
 
 std::vector<SpriteRenderData> movingPlatformRenderData_Vertical = {};
 
+//enemies
+
+std::vector<SpriteRenderData> dummyRenderData = {};
+
+std::vector<SpriteRenderData> yuukaRenderData = {};
+
 /*
     spacing is how many frames an animation loop has, this value is fixed for each SpriteRenderData
     if the spacing is 0 or less the whole animation vector will be used, if it is 1 the SpriteRenderData won't have animations,
     if it is greater than 1, each animation will have <spacing> frames per animation
 
-    startFrame and endFrames alongside frameSize indicates what portion of the spritesheet is used
+    spacing is only used for time based animations (passive animations such as the objects of the environment)
+
+    atlasStartFrame and atlasEndFrame indicates what portion of the spritesheet is used
     these values are fixed for each SpriteRenderData
 
     CropImage splits the given texture in a uniform grid with a 1px gap
@@ -47,7 +55,7 @@ std::vector<SpriteRenderData> movingPlatformRenderData_Vertical = {};
     each SpriteRenderData will have a fixed spacing and frameSize value, but different SpriteRenderData can use
     the same source texture despite having differente sizes, start, end and spacing.
 */
-SpriteRenderData LoadRenderData(const char* path, Vector2 frameSize, int spacing = 1, int startFrame = 0, int endFrame = 0, float animationSpeed = 5.0f)
+SpriteRenderData LoadRenderData(const char* path, Vector2 frameSize, int spacing = 1, int atlasStartFrame = 0, int atlasEndFrame = 0, float animationSpeed = 5.0f)
 {
     SpriteRenderData renderData = {};
 
@@ -72,15 +80,15 @@ SpriteRenderData LoadRenderData(const char* path, Vector2 frameSize, int spacing
 
     std::vector<Rectangle> allFrames = CropImage(*renderData.sourceTexture, frameSize, 1);
 
-    if(endFrame <= 0 || endFrame > (int)allFrames.size()) endFrame = (int)allFrames.size();
+    if(atlasEndFrame <= 0 || atlasEndFrame > (int)allFrames.size()) atlasEndFrame = (int)allFrames.size();
 
-    if(startFrame < 0 || startFrame > endFrame) startFrame = 0;
+    if(atlasStartFrame < 0 || atlasStartFrame > atlasEndFrame) atlasStartFrame = 0;
 
-    if(!allFrames.empty() && startFrame < endFrame)
+    if(!allFrames.empty() && atlasStartFrame < atlasEndFrame)
     {
         renderData.animationFrames.assign(
-            allFrames.begin() + startFrame,
-            allFrames.begin() + endFrame
+            allFrames.begin() + atlasStartFrame,
+            allFrames.begin() + atlasEndFrame
         );
     }
 
@@ -130,6 +138,12 @@ void LoadAssets()
     //platforms
 
     movingPlatformRenderData_Vertical.push_back(LoadRenderData("assets/platforms/vertical-moving-platform-spritesheet.png", {48,5}, 2));
+
+    //enemies
+
+    dummyRenderData.push_back(LoadRenderData("assets/enemies/chibi-dummy.png", {8,12}));
+    
+    yuukaRenderData.push_back(LoadRenderData("assets/enemies/chibi-yuuka.png", {14,15}));
 }
 
 void UnloadAssets()
@@ -142,6 +156,8 @@ void UnloadAssets()
         }
 
         renderData.clear();
+
+        renderData.shrink_to_fit();
     };
 
     //tiles

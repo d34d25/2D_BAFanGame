@@ -44,6 +44,15 @@ private:
 
     bool isGravityUp = false;
 
+    //screen shake
+
+    float screenShakeTimer = 0.0f;
+    float screenShakeDuration = 0.0f;
+    int screenShakeMagnitude = 0;
+
+    Vector2 screenShakeOffset = {0,0};
+
+    //level
     Tile level[LAYERS][COLS][ROWS];
 
     std::vector<Room> rooms = {};
@@ -88,6 +97,7 @@ private:
     //change the target relative to the speed of the player
     //so the camera points a bit ahead of where the player is moving
 
+    //camera
     inline void UpdateCamera(const Vector2& target, const Vector2& offset)
     {
         int roomIndex = -1;
@@ -144,6 +154,7 @@ private:
             
         }
 
+        //commented out
         //camera.target = Vector2Lerp(camera.target, desired, 0.1f);
 
         camera.target.x = desired.x;
@@ -172,6 +183,41 @@ private:
             camera.zoom = Clamp(camera.zoom, 0.25f, 15.25f);
         }
     }
+
+    inline void TriggerScreenShake(float duration, int magnitude)
+    {
+        screenShakeTimer = 0.0f;
+        screenShakeDuration = duration;
+        screenShakeMagnitude = magnitude;
+    }
+
+    inline void CalculateScreenShake()
+    {
+        if(screenShakeTimer < screenShakeDuration)
+        {
+            screenShakeTimer += dt;
+
+            float timePercentage = screenShakeTimer / screenShakeDuration;
+
+            timePercentage = Clamp(timePercentage, 0.0f, 1.0f);
+
+            int maxOffset = (int)Lerp(screenShakeMagnitude, 0.0f, timePercentage);
+
+            if(maxOffset > 0)
+            {
+                screenShakeOffset = {
+                    (float)GetRandomValue(-maxOffset, maxOffset),
+                    (float)GetRandomValue(-maxOffset, maxOffset)
+                };
+            }
+        }
+        else
+        {
+            screenShakeOffset = {0,0};
+        }
+    }
+
+    //camera end
 
     inline bool IsOneWayUpDown(const Tile& tile)
     {

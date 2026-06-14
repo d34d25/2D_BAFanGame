@@ -200,12 +200,13 @@ void Platform::Update(float dt, int iterations)
 
     if(isFalling || isDisappearing)
     {
-        if(timer > 0.0f)
+        
+        if(timer < maxTime)
         {
-            timer -= subDt;
+            timer += subDt;
             return;
         }
-
+        
         if(isDisappearing)
         {
             gameObj.transform.position = DESPAWN_LOCATION;
@@ -216,13 +217,11 @@ void Platform::Update(float dt, int iterations)
 
             gameObj.body.UpdateVelocity(dt, iterations, gravity);
 
-            respawnTimer -= subDt;
+            respawnTimer += subDt;
 
-            if(respawnTimer <= 0.0f)
+            if(respawnTimer >= respawnMaxTime)
             {
                 gameObj.transform.position = DESPAWN_LOCATION;
-
-                respawnTimer = 0.0f;
             }
         }
     }
@@ -261,15 +260,14 @@ void Platform::UpdateInactive(float dt, int iterations)
 
     float subDt = dt / iterations;
 
-    respawnTimer -= subDt;
+    respawnTimer += subDt;
 
-    if(respawnTimer <= 0.0f)
+    if(respawnTimer >= respawnMaxTime)
     {
-        timer = maxTime;
+        timer = 0.0f;
+        respawnTimer = 0.0f;
 
         gameObj.transform.position = ogPosition;
-
-        respawnTimer = respawnMaxTime;
 
         gameObj.body.hasGravity = false;
         gameObj.body.velocity = {0,0};
