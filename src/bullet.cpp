@@ -1,33 +1,32 @@
 #include "bullet.h"
 
-BulletPool::BulletPool(
-    int quantity, float lifeTime, float radius, Color mainColor, Color backColor, 
-    bool explodes, float explosionRadius, float explosionLifeTime, SpriteRenderData* explosionRenderData
-)
+BulletPool::BulletPool(int quantity, const BulletProperties &bulletData, SpriteRenderData* explosionRenderData)
 {
-    this->explodes = explodes;
+    explodes = bulletData.explodes;
+
+    pierces = bulletData.piercing;
 
     for(int i = 0; i < quantity; i++)
     {
         std::unique_ptr<Bullet> tempBullet = std::make_unique<Bullet>();
 
-        tempBullet->lifeTime = lifeTime;
-        tempBullet->radius = radius;
+        tempBullet->lifeTime = bulletData.lifeTime;
+        tempBullet->radius = bulletData.radius;
 
-        tempBullet->mainColor = mainColor;
-        tempBullet->backColor = backColor;
+        tempBullet->mainColor = bulletData.mainColor;
+        tempBullet->backColor = bulletData.backColor;
 
-        tempBullet->ogMainColor = mainColor;
+        tempBullet->ogMainColor = bulletData.mainColor;
         
         bullets.push_back(std::move(tempBullet));
 
-        if(!this->explodes) continue;
+        if(!explodes) continue;
 
         std::unique_ptr<Explosion> tempExplosion = std::make_unique<Explosion>();
 
-        tempExplosion->radius = explosionRadius;
+        tempExplosion->radius = bulletData.explosionRadius;
 
-        tempExplosion->lifeTime = explosionLifeTime;
+        tempExplosion->lifeTime = bulletData.explosionLifeTime;
 
         tempExplosion->renderData = explosionRenderData;
 
@@ -41,7 +40,7 @@ BulletPool::BulletPool(
         inactiveBullets.push_back(rawBulletPtr);
     }
 
-    if(!this->explodes) return;
+    if(!explodes) return;
 
     for(const auto& explosionptr : this->explosions)
     {

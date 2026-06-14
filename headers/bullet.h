@@ -17,7 +17,13 @@ struct BulletProperties
     float angle = 0;
     float spread = 0;
     float radius = 2.0f;
+
     bool explodes = false;
+    float explosionRadius = 70.0f;
+    float explosionLifeTime = 0.5f;
+
+    bool piercing = false;
+
     Color mainColor = RAYWHITE;
     Color backColor = BLACK;
 };
@@ -81,6 +87,7 @@ public:
     std::vector<std::unique_ptr<Bullet>> bullets = {};
 
     bool explodes = false;
+    bool pierces = false;
 
     std::vector<Explosion*> activeExplosions = {};
     std::vector<Explosion*> inactiveExplosions = {};
@@ -90,8 +97,8 @@ public:
     BulletPool() = default;
 
     BulletPool(
-        int quantity, float lifeTime, float radius, Color mainColor, Color backColor, 
-        bool explodes = false, float explosionRadius = 70.0f, float explosionLifeTime = 0.5f, SpriteRenderData* explosionRenderData = nullptr
+        int quantity, const BulletProperties& bulletData,
+        SpriteRenderData* explosionRenderData = nullptr
     );
 
     ~BulletPool() = default;
@@ -106,4 +113,47 @@ inline float GenerateBulletSpread(float angle, float spread)
     float random = (float)GetRandomValue(-1000,1000) / 1000.0f;
 
     return angle + (random * spread);
+}
+
+inline void ShootBullet(
+    float dt,
+    const GameObject& gameObj,
+    BulletProperties* bulletData,
+    const Vector2& bulletSpawnPos,
+    BulletPool* bulletpool,
+    bool condition)
+{
+    float angle = bulletData->angle;
+
+    float bulletGravity = bulletData->gravity;
+
+    if(gameObj.data.flipX)
+    {
+        angle = 180.0f - angle;
+    }
+
+    if(gameObj.data.flipY)
+    {
+        angle = -angle;
+        bulletGravity = -bulletData->gravity;
+    }
+
+    float radians = GenerateBulletSpread(angle, bulletData->spread) * (PI / 180.0f);
+
+    Vector2 initialVel = {0,0};
+
+    initialVel.x = bulletData->speed * cosf(radians) + gameObj.body.velocity.x;
+    initialVel.y = bulletData->speed * sinf(radians);
+
+    if(bulletData->fireTimer > 0.0f) bulletData->fireTimer -= dt;
+
+    if(condition)
+    {
+        while((bulletData->fireTimer <= 0.0f))
+        {
+            bulletpool->FireBullet(bulletSpawnPos, initialVel, bulletGravity);
+
+            bulletData->fireTimer = bulletData->fireRate;
+        }
+    }
 }

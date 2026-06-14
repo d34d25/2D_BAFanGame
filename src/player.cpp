@@ -28,6 +28,7 @@ Player::Player(Vector2 position)
     bulletData.lifeTime = 2.0f;//2.0f
 
     bulletData.explodes = false;
+    bulletData.piercing = false;
 
     Vector2 characterFrameSize = {0,0};
 
@@ -130,6 +131,8 @@ Player::Player(Vector2 position)
         bulletData.mainColor = ARIS_PURPLE;
         bulletData.backColor = ARIS_PURPLE_BG;
 
+        bulletData.piercing = true;
+
         characterFrameSize = {12,15};
 
         weaponFrameSize = {33,10};
@@ -180,7 +183,7 @@ Player::Player(Vector2 position)
 
     weaponRenderData.animationFrames = CropImage(*weaponRenderData.sourceTexture, weaponFrameSize);
 
-    bulletpool = std::make_unique<BulletPool>(30, bulletData.lifeTime, bulletData.radius, bulletData.mainColor, bulletData.backColor, bulletData.explodes);
+    bulletpool = std::make_unique<BulletPool>(30, bulletData);
 }
 
 Player::~Player()
@@ -309,37 +312,9 @@ void Player::Update(float dt, int iterations)
 
 void Player::Shoot(float dt)
 {
-    float angle = bulletData.angle;
-
-    float bulletGravity = bulletData.gravity;
-
-    if(gameObj.data.flipX)
-    {
-        angle = 180.0f - angle;
-    }
-
-    if(gameObj.data.flipY)
-    {
-        angle = -angle;
-        bulletGravity = -bulletData.gravity;
-    }
-
-    float radians = GenerateBulletSpread(angle, bulletData.spread) * (PI / 180.0f);
-
-    Vector2 initialVel = {0,0};
-
-    initialVel.x = bulletData.speed * cosf(radians) + gameObj.body.velocity.x;
-    initialVel.y = bulletData.speed * sinf(radians);
-
-    if(bulletData.fireTimer > 0.0f) bulletData.fireTimer -= dt;
-
-    if(IsKeyDown(KEY_X))
-    {
-        while((bulletData.fireTimer <= 0.0f))
-        {
-            bulletpool.get()->FireBullet(GetBulletSpawnPos(), initialVel, bulletGravity);
-
-            bulletData.fireTimer = bulletData.fireRate;
-        }
-    }
+    ShootBullet(
+        dt, gameObj,
+        &bulletData, GetBulletSpawnPos(),
+        bulletpool.get(), IsKeyDown(KEY_X)
+    );
 }

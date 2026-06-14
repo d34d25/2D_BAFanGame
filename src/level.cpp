@@ -1274,7 +1274,7 @@ void Level::CCD_Update()
 
             if(result.collision)
             {
-                bullet->didHit =  true;
+                if(!player.bulletpool.get()->pierces) bullet->didHit =  true;
             }
         }
 

@@ -163,39 +163,11 @@ void Enemy::YuukaBehaivour(float dt, const Vector2& playerPos, Vector2* playerVe
 
 void Enemy::Shoot(float dt)
 {
-    float angle = bulletData.angle;
-
-    float bulletGravity = bulletData.gravity;
-
-    if(gameObj.data.flipX)
-    {
-        angle = 180.0f - angle;
-    }
-
-    if(gameObj.data.flipY)
-    {
-        angle = -angle;
-        bulletGravity = -bulletData.gravity;
-    }
-
-    float radians = GenerateBulletSpread(angle, bulletData.spread) * (PI / 180.0f);
-
-    Vector2 initialVel = {0,0};
-
-    initialVel.x = bulletData.speed * cosf(radians) + gameObj.body.velocity.x;
-    initialVel.y = bulletData.speed * sinf(radians);
-
-    if(bulletData.fireTimer > 0.0f) bulletData.fireTimer -= dt;
-
-    if(shooting)
-    {
-        while((bulletData.fireTimer <= 0.0f))
-        {
-            bulletpool.get()->FireBullet(GetBulletSpawnPos(), initialVel, bulletGravity);
-
-            bulletData.fireTimer = bulletData.fireRate;
-        }
-    }
+    ShootBullet(
+        dt, gameObj,
+        &bulletData, GetBulletSpawnPos(),
+        bulletpool.get(), shooting
+    );
 }
 
 void Enemy::InitEnemy(
@@ -227,6 +199,8 @@ void Enemy::InitEnemy(
 
     bulletData.mainColor = GOLD;
     bulletData.backColor = BLACK;
+
+    bulletData.explosionRadius = 60.0f;
 
     Hitbox mainHitbox = {
         {0,0},
@@ -276,7 +250,7 @@ void Enemy::InitEnemy(
 
     gameObj.hitboxes.push_back(jumpDetector);
 
-    bulletpool = std::make_unique<BulletPool>(30, bulletData.lifeTime, bulletData.radius, bulletData.mainColor, bulletData.backColor, bulletData.explodes, 60.0f);
+    bulletpool = std::make_unique<BulletPool>(30, bulletData);
 }
 
 void Enemy::UpdateAI(float dt, const Vector2 &playerPos, Vector2 *playerVel, const bool isPlayerGrounded, bool *canPlayerMove)
