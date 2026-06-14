@@ -6,7 +6,9 @@ void Enemy::YuukaBehaivour(float dt, const Vector2& playerPos, Vector2* playerVe
 {
     float moveSpeed = 200 * moveSpeedSign;
 
-    //std::cout<<"state timer: "<<stateTimer<<"\n";
+    std::cout<<"state timer: "<<stateTimer<<"\n";
+
+    gameObj.body.velocity.x >= 0 ? gameObj.data.flipX = false : gameObj.data.flipX = true;
 
     if(stateTimer <= 0.0f)
     {
@@ -20,6 +22,8 @@ void Enemy::YuukaBehaivour(float dt, const Vector2& playerPos, Vector2* playerVe
         shooting = false;
 
         isStomping = false;
+
+        *canPlayerMove = true;
 
         int roll = GetRandomValue(0,100);
 
@@ -45,22 +49,14 @@ void Enemy::YuukaBehaivour(float dt, const Vector2& playerPos, Vector2* playerVe
 
         maxTime = 0.5f;
 
-        float distToPlayerSqr = Vector2LengthSqr(playerPos - gameObj.transform.position);
-
-        const float NUM_OF_TILES = 20.0f;
-
-        float minDist = NUM_OF_TILES * GRID_SIZE * NUM_OF_TILES * GRID_SIZE;
+        if(stateTimer <= 0.4f && isGrounded) isJumping = true;
 
         if(!isGrounded && hitCeiling) isJumping = false;
-
-        if(isGrounded && distToPlayerSqr <= minDist)
-        {
-            if(timer <= 0.0f) isJumping = true;
-        }
+        else if(isGrounded && timer >= maxTime) isJumping = true;
 
         if(!isGrounded)
         {
-            timer = maxTime;
+            timer = 0.0f;
             counter = 0;
             *canPlayerMove = true;
         }
@@ -72,9 +68,9 @@ void Enemy::YuukaBehaivour(float dt, const Vector2& playerPos, Vector2* playerVe
                 else counter = 1;
             }
 
-            if(timer > 0.0f)
+            if(timer <= maxTime)
             {
-                timer -= dt;
+                timer += dt;
 
                 gameObj.body.velocity.x = 0;
 
@@ -103,19 +99,15 @@ void Enemy::YuukaBehaivour(float dt, const Vector2& playerPos, Vector2* playerVe
             if(xPosDifference > 0)
             {
                 gameObj.body.velocity.x = moveSpeed * horizontalBoostFactor;
-                
-                gameObj.data.flipX = false;
             }
             else
             {
                 gameObj.body.velocity.x = -moveSpeed * horizontalBoostFactor;
-
-                gameObj.data.flipX = true;
             }
 
             isJumping = false;
         }
-      
+
         isStomping = isGrounded;
 
         if(stateTimer >= 2.0f)
@@ -147,8 +139,6 @@ void Enemy::YuukaBehaivour(float dt, const Vector2& playerPos, Vector2* playerVe
                 }
 
                 moveSpeedSign *= -1;
-
-                gameObj.data.flipX = !gameObj.data.flipX;
 
                 counter = 1;
             }

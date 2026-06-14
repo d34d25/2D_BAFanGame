@@ -18,6 +18,12 @@ const float REC_TO_CIRCLE_RADIUS_MULTIPLIER = 1.5f; //this ensures that the circ
 
 const float CAMERA_ZOOM = 1.2f;
 
+const float ENEMY_SPAWN_RADIUS = GRID_SIZE * 15.0f;
+
+const float ENEMY_DESPAWN_RADIUS = GRID_SIZE * 17.0f;
+
+const float PLATFORM_UPDATE_RADIUS = GRID_SIZE * 25.0f;
+
 struct TileRangeLimits
 {
     int minX = 0;

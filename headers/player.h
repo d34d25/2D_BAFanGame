@@ -189,6 +189,8 @@ public:
         canMove = true;
 
         ResetFalgs();
+
+        bulletpool.get()->Reset();
     }
 
     inline bool IsFalling()

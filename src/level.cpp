@@ -497,6 +497,8 @@ void Level::ResetRoom()
             platform.Respawn();
         }
     }
+
+    player.bulletpool.get()->Reset();
 }
 
 void Level::LowFrequencyUpdate()
@@ -506,10 +508,6 @@ void Level::LowFrequencyUpdate()
     player.enemyCache.clear();
     
     float playerRadius = player.gameObj.GetMainAABB().width * REC_TO_CIRCLE_RADIUS_MULTIPLIER;
-    float platformUpdateRadius = GRID_SIZE * 25.0f;
-
-    float enemySpawnRadius = GRID_SIZE * 15.0f;
-    float enemyDespawnRadius = GRID_SIZE * 17.0f;
 
     if(currentRoomIndex > -1 && currentRoomIndex < enemyBuckets.size())
     {
@@ -522,14 +520,14 @@ void Level::LowFrequencyUpdate()
             float despawnDistanceSqr = Vector2DistanceSqr(camera.target, enemy.gameObj.transform.position);
             float spawnDistanceSqr = Vector2DistanceSqr(camera.target, enemy.spawnPosition);
 
-            if(despawnDistanceSqr > enemyDespawnRadius * enemyDespawnRadius)
+            if(despawnDistanceSqr > ENEMY_DESPAWN_RADIUS * ENEMY_DESPAWN_RADIUS)
             {
                 enemy.isActive = false;
             }
             else if(!enemy.isActive)
             {
-                if(spawnDistanceSqr <= enemyDespawnRadius * enemyDespawnRadius &&
-                spawnDistanceSqr >= enemySpawnRadius * enemySpawnRadius)
+                if(spawnDistanceSqr <= ENEMY_DESPAWN_RADIUS * ENEMY_DESPAWN_RADIUS &&
+                spawnDistanceSqr >= ENEMY_SPAWN_RADIUS * ENEMY_SPAWN_RADIUS)
                 {
                     enemy.Respawn();
                     enemy.isActive = true;
@@ -567,7 +565,7 @@ void Level::LowFrequencyUpdate()
                 player.gameObj.transform.position,
                 playerRadius,
                 platform.gameObj.transform.position,
-                platformUpdateRadius
+                PLATFORM_UPDATE_RADIUS
             ))
             {
                 player.platformCache_update.push_back(&platform);
@@ -1364,7 +1362,22 @@ void Level::ResetLevel()
             Enemy& enemy = enemyBuckets[i][j];
 
             enemy.Respawn();
-            enemy.isActive = false;
+            
+            float despawnDistanceSqr = Vector2DistanceSqr(camera.target, enemy.gameObj.transform.position);
+            float spawnDistanceSqr = Vector2DistanceSqr(camera.target, enemy.spawnPosition);
+
+            if(despawnDistanceSqr > ENEMY_DESPAWN_RADIUS * ENEMY_DESPAWN_RADIUS)
+            {
+                enemy.isActive = false;
+            }
+            else if(!enemy.isActive)
+            {
+                if(spawnDistanceSqr <= ENEMY_DESPAWN_RADIUS * ENEMY_DESPAWN_RADIUS &&
+                spawnDistanceSqr >= ENEMY_SPAWN_RADIUS * ENEMY_SPAWN_RADIUS)
+                {
+                    enemy.isActive = true;
+                }
+            }
         }
     }
 

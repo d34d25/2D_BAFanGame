@@ -106,6 +106,23 @@ public:
     void UpdateBullets(float dt);
 
     void FireBullet(Vector2 position, Vector2 initialVelocity, float gravity);
+
+    inline void Reset()
+    {
+        for(Bullet* b : activeBullets)
+        {
+            inactiveBullets.push_back(b);
+        }
+
+        activeBullets.clear();
+
+        for(Explosion* e : activeExplosions)
+        {
+            inactiveExplosions.push_back(e);
+        }
+
+        activeExplosions.clear();
+    }
 };
 
 inline float GenerateBulletSpread(float angle, float spread)

@@ -174,6 +174,10 @@ public:
 
         ResetFlags();
 
+        isStomping = false;
+
         gameObj.UpdateHitboxes();
+
+        bulletpool.get()->Reset();
     }
 };
