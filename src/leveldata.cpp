@@ -55,7 +55,7 @@ std::vector<SpriteRenderData> yuukaRenderData = {};
     each SpriteRenderData will have a fixed spacing and frameSize value, but different SpriteRenderData can use
     the same source texture despite having differente sizes, start, end and spacing.
 */
-SpriteRenderData LoadRenderData(const char* path, Vector2 frameSize, int spacing = 1, int atlasStartFrame = 0, int atlasEndFrame = 0, float animationSpeed = 5.0f)
+SpriteRenderData LoadRenderData(const char* path, Vector2 frameSize, int spacing, int atlasStartFrame, int atlasEndFrame, float animationSpeed)
 {
     SpriteRenderData renderData = {};
 

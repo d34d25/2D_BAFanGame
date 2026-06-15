@@ -676,7 +676,7 @@ void Level::MediumFrequencyDiscreteUpdate()
 
         if(lowFrequencyCounter % 2 == 0)
         {
-            if(enemy->type == EnemyType::YUUKA && enemy->isStomping) TriggerScreenShake(0.5f, 5.0f);
+            if(enemy->type == EnemyType::YUUKA && enemy->isStomping) TriggerScreenShake(0.5f, 5.0f); //5.0f
 
             enemy->UpdateAI(dt, player.gameObj.transform.position, &player.gameObj.body.velocity, player.isGrounded, &player.canMove);
 
@@ -1551,12 +1551,12 @@ void Level::DrawLevel()
         }
     }
 
-    DrawSprite(
+    /*DrawSprite(
         player.gameObj.transform,
         &player.weaponRenderData,
         player.gameObj.data,
         player.currentFrame
-    );
+    );*/
 
     //DebugDrawing();
 

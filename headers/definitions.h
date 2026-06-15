@@ -46,7 +46,7 @@ static constexpr int LAYERS = 2;
 
 static constexpr int GRID_SIZE = 48;
 
-static constexpr int TILE_SCALE = 3;
+static constexpr int TILE_SCALE = 3; //3
 
 static constexpr int ROTATING_SPIKE_MAX_HITBOX = 6;
 

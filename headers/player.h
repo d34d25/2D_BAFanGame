@@ -11,6 +11,8 @@
 
 #include "enemy.h"
 
+#include "leveldata.h"
+
 const Color MOMOI_PINK = Color{255,30,150,255};
 const Color MOMOI_PINK_BG = Color{255,180,230,255};
 
@@ -39,11 +41,10 @@ private:
 
     Character character = Character::MOMOI;
 
-    Texture2D playerTexture = {};
-    Texture2D weaponTexture = {};
-
     float jumpTime = 0.0f;
     float maxJumpTime = 0.15f;
+
+    float animationTimer = 0.0f;
 
     inline Vector2 GetBulletSpawnPos()
     {

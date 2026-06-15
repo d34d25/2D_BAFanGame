@@ -10,7 +10,7 @@ Player::Player(Vector2 position)
 
     gameObj.body.hasGravity = true;
 
-    gameObj.hitboxes.push_back(Hitbox{{0,0}, {20,46}});
+    gameObj.hitboxes.push_back(Hitbox{{0,0}, {25,56}}); //20, 46
 
     //jump detector
     gameObj.AddSubHitbox({0,0}, {gameObj.GetMainAABB().width * 0.9f, gameObj.GetMainAABB().height * 0.5f});
@@ -30,21 +30,17 @@ Player::Player(Vector2 position)
     bulletData.explodes = false;
     bulletData.piercing = false;
 
-    Vector2 characterFrameSize = {0,0};
-
-    Vector2 weaponFrameSize = {0,0};
-
     character = Character::YUZU;
 
     switch (character)
     {
     case Character::MOMOI:
 
-        playerTexture = LoadTexture("assets/characters/chibi-momoi.png");
-        weaponTexture = LoadTexture("assets/characters/momoi-weapon.png");
+        characterRenderData = LoadRenderData("assets/characters/momoi-spritesheet-b.png", {14,26});
+        weaponRenderData = LoadRenderData("assets/characters/momoi-weapon.png", {32,8});
 
         characterRenderData.offset.x = 0.0f;
-        characterRenderData.offset.y = -5.0f;
+        characterRenderData.offset.y = -7.0f;
 
         weaponRenderData.offset.x = 25.0f;
         weaponRenderData.offset.y = 16.0f;
@@ -57,18 +53,14 @@ Player::Player(Vector2 position)
         bulletData.mainColor = MOMOI_PINK;
         bulletData.backColor = MOMOI_PINK_BG;
 
-        characterFrameSize = {12,18};
-
-        weaponFrameSize = {32,8};
-
         break;
     case Character::MIDORI:
 
-        playerTexture = LoadTexture("assets/characters/chibi-midori.png");
-        weaponTexture = LoadTexture("assets/characters/midori-weapon.png");
+        characterRenderData = LoadRenderData("assets/characters/midori-spritesheet.png", {14,26});
+        weaponRenderData = LoadRenderData("assets/characters/midori-weapon.png", {32,10});
 
         characterRenderData.offset.x = 0.0f;
-        characterRenderData.offset.y = -5.0f;
+        characterRenderData.offset.y = -7.0f;
 
         weaponRenderData.offset.x = 29.0f;
         weaponRenderData.offset.y = 16.0f;
@@ -79,18 +71,14 @@ Player::Player(Vector2 position)
         bulletData.mainColor = MIDORI_GREEN;
         bulletData.backColor = MIDORI_GREEN_BG;
 
-        characterFrameSize = {12,18};
-
-        weaponFrameSize = {32,10};
-
         break;
     case Character::YUZU:
 
-        playerTexture = LoadTexture("assets/characters/chibi-yuzu.png");
-        weaponTexture = LoadTexture("assets/characters/yuzu-weapon.png");
+        characterRenderData = LoadRenderData("assets/characters/yuzu-spritesheet.png", {21,23});
+        weaponRenderData = LoadRenderData("assets/characters/yuzu-weapon.png", {19,10});
 
         characterRenderData.offset.x = -4.0f;
-        characterRenderData.offset.y = -1.0f;
+        characterRenderData.offset.y = -6.0f;
 
         weaponRenderData.offset.x = 8.0f;
         weaponRenderData.offset.y = 14.0f;
@@ -107,15 +95,11 @@ Player::Player(Vector2 position)
 
         bulletData.explodes = true;
 
-        characterFrameSize = {14,15};
-
-        weaponFrameSize = {19,10};
-
         break;
     case Character::ARIS:
 
-        playerTexture = LoadTexture("assets/characters/chibi-aris.png");
-        weaponTexture = LoadTexture("assets/characters/aris-weapon.png");
+        characterRenderData = LoadRenderData("assets/characters/chibi-aris.png", {12,15});
+        weaponRenderData = LoadRenderData("assets/characters/aris-weapon.png", {33,10});
 
         characterRenderData.offset.x = 0.0f;
         characterRenderData.offset.y = -1.0f;
@@ -133,15 +117,11 @@ Player::Player(Vector2 position)
 
         bulletData.piercing = true;
 
-        characterFrameSize = {12,15};
-
-        weaponFrameSize = {33,10};
-
         break;
     case Character::MOMOI_CHAQUENA:
 
-        playerTexture = LoadTexture("assets/characters/chibi-momoi-chaquena.png");
-        weaponTexture = LoadTexture("assets/characters/momoi-chaquena-weapon.png");
+        characterRenderData = LoadRenderData("assets/characters/chibi-momoi-chaquena.png", {14,17});
+        weaponRenderData = LoadRenderData("assets/characters/momoi-chaquena-weapon.png", {26,8});
 
         characterRenderData.offset.x = 0.0f;
         characterRenderData.offset.y = -4.0f;
@@ -157,32 +137,13 @@ Player::Player(Vector2 position)
         bulletData.mainColor = MOMOI_PINK;
         bulletData.backColor = MOMOI_PINK_BG;
 
-        characterFrameSize = {14,17};
-
-        weaponFrameSize = {26,8};
-
         break;
     default:
         break;
     }
+    
 
-    //character sprite
-    SetTextureFilter(playerTexture, TEXTURE_FILTER_POINT);
-
-    SetTextureWrap(playerTexture, TEXTURE_WRAP_CLAMP);
-
-    //weapon sprite
-    SetTextureFilter(weaponTexture, TEXTURE_FILTER_POINT);
-
-    SetTextureWrap(weaponTexture, TEXTURE_WRAP_CLAMP);
-
-    characterRenderData.sourceTexture = &playerTexture;
-
-    weaponRenderData.sourceTexture = &weaponTexture;
-
-    characterRenderData.animationFrames = CropImage(*characterRenderData.sourceTexture, characterFrameSize);
-
-    weaponRenderData.animationFrames = CropImage(*weaponRenderData.sourceTexture, weaponFrameSize);
+    characterRenderData.animationSpeed = 10.0f;
 
     bulletpool = std::make_unique<BulletPool>(30, bulletData);
 }
@@ -204,6 +165,27 @@ void Player::Update(float dt, int iterations)
     //lateral movement
 
     float moveForce = 400 * gameObj.body.damping;
+
+    animationTimer += subDt * characterRenderData.animationSpeed;
+
+    if(std::abs(gameObj.body.velocity.x) > 50.0f)
+    {
+        if(animationTimer >= 1.0f)
+        {
+            animationTimer = 0.0f;
+            currentFrame++;
+
+            if(currentFrame > 3) currentFrame = 1;
+
+            if(currentFrame < 0) currentFrame = 0;
+        }
+    }
+    else
+    {
+        currentFrame = 0;
+    }
+
+    if(!isGrounded) currentFrame = 0;
 
     if(canMove)
     {

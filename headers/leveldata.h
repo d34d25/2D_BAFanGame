@@ -364,6 +364,8 @@ extern std::vector<SpriteRenderData> dummyRenderData;
 
 extern std::vector<SpriteRenderData> yuukaRenderData;
 
+extern SpriteRenderData LoadRenderData(const char* path, Vector2 frameSize, int spacing = 1, int atlasStartFrame = 0, int atlasEndFrame = 0, float animationSpeed = 5.0f);
+
 void LoadAssets();
 
 void UnloadAssets();
