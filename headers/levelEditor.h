@@ -52,6 +52,13 @@ private:
 
     SpriteRenderData* activeRenderData = nullptr;
 
+    inline bool HasReactiveAnimations(const TileType& type)
+    {
+        if(type > TileType::ENEMY_START && type < TileType::ENEMY_END) return true;
+
+        return false;
+    }
+
     inline void UpdateCamera()
     {
         if(IsMouseButtonDown(MOUSE_BUTTON_MIDDLE))

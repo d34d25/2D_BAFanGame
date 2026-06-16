@@ -55,9 +55,13 @@ std::vector<SpriteRenderData> yuukaRenderData = {};
     each SpriteRenderData will have a fixed spacing and frameSize value, but different SpriteRenderData can use
     the same source texture despite having differente sizes, start, end and spacing.
 */
-SpriteRenderData LoadRenderData(const char* path, Vector2 frameSize, int spacing, int atlasStartFrame, int atlasEndFrame, float animationSpeed)
+SpriteRenderData LoadRenderData(const char* path, Vector2 frameSize, Vector2 offset, int spacing, int atlasStartFrame, int atlasEndFrame, float animationSpeed)
 {
     SpriteRenderData renderData = {};
+
+    renderData.offset = offset;
+
+    renderData.ogOffset = renderData.offset;
 
     renderData.spacing = spacing;
 
@@ -117,33 +121,33 @@ void LoadAssets()
 
     //treadmills
 
-    treadmillRenderData_Right.push_back(LoadRenderData("assets/tiles/treadmill-spritesheet.png", tileSize, 2, 0, 6));
+    treadmillRenderData_Right.push_back(LoadRenderData("assets/tiles/treadmill-spritesheet.png", tileSize, {0,0} ,2, 0, 6));
 
-    treadmillRenderData_Left.push_back(LoadRenderData("assets/tiles/treadmill-spritesheet.png", tileSize, 2, 6, 12));
+    treadmillRenderData_Left.push_back(LoadRenderData("assets/tiles/treadmill-spritesheet.png", tileSize, {0,0}, 2, 6, 12));
 
     //decoration
 
-    decoRenderData.push_back(LoadRenderData("assets/tiles/deco/deco-spritesheet-1.png", {14,16}, 2, 0, 0, 2.0f));
+    decoRenderData.push_back(LoadRenderData("assets/tiles/deco/deco-spritesheet-1.png", {14,16}, {0,0},2, 0, 0, 2.0f));
     decoRenderData.push_back(LoadRenderData("assets/tiles/deco/deco-spritesheet-2.png", {14,16}));
     decoRenderData.push_back(LoadRenderData("assets/tiles/deco/deco-spritesheet-3.png", {35,29}));
 
     //wind tiles
 
-    windRenderData.push_back(LoadRenderData("assets/tiles/wind-up.png", {16,16}, 3));
+    windRenderData.push_back(LoadRenderData("assets/tiles/wind-up.png", {16,16},{0,0},3));
 
     //water
 
-    waterRenderData.push_back(LoadRenderData("assets/tiles/water.png", {16,16}, 3));
+    waterRenderData.push_back(LoadRenderData("assets/tiles/water.png", {16,16}, {0,0}, 3));
 
     //platforms
 
-    movingPlatformRenderData_Vertical.push_back(LoadRenderData("assets/platforms/vertical-moving-platform-spritesheet.png", {48,5}, 2));
+    movingPlatformRenderData_Vertical.push_back(LoadRenderData("assets/platforms/vertical-moving-platform-spritesheet.png", {48,5}, {0,0}, 2));
 
     //enemies
 
     dummyRenderData.push_back(LoadRenderData("assets/enemies/chibi-dummy.png", {8,12}));
     
-    yuukaRenderData.push_back(LoadRenderData("assets/enemies/chibi-yuuka.png", {14,15}));
+    yuukaRenderData.push_back(LoadRenderData("assets/enemies/yuuka-sprtiesheet.png", {20,22}, {-4,-4}, 1, 0, 0, 10.0f));
 }
 
 void UnloadAssets()

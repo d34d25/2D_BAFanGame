@@ -256,8 +256,10 @@ void LevelEditor::Update()
             }
         }
 
+        bool reactiveAnimations = HasReactiveAnimations((TileType)currentTileType);
+
         //texture cycling
-        if(mouseWheel != 0 && IsKeyDown(KEY_LEFT_SHIFT))
+        if(mouseWheel != 0 && IsKeyDown(KEY_LEFT_SHIFT) && !reactiveAnimations)
         {
             if(activeRenderData && !activeRenderData->animationFrames.empty())
             {
@@ -276,6 +278,10 @@ void LevelEditor::Update()
             {
                 currentTexture = 0;
             }
+        }
+        else if(reactiveAnimations)
+        {
+            currentTexture = 0;
         }
 
         //tile type cycling
@@ -608,10 +614,26 @@ void LevelEditor::Draw()
                     }
                     else
                     {
-                        DrawRectangle(i * GRID_SIZE + offsetX, j * GRID_SIZE + offsetY, tileSize.x, tileSize.y, {color.r, color.g, color.b, alpha});
+                        Vector2 size = {tileSize.x, tileSize.y};
+
+                        float playerOffsetY = 0.0f;
+
+                        if(tile.type == TileType::PLAYER_SPAWN)
+                        {
+                            size.y = tileSize.y * 2.0f;
+
+                            playerOffsetY = tileSize.y;
+                        }
+
+                        DrawRectangle(
+                            i * GRID_SIZE + offsetX,
+                            j * GRID_SIZE + offsetY - playerOffsetY,
+                            size.x, size.y,
+                            {color.r, color.g, color.b, alpha}
+                        );
                     }
                 }
-                else 
+                else
                 {
                     DrawSprite(tile.gameObj, tileRenderData, tile.textureIndex, layerTint);
                 }
@@ -664,10 +686,21 @@ void LevelEditor::Draw()
             }
             else
             {
+                Vector2 size = {tileSize.x, tileSize.y};
+
+                float playerOffsetY = 0.0f;
+
+                if(currentTileType == (int)TileType::PLAYER_SPAWN)
+                {
+                    size.y = tileSize.y * 2.0f;
+
+                    playerOffsetY = tileSize.y;
+                }
+
                 DrawRectangle(
                     previewTransform.position.x - (GRID_SIZE * 0.5f) + offsetX, 
-                    previewTransform.position.y - (GRID_SIZE * 0.5f) + offsetY,
-                    tileSize.x, tileSize.y, 
+                    previewTransform.position.y - (GRID_SIZE * 0.5f) + offsetY - playerOffsetY,
+                    size.x, size.y, 
                     previewColor
                 );
             }

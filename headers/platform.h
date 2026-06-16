@@ -2,33 +2,9 @@
 
 #include "raylib.h"
 #include "entity.h"
+#include "leveldata.h"
 
 const Vector2 DESPAWN_LOCATION = {1000 * GRID_SIZE,  1000 * GRID_SIZE};
-
-enum class PlatformType
-{
-    NONE,
-    
-    FALLING,
-    DISAPPEARING,
-
-    ROTATING_SPIKE_SINGLE,
-    ROTATING_SPIKE_DOUBLE,
-
-    MOVING_START,
-
-    MOVING_X,
-
-    MOVING_HORIZONTAL,
-    MOVING_SPIKE_HORIZONTAL,
-    
-    MOVING_Y,
-
-    MOVING_VERTICAL,
-    MOVING_SPIKE_VERTICAL,
-
-    MOVING_END
-};
 
 class Platform
 {

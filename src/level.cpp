@@ -61,7 +61,11 @@ void Level::InitLevel(const char* levelPath, const char* roomPath ,float dt, int
 
                 if(type == TileType::PLAYER_SPAWN)
                 {
-                    player.gameObj.transform.position = tile->gameObj.transform.position;
+                    Vector2 spawnPos = tile->gameObj.transform.position;
+
+                    spawnPos.y -= player.gameObj.GetMainAABB().height * 0.25f;
+
+                    player.gameObj.transform.position = spawnPos;
                     player.spawnPos = player.gameObj.transform.position;
                 }
 
@@ -442,6 +446,8 @@ void Level::UpdateLevel()
 
     MediumFrequencyDiscreteUpdate();
 
+    player.UpdateRender(dt);
+
     for(int iteraion = 0; iteraion < iterations; iteraion++)
     {
         HighFrequencyDiscreteUpdate();
@@ -684,6 +690,8 @@ void Level::MediumFrequencyDiscreteUpdate()
         }
 
         if(enemy->shooting) enemy->Shoot(dt);
+
+        enemy->UpdateRender(dt);
     }
 }
 
@@ -1503,7 +1511,7 @@ void Level::DrawLevel()
         if(!enemyRenderData) DrawRectangleRec(enemy->gameObj.GetMainAABB(), enemy->testColor);
         else
         {
-            DrawSprite(enemy->gameObj, enemyRenderData, enemy->textureIndex);
+            DrawSprite(enemy->gameObj, enemyRenderData, enemy->currentFrame);
         }
     }
 

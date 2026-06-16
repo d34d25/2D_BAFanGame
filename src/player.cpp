@@ -30,13 +30,13 @@ Player::Player(Vector2 position)
     bulletData.explodes = false;
     bulletData.piercing = false;
 
-    character = Character::YUZU;
+    character = Character::MOMOI;
 
     switch (character)
     {
     case Character::MOMOI:
 
-        characterRenderData = LoadRenderData("assets/characters/momoi-spritesheet-b.png", {14,26});
+        characterRenderData = LoadRenderData("assets/characters/momoi-spritesheet-b.png", {14,24});
         weaponRenderData = LoadRenderData("assets/characters/momoi-weapon.png", {32,8});
 
         characterRenderData.offset.x = 0.0f;
@@ -56,7 +56,7 @@ Player::Player(Vector2 position)
         break;
     case Character::MIDORI:
 
-        characterRenderData = LoadRenderData("assets/characters/midori-spritesheet.png", {14,26});
+        characterRenderData = LoadRenderData("assets/characters/midori-spritesheet.png", {14,24});
         weaponRenderData = LoadRenderData("assets/characters/midori-weapon.png", {32,10});
 
         characterRenderData.offset.x = 0.0f;
@@ -74,11 +74,11 @@ Player::Player(Vector2 position)
         break;
     case Character::YUZU:
 
-        characterRenderData = LoadRenderData("assets/characters/yuzu-spritesheet.png", {21,23});
+        characterRenderData = LoadRenderData("assets/characters/yuzu-spritesheet.png", {21,22});
         weaponRenderData = LoadRenderData("assets/characters/yuzu-weapon.png", {19,10});
 
         characterRenderData.offset.x = -4.0f;
-        characterRenderData.offset.y = -6.0f;
+        characterRenderData.offset.y = -4.0f;
 
         weaponRenderData.offset.x = 8.0f;
         weaponRenderData.offset.y = 14.0f;
@@ -98,11 +98,11 @@ Player::Player(Vector2 position)
         break;
     case Character::ARIS:
 
-        characterRenderData = LoadRenderData("assets/characters/chibi-aris.png", {12,15});
+        characterRenderData = LoadRenderData("assets/characters/aris-spritesheet.png", {17,21});
         weaponRenderData = LoadRenderData("assets/characters/aris-weapon.png", {33,10});
 
         characterRenderData.offset.x = 0.0f;
-        characterRenderData.offset.y = -1.0f;
+        characterRenderData.offset.y = -3.0f;
 
         weaponRenderData.offset.x = 16.0f;
         weaponRenderData.offset.y = 18.0f;
@@ -142,14 +142,75 @@ Player::Player(Vector2 position)
         break;
     }
     
-
     characterRenderData.animationSpeed = 10.0f;
+
+    characterRenderData.ogOffset = characterRenderData.offset;
 
     bulletpool = std::make_unique<BulletPool>(30, bulletData);
 }
 
 Player::~Player()
 {
+}
+
+void Player::UpdateRender(float dt)
+{
+    animationTimer += dt * characterRenderData.animationSpeed;
+
+    /*
+    idle = frame 0
+    waliking = frame 1 to 3
+    jumping = frame 4
+    climbing = frame 5 to 6
+    stunned = frame 7
+    */
+
+    if(animationTimer >= 1.0f)
+    {
+        animationTimer = 0.0f;
+
+        int startFrame = 0;
+        int endFrame = characterRenderData.animationFrames.size();
+
+        characterRenderData.offset = characterRenderData.ogOffset;
+
+        if(!canMove)
+        {
+            startFrame = 7;
+            endFrame = 7;
+
+            characterRenderData.offset.y += 5.0f;
+        }
+        else if(climbing)
+        {
+            startFrame = 5;
+            endFrame = 6;
+        }
+        else if(!isGrounded)
+        {
+            startFrame = 4;
+            endFrame = 4;
+        }
+        else
+        {
+            if(std::abs(gameObj.body.velocity.x) > 50.0f)
+            {
+                startFrame = 1;
+                endFrame = 3;
+            }
+            else
+            {
+                startFrame = 0;
+                endFrame = 0;
+            }
+        }
+
+        if(!(climbing && gameObj.body.velocity.y == 0.0f)) currentFrame++;
+
+        if(currentFrame > endFrame || currentFrame < startFrame) currentFrame = startFrame;
+
+        if(currentFrame < 0) currentFrame = 0;
+    }
 }
 
 void Player::Update(float dt, int iterations)
@@ -165,27 +226,6 @@ void Player::Update(float dt, int iterations)
     //lateral movement
 
     float moveForce = 400 * gameObj.body.damping;
-
-    animationTimer += subDt * characterRenderData.animationSpeed;
-
-    if(std::abs(gameObj.body.velocity.x) > 50.0f)
-    {
-        if(animationTimer >= 1.0f)
-        {
-            animationTimer = 0.0f;
-            currentFrame++;
-
-            if(currentFrame > 3) currentFrame = 1;
-
-            if(currentFrame < 0) currentFrame = 0;
-        }
-    }
-    else
-    {
-        currentFrame = 0;
-    }
-
-    if(!isGrounded) currentFrame = 0;
 
     if(canMove)
     {

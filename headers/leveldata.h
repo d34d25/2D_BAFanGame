@@ -4,11 +4,7 @@
 
 #include "entity.h"
 
-#include "enemy.h"
-
 #include "drawing.h"
-
-#include "platform.h"
 
 #include <vector>
 
@@ -94,6 +90,37 @@ enum class TileType
     ENEMY_END,
 
     COUNT
+};
+
+enum class PlatformType
+{
+    NONE,
+    
+    FALLING,
+    DISAPPEARING,
+
+    ROTATING_SPIKE_SINGLE,
+    ROTATING_SPIKE_DOUBLE,
+
+    MOVING_START,
+
+    MOVING_X,
+
+    MOVING_HORIZONTAL,
+    MOVING_SPIKE_HORIZONTAL,
+    
+    MOVING_Y,
+
+    MOVING_VERTICAL,
+    MOVING_SPIKE_VERTICAL,
+
+    MOVING_END
+};
+
+enum class EnemyType
+{
+    DUMMY,
+    YUUKA
 };
 
 inline bool IsTypeInvalid(TileType type)
@@ -364,7 +391,7 @@ extern std::vector<SpriteRenderData> dummyRenderData;
 
 extern std::vector<SpriteRenderData> yuukaRenderData;
 
-extern SpriteRenderData LoadRenderData(const char* path, Vector2 frameSize, int spacing = 1, int atlasStartFrame = 0, int atlasEndFrame = 0, float animationSpeed = 5.0f);
+extern SpriteRenderData LoadRenderData(const char* path, Vector2 frameSize, Vector2 offset = {0,0}, int spacing = 1, int atlasStartFrame = 0, int atlasEndFrame = 0, float animationSpeed = 5.0f);
 
 void LoadAssets();
 
@@ -402,6 +429,12 @@ inline std::vector<SpriteRenderData>* GetTileActiveRenderDataList(TileType type)
     //platforms (only used by the editor)
 
     case TileType::VERTICAL_MOVING_PLATFORM: return &movingPlatformRenderData_Vertical;
+
+    //enemies 
+
+    case TileType::ENEMY_DUMMY: return &dummyRenderData;
+
+    case TileType::ENEMY_YUUKA: return &yuukaRenderData;
 
     default: return nullptr;
     } 

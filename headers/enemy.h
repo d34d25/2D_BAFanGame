@@ -2,12 +2,7 @@
 
 #include "entity.h"
 #include "bullet.h"
-
-enum class EnemyType
-{
-    DUMMY,
-    YUUKA
-};
+#include "leveldata.h"
 
 class Enemy
 {
@@ -24,6 +19,8 @@ private:
     float maxTime = 0.2f;
 
     int moveSpeedSign = 1;
+
+    float animationTimer = 0.0f;
 
     inline Vector2 GetBulletSpawnPos()
     {
@@ -97,7 +94,7 @@ public:
     //animation
 
     //also can be understood as current frame
-    int textureIndex = 0;
+    int currentFrame = 0;
 
     int variantIndex = 0;
 
@@ -116,6 +113,8 @@ public:
     void UpdateAI(float dt, const Vector2& playerPos, Vector2* playerVel, const bool isPlayerGrounded, bool* canPlayerMove);
 
     void Update(float dt, int iterations);
+
+    void UpdateRender(float dt);
 
     void Shoot(float dt);
 

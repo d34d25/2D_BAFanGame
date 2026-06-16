@@ -2,6 +2,56 @@
 #include <iostream>
 #include "physics.h"
 
+void Enemy::UpdateRender(float dt)
+{
+    SpriteRenderData* activeRenderData = GetEnemyActiveRenderData(type, variantIndex);
+
+    if(activeRenderData && type == EnemyType::YUUKA)
+    {
+        animationTimer += dt * activeRenderData->animationSpeed;
+
+        if(animationTimer >= 1.0f)
+        {
+            animationTimer = 0.0f;
+
+            int startFrame = 0;
+            int endFrame = activeRenderData->animationFrames.size();
+
+            activeRenderData->offset = activeRenderData->ogOffset;
+
+            if(!isGrounded)
+            {
+                startFrame = 4;
+                endFrame = 4;
+            }
+            else if(isStomping)
+            {
+                startFrame = 5;
+                endFrame = 5;
+            }
+            else
+            {
+                if(std::abs(gameObj.body.velocity.x) > 50.0f)
+                {
+                    startFrame = 1;
+                    endFrame = 3;
+                }
+                else
+                {
+                    startFrame = 0;
+                    endFrame = 0;
+                }
+            }
+
+            currentFrame++;
+
+            if(currentFrame > endFrame || currentFrame < startFrame) currentFrame = startFrame;
+
+            if(currentFrame < 0) currentFrame = 0;
+        }
+    }
+}
+
 void Enemy::YuukaBehaivour(float dt, const Vector2& playerPos, Vector2* playerVel, const bool isPlayerGrounded, bool* canPlayerMove)
 {
     float moveSpeed = 200 * moveSpeedSign;
@@ -155,6 +205,12 @@ void Enemy::YuukaBehaivour(float dt, const Vector2& playerPos, Vector2* playerVe
     }
     break;
 
+    case 2:
+    {
+
+    }
+    break;
+
     default:break;
     }
 }
@@ -174,10 +230,6 @@ void Enemy::InitEnemy(
     float gravity
 )
 {
-    spawnPosition = spawnPos;
-    
-    gameObj.transform.position = spawnPosition;
-
     gameObj.hasBody = true;
     gameObj.body = {};
 
@@ -202,7 +254,7 @@ void Enemy::InitEnemy(
 
     Hitbox mainHitbox = {
         {0,0},
-        {20,38}
+        {25,56}
     };
 
     Hitbox jumpDetector = {
@@ -247,6 +299,12 @@ void Enemy::InitEnemy(
     gameObj.hitboxes.push_back(mainHitbox);
 
     gameObj.hitboxes.push_back(jumpDetector);
+
+    spawnPosition = spawnPos;
+
+    spawnPosition.y -= gameObj.GetMainAABB().height * 0.25f;
+    
+    gameObj.transform.position = spawnPosition;
 
     bulletpool = std::make_unique<BulletPool>(30, bulletData);
 }

@@ -211,11 +211,12 @@ struct SpriteRenderData
 
     Vector2 offset = {0,0};
 
+    Vector2 ogOffset = {0,0};
+
     //animation
     std::vector<Rectangle> animationFrames = {};
 
-    //used for time based animations (passive animations)
-    int spacing = 0;
+    int spacing = 0; //used for time based animations (passive animations)
 
     int maxFrames = 1;
 

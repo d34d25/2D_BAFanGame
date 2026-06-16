@@ -130,6 +130,8 @@ public:
 
     ~Player();
 
+    void UpdateRender(float dt);
+
     void Update(float dt, int iterations);
 
     void Shoot(float dt);
