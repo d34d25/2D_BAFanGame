@@ -69,6 +69,13 @@ private:
     std::vector<std::vector<Enemy>> enemyBuckets = {};
     std::vector<std::vector<Platform>> platformBuckets = {};
 
+    std::vector<Platform*> platformCache_update = {};
+    std::vector<Platform*> platformCache_physics = {};
+    std::vector<Platform*> platformCache_rendering = {};
+
+    std::vector<Enemy*> enemyCache = {};
+    std::vector<Enemy*> enemyCache_physics = {};
+
     int previousRoomIndex = -1;
     int currentRoomIndex = -1;
 
@@ -346,19 +353,19 @@ public:
         return (int)platformList.size();
     }
 
-    inline int GetPlayerPlatformCache_Update()
+    inline int GetPlatformCache_Update()
     {
-        return (int)player.platformCache_update.size();
+        return (int)platformCache_update.size();
     }
 
-    inline int GetPlayerPlatformCache_Physics()
+    inline int GetPlatformCache_Physics()
     {
-        return (int)player.platformCache_physics.size();
+        return (int)platformCache_physics.size();
     }
 
-    inline int GetPlayerPlatformCache_Render()
+    inline int GetPlatformCache_Render()
     {
-        return (int)player.platformCache_rendering.size();
+        return (int)platformCache_rendering.size();
     }
 
     inline int GetEnemyCount()
@@ -366,13 +373,13 @@ public:
         return (int)enemyList.size();
     }
 
-    inline int GetPlayerEnemyCache()
+    inline int GetEnemyCache()
     {
-        return (int)player.enemyCache.size();
+        return (int)enemyCache.size();
     }
 
-    inline int GetPlayerEnemyCache_Physics()
+    inline int GetEnemyCache_Physics()
     {
-        return (int)player.enemyCache_physics.size();
+        return (int)enemyCache_physics.size();
     }
 };

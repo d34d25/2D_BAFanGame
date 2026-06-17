@@ -63,7 +63,7 @@ void Level::InitLevel(const char* levelPath, const char* roomPath ,float dt, int
                 {
                     Vector2 spawnPos = tile->gameObj.transform.position;
 
-                    spawnPos.y -= player.gameObj.GetMainAABB().height * 0.25f;
+                    if(player.gameObj.GetMainAABB().height > GRID_SIZE) spawnPos.y -= player.gameObj.GetMainAABB().height * 0.25f;
 
                     player.gameObj.transform.position = spawnPos;
                     player.spawnPos = player.gameObj.transform.position;
@@ -427,11 +427,11 @@ void Level::InitLevel(const char* levelPath, const char* roomPath ,float dt, int
     platformList.clear();
     platformList.shrink_to_fit();
 
-    player.platformCache_update.reserve(800);
-    player.platformCache_physics.reserve(60);
-    player.platformCache_rendering.reserve(600);
+    platformCache_update.reserve(800);
+    platformCache_physics.reserve(60);
+    platformCache_rendering.reserve(600);
 
-    player.enemyCache.reserve(800);
+    enemyCache.reserve(800);
 }
 
 void Level::UpdateLevel()
@@ -509,9 +509,9 @@ void Level::ResetRoom()
 
 void Level::LowFrequencyUpdate()
 {
-    player.platformCache_update.clear();
+    platformCache_update.clear();
 
-    player.enemyCache.clear();
+    enemyCache.clear();
     
     float playerRadius = player.gameObj.GetMainAABB().width * REC_TO_CIRCLE_RADIUS_MULTIPLIER;
 
@@ -542,7 +542,7 @@ void Level::LowFrequencyUpdate()
 
             if(enemy.isActive)
             {
-                player.enemyCache.push_back(&enemy);
+                enemyCache.push_back(&enemy);
             }
         }
     }
@@ -574,7 +574,7 @@ void Level::LowFrequencyUpdate()
                 PLATFORM_UPDATE_RADIUS
             ))
             {
-                player.platformCache_update.push_back(&platform);
+                platformCache_update.push_back(&platform);
             }
         }
     }
@@ -582,18 +582,18 @@ void Level::LowFrequencyUpdate()
 
 void Level::MediumFrequencyDiscreteUpdate()
 {
-    player.platformCache_physics.clear();
-    player.platformCache_rendering.clear();
+    platformCache_physics.clear();
+    platformCache_rendering.clear();
 
-    player.enemyCache_physics.clear();
+    enemyCache_physics.clear();
 
     float playerRadius = player.gameObj.GetMainAABB().height * REC_TO_CIRCLE_RADIUS_MULTIPLIER;
 
     float renderRadius = GRID_SIZE * 20.0f;
 
-    for(int p = 0; p < player.platformCache_update.size(); p++)
+    for(int p = 0; p < platformCache_update.size(); p++)
     {
-        Platform* platform = player.platformCache_update[p];
+        Platform* platform = platformCache_update[p];
 
         if(!platform) continue;
 
@@ -608,7 +608,7 @@ void Level::MediumFrequencyDiscreteUpdate()
             renderRadius
         ))
         {
-            player.platformCache_rendering.push_back(platform);
+            platformCache_rendering.push_back(platform);
         }
 
         if(platform->updateRequired) platform->Update(dt, 1);
@@ -659,14 +659,14 @@ void Level::MediumFrequencyDiscreteUpdate()
             GRID_SIZE * 5.0f
         ))
         {
-            player.platformCache_physics.push_back(platform);
+            platformCache_physics.push_back(platform);
         }
     }
 
     //player vs enemy cache
-    for(int e = 0; e < player.enemyCache.size(); e++)
+    for(int e = 0; e < enemyCache.size(); e++)
     {
-        Enemy* enemy = player.enemyCache[e];
+        Enemy* enemy = enemyCache[e];
 
         if(!enemy) continue;
 
@@ -677,14 +677,14 @@ void Level::MediumFrequencyDiscreteUpdate()
             GRID_SIZE * 3.0f
         ))
         {
-            player.enemyCache_physics.push_back(enemy);
+            enemyCache_physics.push_back(enemy);
         }
 
         if(lowFrequencyCounter % 2 == 0)
         {
             if(enemy->type == EnemyType::YUUKA && enemy->isStomping) TriggerScreenShake(0.5f, 5.0f); //5.0f
 
-            enemy->UpdateAI(dt, player.gameObj.transform.position, &player.gameObj.body.velocity, player.isGrounded, &player.canMove);
+            enemy->UpdateAI(dt, player);
 
             enemy->ResetFlagsAI();
         }
@@ -990,9 +990,9 @@ void Level::HighFrequencyDiscreteUpdate()
 
     //player vs platforms
 
-    for(int i = 0; i < player.platformCache_physics.size(); i++)
+    for(int i = 0; i < platformCache_physics.size(); i++)
     {
-        Platform* platform = player.platformCache_physics[i];
+        Platform* platform = platformCache_physics[i];
 
         for(int h = 1; h < platform->gameObj.hitboxes.size(); h++)
         {
@@ -1038,9 +1038,9 @@ void Level::HighFrequencyDiscreteUpdate()
 
     //enemies vs tiles
 
-    for(int e = 0; e < player.enemyCache.size(); e++)
+    for(int e = 0; e < enemyCache.size(); e++)
     {
-        Enemy* enemy = player.enemyCache[e];
+        Enemy* enemy = enemyCache[e];
 
         float enemyRadius = enemy->gameObj.GetMainAABB().height * REC_TO_CIRCLE_RADIUS_MULTIPLIER;
 
@@ -1282,9 +1282,9 @@ void Level::CCD_Update()
             if(!CheckCollisionPointRec(bullet->posititon, currentRoom)) bullet->didHit = true;
         }
 
-        for(int e = 0; e < player.enemyCache.size(); e++)
+        for(int e = 0; e < enemyCache.size(); e++)
         {
-            Enemy* enemy = player.enemyCache[e];
+            Enemy* enemy = enemyCache[e];
 
             if(!enemy) continue;
 
@@ -1329,9 +1329,9 @@ void Level::CCD_Update()
         
     }
 
-    for(int i = 0; i < player.enemyCache.size(); i++)
+    for(int i = 0; i < enemyCache.size(); i++)
     {
-        Enemy* enemy = player.enemyCache[i];
+        Enemy* enemy = enemyCache[i];
 
         if(!enemy) continue;
 
@@ -1455,9 +1455,9 @@ void Level::DrawLevel()
         }
     }
 
-    for(int i = 0; i < player.platformCache_rendering.size(); i++)
+    for(int i = 0; i < platformCache_rendering.size(); i++)
     {
-        Platform* platform = player.platformCache_rendering[i];
+        Platform* platform = platformCache_rendering[i];
 
         SpriteRenderData* platformRenderData =  GetPlatformActiveRenderData(platform->type, platform->variantIndex);
 
@@ -1502,9 +1502,9 @@ void Level::DrawLevel()
         }
     }
 
-    for(int i = 0; i < player.enemyCache.size(); i++)
+    for(int i = 0; i < enemyCache.size(); i++)
     {
-        Enemy* enemy = player.enemyCache[i];
+        Enemy* enemy = enemyCache[i];
 
         SpriteRenderData* enemyRenderData = GetEnemyActiveRenderData(enemy->type, enemy->variantIndex);
         
@@ -1543,9 +1543,9 @@ void Level::DrawLevel()
         }
     }
 
-    for(int e = 0; e < player.enemyCache.size(); e++)
+    for(int e = 0; e < enemyCache.size(); e++)
     {
-        Enemy* enemy = player.enemyCache[e];
+        Enemy* enemy = enemyCache[e];
 
         if(!enemy) continue;
 
@@ -1606,9 +1606,9 @@ void Level::DebugDrawing()
         renderTileCheckRange
     );
 
-    for(int i = 0; i < player.platformCache_rendering.size(); i++)
+    for(int i = 0; i < platformCache_rendering.size(); i++)
     {
-        Platform* platform = player.platformCache_rendering[i];
+        Platform* platform = platformCache_rendering[i];
 
         DrawLine(
             player.gameObj.transform.position.x, player.gameObj.transform.position.y, 
@@ -1664,9 +1664,9 @@ void Level::DebugDrawing()
         }
     }
 
-    for(int i = 0; i < player.enemyCache.size(); i++)
+    for(int i = 0; i < enemyCache.size(); i++)
     {
-        Enemy* enemy = player.enemyCache[i];
+        Enemy* enemy = enemyCache[i];
 
         DrawAABB(enemy->gameObj.GetMainAABB(), RED);
 

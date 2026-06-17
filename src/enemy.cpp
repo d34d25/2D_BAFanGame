@@ -52,11 +52,11 @@ void Enemy::UpdateRender(float dt)
     }
 }
 
-void Enemy::YuukaBehaivour(float dt, const Vector2& playerPos, Vector2* playerVel, const bool isPlayerGrounded, bool* canPlayerMove)
+void Enemy::YuukaBehaivour(float dt, Player& player)
 {
     float moveSpeed = 200 * moveSpeedSign;
 
-    std::cout<<"state timer: "<<stateTimer<<"\n";
+    //std::cout<<"state timer: "<<stateTimer<<"\n";
 
     gameObj.body.velocity.x >= 0 ? gameObj.data.flipX = false : gameObj.data.flipX = true;
 
@@ -73,25 +73,23 @@ void Enemy::YuukaBehaivour(float dt, const Vector2& playerPos, Vector2* playerVe
 
         isStomping = false;
 
-        *canPlayerMove = true;
+        timer = 0.0f;
 
         int roll = GetRandomValue(0,100);
 
         if(roll <= 50) moveSpeedSign = -1;
         else moveSpeedSign = 1;
 
-        if (roll <= 80) currentAttack = 0;
-        else currentAttack = 1;
-
-        counter = 0;
+        if (roll <= 100) currentAttack = Attacks::STOMP;
+        else currentAttack = Attacks::RUN_N_SHOOT;
     }
 
     stateTimer += dt;
 
     switch (currentAttack)
     {
-    // stomp
-    case 0:
+
+    case Attacks::STOMP:
     {
         gravity = ogGravity * 2.0f;
 
@@ -106,29 +104,31 @@ void Enemy::YuukaBehaivour(float dt, const Vector2& playerPos, Vector2* playerVe
 
         if(!isGrounded)
         {
+            if(stunState == StunState::STUNNED) player.RemoveStun();
+
             timer = 0.0f;
-            counter = 0;
-            *canPlayerMove = true;
+
+            stunState = StunState::NOT_STUNNED;
         }
         else
         {
-            if(counter == 0)
+            if(stunState == StunState::NOT_STUNNED && !isJumping)
             {
-                if(isPlayerGrounded) counter = 2;
-                else counter = 1;
+                if(player.isGrounded)
+                {
+                    player.AddStun();
+
+                    stunState = StunState::STUNNED;
+                }
+                else
+                {
+                    stunState = StunState::DODGED;
+                }
             }
 
             if(timer <= maxTime)
             {
                 timer += dt;
-
-                gameObj.body.velocity.x = 0;
-
-                if(counter == 2) 
-                {
-                    *canPlayerMove = false;
-                    playerVel->x = 0;
-                }
             }
         }
        
@@ -136,7 +136,7 @@ void Enemy::YuukaBehaivour(float dt, const Vector2& playerPos, Vector2* playerVe
         {
             isGrounded = false;
 
-            float xPosDifference = playerPos.x - gameObj.transform.position.x;
+            float xPosDifference = player.gameObj.transform.position.x - gameObj.transform.position.x;
 
             float jumpVel = -10000;
 
@@ -163,11 +163,13 @@ void Enemy::YuukaBehaivour(float dt, const Vector2& playerPos, Vector2* playerVe
         if(stateTimer >= 2.0f)
         {
             stateTimer = 0.0f;
+            
+            if(stunState == StunState::STUNNED) player.RemoveStun();
         }
     }
     break;
 
-    case 1:
+    case Attacks::RUN_N_SHOOT:
     {
         gameObj.body.velocity.x = moveSpeed;
 
@@ -175,7 +177,7 @@ void Enemy::YuukaBehaivour(float dt, const Vector2& playerPos, Vector2* playerVe
         
         if(isTouchingWall)
         {
-            if(counter == 0)
+            if(!alreadyFlipped)
             {
                 float offset = 4.0f;
 
@@ -190,12 +192,12 @@ void Enemy::YuukaBehaivour(float dt, const Vector2& playerPos, Vector2* playerVe
 
                 moveSpeedSign *= -1;
 
-                counter = 1;
+                alreadyFlipped = true;
             }
         }
         else
         {
-            counter = 0;
+            alreadyFlipped = false;
         }
 
         if(stateTimer >= 6.0f)
@@ -205,13 +207,17 @@ void Enemy::YuukaBehaivour(float dt, const Vector2& playerPos, Vector2* playerVe
     }
     break;
 
-    case 2:
+    case Attacks::WIP:
     {
-
+        stateTimer = 0.0f;
     }
     break;
 
-    default:break;
+    default:
+    {
+        stateTimer = 0.0f;
+    }
+    break;
     }
 }
 
@@ -309,12 +315,12 @@ void Enemy::InitEnemy(
     bulletpool = std::make_unique<BulletPool>(30, bulletData);
 }
 
-void Enemy::UpdateAI(float dt, const Vector2 &playerPos, Vector2 *playerVel, const bool isPlayerGrounded, bool *canPlayerMove)
+void Enemy::UpdateAI(float dt, Player& player)
 {
     switch (type)
     {
 
-    case EnemyType::YUUKA: YuukaBehaivour(dt, playerPos, playerVel, isPlayerGrounded, canPlayerMove); break;
+    case EnemyType::YUUKA: YuukaBehaivour(dt, player); break;
 
     default: break;
     }

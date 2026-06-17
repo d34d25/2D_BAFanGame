@@ -211,6 +211,8 @@ void Player::UpdateRender(float dt)
 
         if(currentFrame < 0) currentFrame = 0;
     }
+
+    std::cout<<"stun count: "<<stunCounter<<"\n";
 }
 
 void Player::Update(float dt, int iterations)
@@ -223,12 +225,14 @@ void Player::Update(float dt, int iterations)
 
     if(gameObj.data.flipY) jump = -jumpVel;
 
-    //lateral movement
-
-    float moveForce = 400 * gameObj.body.damping;
+    canMove = stunCounter <= 0;
 
     if(canMove)
     {
+        //lateral movement
+
+        float moveForce = 400 * gameObj.body.damping;
+
         if(IsKeyDown(KEY_LEFT))
         {
             gameObj.body.force.x -= moveForce;

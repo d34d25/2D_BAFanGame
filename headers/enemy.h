@@ -4,16 +4,31 @@
 #include "bullet.h"
 #include "leveldata.h"
 
+#include "player.h"
+
+enum class StunState
+{
+    STUNNED,
+    NOT_STUNNED,
+    DODGED
+};
+
+enum class Attacks
+{
+    STOMP,
+    RUN_N_SHOOT,
+    WIP
+};
+
 class Enemy
 {
 
 private:
 
-    void YuukaBehaivour(float dt, const Vector2& playerPos, Vector2* playerVel, const bool isPlayerGrounded, bool* canPlayerMove);
+    void YuukaBehaivour(float dt, Player& player);
 
-    int currentAttack = 0;
+    Attacks currentAttack = Attacks::WIP;
 
-    int counter = 0; //for various enemies or bosses that need to count something
     //generic timer for being used inside the enemies patterns
     float timer = 0.0f;
     float maxTime = 0.2f;
@@ -21,6 +36,10 @@ private:
     int moveSpeedSign = 1;
 
     float animationTimer = 0.0f;
+
+    StunState stunState = StunState::NOT_STUNNED;
+
+    bool alreadyFlipped = false;
 
     inline Vector2 GetBulletSpawnPos()
     {
@@ -110,7 +129,7 @@ public:
         float gravity
     );
 
-    void UpdateAI(float dt, const Vector2& playerPos, Vector2* playerVel, const bool isPlayerGrounded, bool* canPlayerMove);
+    void UpdateAI(float dt, Player& player);
 
     void Update(float dt, int iterations);
 

@@ -186,16 +186,16 @@ int main()
 
     std::cout<<"\n";
 
-    std::cout<<"total player update platform cache count: "<<testLevel->GetPlayerPlatformCache_Update()<<"\n";
-    std::cout<<"total player physics platform cache count: "<<testLevel->GetPlayerPlatformCache_Physics()<<"\n";
-    std::cout<<"total player render platform cache count: "<<testLevel->GetPlayerPlatformCache_Render()<<"\n";
+    std::cout<<"total player update platform cache count: "<<testLevel->GetPlatformCache_Update()<<"\n";
+    std::cout<<"total player physics platform cache count: "<<testLevel->GetPlatformCache_Physics()<<"\n";
+    std::cout<<"total player render platform cache count: "<<testLevel->GetPlatformCache_Render()<<"\n";
 
     std::cout<<"\n";
 
     std::cout<<"total enemy count: "<<testLevel->GetEnemyCount()<<"\n";
 
-    std::cout<<"total player enemy cache count: "<<testLevel->GetPlayerEnemyCache()<<"\n";
-    std::cout<<"total player enemy physics cache count: "<<testLevel->GetPlayerEnemyCache_Physics()<<"\n";
+    std::cout<<"total player enemy cache count: "<<testLevel->GetEnemyCache()<<"\n";
+    std::cout<<"total player enemy physics cache count: "<<testLevel->GetEnemyCache_Physics()<<"\n";
 
     std::cout<<"\n";
 

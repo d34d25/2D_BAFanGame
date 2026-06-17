@@ -7,10 +7,6 @@
 
 #include <iostream>
 
-#include "platform.h"
-
-#include "enemy.h"
-
 #include "leveldata.h"
 
 const Color MOMOI_PINK = Color{255,30,150,255};
@@ -103,6 +99,9 @@ public:
     //jump flags
     bool isJumping = false;
 
+    //stun
+    int stunCounter = 0;
+
     Vector2 spawnPos = {0,0};
 
     GameObject gameObj = {};
@@ -116,13 +115,6 @@ public:
     BulletProperties bulletData = {};
 
     std::unique_ptr<BulletPool> bulletpool = {};
-
-    std::vector<Platform*> platformCache_update = {};
-    std::vector<Platform*> platformCache_physics = {};
-    std::vector<Platform*> platformCache_rendering = {};
-
-    std::vector<Enemy*> enemyCache = {};
-    std::vector<Enemy*> enemyCache_physics = {};
 
     float laddedSnapPosX = 0.0f;
 
@@ -191,6 +183,8 @@ public:
 
         canMove = true;
 
+        stunCounter = 0;
+
         ResetFalgs();
 
         bulletpool.get()->Reset();
@@ -240,5 +234,17 @@ public:
         if(gameObj.data.flipY && IsKeyDown(KEY_DOWN)) return true;
 
         return false;
+    }
+
+    inline void AddStun()
+    {
+        stunCounter++;
+    }
+
+    inline void RemoveStun()
+    {
+        stunCounter--;
+
+        if(stunCounter <= 0) stunCounter = 0;
     }
 };
