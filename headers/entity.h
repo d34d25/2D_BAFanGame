@@ -260,3 +260,17 @@ inline const char* GetDirectionText(Direction direction)
     default: return "UNDEFINED DIRECTION";
     }
 };
+
+inline void FlipHitboxY(Hitbox& hitbox, bool flipY, bool invert)
+{
+    float offset = std::abs(hitbox.offset.y);
+
+    if(flipY)
+    {
+        hitbox.offset.y = invert ? offset : -offset;
+    }
+    else
+    {
+        hitbox.offset.y = invert ? -offset : offset;
+    }
+};

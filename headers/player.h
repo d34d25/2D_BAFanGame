@@ -130,46 +130,19 @@ public:
 
     void Shoot(float dt);
 
-    inline Rectangle& GetJumpDetector()
+    inline Rectangle GetJumpDetector()
     {
-        float offset = 15.0f;
-
-        int dir = gameObj.data.flipY ? -1 : 1;
-
-        float centerY = gameObj.GetMainAABB().y + gameObj.GetMainAABB().height * 0.5f;
-
-        if(dir == 1) gameObj.GetSubAABB(1).y = centerY + offset;
-        else gameObj.GetSubAABB(1).y = centerY - offset - gameObj.GetSubAABB(1).height;
-        
         return gameObj.GetSubAABB(1);
     }
 
-    inline Rectangle& GetTreadmillDetector()
+    inline Rectangle GetTreadmillDetector()
     {
-        float offset = 15.0f;
-
-        int dir = gameObj.data.flipY ? -1 : 1;
-
-        float centerY = gameObj.GetMainAABB().y + gameObj.GetMainAABB().height * 0.5f;
-
-        if(dir == 1) gameObj.GetSubAABB(2).y = centerY + offset;
-        else gameObj.GetSubAABB(2).y = centerY - offset - gameObj.GetSubAABB(2).height;
-        
         return gameObj.GetSubAABB(2);
     }
 
     inline Rectangle& GetCeilingDetector()
     {
-        float offset = 15.0f;
-
-        int dir = gameObj.data.flipY ? 1 : -1;
-
-        float centerY = gameObj.GetMainAABB().y + gameObj.GetMainAABB().height * 0.5f;
-
-        if(dir == 1) gameObj.GetSubAABB(1).y = centerY + offset;
-        else gameObj.GetSubAABB(1).y = centerY - offset - gameObj.GetSubAABB(1).height;
-        
-        return gameObj.GetSubAABB(1);
+        return gameObj.GetSubAABB(3);
     }
 
     inline void Respawn()

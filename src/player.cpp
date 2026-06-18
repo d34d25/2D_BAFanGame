@@ -13,10 +13,13 @@ Player::Player(Vector2 position)
     gameObj.hitboxes.push_back(Hitbox{{0,0}, {25,56}}); //20, 46
 
     //jump detector
-    gameObj.AddSubHitbox({0,0}, {gameObj.GetMainAABB().width * 0.9f, gameObj.GetMainAABB().height * 0.25f});
+    gameObj.AddSubHitbox({0,23}, {gameObj.GetMainAABB().width * 0.9f, gameObj.GetMainAABB().height * 0.25f});
 
     //for treadmills only
-    gameObj.AddSubHitbox({0,0}, {gameObj.GetMainAABB().width, gameObj.GetMainAABB().height * 0.25f});
+    gameObj.AddSubHitbox({0,23}, {gameObj.GetMainAABB().width, gameObj.GetMainAABB().height * 0.25f});
+
+    //ceiling detector
+    gameObj.AddSubHitbox({0,-23}, {gameObj.GetMainAABB().width * 0.9f, gameObj.GetMainAABB().height * 0.25f});
 
     gameObj.UpdateHitboxes();
 
@@ -212,8 +215,6 @@ void Player::UpdateRender(float dt)
         if(currentFrame < 0) currentFrame = 0;
     }
 
-    //std::cout<<"stun count: "<<stunCounter<<"\n";
-
     std::cout<<"stun timer: "<<stunTimer<<"\n";
     std::cout<<"max stun time: "<<maxStunTime<<"\n";
 }
@@ -228,7 +229,16 @@ void Player::Update(float dt, int iterations)
 
     if(gameObj.data.flipY) jump = -jumpVel;
 
-    canMove = stunTimer >= maxStunTime; //stunCounter <= 0;
+    //jump detector
+    FlipHitboxY(gameObj.hitboxes[1], gameObj.data.flipY, false);
+
+    //treadmill detector
+    FlipHitboxY(gameObj.hitboxes[2], gameObj.data.flipY, false);
+
+    //ceiling detector
+    FlipHitboxY(gameObj.hitboxes[3], gameObj.data.flipY, true);
+
+    canMove = stunTimer >= maxStunTime;
 
     if(canMove)
     {

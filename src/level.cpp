@@ -1668,13 +1668,8 @@ void Level::DebugDrawing()
 
         DrawAABB(enemy->gameObj.GetMainAABB(), RED);
 
-        for(int h = 1; h < enemy->gameObj.hitboxes.size(); h++)
-        {
-            DrawAABB(enemy->gameObj.GetSubAABB(h), MAGENTA);
-        }
-
-        DrawAABB(enemy->GetJumpDetector(), GOLD);
-        DrawAABB(enemy->GetCeilingDetector(), YELLOW);
+        DrawAABB(enemy->GetJumpDetector(), GREEN);
+        DrawAABB(enemy->GetCeilingDetector(), BLUE);
     }
     
     for(int i = 0; i < player.bulletpool->activeBullets.size(); i++)
@@ -1719,9 +1714,9 @@ void Level::DebugDrawing()
 
     DrawAABB(player.gameObj.GetMainAABB(), ORANGE);
 
-    DrawAABB(player.GetJumpDetector(), GREEN);
-
-    DrawAABB(player.GetCeilingDetector(), DARKGREEN);
+    DrawAABB(player.GetJumpDetector(), MAGENTA);
+    DrawAABB(player.GetTreadmillDetector(), GREEN, 0.5f);
+    DrawAABB(player.GetCeilingDetector(), RED);
 }
 
 void Level::DebugTextDrawing()

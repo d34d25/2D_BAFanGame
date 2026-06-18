@@ -88,12 +88,7 @@ void Platform::InitPlatform(
 
         float factor = 0.8f;
 
-        Hitbox subHitbox = {
-            {0,0},
-            {platformWidth * factor, platformHeight * factor}
-        };
-
-        gameObj.hitboxes.push_back(subHitbox);
+        gameObj.AddSubHitbox({0,0}, {platformWidth * factor, platformHeight * factor});
     }
     break;
 
@@ -107,12 +102,7 @@ void Platform::InitPlatform(
 
         float factor = 0.8f;
 
-        Hitbox subHitbox = {
-            {0,0},
-            {platformWidth * factor, platformHeight * factor}
-        };
-
-        gameObj.hitboxes.push_back(subHitbox);
+        gameObj.AddSubHitbox({0,0}, {platformWidth * factor, platformHeight * factor});
     }
     break;
 
@@ -136,11 +126,7 @@ void Platform::InitPlatform(
                 offset.x = gameObj.data.flipX ? -multiplier : multiplier;
                 offset.y = gameObj.data.flipY ? multiplier : -multiplier;
 
-                Hitbox subHitbox = {
-                    offset, {size, size}
-                };
-
-                gameObj.hitboxes.push_back(subHitbox);
+                gameObj.AddSubHitbox(offset, {size,size});
             }
         }
     }
@@ -175,7 +161,7 @@ void Platform::InitPlatform(
                     offset, {size, size}
                 };
 
-                gameObj.hitboxes.push_back(subHitbox);
+                gameObj.AddSubHitbox(offset, {size,size});
             }
         }
     }
@@ -184,9 +170,9 @@ void Platform::InitPlatform(
     default: break;
     } 
 
-    renderData = GetPlatformActiveRenderData(type, variantIndex);
-
     gameObj.UpdateHitboxes();
+
+    renderData = GetPlatformActiveRenderData(type, variantIndex);
 
     Respawn();
 }

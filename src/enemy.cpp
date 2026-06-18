@@ -80,7 +80,7 @@ void Enemy::YuukaBehaivour(float dt, int framskip, Player& player)
         if(roll <= 50) moveSpeedSign = -1;
         else moveSpeedSign = 1;
 
-        if (roll <= 100) currentAttack = Attacks::STOMP;
+        if (roll <= 100) currentAttack = Attacks::WIP;
         else currentAttack = Attacks::RUN_N_SHOOT;
     }
 
@@ -203,7 +203,7 @@ void Enemy::YuukaBehaivour(float dt, int framskip, Player& player)
 
     case Attacks::WIP:
     {
-        stateTimer = 0.0f;
+        
     }
     break;
 
@@ -257,11 +257,6 @@ void Enemy::InitEnemy(
         {25,56}
     };
 
-    Hitbox jumpDetector = {
-        {0,0},
-        {mainHitbox.aabb.width * 0.9f, mainHitbox.aabb.height * 0.25f}
-    };
-
     switch (type)
     {
     case EnemyType::DUMMY:
@@ -298,7 +293,9 @@ void Enemy::InitEnemy(
 
     gameObj.hitboxes.push_back(mainHitbox);
 
-    gameObj.hitboxes.push_back(jumpDetector);
+    gameObj.AddSubHitbox({0,23}, {gameObj.GetMainAABB().width * 0.9f, gameObj.GetMainAABB().height * 0.25f});
+
+    gameObj.AddSubHitbox({0,-23}, {gameObj.GetMainAABB().width * 0.9f, gameObj.GetMainAABB().height * 0.25f});
 
     spawnPosition = spawnPos;
 
@@ -324,5 +321,9 @@ void Enemy::UpdateAI(float dt, int framskip, Player& player)
 
 void Enemy::Update(float dt, int iterations)
 {
+    FlipHitboxY(gameObj.hitboxes[1], gameObj.data.flipY, false);
+
+    FlipHitboxY(gameObj.hitboxes[2], gameObj.data.flipY, true);
+
     gameObj.body.UpdateVelocity(dt, iterations, gravity);
 }
