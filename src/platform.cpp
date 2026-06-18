@@ -115,7 +115,7 @@ void Platform::InitPlatform(
 
         float size = GRID_SIZE * 0.5f;
 
-        for(int h = 0; h < ROTATING_SPIKE_MAX_HITBOX; h++)
+        for(int h = 0; h < SINGLE_ROTATING_SPIKE_MAX_HITBOX; h++)
         {
             Vector2 offset = {0,0};
 
@@ -141,14 +141,14 @@ void Platform::InitPlatform(
 
         float size = GRID_SIZE * 0.5f;
 
-        for(int h = 0; h < ROTATING_SPIKE_MAX_HITBOX * 2.0f; h++)
+        for(int h = 0; h < DOUBLE_ROTATING_SPIKE_MAX_HITBOX * 2.0f; h++)
         {
-            if(h == ROTATING_SPIKE_MAX_HITBOX) continue;
+            if(h == DOUBLE_ROTATING_SPIKE_MAX_HITBOX) continue;
 
             Vector2 offset = {0,0};
 
-            float armSide = (h < ROTATING_SPIKE_MAX_HITBOX) ? 1.0f : -1.0f;
-            int localH = h % ROTATING_SPIKE_MAX_HITBOX;
+            float armSide = (h < DOUBLE_ROTATING_SPIKE_MAX_HITBOX) ? 1.0f : -1.0f;
+            int localH = h % DOUBLE_ROTATING_SPIKE_MAX_HITBOX;
 
             if(localH >= 0)
             {

@@ -40,6 +40,10 @@ std::vector<SpriteRenderData> dummyRenderData = {};
 
 std::vector<SpriteRenderData> yuukaRenderData = {};
 
+//enemies weapons
+
+SpriteRenderData yuukaWeaponRenderData = {};
+
 /*
     spacing is how many frames an animation loop has, this value is fixed for each SpriteRenderData
     if the spacing is 0 or less the whole animation vector will be used, if it is 1 the SpriteRenderData won't have animations,
@@ -69,6 +73,8 @@ SpriteRenderData LoadRenderData(const char* path, Vector2 frameSize, Vector2 off
 
     renderData.animationFrames.clear();
 
+    renderData.frameSize = frameSize;
+
     std::string key = path;
 
     if(textureCache.find(key) == textureCache.end())
@@ -82,7 +88,7 @@ SpriteRenderData LoadRenderData(const char* path, Vector2 frameSize, Vector2 off
 
     renderData.sourceTexture = &textureCache[key];
 
-    std::vector<Rectangle> allFrames = CropImage(*renderData.sourceTexture, frameSize, 1);
+    std::vector<Rectangle> allFrames = CropImage(*renderData.sourceTexture, renderData.frameSize, 1);
 
     if(atlasEndFrame <= 0 || atlasEndFrame > (int)allFrames.size()) atlasEndFrame = (int)allFrames.size();
 
@@ -148,6 +154,10 @@ void LoadAssets()
     dummyRenderData.push_back(LoadRenderData("assets/enemies/chibi-dummy.png", {8,12}));
     
     yuukaRenderData.push_back(LoadRenderData("assets/enemies/yuuka-sprtiesheet.png", {20,22}, {-4,-4}, 1, 0, 0, 10.0f));
+
+    //enemies' weapons
+
+    yuukaWeaponRenderData = LoadRenderData("assets/enemies/yuuka-weapon-holo.png", {10,4}, {39,7});
 }
 
 void UnloadAssets()

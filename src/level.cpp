@@ -644,7 +644,7 @@ void Level::MediumFrequencyDiscreteUpdate()
                         {
                             if(CheckCollisionRecs(platform->gameObj.GetMainAABB(), objTile.GetMainAABB()))
                             {
-                                SolveCollisions_Platform(&platform->gameObj, &objTile, (platform->type > PlatformType::MOVING_X && platform->type < PlatformType::MOVING_Y));
+                                SolveCollisions_Platform(platform->gameObj, objTile, (platform->type > PlatformType::MOVING_X && platform->type < PlatformType::MOVING_Y));
                             }
                         }
                     }
@@ -769,7 +769,7 @@ void Level::HighFrequencyDiscreteUpdate()
                     if(!IsTileOneWay(tile))
                     {
                         SolveCollisions(
-                            &player.gameObj, &tile.gameObj, 
+                            player.gameObj, tile.gameObj, 
                             true, isGravityUp, 
                             tile.type == TileType::TRAMPOLINE,
                             false
@@ -778,7 +778,7 @@ void Level::HighFrequencyDiscreteUpdate()
                     else if(IsOneWayRightLeft(tile))
                     {
                         SolveCollisionsOneWayLeftRight(
-                            &player.gameObj, &tile.gameObj,
+                            player.gameObj, tile.gameObj,
                             tile.gameObj.direction == Direction::RIGHT
                         );
                     }
@@ -819,7 +819,7 @@ void Level::HighFrequencyDiscreteUpdate()
                         if(!IsTileOneWay(tile))
                         {
                             SolveCollisions(
-                                &player.gameObj, &objTile, 
+                                player.gameObj, objTile, 
                                 false, isGravityUp, 
                                 tile.type == TileType::TRAMPOLINE,
                                 false
@@ -829,7 +829,7 @@ void Level::HighFrequencyDiscreteUpdate()
                         {
                             SolveCollisionsOneWayUpDown
                             (
-                                &player.gameObj, &objTile,
+                                player.gameObj, objTile,
                                 tile.gameObj.direction == Direction::UP,
                                 isGravityUp,
                                 false
@@ -928,7 +928,7 @@ void Level::HighFrequencyDiscreteUpdate()
                             {
                                 if(!player.IsPressingDown())
                                 {
-                                    SolveCollisionsOneWayUpDown(&player.gameObj, &objTile, true, isGravityUp, true);
+                                    SolveCollisionsOneWayUpDown(player.gameObj, objTile, true, isGravityUp, true);
 
                                     player.inLadder = false;
                                     isTileJumpTrigger = true;
@@ -1019,7 +1019,7 @@ void Level::HighFrequencyDiscreteUpdate()
             if(CheckCollisionRecs(player.gameObj.GetMainAABB(), platform->gameObj.GetMainAABB()))
             {
                 SolveCollisionsOneWayUpDown(
-                    &player.gameObj, &platform->gameObj,
+                    player.gameObj, platform->gameObj,
                     true, isGravityUp, true
                 );
             }
@@ -1092,7 +1092,7 @@ void Level::HighFrequencyDiscreteUpdate()
                         if(!IsTileOneWay(tile))
                         {
                             SolveCollisions(
-                                &enemy->gameObj, &tile.gameObj, 
+                                enemy->gameObj, tile.gameObj, 
                                 true, isGravityUp, 
                                 tile.type == TileType::TRAMPOLINE,
                                 false
@@ -1101,7 +1101,7 @@ void Level::HighFrequencyDiscreteUpdate()
                         else if(IsOneWayRightLeft(tile))
                         {
                             SolveCollisionsOneWayLeftRight(
-                                &enemy->gameObj, &tile.gameObj,
+                                enemy->gameObj, tile.gameObj,
                                 tile.gameObj.direction == Direction::RIGHT
                             );
                         }
@@ -1142,7 +1142,7 @@ void Level::HighFrequencyDiscreteUpdate()
                             if(!IsTileOneWay(tile))
                             {
                                 SolveCollisions(
-                                    &enemy->gameObj, &tile.gameObj, 
+                                    enemy->gameObj, tile.gameObj, 
                                     false, false, 
                                     tile.type == TileType::TRAMPOLINE,
                                     false
@@ -1152,7 +1152,7 @@ void Level::HighFrequencyDiscreteUpdate()
                             {
                                 SolveCollisionsOneWayUpDown
                                 (
-                                    &enemy->gameObj, &tile.gameObj,
+                                    enemy->gameObj, tile.gameObj,
                                     tile.gameObj.direction == Direction::UP,
                                     false,
                                     false
@@ -1506,19 +1506,19 @@ void Level::DrawLevel()
     {
         Enemy* enemy = enemyCache[i];
         
-        if(!enemy->renderData) DrawRectangleRec(enemy->gameObj.GetMainAABB(), enemy->testColor);
+        if(!enemy->enemyRenderData) DrawRectangleRec(enemy->gameObj.GetMainAABB(), enemy->testColor);
         else
         {
-            DrawSprite(enemy->gameObj, enemy->renderData, enemy->currentFrame);
+            DrawSprite(enemy->gameObj, enemy->enemyRenderData, enemy->currentFrame);
+        }
+
+        if(enemy->weaponRenderData)
+        {
+            DrawSprite(enemy->gameObj, enemy->weaponRenderData, 0);
         }
     }
 
-    DrawSprite(
-        player.gameObj.transform,
-        &player.characterRenderData,
-        player.gameObj.data,
-        player.currentFrame
-    );
+    DrawSprite(player.gameObj, &player.characterRenderData, player.currentFrame);
 
     for(int i = 0; i < player.bulletpool->activeBullets.size(); i++)
     {
@@ -1557,12 +1557,7 @@ void Level::DrawLevel()
         }
     }
 
-    DrawSprite(
-        player.gameObj.transform,
-        &player.weaponRenderData,
-        player.gameObj.data,
-        0
-    );
+    DrawSprite(player.gameObj, &player.weaponRenderData, 0);
 
     //DebugDrawing();
 

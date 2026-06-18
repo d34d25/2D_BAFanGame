@@ -48,7 +48,9 @@ static constexpr int GRID_SIZE = 48;
 
 static constexpr int TILE_SCALE = 3; //3
 
-static constexpr int ROTATING_SPIKE_MAX_HITBOX = 6;
+static constexpr int SINGLE_ROTATING_SPIKE_MAX_HITBOX = 6; //6
+
+static constexpr int DOUBLE_ROTATING_SPIKE_MAX_HITBOX = 4;
 
 const float GRAVITY = 3500.0f;
 

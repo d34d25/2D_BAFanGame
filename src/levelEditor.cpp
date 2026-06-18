@@ -35,7 +35,7 @@ void LevelEditor::DrawRotatingSpikes(int currentType, Vector2 position, float si
     {
     case (int)TileType::ROTATING_SPIKE_SINGLE:
     {
-        for(int i = 0; i < ROTATING_SPIKE_MAX_HITBOX; i++)
+        for(int i = 0; i < SINGLE_ROTATING_SPIKE_MAX_HITBOX; i++)
         {
             Vector2 currentOffset = {0,0};
 
@@ -59,17 +59,17 @@ void LevelEditor::DrawRotatingSpikes(int currentType, Vector2 position, float si
 
     case (int)TileType::ROTATING_SPIKE_DOUBLE:
     {
-        for(int i = 0; i < ROTATING_SPIKE_MAX_HITBOX * 2; i++)
+        for(int i = 0; i < SINGLE_ROTATING_SPIKE_MAX_HITBOX * 2; i++)
         {
-            if(i == ROTATING_SPIKE_MAX_HITBOX) continue;
+            if(i == SINGLE_ROTATING_SPIKE_MAX_HITBOX) continue;
 
             float size = GRID_SIZE * 0.5f;
 
             Vector2 currentOffset = {0,0};
 
-            float armSide = (i < ROTATING_SPIKE_MAX_HITBOX) ? 1.0f : -1.0f;
+            float armSide = (i < SINGLE_ROTATING_SPIKE_MAX_HITBOX) ? 1.0f : -1.0f;
 
-            int localI = i % ROTATING_SPIKE_MAX_HITBOX;
+            int localI = i % SINGLE_ROTATING_SPIKE_MAX_HITBOX;
 
             if(localI > 0)
             {

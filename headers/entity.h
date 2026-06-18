@@ -213,6 +213,8 @@ struct SpriteRenderData
 
     Vector2 ogOffset = {0,0};
 
+    Vector2 frameSize = {0,0};
+
     //animation
     std::vector<Rectangle> animationFrames = {};
 
@@ -273,4 +275,32 @@ inline void FlipHitboxY(Hitbox& hitbox, bool flipY, bool invert)
     {
         hitbox.offset.y = invert ? -offset : offset;
     }
+};
+
+inline Vector2 GetTextureBulletSpawnPos(const GameObject& gameObj, const SpriteRenderData* renderData)
+{
+    Vector2 spawnPos = gameObj.transform.position;
+
+    if(!renderData) return spawnPos;
+
+    Vector2 offset = renderData->offset;
+
+    int textureWidth = renderData->frameSize.x;
+
+    if(gameObj.data.flipX)
+    {
+        offset.x = -offset.x;
+
+        textureWidth = -textureWidth;
+    }
+
+    if(gameObj.data.flipY)
+    {
+        offset.y = -offset.y;
+    }
+
+    spawnPos.x += offset.x + textureWidth;
+    spawnPos.y += offset.y;
+
+    return spawnPos;
 };

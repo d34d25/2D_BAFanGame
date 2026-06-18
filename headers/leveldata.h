@@ -391,6 +391,10 @@ extern std::vector<SpriteRenderData> dummyRenderData;
 
 extern std::vector<SpriteRenderData> yuukaRenderData;
 
+//enemy's weapons
+
+extern SpriteRenderData yuukaWeaponRenderData;
+
 extern SpriteRenderData LoadRenderData(const char* path, Vector2 frameSize, Vector2 offset = {0,0}, int spacing = 1, int atlasStartFrame = 0, int atlasEndFrame = 0, float animationSpeed = 5.0f);
 
 void LoadAssets();
@@ -437,7 +441,7 @@ inline std::vector<SpriteRenderData>* GetTileActiveRenderDataList(TileType type)
     case TileType::ENEMY_YUUKA: return &yuukaRenderData;
 
     default: return nullptr;
-    } 
+    }
 }
 
 inline SpriteRenderData* GetTileActiveRenderData(TileType type, int variant = 0)
@@ -496,6 +500,17 @@ inline SpriteRenderData* GetEnemyActiveRenderData(EnemyType type, int variant = 
     }
 
     return nullptr;
+}
+
+inline SpriteRenderData* GetEnemyWeaponRenderData(EnemyType type)
+{
+    switch (type)
+    {
+    
+    case EnemyType::YUUKA: return &yuukaWeaponRenderData;
+
+    default: return nullptr;
+    }
 }
 
 inline void LoadLevelData(const char* levelPath, Tile(&destination)[LAYERS][COLS][ROWS], const char* roomPath, std::vector<Room>& rooms)

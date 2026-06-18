@@ -80,7 +80,7 @@ void Enemy::YuukaBehaivour(float dt, int framskip, Player& player)
         if(roll <= 50) moveSpeedSign = -1;
         else moveSpeedSign = 1;
 
-        if (roll <= 100) currentAttack = Attacks::WIP;
+        if (roll <= 70) currentAttack = Attacks::STOMP;
         else currentAttack = Attacks::RUN_N_SHOOT;
     }
 
@@ -89,13 +89,15 @@ void Enemy::YuukaBehaivour(float dt, int framskip, Player& player)
     switch (currentAttack)
     {
 
+    case Attacks::NOTHING: break;
+
     case Attacks::STOMP:
     {
         gravity = ogGravity * 2.0f;
 
         moveSpeedSign = 1;
 
-        maxTime = (float)GetRandomValue(2,5) * 0.1f;
+        maxTime = 0.5f;
 
         if(!isGrounded && hitCeiling) isJumping = false;
         else if(isGrounded && timer >= maxTime) isJumping = true;
@@ -203,7 +205,7 @@ void Enemy::YuukaBehaivour(float dt, int framskip, Player& player)
 
     case Attacks::WIP:
     {
-        
+        stateTimer = 0.0f;
     }
     break;
 
@@ -219,7 +221,7 @@ void Enemy::Shoot(float dt)
 {
     ShootBullet(
         dt, gameObj,
-        &bulletData, GetBulletSpawnPos(),
+        &bulletData, GetTextureBulletSpawnPos(gameObj, weaponRenderData),
         bulletpool.get(), shooting
     );
 }
@@ -256,6 +258,8 @@ void Enemy::InitEnemy(
         {0,0},
         {25,56}
     };
+
+    Vector2 weaponOffset = {0,0};
 
     switch (type)
     {
@@ -305,7 +309,9 @@ void Enemy::InitEnemy(
 
     bulletpool = std::make_unique<BulletPool>(30, bulletData);
 
-    renderData = GetEnemyActiveRenderData(type, variantIndex);
+    enemyRenderData = GetEnemyActiveRenderData(type, variantIndex);
+
+    weaponRenderData = GetEnemyWeaponRenderData(type);
 }
 
 void Enemy::UpdateAI(float dt, int framskip, Player& player)

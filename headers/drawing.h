@@ -127,7 +127,7 @@ inline void DrawSprite(
     );
 }
 
-inline void DrawSprite(const GameObject& gameObj, SpriteRenderData* renderData, int currentFrame = 0, Color color = WHITE)
+inline void DrawSprite(GameObject& gameObj, SpriteRenderData* renderData, int currentFrame = 0, Color color = WHITE)
 {
     DrawSprite(
         gameObj.transform,

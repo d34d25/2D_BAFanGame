@@ -41,33 +41,6 @@ private:
     float maxJumpTime = 0.15f;
 
     float animationTimer = 0.0f;
-
-    inline Vector2 GetBulletSpawnPos()
-    {
-        Vector2 spawnPos = {};
-
-        Vector2 offset = weaponRenderData.offset;
-
-        float textureWidth = weaponRenderData.sourceTexture->width;
-
-        if(gameObj.data.flipX)
-        {
-            offset.x = -offset.x;
-
-            textureWidth = -textureWidth;
-        }
-
-        if(gameObj.data.flipY)
-        {
-            offset.y = -offset.y;
-        }
-
-        spawnPos.x = gameObj.transform.position.x + offset.x + textureWidth;
-
-        spawnPos.y = gameObj.transform.position.y + offset.y;
-
-        return spawnPos;
-    }
     
 public:
 
@@ -111,8 +84,6 @@ public:
     SpriteRenderData characterRenderData = {};
 
     SpriteRenderData weaponRenderData = {};
-
-    //EntityData entityData = {false,false};
 
     BulletProperties bulletData = {};
 

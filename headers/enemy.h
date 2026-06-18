@@ -15,6 +15,7 @@ enum class StunState
 
 enum class Attacks
 {
+    NOTHING,
     STOMP,
     RUN_N_SHOOT,
     WIP
@@ -42,29 +43,6 @@ private:
 
     bool alreadyFlipped = false;
 
-    inline Vector2 GetBulletSpawnPos()
-    {
-        Vector2 spawnPos = {};
-
-        Vector2 offset = {0,0};
-
-        if(gameObj.data.flipX)
-        {
-            offset.x = -offset.x;
-        }
-
-        if(gameObj.data.flipY)
-        {
-            offset.y = -offset.y;
-        }
-
-        spawnPos.x = gameObj.transform.position.x + offset.x;
-
-        spawnPos.y = gameObj.transform.position.y + offset.y;
-
-        return spawnPos;
-    }
-
 public:
 
     Vector2 spawnPosition = {0,0};
@@ -79,7 +57,9 @@ public:
 
     Rectangle roomSize = {};
 
-    SpriteRenderData* renderData = nullptr;
+    SpriteRenderData* enemyRenderData = nullptr;
+
+    SpriteRenderData* weaponRenderData = nullptr;
 
     //bullets
     bool shooting = false;

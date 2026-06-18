@@ -13,9 +13,9 @@ struct CCD_CollisionResult
     float exitTime = 0.0f;
 };
 
-void SolveCollisions(GameObject* objA, GameObject* objB, bool isX, bool gravityUp, bool isTrampoline, bool isPlatform);
+void SolveCollisions(GameObject& objA, GameObject& objB, bool isX, bool gravityUp, bool isTrampoline, bool isPlatform);
 
-void SolveCollisions_Platform(GameObject* objA, GameObject* objB, bool isX);
+void SolveCollisions_Platform(GameObject& objA, GameObject& objB, bool isX);
 
 CCD_CollisionResult CheckCollisionsBulletVsEntity_CCD(Bullet* bullet, GameObject* target, float dt);
 
@@ -51,20 +51,20 @@ inline bool IsBelow(const Rectangle& aabb_A, const Rectangle& aabb_B, float offs
     return (top > bottom - offset);
 }
 
-inline void SolveCollisionsOneWayLeftRight(GameObject * objA, GameObject* objB, bool isRight)
+inline void SolveCollisionsOneWayLeftRight(GameObject& objA, GameObject& objB, bool isRight)
 {
     bool isLeft = !isRight;
 
     float offset = 6.0f;
 
-    if(isLeft) if(IsLeft(objA->GetMainAABB(), objB->GetMainAABB(), offset) || objA->body.velocity.x <= 0.0f) return;
+    if(isLeft) if(IsLeft(objA.GetMainAABB(), objB.GetMainAABB(), offset) || objA.body.velocity.x <= 0.0f) return;
 
-    if(isRight) if(IsRight(objA->GetMainAABB(), objB->GetMainAABB(), offset) || objA->body.velocity.x >= 0.0f) return;
+    if(isRight) if(IsRight(objA.GetMainAABB(), objB.GetMainAABB(), offset) || objA.body.velocity.x >= 0.0f) return;
 
     SolveCollisions(objA, objB, true, false, false, false);
 }
 
-inline void SolveCollisionsOneWayUpDown(GameObject * objA, GameObject* objB, bool isUp ,bool gravityUp, bool isPlatform)
+inline void SolveCollisionsOneWayUpDown(GameObject& objA, GameObject& objB, bool isUp ,bool gravityUp, bool isPlatform)
 {
     bool isDown = !isUp;
 
@@ -72,23 +72,23 @@ inline void SolveCollisionsOneWayUpDown(GameObject * objA, GameObject* objB, boo
 
     if(!isPlatform)
     {
-        if(isUp) if(!IsAbove(objA->GetMainAABB(), objB->GetMainAABB(), offset) || objA->body.velocity.y <= 0.0f) return;
+        if(isUp) if(!IsAbove(objA.GetMainAABB(), objB.GetMainAABB(), offset) || objA.body.velocity.y <= 0.0f) return;
 
-        if(isDown) if(!IsBelow(objA->GetMainAABB(), objB->GetMainAABB(), offset) || objA->body.velocity.y >= 0.0f) return;
+        if(isDown) if(!IsBelow(objA.GetMainAABB(), objB.GetMainAABB(), offset) || objA.body.velocity.y >= 0.0f) return;
     }
     else
     {
         if(!gravityUp)
         {
-            if(isUp) if(!IsAbove(objA->GetMainAABB(), objB->GetMainAABB(), offset) || objA->body.velocity.y <= 0.0f) return;
+            if(isUp) if(!IsAbove(objA.GetMainAABB(), objB.GetMainAABB(), offset) || objA.body.velocity.y <= 0.0f) return;
 
-            if(isDown) if(!IsBelow(objA->GetMainAABB(), objB->GetMainAABB(), offset) || objA->body.velocity.y >= 0.0f) return;
+            if(isDown) if(!IsBelow(objA.GetMainAABB(), objB.GetMainAABB(), offset) || objA.body.velocity.y >= 0.0f) return;
         }
         else
         {
-            if(isDown) if(!IsAbove(objA->GetMainAABB(), objB->GetMainAABB(), offset) || objA->body.velocity.y <= 0.0f) return;
+            if(isDown) if(!IsAbove(objA.GetMainAABB(), objB.GetMainAABB(), offset) || objA.body.velocity.y <= 0.0f) return;
 
-            if(isUp) if(!IsBelow(objA->GetMainAABB(), objB->GetMainAABB(), offset) || objA->body.velocity.y >= 0.0f) return;
+            if(isUp) if(!IsBelow(objA.GetMainAABB(), objB.GetMainAABB(), offset) || objA.body.velocity.y >= 0.0f) return;
         }
     }    
 

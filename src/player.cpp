@@ -358,7 +358,7 @@ void Player::Shoot(float dt)
 {
     ShootBullet(
         dt, gameObj,
-        &bulletData, GetBulletSpawnPos(),
+        &bulletData, GetTextureBulletSpawnPos(gameObj, &weaponRenderData),
         bulletpool.get(), IsKeyDown(KEY_X)
     );
 }
