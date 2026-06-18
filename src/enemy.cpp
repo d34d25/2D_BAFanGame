@@ -52,7 +52,7 @@ void Enemy::UpdateRender(float dt)
     }
 }
 
-void Enemy::YuukaBehaivour(float dt, Player& player)
+void Enemy::YuukaBehaivour(float dt, int framskip, Player& player)
 {
     float moveSpeed = 200 * moveSpeedSign;
 
@@ -95,17 +95,13 @@ void Enemy::YuukaBehaivour(float dt, Player& player)
 
         moveSpeedSign = 1;
 
-        maxTime = 0.5f;
-
-        if(stateTimer <= 0.4f && isGrounded) isJumping = true;
+        maxTime = (float)GetRandomValue(2,5) * 0.1f;
 
         if(!isGrounded && hitCeiling) isJumping = false;
         else if(isGrounded && timer >= maxTime) isJumping = true;
 
         if(!isGrounded)
         {
-            if(stunState == StunState::STUNNED) player.RemoveStun();
-
             timer = 0.0f;
 
             stunState = StunState::NOT_STUNNED;
@@ -116,7 +112,7 @@ void Enemy::YuukaBehaivour(float dt, Player& player)
             {
                 if(player.isGrounded)
                 {
-                    player.AddStun();
+                    player.ApplyStun(maxTime * framskip);
 
                     stunState = StunState::STUNNED;
                 }
@@ -163,8 +159,6 @@ void Enemy::YuukaBehaivour(float dt, Player& player)
         if(stateTimer >= 2.0f)
         {
             stateTimer = 0.0f;
-            
-            if(stunState == StunState::STUNNED) player.RemoveStun();
         }
     }
     break;
@@ -265,7 +259,7 @@ void Enemy::InitEnemy(
 
     Hitbox jumpDetector = {
         {0,0},
-        {mainHitbox.aabb.width * 0.9f, mainHitbox.aabb.height * 0.5f}
+        {mainHitbox.aabb.width * 0.9f, mainHitbox.aabb.height * 0.25f}
     };
 
     switch (type)
@@ -313,14 +307,16 @@ void Enemy::InitEnemy(
     gameObj.transform.position = spawnPosition;
 
     bulletpool = std::make_unique<BulletPool>(30, bulletData);
+
+    renderData = GetEnemyActiveRenderData(type, variantIndex);
 }
 
-void Enemy::UpdateAI(float dt, Player& player)
+void Enemy::UpdateAI(float dt, int framskip, Player& player)
 {
     switch (type)
     {
 
-    case EnemyType::YUUKA: YuukaBehaivour(dt, player); break;
+    case EnemyType::YUUKA: YuukaBehaivour(dt, framskip, player); break;
 
     default: break;
     }

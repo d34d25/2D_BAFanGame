@@ -184,6 +184,8 @@ void Platform::InitPlatform(
     default: break;
     } 
 
+    renderData = GetPlatformActiveRenderData(type, variantIndex);
+
     gameObj.UpdateHitboxes();
 
     Respawn();

@@ -28,6 +28,8 @@ public:
 
     PlatformType type = PlatformType::NONE;
 
+    SpriteRenderData* renderData = nullptr;
+
     int textureIndex = -1;
 
     int variantIndex = 0;

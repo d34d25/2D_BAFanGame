@@ -13,10 +13,10 @@ Player::Player(Vector2 position)
     gameObj.hitboxes.push_back(Hitbox{{0,0}, {25,56}}); //20, 46
 
     //jump detector
-    gameObj.AddSubHitbox({0,0}, {gameObj.GetMainAABB().width * 0.9f, gameObj.GetMainAABB().height * 0.5f});
+    gameObj.AddSubHitbox({0,0}, {gameObj.GetMainAABB().width * 0.9f, gameObj.GetMainAABB().height * 0.25f});
 
     //for treadmills only
-    gameObj.AddSubHitbox({0,0}, {gameObj.GetMainAABB().width, gameObj.GetMainAABB().height * 0.5f});
+    gameObj.AddSubHitbox({0,0}, {gameObj.GetMainAABB().width, gameObj.GetMainAABB().height * 0.25f});
 
     gameObj.UpdateHitboxes();
 
@@ -30,20 +30,20 @@ Player::Player(Vector2 position)
     bulletData.explodes = false;
     bulletData.piercing = false;
 
-    character = Character::MOMOI;
+    character = Character::YUZU;
 
     switch (character)
     {
     case Character::MOMOI:
 
         characterRenderData = LoadRenderData("assets/characters/momoi-spritesheet-b.png", {14,24});
-        weaponRenderData = LoadRenderData("assets/characters/momoi-weapon.png", {32,8});
+        weaponRenderData = LoadRenderData("assets/characters/momoi-weapon-holo.png", {10,5});
 
         characterRenderData.offset.x = 0.0f;
         characterRenderData.offset.y = -7.0f;
 
-        weaponRenderData.offset.x = 25.0f;
-        weaponRenderData.offset.y = 16.0f;
+        weaponRenderData.offset.x = 39.0f;
+        weaponRenderData.offset.y = 7.0f;
 
         bulletData.fireRate = 0.2f;
         bulletData.spread = 8.0f;
@@ -57,13 +57,13 @@ Player::Player(Vector2 position)
     case Character::MIDORI:
 
         characterRenderData = LoadRenderData("assets/characters/midori-spritesheet.png", {14,24});
-        weaponRenderData = LoadRenderData("assets/characters/midori-weapon.png", {32,10});
+        weaponRenderData = LoadRenderData("assets/characters/midori-weapon-holo.png", {11,5});
 
         characterRenderData.offset.x = 0.0f;
         characterRenderData.offset.y = -7.0f;
 
-        weaponRenderData.offset.x = 29.0f;
-        weaponRenderData.offset.y = 16.0f;
+        weaponRenderData.offset.x = 42.0f;
+        weaponRenderData.offset.y = 7.0f;
 
         bulletData.spread = 1.5f;
         bulletData.radius = 6.0f;
@@ -75,13 +75,13 @@ Player::Player(Vector2 position)
     case Character::YUZU:
 
         characterRenderData = LoadRenderData("assets/characters/yuzu-spritesheet.png", {21,22});
-        weaponRenderData = LoadRenderData("assets/characters/yuzu-weapon.png", {19,10});
+        weaponRenderData = LoadRenderData("assets/characters/yuzu-weapon-holo.png", {10,5});
 
         characterRenderData.offset.x = -4.0f;
         characterRenderData.offset.y = -4.0f;
 
-        weaponRenderData.offset.x = 8.0f;
-        weaponRenderData.offset.y = 14.0f;
+        weaponRenderData.offset.x = 42.0f;
+        weaponRenderData.offset.y = 7.0f;
 
         bulletData.gravity = gravity * 2.0f;
 
@@ -99,13 +99,13 @@ Player::Player(Vector2 position)
     case Character::ARIS:
 
         characterRenderData = LoadRenderData("assets/characters/aris-spritesheet.png", {17,21});
-        weaponRenderData = LoadRenderData("assets/characters/aris-weapon.png", {33,10});
+        weaponRenderData = LoadRenderData("assets/characters/aris-weapon-holo.png", {15,4});
 
         characterRenderData.offset.x = 0.0f;
         characterRenderData.offset.y = -3.0f;
 
-        weaponRenderData.offset.x = 16.0f;
-        weaponRenderData.offset.y = 18.0f;
+        weaponRenderData.offset.x = 51.0f;
+        weaponRenderData.offset.y = 7.0f;
 
         bulletData.spread = 0.0f;
         bulletData.radius = 10.0f;
@@ -212,7 +212,10 @@ void Player::UpdateRender(float dt)
         if(currentFrame < 0) currentFrame = 0;
     }
 
-    std::cout<<"stun count: "<<stunCounter<<"\n";
+    //std::cout<<"stun count: "<<stunCounter<<"\n";
+
+    std::cout<<"stun timer: "<<stunTimer<<"\n";
+    std::cout<<"max stun time: "<<maxStunTime<<"\n";
 }
 
 void Player::Update(float dt, int iterations)
@@ -225,7 +228,7 @@ void Player::Update(float dt, int iterations)
 
     if(gameObj.data.flipY) jump = -jumpVel;
 
-    canMove = stunCounter <= 0;
+    canMove = stunTimer >= maxStunTime; //stunCounter <= 0;
 
     if(canMove)
     {
@@ -259,7 +262,7 @@ void Player::Update(float dt, int iterations)
             }
             else
             {
-                gameObj.transform.position.x = laddedSnapPosX;
+                gameObj.transform.position.x = ladderSnapPosX;
 
                 gameObj.body.hasGravity = false;
 
@@ -330,6 +333,10 @@ void Player::Update(float dt, int iterations)
     else 
     {
         gameObj.body.velocity = {0,0};
+
+        stunTimer += subDt;
+
+        if(stunTimer >= maxStunTime) stunTimer = maxStunTime;
     }
     
     //update

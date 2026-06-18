@@ -25,7 +25,7 @@ class Enemy
 
 private:
 
-    void YuukaBehaivour(float dt, Player& player);
+    void YuukaBehaivour(float dt, int framskip, Player& player);
 
     Attacks currentAttack = Attacks::WIP;
 
@@ -37,6 +37,7 @@ private:
 
     float animationTimer = 0.0f;
 
+    //can the enemy stun the player?
     StunState stunState = StunState::NOT_STUNNED;
 
     bool alreadyFlipped = false;
@@ -77,6 +78,8 @@ public:
     Color testColor = ENEMY_DUMMY;
 
     Rectangle roomSize = {};
+
+    SpriteRenderData* renderData = nullptr;
 
     //bullets
     bool shooting = false;
@@ -129,7 +132,7 @@ public:
         float gravity
     );
 
-    void UpdateAI(float dt, Player& player);
+    void UpdateAI(float dt, int framskip, Player& player);
 
     void Update(float dt, int iterations);
 
@@ -139,7 +142,7 @@ public:
 
     inline Rectangle& GetJumpDetector()
     {
-        float offset = 5.0f;
+        float offset = 15.0f;
 
         int dir = gameObj.data.flipY ? -1 : 1;
 

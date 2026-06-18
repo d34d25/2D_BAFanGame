@@ -100,7 +100,9 @@ public:
     bool isJumping = false;
 
     //stun
-    int stunCounter = 0;
+    float stunTimer = 0.0f;
+
+    float maxStunTime = 0.0f;
 
     Vector2 spawnPos = {0,0};
 
@@ -116,7 +118,7 @@ public:
 
     std::unique_ptr<BulletPool> bulletpool = {};
 
-    float laddedSnapPosX = 0.0f;
+    float ladderSnapPosX = 0.0f;
 
     Player(Vector2 position);
 
@@ -130,7 +132,7 @@ public:
 
     inline Rectangle& GetJumpDetector()
     {
-        float offset = 5.0f;
+        float offset = 15.0f;
 
         int dir = gameObj.data.flipY ? -1 : 1;
 
@@ -144,7 +146,7 @@ public:
 
     inline Rectangle& GetTreadmillDetector()
     {
-        float offset = 5.0f;
+        float offset = 15.0f;
 
         int dir = gameObj.data.flipY ? -1 : 1;
 
@@ -158,7 +160,7 @@ public:
 
     inline Rectangle& GetCeilingDetector()
     {
-        float offset = 1.0f;
+        float offset = 15.0f;
 
         int dir = gameObj.data.flipY ? 1 : -1;
 
@@ -183,7 +185,7 @@ public:
 
         canMove = true;
 
-        stunCounter = 0;
+        stunTimer = 10000.0f;
 
         ResetFalgs();
 
@@ -236,15 +238,12 @@ public:
         return false;
     }
 
-    inline void AddStun()
+    inline void ApplyStun(float duration)
     {
-        stunCounter++;
-    }
+        if(stunTimer < maxStunTime) return;
 
-    inline void RemoveStun()
-    {
-        stunCounter--;
+        stunTimer = 0.0f;
 
-        if(stunCounter <= 0) stunCounter = 0;
+        maxStunTime = duration;
     }
 };

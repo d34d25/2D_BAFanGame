@@ -680,11 +680,13 @@ void Level::MediumFrequencyDiscreteUpdate()
             enemyCache_physics.push_back(enemy);
         }
 
-        if(lowFrequencyCounter % 2 == 0)
+        int frameskip = 2;
+
+        if(lowFrequencyCounter % frameskip == 0)
         {
             if(enemy->type == EnemyType::YUUKA && enemy->isStomping) TriggerScreenShake(0.5f, 5.0f); //5.0f
 
-            enemy->UpdateAI(dt, player);
+            enemy->UpdateAI(dt, frameskip, player);
 
             enemy->ResetFlagsAI();
         }
@@ -910,7 +912,7 @@ void Level::HighFrequencyDiscreteUpdate()
                         {
                             player.inLadder = true;
 
-                            player.laddedSnapPosX = tile.gameObj.transform.position.x;
+                            player.ladderSnapPosX = tile.gameObj.transform.position.x;
                         }
 
                         bool isEdgeUp = tile.GetNeighborType(NeighborDirection::UP) == TileType::VOID ||
@@ -1459,26 +1461,24 @@ void Level::DrawLevel()
     {
         Platform* platform = platformCache_rendering[i];
 
-        SpriteRenderData* platformRenderData =  GetPlatformActiveRenderData(platform->type, platform->variantIndex);
-
-        if(platformRenderData)
+        if(platform->renderData)
         {
             int frameToDraw = platform->textureIndex;
 
-            if(platformRenderData->spacing != 1)
+            if(platform->renderData->spacing != 1)
             {
                 frameToDraw = GetCurrentFrame(
-                    platformRenderData->animationFrames,
+                    platform->renderData->animationFrames,
                     platform->textureIndex,
-                    platformRenderData->spacing,
-                    platformRenderData->animationSpeed,
+                    platform->renderData->spacing,
+                    platform->renderData->animationSpeed,
                     currentTime
                 );
             }
 
-            if(frameToDraw >= 0 && frameToDraw < (int)platformRenderData->animationFrames.size())
+            if(frameToDraw >= 0 && frameToDraw < (int)platform->renderData->animationFrames.size())
             {
-                DrawSprite(platform->gameObj, platformRenderData, frameToDraw);
+                DrawSprite(platform->gameObj, platform->renderData, frameToDraw);
             }
         }
         else
@@ -1505,13 +1505,11 @@ void Level::DrawLevel()
     for(int i = 0; i < enemyCache.size(); i++)
     {
         Enemy* enemy = enemyCache[i];
-
-        SpriteRenderData* enemyRenderData = GetEnemyActiveRenderData(enemy->type, enemy->variantIndex);
         
-        if(!enemyRenderData) DrawRectangleRec(enemy->gameObj.GetMainAABB(), enemy->testColor);
+        if(!enemy->renderData) DrawRectangleRec(enemy->gameObj.GetMainAABB(), enemy->testColor);
         else
         {
-            DrawSprite(enemy->gameObj, enemyRenderData, enemy->currentFrame);
+            DrawSprite(enemy->gameObj, enemy->renderData, enemy->currentFrame);
         }
     }
 
@@ -1559,12 +1557,12 @@ void Level::DrawLevel()
         }
     }
 
-    /*DrawSprite(
+    DrawSprite(
         player.gameObj.transform,
         &player.weaponRenderData,
         player.gameObj.data,
-        player.currentFrame
-    );*/
+        0
+    );
 
     //DebugDrawing();
 

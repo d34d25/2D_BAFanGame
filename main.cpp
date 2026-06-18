@@ -85,7 +85,7 @@ int main()
             //hud and transitions and level switching are drawn and managed there
             
             auto allPhysicsTimerStart = std::chrono::high_resolution_clock::now();
-
+ 
             if(!editorMode) testLevel->UpdateLevel();
             else editor->Update();
 
