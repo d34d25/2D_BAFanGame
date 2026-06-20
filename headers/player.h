@@ -169,7 +169,8 @@ public:
         gameObj.body.altVelocity = {0,0};
 
         isJumping = false;
-        wasGrounded = false;
+        
+        isGrounded = false;
 
         canMove = true;
 

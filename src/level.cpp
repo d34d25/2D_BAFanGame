@@ -1240,7 +1240,7 @@ void Level::HighFrequencyDiscreteUpdate()
 
     if(!player.wasTouchingGravityChanger && player.isTouchingGravityChanger)
     {
-        player.wasGrounded = false;
+        player.isGrounded = false;
         player.isJumping = false;
 
         gravity *= -1;
