@@ -75,9 +75,9 @@ public:
     float ogGravity = 0.0f;
 
     //flags
-    bool wasGrounded = false;
-
     bool isGrounded = false;
+
+    bool wasGrounded = false;
 
     bool isStomping = false;
 
@@ -137,13 +137,13 @@ public:
     inline void ResetFlagsAI()
     {
         isTouchingWall = false;
-        wasGrounded = false;
+        isGrounded = false;
         hitCeiling = false;
     }
 
     inline void UpdateFlags()
     {
-        isGrounded = wasGrounded;
+        wasGrounded = isGrounded;
     }
 
     inline void Respawn()

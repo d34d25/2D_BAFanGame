@@ -61,6 +61,7 @@ public:
     bool climbing = false;
 
     //current frame flags
+
     bool isGrounded = false;
     bool isTouchingGravityChanger = false;
     bool isTouchingSpike = false;
@@ -168,7 +169,7 @@ public:
         gameObj.body.altVelocity = {0,0};
 
         isJumping = false;
-        isGrounded = false;
+        wasGrounded = false;
 
         canMove = true;
 
@@ -187,9 +188,10 @@ public:
 
     inline void ResetFalgs()
     {
-        wasGrounded = false;
-        wasTouchingGravityChanger = false;
-        wasTouchingSpike = false;
+        isGrounded = false;
+        
+        isTouchingGravityChanger = false;
+        isTouchingSpike = false;
 
         windApplied = false;
 
@@ -202,9 +204,9 @@ public:
 
     inline void UpdateFlags()
     {
-        isGrounded = wasGrounded;
-        isTouchingGravityChanger = wasTouchingGravityChanger;
-        isTouchingSpike = wasTouchingSpike;
+        wasGrounded = isGrounded;
+        wasTouchingGravityChanger = isTouchingGravityChanger;
+        wasTouchingSpike = isTouchingSpike;
     }
 
     inline bool IsHoldingDown()

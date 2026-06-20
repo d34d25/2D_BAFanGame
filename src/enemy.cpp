@@ -146,8 +146,6 @@ void Enemy::YuukaBehaivour(float dt, int framskip, Player& player)
 
             float jumpVel = -10000;
 
-            isGrounded = false;
-
             gameObj.body.velocity.y = jumpVel;
 
             float horizontalBoostFactor = std::abs(xPosDifference) * 0.02f;

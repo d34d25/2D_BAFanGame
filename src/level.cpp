@@ -875,7 +875,7 @@ void Level::HighFrequencyDiscreteUpdate()
                 {
                     switch (tile.type)
                     {
-                    case TileType::GRAVITY_CHANGER: player.wasTouchingGravityChanger = true; break;
+                    case TileType::GRAVITY_CHANGER: player.isTouchingGravityChanger = true; break;
                     case TileType::WIND:
                     {
                         if(!player.windApplied)
@@ -959,7 +959,7 @@ void Level::HighFrequencyDiscreteUpdate()
                         {
                             if(CheckCollisionRecs(player.gameObj.GetMainAABB(), objTile.GetSubAABB(h)))
                             {
-                                player.wasTouchingSpike = true;
+                                player.isTouchingSpike = true;
                                 break;
                             }
                         }
@@ -976,20 +976,20 @@ void Level::HighFrequencyDiscreteUpdate()
 
                 if(CheckCollisionRecs(player.GetJumpDetector(), objTile.GetMainAABB()) && player.IsFalling())
                 {
-                    if(!IsOneWayUpDown(tile)) player.wasGrounded = true;
+                    if(!IsOneWayUpDown(tile)) player.isGrounded = true;
                     else if(IsOneWayUpDown(tile))
                     {
                         if(tile.gameObj.direction == Direction::UP &&
                             IsAbove(player.gameObj.GetMainAABB(), objTile.GetMainAABB(), 0.0f)
                         )
                         {
-                            player.wasGrounded = true;
+                            player.isGrounded = true;
                         }
                         else if(tile.gameObj.direction == Direction::DOWN &&
                             IsBelow(player.gameObj.GetMainAABB(), objTile.GetMainAABB(), 0.0f)
                         )
                         {
-                            player.wasGrounded = true;
+                            player.isGrounded = true;
                         }
                     }
                 }
@@ -1009,7 +1009,7 @@ void Level::HighFrequencyDiscreteUpdate()
             {
                 if(IsPlatformSpike(platform->type))
                 {
-                    player.wasTouchingSpike = true;
+                    player.isTouchingSpike = true;
                 }
             }
         }
@@ -1038,7 +1038,7 @@ void Level::HighFrequencyDiscreteUpdate()
             (isGravityUp && IsBelow(player.gameObj.GetMainAABB(), platform->gameObj.GetMainAABB(), 0.0f)))
             {
                 platform->updateRequired = true;
-                player.wasGrounded = true;
+                player.isGrounded = true;
             }
         }
     }
@@ -1214,20 +1214,20 @@ void Level::HighFrequencyDiscreteUpdate()
 
                     if(CheckCollisionRecs(enemy->GetJumpDetector(), tile.gameObj.GetMainAABB()))
                     {
-                        if(!IsOneWayUpDown(tile)) enemy->wasGrounded = true;
+                        if(!IsOneWayUpDown(tile)) enemy->isGrounded = true;
                         else if(IsOneWayUpDown(tile))
                         {
                             if(tile.gameObj.direction == Direction::UP &&
                                 IsAbove(enemy->gameObj.GetMainAABB(), tile.gameObj.GetMainAABB(), 0.0f)
                             )
                             {
-                                enemy->wasGrounded = true;
+                                enemy->isGrounded = true;
                             }
                             else if(tile.gameObj.direction == Direction::DOWN &&
                                 IsBelow(enemy->gameObj.GetMainAABB(), tile.gameObj.GetMainAABB(), 0.0f)
                             )
                             {
-                                enemy->wasGrounded = true;
+                                enemy->isGrounded = true;
                             }
                         }
                     }
@@ -1238,9 +1238,9 @@ void Level::HighFrequencyDiscreteUpdate()
         enemy->UpdateFlags();
     }
 
-    if(!player.isTouchingGravityChanger && player.wasTouchingGravityChanger)
+    if(!player.wasTouchingGravityChanger && player.isTouchingGravityChanger)
     {
-        player.isGrounded = false;
+        player.wasGrounded = false;
         player.isJumping = false;
 
         gravity *= -1;
@@ -1264,7 +1264,12 @@ void Level::HighFrequencyDiscreteUpdate()
         }
     }
 
-    if(!player.isTouchingSpike && player.wasTouchingSpike)
+    /*
+        on enter trigger = !wasTouchingTrigger && isTouchingTrigger
+        on exit trigger = wasTouchingTrigger && !isTouchingTrigger
+    */
+
+    if(!player.wasTouchingSpike && player.isTouchingSpike)
     {
         ResetLevel();
     }
