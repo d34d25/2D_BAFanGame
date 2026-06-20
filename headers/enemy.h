@@ -95,7 +95,6 @@ public:
 
     //animation
 
-    //also can be understood as current frame
     int currentFrame = 0;
 
     int variantIndex = 0;

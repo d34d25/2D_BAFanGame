@@ -469,9 +469,16 @@ void Level::UpdateLevel()
 
     camera.offset += screenShakeOffset;
 
-    if(IsKeyPressed(KEY_R)) ResetLevel();
-
-    if(IsKeyPressed(KEY_R) && IsKeyDown(KEY_LEFT_SHIFT)) camera.zoom = CAMERA_ZOOM;
+    if(player.resetingZoom)
+    {
+        player.resetingZoom = false;
+        camera.zoom = CAMERA_ZOOM;
+    }
+    else if(player.resetingLevel)
+    {
+        player.resetingLevel = false;
+        ResetLevel();
+    }
 }
 
 void Level::ResetRoom()
@@ -926,7 +933,7 @@ void Level::HighFrequencyDiscreteUpdate()
                             if((IsAbove(player.gameObj.GetMainAABB(), objTile.GetMainAABB(), 1.0f) && !isGravityUp) || 
                             (IsBelow(player.gameObj.GetMainAABB(), objTile.GetMainAABB(), 1.0f) && isGravityUp))
                             {
-                                if(!player.IsPressingDown())
+                                if(!player.movingDown)
                                 {
                                     SolveCollisionsOneWayUpDown(player.gameObj, objTile, true, isGravityUp, true);
 

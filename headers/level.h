@@ -348,6 +348,11 @@ public:
 
     void ResetLevel();
 
+    inline void UpdatePlayerInput()
+    {
+        player.UpdateInput();
+    }
+
     inline int GetPlatformCount()
     {
         return (int)platformList.size();

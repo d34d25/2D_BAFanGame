@@ -78,6 +78,8 @@ int main()
         float dt = GetFrameTime();
         accumulator += dt;
 
+        if(!editorMode) testLevel->UpdatePlayerInput();
+
         while (accumulator >= fixedDt)
         {
             //when making levels a list of level instances

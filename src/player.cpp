@@ -156,6 +156,33 @@ Player::~Player()
 {
 }
 
+void Player::UpdateInput()
+{
+    movingLeft = IsKeyDown(KEY_LEFT);
+
+    movingRight = IsKeyDown(KEY_RIGHT);
+
+    movingUp = IsHoldingUp(); //relative to the flipY status
+
+    movingDown = IsHoldingDown(); //relative to the flipY status
+
+    holdingUp = IsKeyDown(KEY_UP);
+
+    holdingDown = IsKeyDown(KEY_DOWN);
+
+    holdingJump = IsKeyDown(KEY_Z);
+
+    holdingShoot = IsKeyDown(KEY_X);
+
+    //press
+
+    if(IsKeyPressed(KEY_Z)) jumpingOffLadder = true;
+
+    if(IsKeyPressed(KEY_R)) resetingLevel = true;
+
+    if(IsKeyPressed(KEY_R) && IsKeyDown(KEY_LEFT_SHIFT)) resetingZoom = true;
+}
+
 void Player::UpdateRender(float dt)
 {
     animationTimer += dt * characterRenderData.animationSpeed;
@@ -246,13 +273,13 @@ void Player::Update(float dt, int iterations)
 
         float moveForce = 400 * gameObj.body.damping;
 
-        if(IsKeyDown(KEY_LEFT))
+        if(movingLeft)
         {
             gameObj.body.force.x -= moveForce;
             
             gameObj.data.flipX = true;
         }
-        else if(IsKeyDown(KEY_RIGHT))
+        else if(movingRight)
         {
             gameObj.body.force.x += moveForce;
 
@@ -261,12 +288,15 @@ void Player::Update(float dt, int iterations)
 
         //ladder
 
-        if(inLadder && (IsKeyDown(KEY_UP) || IsKeyDown(KEY_DOWN))) climbing = true;
+        if(inLadder && (holdingUp || holdingDown)) climbing = true;
+
+        if(!inLadder) jumpingOffLadder = false;
 
         if(climbing)
         {
             if(!inLadder)
             {
+                jumpingOffLadder = false;
                 climbing = false;
                 gameObj.body.hasGravity = true;
             }
@@ -279,10 +309,10 @@ void Player::Update(float dt, int iterations)
                 gameObj.body.velocity = {0,0};
                 gameObj.body.altVelocity = {0,0};
 
-                float climbingSpeed = 200.0f;
+                float climbingSpeed = 200;
 
-                if(IsKeyDown(KEY_UP)) gameObj.body.velocity.y = -climbingSpeed;
-                else if(IsKeyDown(KEY_DOWN))
+                if(holdingUp) gameObj.body.velocity.y = -climbingSpeed;
+                else if(holdingDown)
                 {
                     gameObj.body.velocity.y = climbingSpeed;
 
@@ -291,11 +321,14 @@ void Player::Update(float dt, int iterations)
                         climbing = false;
                         inLadder = false;
                         gameObj.body.hasGravity = true;
+                        jumpingOffLadder = false;
                     }
-                } 
+                }
 
-                if(IsKeyPressed(KEY_Z))
+                if(jumpingOffLadder)
                 {
+                    jumpingOffLadder = false;
+
                     climbing = false;
 
                     gameObj.body.velocity.y = jump * 0.1f;
@@ -304,6 +337,7 @@ void Player::Update(float dt, int iterations)
         }
         else
         {
+            jumpingOffLadder = false;
             gameObj.body.hasGravity = true;
         }
 
@@ -322,7 +356,7 @@ void Player::Update(float dt, int iterations)
             if(jumpTime >= maxJumpTime) jumpTime = maxJumpTime; 
         }
 
-        if(IsKeyDown(KEY_Z))
+        if(holdingJump)
         {
             if(isGrounded) isJumping = true;
 
@@ -342,6 +376,8 @@ void Player::Update(float dt, int iterations)
     }
     else 
     {
+        ResetInput();
+
         gameObj.body.velocity = {0,0};
 
         stunTimer += subDt;
@@ -359,6 +395,6 @@ void Player::Shoot(float dt)
     ShootBullet(
         dt, gameObj,
         &bulletData, GetTextureBulletSpawnPos(gameObj, &weaponRenderData),
-        bulletpool.get(), IsKeyDown(KEY_X)
+        bulletpool.get(), holdingShoot
     );
 }

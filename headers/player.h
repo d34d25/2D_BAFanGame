@@ -77,6 +77,25 @@ public:
 
     float maxStunTime = 0.0f;
 
+    //input
+
+    bool movingLeft = false;
+    bool movingRight = false;
+
+    bool movingUp = false;
+    bool movingDown = false;
+
+    bool holdingUp = false;
+    bool holdingDown = false;
+
+    bool holdingJump = false;
+    bool jumpingOffLadder = false;
+
+    bool holdingShoot = false;
+
+    bool resetingLevel = false;
+    bool resetingZoom = false;
+
     Vector2 spawnPos = {0,0};
 
     GameObject gameObj = {};
@@ -94,6 +113,8 @@ public:
     Player(Vector2 position);
 
     ~Player();
+
+    void UpdateInput();
 
     void UpdateRender(float dt);
 
@@ -116,8 +137,30 @@ public:
         return gameObj.GetSubAABB(3);
     }
 
+    inline void ResetInput()
+    {
+        movingLeft = false;
+        movingRight = false;
+
+        movingUp = false;
+        movingDown = false;
+
+        holdingUp = false;
+        holdingDown = false;
+
+        holdingJump = false;
+        jumpingOffLadder = false;
+
+        holdingShoot = false;
+
+        resetingLevel = false;
+        resetingZoom = false;
+    }
+
     inline void Respawn()
     {
+        ResetInput();
+
         gameObj.transform.position = spawnPos;
 
         gameObj.body.velocity = {0,0};
@@ -164,7 +207,7 @@ public:
         isTouchingSpike = wasTouchingSpike;
     }
 
-    inline bool IsPressingDown()
+    inline bool IsHoldingDown()
     {
         if(!gameObj.data.flipY && IsKeyDown(KEY_DOWN)) return true;
         
@@ -173,7 +216,7 @@ public:
         return false;
     }
 
-    inline bool IsPressingUp()
+    inline bool IsHoldingUp()
     {
         if(!gameObj.data.flipY && IsKeyDown(KEY_UP)) return true;
         

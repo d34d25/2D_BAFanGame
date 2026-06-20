@@ -4,43 +4,51 @@
 
 void Enemy::UpdateRender(float dt)
 {
-    SpriteRenderData* activeRenderData = GetEnemyActiveRenderData(type, variantIndex);
-
-    if(activeRenderData && type == EnemyType::YUUKA)
+    if(enemyRenderData)
     {
-        animationTimer += dt * activeRenderData->animationSpeed;
+        animationTimer += dt * enemyRenderData->animationSpeed;
 
         if(animationTimer >= 1.0f)
         {
             animationTimer = 0.0f;
 
             int startFrame = 0;
-            int endFrame = activeRenderData->animationFrames.size();
+            int endFrame = enemyRenderData->animationFrames.size();
 
-            activeRenderData->offset = activeRenderData->ogOffset;
+            enemyRenderData->offset = enemyRenderData->ogOffset;
 
-            if(!isGrounded)
+            switch (type)
             {
-                startFrame = 4;
-                endFrame = 4;
-            }
-            else if(isStomping)
+            case EnemyType::YUUKA:
             {
-                startFrame = 5;
-                endFrame = 5;
-            }
-            else
-            {
-                if(std::abs(gameObj.body.velocity.x) > 50.0f)
+                if(!isGrounded)
                 {
-                    startFrame = 1;
-                    endFrame = 3;
+                    startFrame = 4;
+                    endFrame = 4;
+                }
+                else if(isStomping)
+                {
+                    startFrame = 5;
+                    endFrame = 5;
                 }
                 else
                 {
-                    startFrame = 0;
-                    endFrame = 0;
+                    if(std::abs(gameObj.body.velocity.x) > 50.0f)
+                    {
+                        startFrame = 1;
+                        endFrame = 3;
+                    }
+                    else
+                    {
+                        startFrame = 0;
+                        endFrame = 0;
+                    }
                 }
+            }
+            break;
+            
+            default:
+                break;
             }
 
             currentFrame++;

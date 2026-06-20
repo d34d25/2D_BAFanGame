@@ -430,7 +430,7 @@ inline std::vector<SpriteRenderData>* GetTileActiveRenderDataList(TileType type)
 
     case TileType::WATER: return &waterRenderData;
     
-    //platforms (only used by the editor)
+    //platforms
 
     case TileType::VERTICAL_MOVING_PLATFORM: return &movingPlatformRenderData_Vertical;
 
