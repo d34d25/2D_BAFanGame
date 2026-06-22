@@ -53,10 +53,6 @@ public:
     bool wasTouchingGravityChanger = false;
     bool wasTouchingSpike = false;
 
-    bool windApplied = false;
-
-    bool inWater = false;
-
     bool inLadder = false;
     bool climbing = false;
 
@@ -65,6 +61,9 @@ public:
     bool isGrounded = false;
     bool isTouchingGravityChanger = false;
     bool isTouchingSpike = false;
+
+    bool touchingWind = false;
+    bool touchingWater = false;
 
     bool hitCeiling = false;
 
@@ -194,10 +193,9 @@ public:
         isTouchingGravityChanger = false;
         isTouchingSpike = false;
 
-        windApplied = false;
+        touchingWater = false;
+        touchingWind = false;
 
-        inWater = false;
-        
         inLadder = false;
 
         hitCeiling = false;

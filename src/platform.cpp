@@ -235,9 +235,9 @@ void Platform::Update(float dt, int iterations)
         gameObj.body.AddVelocities();
     }
 
-    gameObj.body.UpdatePositionX(dt, iterations, &gameObj.transform.position.x);
+    gameObj.body.UpdatePositionX(dt, iterations, gameObj.transform.position.x);
 
-    gameObj.body.UpdatePositionY(dt, iterations, &gameObj.transform.position.y);
+    gameObj.body.UpdatePositionY(dt, iterations, gameObj.transform.position.y);
 
     gameObj.UpdateHitboxes();
 }

@@ -10,13 +10,26 @@ void SimpleBody2D::UpdateVelocity(float dt, int iterations, float gravity)
     acceleration.y += force.y / MASS;
 
     if(hasGravity) acceleration.y += gravity;
-        
-    velocity.x += acceleration.x * subDt;
-    velocity.y += acceleration.y * subDt;
-
+    
     float decay = expf(-damping * subDt);
 
-    velocity = Vector2Scale(velocity, decay);
+    if(damping > 0.001f)
+    {
+        velocity.x = (velocity.x * decay) + (acceleration.x / damping) * (1.0f - decay);
+    }
+    else
+    {
+        velocity.x += acceleration.x * subDt;
+    }
+
+    if(damping > 0.001f)
+    {
+        velocity.y = (velocity.y * decay) + (acceleration.y / damping) * (1.0f - decay);
+    }
+    else
+    {
+        velocity.y += acceleration.y * subDt;
+    }
 
     AddVelocities();
 

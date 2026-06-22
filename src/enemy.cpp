@@ -60,7 +60,7 @@ void Enemy::UpdateRender(float dt)
     }
 }
 
-void Enemy::YuukaBehaivour(float dt, int framskip, Player& player)
+void Enemy::YuukaBehaivour(float dt, Player& player)
 {
     float moveSpeed = 200 * moveSpeedSign;
 
@@ -70,19 +70,9 @@ void Enemy::YuukaBehaivour(float dt, int framskip, Player& player)
 
     if(stateTimer <= 0.0f)
     {
-        gameObj.body.velocity = {0,0};
-        gameObj.body.altVelocity = {0,0};
+        lastAttack = currentAttack;
 
-        gameObj.body.hasGravity = true;
-
-        gravity = ogGravity;
-
-        shooting = false;
-
-        isStomping = false;
-
-        //only reset the timer if the previous attack and current attack are different
-        timer = maxTime;
+        //std::cout<<"choosing attack"<<"\n";
 
         int roll = GetRandomValue(0,100);
 
@@ -91,6 +81,24 @@ void Enemy::YuukaBehaivour(float dt, int framskip, Player& player)
 
         if (roll <= 100) currentAttack = Attacks::STOMP;
         else currentAttack = Attacks::RUN_N_SHOOT;
+
+        if(lastAttack != currentAttack)
+        {
+            timer = maxTime;
+
+            gravity = ogGravity;
+
+            gameObj.body.velocity = {0,0};
+            gameObj.body.altVelocity = {0,0};
+
+            gameObj.body.hasGravity = true;
+
+            shooting = false;
+
+            isStomping = false;
+
+            gameObj.body.damping = ogDamping;
+        }
     }
 
     stateTimer += dt;
@@ -104,29 +112,23 @@ void Enemy::YuukaBehaivour(float dt, int framskip, Player& player)
     {
         gravity = ogGravity * 2.0f;
 
+        gameObj.body.damping = 0.0f;
+
         moveSpeedSign = 1;
 
         maxTime = 0.5f;
 
-        if(!isGrounded && hitCeiling) isJumping = false;
-        else if(isGrounded && timer >= maxTime) isJumping = true;
+        if(isGrounded && timer >= maxTime) isJumping = true;
 
-        std::cout<<"just landed: "<<(int)justLanded<<"\n";
-        std::cout<<"\n";
+        if((!isGrounded && hitCeiling)) isJumping = false;
 
-        if(!isGrounded)
-        {
-            timer = 0.0f;
-
-            stunState = StunState::NOT_STUNNED;
-        }
-        else
+        if(isGrounded)
         {
             if(justLanded && stunState == StunState::NOT_STUNNED && !isJumping)
             {
                 if(player.isGrounded)
                 {
-                    player.ApplyStun(maxTime * framskip);
+                    player.ApplyStun(maxTime * aiFrameskip);
 
                     stunState = StunState::STUNNED;
                 }
@@ -136,37 +138,40 @@ void Enemy::YuukaBehaivour(float dt, int framskip, Player& player)
                 }
             }
 
+            gameObj.body.velocity = {0,0};
+
             if(timer <= maxTime)
             {
                 timer += dt;
             }
+        }
+        else
+        {
+            timer = 0.0f;
+
+            stunState = StunState::NOT_STUNNED;
         }
        
         if(isJumping)
         {
             isGrounded = false;
 
-            float xPosDifference = player.gameObj.transform.position.x - gameObj.transform.position.x;
+            float jump = -1500;
 
-            float jumpVel = -10000;
+            gameObj.body.velocity.y = jump;
 
-            gameObj.body.velocity.y = jumpVel;
+            float distanceToPlayerX = gameObj.transform.position.x - player.gameObj.transform.position.x;
 
-            float horizontalBoostFactor = std::abs(xPosDifference) * 0.02f;
+            float airTime = (2 * jump) / gravity;
 
-            if(xPosDifference > 0)
-            {
-                gameObj.body.velocity.x = moveSpeed * horizontalBoostFactor;
-            }
-            else
-            {
-                gameObj.body.velocity.x = -moveSpeed * horizontalBoostFactor;
-            }
+            float requiredVelocity = distanceToPlayerX / airTime;
+
+            gameObj.body.velocity.x = requiredVelocity * 0.48f;
 
             isJumping = false;
         }
 
-        isStomping = isGrounded;//justLanded && (timer < maxTime);
+        isStomping = isGrounded;
 
         isStompingRender = isGrounded;
 
@@ -217,7 +222,10 @@ void Enemy::YuukaBehaivour(float dt, int framskip, Player& player)
 
     case Attacks::WIP:
     {
-        stateTimer = 0.0f;
+        if(stateTimer >= 0.5f)
+        {
+            stateTimer = 0.0f;
+        }   
     }
     break;
 
@@ -241,7 +249,8 @@ void Enemy::Shoot(float dt)
 void Enemy::InitEnemy(
     const Vector2& spawnPos,
     const EntityData& data,
-    float gravity
+    float gravity,
+    int frameskip
 )
 {
     gameObj.hasBody = true;
@@ -324,14 +333,18 @@ void Enemy::InitEnemy(
     enemyRenderData = GetEnemyActiveRenderData(type, variantIndex);
 
     weaponRenderData = GetEnemyWeaponRenderData(type);
+
+    aiFrameskip = frameskip;
+
+    ogDamping = gameObj.body.damping;
 }
 
-void Enemy::UpdateAI(float dt, int framskip, Player& player)
+void Enemy::UpdateAI(float dt, Player& player)
 {
     switch (type)
     {
 
-    case EnemyType::YUUKA: YuukaBehaivour(dt, framskip, player); break;
+    case EnemyType::YUUKA: YuukaBehaivour(dt, player); break;
 
     default: break;
     }

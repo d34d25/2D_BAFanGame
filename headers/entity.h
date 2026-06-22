@@ -56,18 +56,18 @@ public:
 
     void UpdateVelocity(float dt, int iterations, float gravity);
 
-    inline void UpdatePositionX(float dt, int iterations, float* xpos)
+    inline void UpdatePositionX(float dt, int iterations, float& xpos)
     {
         float subDt = dt / iterations;
 
-        *xpos += finalVelocity.x * subDt;
+        xpos += finalVelocity.x * subDt;
     }
 
-    inline void UpdatePositionY(float dt, int iterations, float* ypos)
+    inline void UpdatePositionY(float dt, int iterations, float& ypos)
     {
         float subDt = dt / iterations;
 
-        *ypos += finalVelocity.y * subDt;
+        ypos += finalVelocity.y * subDt;
     }
 
     inline Vector2 GetFinalVelocity()
@@ -192,14 +192,14 @@ struct GameObject
 
     inline void UpdatePositionX(float dt, int iterations)
     {
-        body.UpdatePositionX(dt, iterations, &transform.position.x);
+        body.UpdatePositionX(dt, iterations, transform.position.x);
         
         UpdateHitboxes();
     }
 
     inline void UpdatePositionY(float dt, int iterations)
     {
-        body.UpdatePositionY(dt, iterations, &transform.position.y);
+        body.UpdatePositionY(dt, iterations, transform.position.y);
         
         UpdateHitboxes();
     }

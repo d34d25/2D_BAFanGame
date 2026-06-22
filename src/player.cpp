@@ -248,7 +248,7 @@ void Player::UpdateRender(float dt)
 
 void Player::Update(float dt, int iterations)
 {
-    float jumpVel = -12000;
+    float jumpVel = -200;
 
     float jump = jumpVel;
 
@@ -269,7 +269,7 @@ void Player::Update(float dt, int iterations)
     {
         //lateral movement
 
-        float moveForce = 400 * gameObj.body.damping * iterations;
+        float moveForce = 16000;
 
         if(movingLeft)
         {
@@ -329,7 +329,7 @@ void Player::Update(float dt, int iterations)
 
                     climbing = false;
 
-                    gameObj.body.velocity.y = jump * 0.1f;
+                    gameObj.body.velocity.y = jump * 4;
                 }
             }
         }
@@ -360,7 +360,7 @@ void Player::Update(float dt, int iterations)
 
             if(isJumping && jumpTime < maxJumpTime)
             {
-                gameObj.body.force.y = jump * iterations;
+                gameObj.body.velocity.y += jump;
             }
             else
             {

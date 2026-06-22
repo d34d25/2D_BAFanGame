@@ -434,13 +434,26 @@ void Level::InitLevel(const char* levelPath, const char* roomPath ,float dt, int
     enemyCache.reserve(800);
 }
 
+/*
+    where a flag lives (i.e when has to be reseted / updated)
+    depends on where is the code that read those flags
+    for example if the flag is read inside the high freq update,
+    then the flag must live in the high freq update,
+    if the flag is read once per frame then
+    it must live in the medium freq update
+    and if a flag is read at half the speed then the flag
+    has to be reset / updated at the same rate
+
+    with the exceptions of forced exits (i.e player.inLadder)
+*/
+
 void Level::UpdateLevel()
 {
     lowFrequencyCounter++;
 
     if(lowFrequencyCounter % 4 == 0)
     {
-        LowFrequencyUpdate();
+        LowFrequencyUpdate(); //cache sorting
         lowFrequencyCounter = 0;
     }
 
@@ -451,11 +464,9 @@ void Level::UpdateLevel()
         HighFrequencyDiscreteUpdate();
     }
 
-    CCD_Update();
+    CCD_Update(); //bullets only
 
     MediumFrequencyDiscreteUpdate_Second();
-
-    if(player.canMove) player.Shoot(dt);
 
     bool isShaking = screenShakeTimer < screenShakeDuration ||
     screenShakeOffset.x != 0.0f || screenShakeOffset.y != 0.0f;
@@ -687,15 +698,13 @@ void Level::MediumFrequencyDiscreteUpdate_First()
             enemyCache_physics.push_back(enemy);
         }
 
-        int frameskip = 2;
-
         enemy->UpdateRender(dt);
 
-        if(lowFrequencyCounter % frameskip == 0)
+        if(lowFrequencyCounter % enemy->aiFrameskip == 0)
         {
             if(enemy->type == EnemyType::YUUKA && enemy->isStomping) TriggerScreenShake(0.5f, 5.0f); //5.0f
 
-            enemy->UpdateAI(dt, frameskip, player);
+            enemy->UpdateAI(dt, player);
 
             enemy->ResetFlagsAI();
         }
@@ -710,6 +719,8 @@ void Level::MediumFrequencyDiscreteUpdate_First()
     player.UpdateRender(dt);
 
     player.Update(dt, iterations);
+
+    if(player.canMove) player.Shoot(dt);
 
     player.ResetFalgs();
 }
@@ -762,9 +773,7 @@ void Level::MediumFrequencyDiscreteUpdate_Second()
 
         if(!enemy) continue;
 
-        int frameskip = 2;
-        
-        if(lowFrequencyCounter % frameskip == 0) enemy->UpdateFlags();
+        if(lowFrequencyCounter % enemy->aiFrameskip == 0) enemy->UpdateFlags();
     }
 }
 
@@ -808,11 +817,11 @@ void Level::HighFrequencyDiscreteUpdate()
         rangeLimits.maxX, rangeLimits.maxY
     );
 
-    //player.Update(dt, iterations);
+    //physics flags
+    bool playerInWater = false;
+    bool playerInWind = false;
 
     player.gameObj.body.UpdateVelocity(dt, iterations, gravity);
-
-    //player.ResetFalgs();
 
     //player X pass
 
@@ -944,7 +953,7 @@ void Level::HighFrequencyDiscreteUpdate()
                     case TileType::GRAVITY_CHANGER: player.isTouchingGravityChanger = true; break;
                     case TileType::WIND:
                     {
-                        if(!player.windApplied)
+                        if(!playerInWind)
                         {
                             bool isEdgeUp = tile.gameObj.direction == Direction::UP && 
                             (tile.GetNeighborType(NeighborDirection::UP) == TileType::VOID ||
@@ -963,30 +972,31 @@ void Level::HighFrequencyDiscreteUpdate()
                                 isGravityUp
                             );
 
-                            player.windApplied = true;
+                            playerInWind = true;
+
+                            player.touchingWind = true;
                         }
                     }
                     break;
 
                     case TileType::WATER:
                     {
-                        if(!player.inWater)
+                        if(!playerInWater)
                         {
                             ApplyWaterPhysics(&player.gameObj, isGravityUp);
 
-                            player.inWater = true;
+                            playerInWater = true;
+
+                            player.touchingWater = true;
                         }
                     }
                     break;
 
                     case TileType::LADDER:
                     {
-                        if(!player.inLadder)
-                        {
-                            player.inLadder = true;
-
-                            player.ladderSnapPosX = tile.gameObj.transform.position.x;
-                        }
+                        player.inLadder = true;
+                        
+                        player.ladderSnapPosX = tile.gameObj.transform.position.x;
 
                         bool isEdgeUp = tile.GetNeighborType(NeighborDirection::UP) == TileType::VOID ||
                         tile.GetNeighborType(NeighborDirection::UP) == TileType::DECO;
@@ -1129,9 +1139,9 @@ void Level::HighFrequencyDiscreteUpdate()
             rangeLimits.maxX, rangeLimits.maxY
         );
 
-        enemy->gameObj.body.UpdateVelocity(dt, iterations, gravity);
+        bool enemyInWater = false;
 
-        //enemy->ResetFlags();
+        enemy->gameObj.body.UpdateVelocity(dt, iterations, gravity);
 
         //enemy x pass
         enemy->gameObj.UpdatePositionX(dt, iterations);
@@ -1264,10 +1274,13 @@ void Level::HighFrequencyDiscreteUpdate()
                         {
                         case TileType::WATER:
                         {
-                            if(!enemy->inWater)
+                            if(!enemyInWater)
                             {
                                 ApplyWaterPhysics(&enemy->gameObj, false);
                                 
+
+                                enemyInWater = true;
+
                                 enemy->inWater = true;
                             }
                         }
@@ -1627,7 +1640,7 @@ void Level::DrawLevel()
         WHITE
     );
 
-    //DebugTextDrawing();
+    DebugTextDrawing();
 }
 
 void Level::DebugDrawing()

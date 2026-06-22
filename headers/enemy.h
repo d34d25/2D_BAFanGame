@@ -26,9 +26,11 @@ class Enemy
 
 private:
 
-    void YuukaBehaivour(float dt, int framskip, Player& player);
+    void YuukaBehaivour(float dt, Player& player);
 
     Attacks currentAttack = Attacks::WIP;
+
+    Attacks lastAttack = Attacks::WIP;
 
     //generic timer for being used inside the enemies patterns
     float timer = 0.0f;
@@ -42,6 +44,8 @@ private:
     StunState stunState = StunState::NOT_STUNNED;
 
     bool alreadyFlipped = false;
+
+    float ogDamping = 0.0f;
 
 public:
 
@@ -103,6 +107,10 @@ public:
 
     int variantIndex = 0;
 
+    //
+
+    int aiFrameskip = 2;
+
     Enemy() = default;
 
     ~Enemy() = default;
@@ -112,10 +120,11 @@ public:
     void InitEnemy(
         const Vector2& spawnPos,
         const EntityData& data,
-        float gravity
+        float gravity,
+        int frameskip = 2
     );
 
-    void UpdateAI(float dt, int framskip, Player& player);
+    void UpdateAI(float dt, Player& player);
 
     void Update(float dt, int iterations);
 
