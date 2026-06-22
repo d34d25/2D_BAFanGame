@@ -259,6 +259,8 @@ void UnloadAssets()
         for(auto& data : renderData)
         {
             data.animationFrames.clear();
+
+            data.animationFrames.shrink_to_fit();
         }
 
         renderData.clear();
@@ -300,4 +302,20 @@ void UnloadAssets()
     //enemies' weapons
 
     CleanUp(yuukaWeaponRenderData);
+
+    //player
+
+    CleanUp(momoiRenderData);
+    CleanUp(midoriRenderData);
+
+    CleanUp(yuzuRenderData);
+    CleanUp(arisRenderData);
+
+    //player's weapons
+
+    CleanUp(momoiWeaponRenderData);
+    CleanUp(midoriWeaponRenderData);
+
+    CleanUp(yuzuWeaponRenderData);
+    CleanUp(arisWeaponRenderData);
 }
