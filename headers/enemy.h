@@ -81,11 +81,15 @@ public:
 
     bool isStomping = false;
 
+    bool isStompingRender = false;
+
     bool inWater = false;
 
     bool isTouchingWall = false;
 
     bool hitCeiling = false;
+
+    bool justLanded = false;
 
     //jump
     bool isJumping = false;
@@ -143,6 +147,8 @@ public:
 
     inline void UpdateFlags()
     {
+        justLanded = isGrounded && !wasGrounded;
+
         wasGrounded = isGrounded;
     }
 
@@ -157,6 +163,8 @@ public:
         ResetFlags();
 
         isStomping = false;
+
+        isStompingRender = false;
 
         gameObj.UpdateHitboxes();
 

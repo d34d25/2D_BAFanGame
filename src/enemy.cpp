@@ -26,7 +26,7 @@ void Enemy::UpdateRender(float dt)
                     startFrame = 4;
                     endFrame = 4;
                 }
-                else if(isStomping)
+                else if(isStompingRender)
                 {
                     startFrame = 5;
                     endFrame = 5;
@@ -81,14 +81,15 @@ void Enemy::YuukaBehaivour(float dt, int framskip, Player& player)
 
         isStomping = false;
 
-        timer = 0.0f;
+        //only reset the timer if the previous attack and current attack are different
+        timer = maxTime;
 
         int roll = GetRandomValue(0,100);
 
         if(roll <= 50) moveSpeedSign = -1;
         else moveSpeedSign = 1;
 
-        if (roll <= 70) currentAttack = Attacks::STOMP;
+        if (roll <= 100) currentAttack = Attacks::STOMP;
         else currentAttack = Attacks::RUN_N_SHOOT;
     }
 
@@ -110,6 +111,9 @@ void Enemy::YuukaBehaivour(float dt, int framskip, Player& player)
         if(!isGrounded && hitCeiling) isJumping = false;
         else if(isGrounded && timer >= maxTime) isJumping = true;
 
+        std::cout<<"just landed: "<<(int)justLanded<<"\n";
+        std::cout<<"\n";
+
         if(!isGrounded)
         {
             timer = 0.0f;
@@ -118,7 +122,7 @@ void Enemy::YuukaBehaivour(float dt, int framskip, Player& player)
         }
         else
         {
-            if(stunState == StunState::NOT_STUNNED && !isJumping)
+            if(justLanded && stunState == StunState::NOT_STUNNED && !isJumping)
             {
                 if(player.isGrounded)
                 {
@@ -162,7 +166,9 @@ void Enemy::YuukaBehaivour(float dt, int framskip, Player& player)
             isJumping = false;
         }
 
-        isStomping = isGrounded;
+        isStomping = isGrounded;//justLanded && (timer < maxTime);
+
+        isStompingRender = isGrounded;
 
         if(stateTimer >= 2.0f)
         {
@@ -336,6 +342,4 @@ void Enemy::Update(float dt, int iterations)
     FlipHitboxY(gameObj.hitboxes[1], gameObj.data.flipY, false);
 
     FlipHitboxY(gameObj.hitboxes[2], gameObj.data.flipY, true);
-
-    gameObj.body.UpdateVelocity(dt, iterations, gravity);
 }

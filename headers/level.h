@@ -261,7 +261,9 @@ private:
 
     void LowFrequencyUpdate(); //less than 60 fps
 
-    void MediumFrequencyDiscreteUpdate(); //60 fps
+    void MediumFrequencyDiscreteUpdate_First(); //60 fps
+
+    void MediumFrequencyDiscreteUpdate_Second(); //60 fps
 
     void HighFrequencyDiscreteUpdate(); //60 fps at 10 iterations (600 times total)
 

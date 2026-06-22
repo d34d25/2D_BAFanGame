@@ -444,9 +444,7 @@ void Level::UpdateLevel()
         lowFrequencyCounter = 0;
     }
 
-    MediumFrequencyDiscreteUpdate();
-
-    player.UpdateRender(dt);
+    MediumFrequencyDiscreteUpdate_First();
 
     for(int iteraion = 0; iteraion < iterations; iteraion++)
     {
@@ -454,6 +452,8 @@ void Level::UpdateLevel()
     }
 
     CCD_Update();
+
+    MediumFrequencyDiscreteUpdate_Second();
 
     if(player.canMove) player.Shoot(dt);
 
@@ -587,7 +587,7 @@ void Level::LowFrequencyUpdate()
     }
 }
 
-void Level::MediumFrequencyDiscreteUpdate()
+void Level::MediumFrequencyDiscreteUpdate_First()
 {
     platformCache_physics.clear();
     platformCache_rendering.clear();
@@ -689,6 +689,8 @@ void Level::MediumFrequencyDiscreteUpdate()
 
         int frameskip = 2;
 
+        enemy->UpdateRender(dt);
+
         if(lowFrequencyCounter % frameskip == 0)
         {
             if(enemy->type == EnemyType::YUUKA && enemy->isStomping) TriggerScreenShake(0.5f, 5.0f); //5.0f
@@ -699,8 +701,70 @@ void Level::MediumFrequencyDiscreteUpdate()
         }
 
         if(enemy->shooting) enemy->Shoot(dt);
+        
+        enemy->Update(dt, iterations);
 
-        enemy->UpdateRender(dt);
+        enemy->ResetFlags();
+    }
+
+    player.UpdateRender(dt);
+
+    player.Update(dt, iterations);
+
+    player.ResetFalgs();
+}
+
+void Level::MediumFrequencyDiscreteUpdate_Second()
+{
+    /*
+        on enter trigger = !wasTouchingTrigger && isTouchingTrigger
+        on exit trigger = wasTouchingTrigger && !isTouchingTrigger
+    */
+
+    if(!player.wasTouchingGravityChanger && player.isTouchingGravityChanger)
+    {
+        player.isGrounded = false;
+        player.isJumping = false;
+
+        gravity *= -1;
+        isGravityUp = gravity < 0;
+
+        player.gravity = gravity;
+        player.gameObj.data.flipY = isGravityUp;
+
+        if(currentRoomIndex > -1 && currentRoomIndex < platformBuckets.size())
+        {
+            std::vector<Platform>& activePLatformBucket = platformBuckets[currentRoomIndex];
+
+            for(int i = 0; i < activePLatformBucket.size(); i++)
+            {
+                Platform& platform = activePLatformBucket[i];
+
+                if(!(platform.type == PlatformType::FALLING) || platform.updateRequired) continue;
+
+                platform.gravity = gravity;
+            }
+        }
+    }
+
+    if(!player.wasTouchingSpike && player.isTouchingSpike)
+    {
+        ResetLevel();
+    }
+
+    player.UpdateFlags();
+
+    //enemies
+
+    for(int e = 0; e < enemyCache.size(); e++)
+    {
+        Enemy* enemy = enemyCache[e];
+
+        if(!enemy) continue;
+
+        int frameskip = 2;
+        
+        if(lowFrequencyCounter % frameskip == 0) enemy->UpdateFlags();
     }
 }
 
@@ -744,9 +808,11 @@ void Level::HighFrequencyDiscreteUpdate()
         rangeLimits.maxX, rangeLimits.maxY
     );
 
-    player.Update(dt, iterations);
+    //player.Update(dt, iterations);
 
-    player.ResetFalgs();
+    player.gameObj.body.UpdateVelocity(dt, iterations, gravity);
+
+    //player.ResetFalgs();
 
     //player X pass
 
@@ -1051,6 +1117,8 @@ void Level::HighFrequencyDiscreteUpdate()
     {
         Enemy* enemy = enemyCache[e];
 
+        if(!enemy) continue;
+
         float enemyRadius = enemy->gameObj.GetMainAABB().height * REC_TO_CIRCLE_RADIUS_MULTIPLIER;
 
         TileRange enemyTileRange = CalculateTileRange(
@@ -1061,9 +1129,9 @@ void Level::HighFrequencyDiscreteUpdate()
             rangeLimits.maxX, rangeLimits.maxY
         );
 
-        enemy->Update(dt, iterations);
+        enemy->gameObj.body.UpdateVelocity(dt, iterations, gravity);
 
-        enemy->ResetFlags();
+        //enemy->ResetFlags();
 
         //enemy x pass
         enemy->gameObj.UpdatePositionX(dt, iterations);
@@ -1235,48 +1303,7 @@ void Level::HighFrequencyDiscreteUpdate()
             }
         }
 
-        enemy->UpdateFlags();
     }
-
-    if(!player.wasTouchingGravityChanger && player.isTouchingGravityChanger)
-    {
-        player.isGrounded = false;
-        player.isJumping = false;
-
-        gravity *= -1;
-        isGravityUp = gravity < 0;
-
-        player.gravity = gravity;
-        player.gameObj.data.flipY = isGravityUp;
-
-        if(currentRoomIndex > -1 && currentRoomIndex < platformBuckets.size())
-        {
-            std::vector<Platform>& activePLatformBucket = platformBuckets[currentRoomIndex];
-
-            for(int i = 0; i < activePLatformBucket.size(); i++)
-            {
-                Platform& platform = activePLatformBucket[i];
-
-                if(!(platform.type == PlatformType::FALLING) || platform.updateRequired) continue;
-
-                platform.gravity = gravity;
-            }
-        }
-    }
-
-    /*
-        on enter trigger = !wasTouchingTrigger && isTouchingTrigger
-        on exit trigger = wasTouchingTrigger && !isTouchingTrigger
-    */
-
-    if(!player.wasTouchingSpike && player.isTouchingSpike)
-    {
-        ResetLevel();
-    }
-
-    //booleans update
-
-    player.UpdateFlags();
 }
 
 void Level::CCD_Update()

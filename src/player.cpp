@@ -242,14 +242,12 @@ void Player::UpdateRender(float dt)
         if(currentFrame < 0) currentFrame = 0;
     }
 
-    std::cout<<"stun timer: "<<stunTimer<<"\n";
-    std::cout<<"max stun time: "<<maxStunTime<<"\n";
+    //std::cout<<"stun timer: "<<stunTimer<<"\n";
+    //std::cout<<"max stun time: "<<maxStunTime<<"\n";
 }
 
 void Player::Update(float dt, int iterations)
 {
-    float subDt = dt / iterations;
-
     float jumpVel = -12000;
 
     float jump = jumpVel;
@@ -271,7 +269,7 @@ void Player::Update(float dt, int iterations)
     {
         //lateral movement
 
-        float moveForce = 400 * gameObj.body.damping;
+        float moveForce = 400 * gameObj.body.damping * iterations;
 
         if(movingLeft)
         {
@@ -351,7 +349,7 @@ void Player::Update(float dt, int iterations)
         }
         else
         {
-            jumpTime += subDt;
+            jumpTime += dt;
 
             if(jumpTime >= maxJumpTime) jumpTime = maxJumpTime; 
         }
@@ -362,7 +360,7 @@ void Player::Update(float dt, int iterations)
 
             if(isJumping && jumpTime < maxJumpTime)
             {
-                gameObj.body.velocity.y += jump * subDt;
+                gameObj.body.force.y = jump * iterations;
             }
             else
             {
@@ -380,14 +378,10 @@ void Player::Update(float dt, int iterations)
 
         gameObj.body.velocity = {0,0};
 
-        stunTimer += subDt;
+        stunTimer += dt;
 
         if(stunTimer >= maxStunTime) stunTimer = maxStunTime;
     }
-    
-    //update
-    
-    gameObj.body.UpdateVelocity(dt, iterations, gravity);   
 }
 
 void Player::Shoot(float dt)
