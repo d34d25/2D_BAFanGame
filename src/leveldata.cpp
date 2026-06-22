@@ -40,9 +40,26 @@ std::vector<SpriteRenderData> dummyRenderData = {};
 
 std::vector<SpriteRenderData> yuukaRenderData = {};
 
-//enemies weapons
+//enemies' weapons
 
-SpriteRenderData yuukaWeaponRenderData = {};
+std::vector<SpriteRenderData> yuukaWeaponRenderData = {};
+
+//player
+
+std::vector<SpriteRenderData> momoiRenderData = {};
+std::vector<SpriteRenderData> midoriRenderData = {};
+
+std::vector<SpriteRenderData> yuzuRenderData = {};
+std::vector<SpriteRenderData> arisRenderData = {};
+
+//player's weapons
+
+std::vector<SpriteRenderData> momoiWeaponRenderData = {};
+
+std::vector<SpriteRenderData> midoriWeaponRenderData = {};
+
+std::vector<SpriteRenderData> yuzuWeaponRenderData = {};
+std::vector<SpriteRenderData> arisWeaponRenderData = {};
 
 /*
     spacing is how many frames an animation loop has, this value is fixed for each SpriteRenderData
@@ -59,6 +76,7 @@ SpriteRenderData yuukaWeaponRenderData = {};
     each SpriteRenderData will have a fixed spacing and frameSize value, but different SpriteRenderData can use
     the same source texture despite having differente sizes, start, end and spacing.
 */
+
 SpriteRenderData LoadRenderData(const char* path, Vector2 frameSize, Vector2 offset, int spacing, int atlasStartFrame, int atlasEndFrame, float animationSpeed)
 {
     SpriteRenderData renderData = {};
@@ -157,7 +175,81 @@ void LoadAssets()
 
     //enemies' weapons
 
-    yuukaWeaponRenderData = LoadRenderData("assets/enemies/yuuka-weapon-holo.png", {10,4}, {39,7});
+    yuukaWeaponRenderData.push_back(LoadRenderData("assets/enemies/yuuka-weapon-holo.png", {10,4}, {39,7}));
+
+    //player
+
+    momoiRenderData.push_back(LoadRenderData(
+        "assets/characters/momoi-spritesheet-b.png",
+        {14.0f, 24.0f},
+        {0.0f, -7.0f},
+        1,0,0, 
+        10.0f
+    ));
+
+    momoiRenderData.push_back(LoadRenderData(
+        "assets/characters/momoi-chaquena-spritesheet.png",
+        {18.0f, 23.0f},
+        {0.0f, -7.0f},
+        1,0,0, 
+        10.0f
+    ));
+
+    midoriRenderData.push_back(LoadRenderData(
+        "assets/characters/midori-spritesheet.png",
+        {14.0f, 24.0f},
+        {0.0f, -7.0f},
+        1, 0, 0,
+        10.0f
+    ));
+
+    yuzuRenderData.push_back(LoadRenderData(
+        "assets/characters/yuzu-spritesheet.png",
+        {21.0f, 22.0f},
+        {-4.0f, -4.0f},
+        1, 0, 0,
+        10.0f
+    ));
+
+    arisRenderData.push_back(LoadRenderData(
+        "assets/characters/aris-spritesheet.png",
+        {17.0f, 21.0f},
+        {0.0f, -3.0f},
+        1, 0, 0,
+        10.0f
+    ));
+
+    //player's weapons
+
+    momoiWeaponRenderData.push_back(LoadRenderData(
+        "assets/characters/momoi-weapon-holo.png",
+        {10.0f, 5.0f},
+        {39.0f, 7.0f}
+    ));
+
+    momoiWeaponRenderData.push_back(LoadRenderData(
+        "assets/characters/momoi-chaquena-weapon-holo.png",
+        {5.0f, 7.0f},
+        {39.0f, 7.0f}
+    ));
+
+    midoriWeaponRenderData.push_back(LoadRenderData(
+        "assets/characters/midori-weapon-holo.png",
+        {11.0f, 5.0f},
+        {42.0f, 7.0f}
+    ));
+
+    yuzuWeaponRenderData.push_back(LoadRenderData(
+        "assets/characters/yuzu-weapon-holo.png",
+        {10.0f, 5.0f},
+        {42.0f, 7.0f}
+    ));
+
+    arisWeaponRenderData.push_back(LoadRenderData(
+        "assets/characters/aris-weapon-holo.png",
+        {15.0f, 4.0f},
+        {51.0f, 7.0f}
+    ));
 }
 
 void UnloadAssets()
@@ -198,4 +290,14 @@ void UnloadAssets()
     CleanUp(windRenderData);
 
     CleanUp(waterRenderData);
+
+    //enemies
+
+    CleanUp(dummyRenderData);
+
+    CleanUp(yuukaRenderData);
+
+    //enemies' weapons
+
+    CleanUp(yuukaWeaponRenderData);
 }

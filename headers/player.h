@@ -21,15 +21,6 @@ const Color YUZU_COLOR_BG = BLACK;
 const Color ARIS_PURPLE = Color{120,100,255,255};
 const Color ARIS_PURPLE_BG = Color{200,162,255,255};
 
-enum class Character
-{
-    MOMOI,
-    MIDORI,
-    YUZU,
-    ARIS,
-    MOMOI_CHAQUENA
-};
-
 class Player
 {
 
@@ -44,7 +35,11 @@ private:
     
 public:
 
-    int currentFrame = 0;
+    int characterCurrentFrame = 0;
+
+    int variantIndex = 0;
+
+    int weaponCurrentFrame = 0;
 
     float gravity = 500;
 
@@ -100,9 +95,9 @@ public:
 
     GameObject gameObj = {};
 
-    SpriteRenderData characterRenderData = {};
+    SpriteRenderData* characterRenderData = {};
 
-    SpriteRenderData weaponRenderData = {};
+    SpriteRenderData* weaponRenderData = {};
 
     BulletProperties bulletData = {};
 
@@ -110,7 +105,9 @@ public:
 
     float ladderSnapPosX = 0.0f;
 
-    Player(Vector2 position);
+    Player() = default;
+
+    void InitPlayer(Vector2 position, float gravity, bool flipY);
 
     ~Player();
 

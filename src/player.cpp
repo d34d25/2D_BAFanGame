@@ -1,7 +1,11 @@
 #include "player.h"
 
-Player::Player(Vector2 position)
+void Player::InitPlayer(Vector2 position, float gravity, bool flipY)
 {
+    this->gravity = gravity;
+
+    gameObj.data.flipY = flipY;
+
     spawnPos = position;
 
     gameObj.transform.position = position;
@@ -33,20 +37,15 @@ Player::Player(Vector2 position)
     bulletData.explodes = false;
     bulletData.piercing = false;
 
+    bulletData.gravity = 0.0f;
+
+    variantIndex = 0;
+
     character = Character::YUZU;
 
     switch (character)
     {
     case Character::MOMOI:
-
-        characterRenderData = LoadRenderData("assets/characters/momoi-spritesheet-b.png", {14,24});
-        weaponRenderData = LoadRenderData("assets/characters/momoi-weapon-holo.png", {10,5});
-
-        characterRenderData.offset.x = 0.0f;
-        characterRenderData.offset.y = -7.0f;
-
-        weaponRenderData.offset.x = 39.0f;
-        weaponRenderData.offset.y = 7.0f;
 
         bulletData.fireRate = 0.2f;
         bulletData.spread = 8.0f;
@@ -59,15 +58,6 @@ Player::Player(Vector2 position)
         break;
     case Character::MIDORI:
 
-        characterRenderData = LoadRenderData("assets/characters/midori-spritesheet.png", {14,24});
-        weaponRenderData = LoadRenderData("assets/characters/midori-weapon-holo.png", {11,5});
-
-        characterRenderData.offset.x = 0.0f;
-        characterRenderData.offset.y = -7.0f;
-
-        weaponRenderData.offset.x = 42.0f;
-        weaponRenderData.offset.y = 7.0f;
-
         bulletData.spread = 1.5f;
         bulletData.radius = 6.0f;
 
@@ -77,16 +67,7 @@ Player::Player(Vector2 position)
         break;
     case Character::YUZU:
 
-        characterRenderData = LoadRenderData("assets/characters/yuzu-spritesheet.png", {21,22});
-        weaponRenderData = LoadRenderData("assets/characters/yuzu-weapon-holo.png", {10,5});
-
-        characterRenderData.offset.x = -4.0f;
-        characterRenderData.offset.y = -4.0f;
-
-        weaponRenderData.offset.x = 42.0f;
-        weaponRenderData.offset.y = 7.0f;
-
-        bulletData.gravity = gravity * 2.0f;
+        bulletData.gravity = 1000.0f;
 
         bulletData.spread = 0.0f;
         bulletData.radius = 8.0f;
@@ -101,15 +82,6 @@ Player::Player(Vector2 position)
         break;
     case Character::ARIS:
 
-        characterRenderData = LoadRenderData("assets/characters/aris-spritesheet.png", {17,21});
-        weaponRenderData = LoadRenderData("assets/characters/aris-weapon-holo.png", {15,4});
-
-        characterRenderData.offset.x = 0.0f;
-        characterRenderData.offset.y = -3.0f;
-
-        weaponRenderData.offset.x = 51.0f;
-        weaponRenderData.offset.y = 7.0f;
-
         bulletData.spread = 0.0f;
         bulletData.radius = 10.0f;
 
@@ -123,14 +95,7 @@ Player::Player(Vector2 position)
         break;
     case Character::MOMOI_CHAQUENA:
 
-        characterRenderData = LoadRenderData("assets/characters/chibi-momoi-chaquena.png", {14,17});
-        weaponRenderData = LoadRenderData("assets/characters/momoi-chaquena-weapon.png", {26,8});
-
-        characterRenderData.offset.x = 0.0f;
-        characterRenderData.offset.y = -4.0f;
-
-        weaponRenderData.offset.x = 16.0f;
-        weaponRenderData.offset.y = 16.0f;
+        variantIndex = 1;
 
         bulletData.fireRate = 0.2f;
         bulletData.spread = 8.0f;
@@ -144,10 +109,10 @@ Player::Player(Vector2 position)
     default:
         break;
     }
-    
-    characterRenderData.animationSpeed = 10.0f;
 
-    characterRenderData.ogOffset = characterRenderData.offset;
+    characterRenderData = GetPlayerActiveRenderData(character, variantIndex);
+
+    weaponRenderData = GetPlayerWeaponActiveRenderData(character, variantIndex);
 
     bulletpool = std::make_unique<BulletPool>(30, bulletData);
 }
@@ -185,7 +150,9 @@ void Player::UpdateInput()
 
 void Player::UpdateRender(float dt)
 {
-    animationTimer += dt * characterRenderData.animationSpeed;
+    if(!characterRenderData) return;
+
+    animationTimer += dt * characterRenderData->animationSpeed;
 
     /*
     idle = frame 0
@@ -195,55 +162,59 @@ void Player::UpdateRender(float dt)
     stunned = frame 7
     */
 
-    if(animationTimer >= 1.0f)
+    int startFrame = 0;
+    int endFrame = characterRenderData->animationFrames.size();
+
+    characterRenderData->offset = characterRenderData->ogOffset;
+
+    if(!canMove)
     {
-        animationTimer = 0.0f;
+        startFrame = 7;
+        endFrame = 7;
 
-        int startFrame = 0;
-        int endFrame = characterRenderData.animationFrames.size();
-
-        characterRenderData.offset = characterRenderData.ogOffset;
-
-        if(!canMove)
+        characterRenderData->offset.y += 5.0f;
+    }
+    else if(climbing)
+    {
+        startFrame = 5;
+        endFrame = 6;
+    }
+    else if(!isGrounded)
+    {
+        startFrame = 4;
+        endFrame = 4;
+    }
+    else
+    {
+        if(std::abs(gameObj.body.velocity.x) > 50.0f)
         {
-            startFrame = 7;
-            endFrame = 7;
-
-            characterRenderData.offset.y += 5.0f;
-        }
-        else if(climbing)
-        {
-            startFrame = 5;
-            endFrame = 6;
-        }
-        else if(!isGrounded)
-        {
-            startFrame = 4;
-            endFrame = 4;
+            startFrame = 1;
+            endFrame = 3;
         }
         else
         {
-            if(std::abs(gameObj.body.velocity.x) > 50.0f)
-            {
-                startFrame = 1;
-                endFrame = 3;
-            }
-            else
-            {
-                startFrame = 0;
-                endFrame = 0;
-            }
+            startFrame = 0;
+            endFrame = 0;
         }
-
-        if(!(climbing && gameObj.body.velocity.y == 0.0f)) currentFrame++;
-
-        if(currentFrame > endFrame || currentFrame < startFrame) currentFrame = startFrame;
-
-        if(currentFrame < 0) currentFrame = 0;
     }
 
-    //std::cout<<"stun timer: "<<stunTimer<<"\n";
-    //std::cout<<"max stun time: "<<maxStunTime<<"\n";
+    if(characterCurrentFrame > endFrame || characterCurrentFrame < startFrame)
+    {
+        characterCurrentFrame = startFrame;
+
+        animationTimer = 0.0f;
+    }
+
+    if(animationTimer >= 1.0f)
+    {
+        animationTimer = 0.0f;
+        
+        if(!(climbing && gameObj.body.velocity.y == 0.0f)) characterCurrentFrame++;
+
+        if(characterCurrentFrame > endFrame) characterCurrentFrame = startFrame;
+    }
+
+    if(characterCurrentFrame < 0) characterCurrentFrame = 0;
 }
 
 void Player::Update(float dt, int iterations)
@@ -388,7 +359,7 @@ void Player::Shoot(float dt)
 {
     ShootBullet(
         dt, gameObj,
-        &bulletData, GetTextureBulletSpawnPos(gameObj, &weaponRenderData),
+        &bulletData, GetTextureBulletSpawnPos(gameObj, weaponRenderData),
         bulletpool.get(), holdingShoot
     );
 }

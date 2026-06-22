@@ -3,10 +3,6 @@
 #include <iostream>
 #include <algorithm>
 
-Level::Level() : player({0, 0})
-{
-}
-
 Level::~Level()
 {
     ClearTileMatrix();
@@ -23,10 +19,6 @@ void Level::InitLevel(const char* levelPath, const char* roomPath ,float dt, int
     this->dt = dt;
 
     gravity = GRAVITY;
-
-    player.gameObj.data.flipY = gravity < 0;
-
-    player.gravity = gravity;
 
     camera.target = {0,0};
 
@@ -62,6 +54,8 @@ void Level::InitLevel(const char* levelPath, const char* roomPath ,float dt, int
                 if(type == TileType::PLAYER_SPAWN)
                 {
                     Vector2 spawnPos = tile->gameObj.transform.position;
+
+                    player.InitPlayer(spawnPos, gravity, gravity < 0);
 
                     if(player.gameObj.GetMainAABB().height > GRID_SIZE) spawnPos.y -= player.gameObj.GetMainAABB().height * 0.25f;
 
@@ -1561,16 +1555,13 @@ void Level::DrawLevel()
         if(!enemy->enemyRenderData) DrawRectangleRec(enemy->gameObj.GetMainAABB(), enemy->testColor);
         else
         {
-            DrawSprite(enemy->gameObj, enemy->enemyRenderData, enemy->currentFrame);
-        }
+            DrawSprite(enemy->gameObj, enemy->enemyRenderData, enemy->characterCurrentFrame);
 
-        if(enemy->weaponRenderData)
-        {
-            DrawSprite(enemy->gameObj, enemy->weaponRenderData, 0);
-        }
+            DrawSprite(enemy->gameObj, enemy->weaponRenderData, enemy->weaponCurrentFrame);
+        }   
     }
 
-    DrawSprite(player.gameObj, &player.characterRenderData, player.currentFrame);
+    DrawSprite(player.gameObj, player.characterRenderData, player.characterCurrentFrame);
 
     for(int i = 0; i < player.bulletpool->activeBullets.size(); i++)
     {
@@ -1609,7 +1600,7 @@ void Level::DrawLevel()
         }
     }
 
-    DrawSprite(player.gameObj, &player.weaponRenderData, 0);
+    DrawSprite(player.gameObj, player.weaponRenderData, player.weaponCurrentFrame);
 
     //DebugDrawing();
 
@@ -1640,7 +1631,7 @@ void Level::DrawLevel()
         WHITE
     );
 
-    DebugTextDrawing();
+    //DebugTextDrawing();
 }
 
 void Level::DebugDrawing()

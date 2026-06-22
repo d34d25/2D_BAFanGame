@@ -4,60 +4,68 @@
 
 void Enemy::UpdateRender(float dt)
 {
-    if(enemyRenderData)
+    if(!enemyRenderData) return;
+
+    animationTimer += dt * enemyRenderData->animationSpeed;
+
+    int startFrame = 0;
+    int endFrame = enemyRenderData->animationFrames.size();
+
+    enemyRenderData->offset = enemyRenderData->ogOffset;
+
+    switch (type)
     {
-        animationTimer += dt * enemyRenderData->animationSpeed;
-
-        if(animationTimer >= 1.0f)
+    case EnemyType::YUUKA:
+    {
+        if(!isGrounded)
         {
-            animationTimer = 0.0f;
-
-            int startFrame = 0;
-            int endFrame = enemyRenderData->animationFrames.size();
-
-            enemyRenderData->offset = enemyRenderData->ogOffset;
-
-            switch (type)
-            {
-            case EnemyType::YUUKA:
-            {
-                if(!isGrounded)
-                {
-                    startFrame = 4;
-                    endFrame = 4;
-                }
-                else if(isStompingRender)
-                {
-                    startFrame = 5;
-                    endFrame = 5;
-                }
-                else
-                {
-                    if(std::abs(gameObj.body.velocity.x) > 50.0f)
-                    {
-                        startFrame = 1;
-                        endFrame = 3;
-                    }
-                    else
-                    {
-                        startFrame = 0;
-                        endFrame = 0;
-                    }
-                }
-            }
-            break;
-            
-            default:
-                break;
-            }
-
-            currentFrame++;
-
-            if(currentFrame > endFrame || currentFrame < startFrame) currentFrame = startFrame;
-
-            if(currentFrame < 0) currentFrame = 0;
+            startFrame = 4;
+            endFrame = 4;
         }
+        else if(isStompingRender)
+        {
+            startFrame = 5;
+            endFrame = 5;
+
+            enemyRenderData->offset.y += 5.0f;
+        }
+        else
+        {
+            if(std::abs(gameObj.body.velocity.x) > 50.0f)
+            {
+                startFrame = 1;
+                endFrame = 3;
+            }
+            else
+            {
+                startFrame = 0;
+                endFrame = 0;
+                }
+            }
     }
+    break;
+            
+    default:
+        break;
+    }
+
+    if(characterCurrentFrame > endFrame || characterCurrentFrame < startFrame)
+    {
+        characterCurrentFrame = startFrame;
+
+        animationTimer = 0.0f;
+    }
+
+    if(animationTimer >= 1.0f)
+    {
+        animationTimer = 0.0f;
+
+        characterCurrentFrame++;
+
+        if(characterCurrentFrame > endFrame) characterCurrentFrame = startFrame;
+    }
+
+    if(characterCurrentFrame < 0) characterCurrentFrame = 0;
 }
 
 void Enemy::YuukaBehaivour(float dt, Player& player)
@@ -332,7 +340,7 @@ void Enemy::InitEnemy(
 
     enemyRenderData = GetEnemyActiveRenderData(type, variantIndex);
 
-    weaponRenderData = GetEnemyWeaponRenderData(type);
+    weaponRenderData = GetEnemyWeaponActiveRenderData(type, variantIndex);
 
     aiFrameskip = frameskip;
 

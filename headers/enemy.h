@@ -103,9 +103,11 @@ public:
 
     //animation
 
-    int currentFrame = 0;
+    int characterCurrentFrame = 0;
 
     int variantIndex = 0;
+
+    int weaponCurrentFrame = 0;
 
     //
 

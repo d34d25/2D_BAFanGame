@@ -81,7 +81,7 @@ private:
 
     Camera2D camera = {};
 
-    Player player;
+    Player player = {};
 
     //clamps the tile range to the current room
     TileRangeLimits rangeLimits = {};
@@ -338,7 +338,7 @@ public:
 
     RenderTexture2D canvas = {};
 
-    Level();
+    Level() = default;
 
     ~Level();
 

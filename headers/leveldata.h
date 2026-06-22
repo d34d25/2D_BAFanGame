@@ -123,6 +123,15 @@ enum class EnemyType
     YUUKA
 };
 
+enum class Character
+{
+    MOMOI,
+    MIDORI,
+    YUZU,
+    ARIS,
+    MOMOI_CHAQUENA
+};
+
 inline bool IsTypeInvalid(TileType type)
 {
     switch (type)
@@ -393,7 +402,26 @@ extern std::vector<SpriteRenderData> yuukaRenderData;
 
 //enemy's weapons
 
-extern SpriteRenderData yuukaWeaponRenderData;
+extern std::vector<SpriteRenderData> yuukaWeaponRenderData;
+
+//player
+
+extern std::vector<SpriteRenderData> momoiRenderData;
+extern std::vector<SpriteRenderData> midoriRenderData;
+
+extern std::vector<SpriteRenderData> yuzuRenderData;
+extern std::vector<SpriteRenderData> arisRenderData;
+
+//player's weapons
+
+extern std::vector<SpriteRenderData> momoiWeaponRenderData;
+
+extern std::vector<SpriteRenderData> midoriWeaponRenderData;
+
+extern std::vector<SpriteRenderData> yuzuWeaponRenderData;
+extern std::vector<SpriteRenderData> arisWeaponRenderData;
+
+//------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 extern SpriteRenderData LoadRenderData(const char* path, Vector2 frameSize, Vector2 offset = {0,0}, int spacing = 1, int atlasStartFrame = 0, int atlasEndFrame = 0, float animationSpeed = 5.0f);
 
@@ -456,7 +484,6 @@ inline SpriteRenderData* GetTileActiveRenderData(TileType type, int variant = 0)
     return nullptr;
 }
 
-
 inline std::vector<SpriteRenderData>* GetPlatformActiveRenderDataList(PlatformType type)
 {
     switch (type)
@@ -502,7 +529,7 @@ inline SpriteRenderData* GetEnemyActiveRenderData(EnemyType type, int variant = 
     return nullptr;
 }
 
-inline SpriteRenderData* GetEnemyWeaponRenderData(EnemyType type)
+inline std::vector<SpriteRenderData>* GetEnemyWeaponActiveRenderDataList(EnemyType type)
 {
     switch (type)
     {
@@ -511,6 +538,80 @@ inline SpriteRenderData* GetEnemyWeaponRenderData(EnemyType type)
 
     default: return nullptr;
     }
+}
+
+inline SpriteRenderData* GetEnemyWeaponActiveRenderData(EnemyType type, int variant = 0)
+{
+    std::vector<SpriteRenderData>* activeRenderData = GetEnemyWeaponActiveRenderDataList(type);
+
+    if(activeRenderData && variant >= 0 && variant < (int)activeRenderData->size())
+    {
+        return &activeRenderData->at(variant);
+    }
+
+    return nullptr;
+}
+
+inline std::vector<SpriteRenderData>* GetPlayerActiveRenderDataList(Character type)
+{
+    switch (type)
+    {
+    
+    case Character::MOMOI: 
+    case Character::MOMOI_CHAQUENA:
+        return &momoiRenderData;
+
+    case Character::MIDORI: return &midoriRenderData;
+
+    case Character::YUZU: return &yuzuRenderData;
+
+    case Character::ARIS: return &arisRenderData;
+
+    default: return nullptr;
+    }
+}
+
+inline SpriteRenderData* GetPlayerActiveRenderData(Character type, int variant = 0)
+{
+    std::vector<SpriteRenderData>* activeRenderData = GetPlayerActiveRenderDataList(type);
+
+    if(activeRenderData && variant >= 0 && variant < (int)activeRenderData->size())
+    {
+        return &activeRenderData->at(variant);
+    }
+
+    return nullptr;
+}
+
+inline std::vector<SpriteRenderData>* GetPlayerWeaponActiveRenderDataList(Character type)
+{
+    switch (type)
+    {
+    
+    case Character::MOMOI:
+    case Character::MOMOI_CHAQUENA:
+        return &momoiWeaponRenderData;
+
+    case Character::MIDORI: return &midoriWeaponRenderData;
+
+    case Character::YUZU: return &yuzuWeaponRenderData;
+
+    case Character::ARIS: return &arisWeaponRenderData;
+
+    default: return nullptr;
+    }
+}
+
+inline SpriteRenderData* GetPlayerWeaponActiveRenderData(Character type, int variant = 0)
+{
+    std::vector<SpriteRenderData>* activeRenderData = GetPlayerWeaponActiveRenderDataList(type);
+
+    if(activeRenderData && variant >= 0 && variant < (int)activeRenderData->size())
+    {
+        return &activeRenderData->at(variant);
+    }
+
+    return nullptr;
 }
 
 inline void LoadLevelData(const char* levelPath, Tile(&destination)[LAYERS][COLS][ROWS], const char* roomPath, std::vector<Room>& rooms)
