@@ -37,9 +37,11 @@ public:
 
     int characterCurrentFrame = 0;
 
-    int variantIndex = 0;
+    int characterVariantIndex = 0;
 
     int weaponCurrentFrame = 0;
+
+    int weaponVariantIndex = 0;
 
     float gravity = 500;
 

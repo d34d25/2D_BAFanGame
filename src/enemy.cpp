@@ -22,7 +22,7 @@ void Enemy::UpdateRender(float dt)
             startFrame = 4;
             endFrame = 4;
         }
-        else if(isStompingRender)
+        else if(isStomping)
         {
             startFrame = 5;
             endFrame = 5;
@@ -40,8 +40,8 @@ void Enemy::UpdateRender(float dt)
             {
                 startFrame = 0;
                 endFrame = 0;
-                }
             }
+        }
     }
     break;
             
@@ -87,7 +87,7 @@ void Enemy::YuukaBehaivour(float dt, Player& player)
         if(roll <= 50) moveSpeedSign = -1;
         else moveSpeedSign = 1;
 
-        if (roll <= 100) currentAttack = Attacks::STOMP;
+        if (roll <= 70) currentAttack = Attacks::STOMP;
         else currentAttack = Attacks::RUN_N_SHOOT;
 
         if(lastAttack != currentAttack)
@@ -180,8 +180,6 @@ void Enemy::YuukaBehaivour(float dt, Player& player)
         }
 
         isStomping = isGrounded;
-
-        isStompingRender = isGrounded;
 
         if(stateTimer >= 2.0f)
         {
@@ -338,9 +336,9 @@ void Enemy::InitEnemy(
 
     bulletpool = std::make_unique<BulletPool>(30, bulletData);
 
-    enemyRenderData = GetEnemyActiveRenderData(type, variantIndex);
+    enemyRenderData = GetEnemyActiveRenderData(type, characterVariantIndex);
 
-    weaponRenderData = GetEnemyWeaponActiveRenderData(type, variantIndex);
+    weaponRenderData = GetEnemyWeaponActiveRenderData(type, weaponVariantIndex);
 
     aiFrameskip = frameskip;
 

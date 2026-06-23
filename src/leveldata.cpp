@@ -211,6 +211,14 @@ void LoadAssets()
         10.0f
     ));
 
+    yuzuRenderData.push_back(LoadRenderData(
+        "assets/characters/yuzu-battle-spritesheet.png",
+        {18.0f, 24.0f},
+        {-6.0f, -8.0f},
+        1, 0, 0,
+        10.0f
+    ));
+
     arisRenderData.push_back(LoadRenderData(
         "assets/characters/aris-spritesheet.png",
         {17.0f, 21.0f},

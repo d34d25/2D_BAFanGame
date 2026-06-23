@@ -1556,9 +1556,9 @@ void Level::DrawLevel()
         else
         {
             DrawSprite(enemy->gameObj, enemy->enemyRenderData, enemy->characterCurrentFrame);
+        }
 
-            DrawSprite(enemy->gameObj, enemy->weaponRenderData, enemy->weaponCurrentFrame);
-        }   
+        DrawSprite(enemy->gameObj, enemy->weaponRenderData, enemy->weaponCurrentFrame);
     }
 
     DrawSprite(player.gameObj, player.characterRenderData, player.characterCurrentFrame);
@@ -1631,7 +1631,7 @@ void Level::DrawLevel()
         WHITE
     );
 
-    //DebugTextDrawing();
+    DebugTextDrawing();
 }
 
 void Level::DebugDrawing()

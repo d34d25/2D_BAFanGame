@@ -39,9 +39,10 @@ void Player::InitPlayer(Vector2 position, float gravity, bool flipY)
 
     bulletData.gravity = 0.0f;
 
-    variantIndex = 0;
+    characterVariantIndex = 0;
+    weaponVariantIndex = 0;
 
-    character = Character::YUZU;
+    character = Character::YUZU_BATTLE;
 
     switch (character)
     {
@@ -80,6 +81,23 @@ void Player::InitPlayer(Vector2 position, float gravity, bool flipY)
         bulletData.explodes = true;
 
         break;
+    case Character::YUZU_BATTLE:
+
+        characterVariantIndex = 1;
+
+        bulletData.gravity = 1000.0f;
+
+        bulletData.spread = 0.0f;
+        bulletData.radius = 8.0f;
+        bulletData.angle = -40;
+        bulletData.fireRate = 1.2f;
+
+        bulletData.mainColor = YUZU_COLOR;
+        bulletData.backColor = YUZU_COLOR_BG;
+
+        bulletData.explodes = true;
+        
+        break;
     case Character::ARIS:
 
         bulletData.spread = 0.0f;
@@ -95,7 +113,8 @@ void Player::InitPlayer(Vector2 position, float gravity, bool flipY)
         break;
     case Character::MOMOI_CHAQUENA:
 
-        variantIndex = 1;
+        characterVariantIndex = 1;
+        weaponVariantIndex = 1;
 
         bulletData.fireRate = 0.2f;
         bulletData.spread = 8.0f;
@@ -110,9 +129,9 @@ void Player::InitPlayer(Vector2 position, float gravity, bool flipY)
         break;
     }
 
-    characterRenderData = GetPlayerActiveRenderData(character, variantIndex);
+    characterRenderData = GetPlayerActiveRenderData(character, characterVariantIndex);
 
-    weaponRenderData = GetPlayerWeaponActiveRenderData(character, variantIndex);
+    weaponRenderData = GetPlayerWeaponActiveRenderData(character, weaponVariantIndex);
 
     bulletpool = std::make_unique<BulletPool>(30, bulletData);
 }
@@ -178,6 +197,8 @@ void Player::UpdateRender(float dt)
     {
         startFrame = 5;
         endFrame = 6;
+
+        if(character == Character::YUZU_BATTLE) characterRenderData->offset.x = 0;
     }
     else if(!isGrounded)
     {

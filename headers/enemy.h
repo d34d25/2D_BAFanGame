@@ -85,8 +85,6 @@ public:
 
     bool isStomping = false;
 
-    bool isStompingRender = false;
-
     bool inWater = false;
 
     bool isTouchingWall = false;
@@ -105,9 +103,11 @@ public:
 
     int characterCurrentFrame = 0;
 
-    int variantIndex = 0;
+    int characterVariantIndex = 0;
 
     int weaponCurrentFrame = 0;
+
+    int weaponVariantIndex = 0;
 
     //
 
@@ -174,8 +174,6 @@ public:
         ResetFlags();
 
         isStomping = false;
-
-        isStompingRender = false;
 
         gameObj.UpdateHitboxes();
 

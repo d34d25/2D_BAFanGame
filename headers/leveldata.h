@@ -128,6 +128,7 @@ enum class Character
     MOMOI,
     MIDORI,
     YUZU,
+    YUZU_BATTLE,
     ARIS,
     MOMOI_CHAQUENA
 };
@@ -563,7 +564,9 @@ inline std::vector<SpriteRenderData>* GetPlayerActiveRenderDataList(Character ty
 
     case Character::MIDORI: return &midoriRenderData;
 
-    case Character::YUZU: return &yuzuRenderData;
+    case Character::YUZU:
+    case Character::YUZU_BATTLE:
+        return &yuzuRenderData;
 
     case Character::ARIS: return &arisRenderData;
 
@@ -594,7 +597,9 @@ inline std::vector<SpriteRenderData>* GetPlayerWeaponActiveRenderDataList(Charac
 
     case Character::MIDORI: return &midoriWeaponRenderData;
 
-    case Character::YUZU: return &yuzuWeaponRenderData;
+    case Character::YUZU:
+    case Character::YUZU_BATTLE:
+        return &yuzuWeaponRenderData;
 
     case Character::ARIS: return &arisWeaponRenderData;
 
