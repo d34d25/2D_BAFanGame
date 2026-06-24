@@ -17,8 +17,8 @@ enum class Attacks
 {
     NOTHING,
     STOMP,
-    RUN_N_SHOOT,
-    WIP
+    STOMP_N_SHOT,
+    RUN_N_SHOOT
 };
 
 class Enemy
@@ -28,9 +28,9 @@ private:
 
     void YuukaBehaivour(float dt, Player& player);
 
-    Attacks currentAttack = Attacks::WIP;
+    Attacks currentAttack = Attacks::NOTHING;
 
-    Attacks lastAttack = Attacks::WIP;
+    Attacks lastAttack = Attacks::NOTHING;
 
     //generic timer for being used inside the enemies patterns
     float timer = 0.0f;
@@ -45,7 +45,11 @@ private:
 
     bool alreadyFlipped = false;
 
+    bool lookAtPlayer = false;
+
     float ogDamping = 0.0f;
+
+    BulletProperties ogBulletData = {};
 
 public:
 

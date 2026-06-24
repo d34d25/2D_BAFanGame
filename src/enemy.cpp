@@ -76,26 +76,27 @@ void Enemy::YuukaBehaivour(float dt, Player& player)
 {
     float moveSpeed = 200 * moveSpeedSign;
 
-    //std::cout<<"state timer: "<<stateTimer<<"\n";
-
-    gameObj.body.velocity.x >= 0 ? gameObj.data.flipX = false : gameObj.data.flipX = true;
+    if(!lookAtPlayer) gameObj.body.velocity.x >= 0 ? gameObj.data.flipX = false : gameObj.data.flipX = true;
 
     if(stateTimer <= 0.0f)
     {
         lastAttack = currentAttack;
 
-        //std::cout<<"choosing attack"<<"\n";
-
-        int roll = GetRandomValue(0,100);
+        int roll = GetRandomValue(1,100);
 
         if(roll <= 50) moveSpeedSign = -1;
         else moveSpeedSign = 1;
 
-        if (roll <= 70) currentAttack = Attacks::STOMP;
+        if (roll <= 50) currentAttack = Attacks::STOMP;
+        else if(roll <= 80) currentAttack = Attacks::STOMP_N_SHOT;
         else currentAttack = Attacks::RUN_N_SHOOT;
+
+        //currentAttack = Attacks::STOMP_N_SHOT;
 
         if(lastAttack != currentAttack)
         {
+            lookAtPlayer = false;
+
             timer = maxTime;
 
             gravity = ogGravity;
@@ -110,6 +111,8 @@ void Enemy::YuukaBehaivour(float dt, Player& player)
             isStomping = false;
 
             gameObj.body.damping = ogDamping;
+
+            bulletData = ogBulletData;
         }
     }
 
@@ -192,9 +195,97 @@ void Enemy::YuukaBehaivour(float dt, Player& player)
     }
     break;
 
+    case Attacks::STOMP_N_SHOT:
+    {
+        lookAtPlayer = true;
+
+        bulletData.speed = ogBulletData.speed * 3.0f;
+
+        bulletData.pelletCount = 4;
+
+        bulletData.spread = 6.0f;
+
+        float distanceToPlayerX = gameObj.transform.position.x - player.gameObj.transform.position.x;
+
+        distanceToPlayerX >= 0 ? gameObj.data.flipX = true : gameObj.data.flipX = false;
+
+        gravity = ogGravity * 2.0f;
+
+        gameObj.body.damping = 0.0f;
+
+        moveSpeedSign = 1;
+
+        maxTime = 0.5f;
+
+        if(isGrounded && timer >= maxTime) isJumping = true;
+
+        if((!isGrounded && hitCeiling)) isJumping = false;
+
+        if(isGrounded)
+        {
+            if(justLanded && stunState == StunState::NOT_STUNNED && !isJumping)
+            {
+                if(player.isGrounded)
+                {
+                    player.ApplyStun(maxTime * aiFrameskip);
+
+                    stunState = StunState::STUNNED;
+                }
+                else
+                {
+                    stunState = StunState::DODGED;
+                }
+            }
+
+            gameObj.body.velocity = {0,0};
+
+            if(timer <= maxTime)
+            {
+                timer += dt;
+            }
+        }
+        else
+        {
+            timer = 0.0f;
+
+            stunState = StunState::NOT_STUNNED;
+        }
+       
+        if(isJumping)
+        {
+            isGrounded = false;
+
+            float jump = -1100;
+
+            gameObj.body.velocity.y = jump;
+
+            float rawVelocityX = 200;
+
+            float velocityX = (float)GetRandomValue(-rawVelocityX, rawVelocityX);
+
+            gameObj.body.velocity.x = velocityX;
+
+            isJumping = false;
+        }
+
+        isStomping = isGrounded;
+
+        int shoots = GetRandomValue(1, 100);
+
+        shooting = ((shoots <= 80) && isGrounded && !isJumping);
+
+        if(stateTimer >= 3.0f)
+        {
+            stateTimer = 0.0f;
+        }
+    }
+    break;
+
     case Attacks::RUN_N_SHOOT:
     {
         gameObj.body.velocity.x = moveSpeed;
+
+        bulletData.fireRate = 1.2f;
 
         if(stateTimer >= 0.5f) shooting = true;
         
@@ -223,19 +314,10 @@ void Enemy::YuukaBehaivour(float dt, Player& player)
             alreadyFlipped = false;
         }
 
-        if(stateTimer >= 6.0f)
+        if(stateTimer >= 4.0f)
         {
             stateTimer = 0.0f;
         }
-    }
-    break;
-
-    case Attacks::WIP:
-    {
-        if(stateTimer >= 0.5f)
-        {
-            stateTimer = 0.0f;
-        }   
     }
     break;
 
@@ -318,7 +400,7 @@ void Enemy::InitEnemy(
 
         bulletData.radius = 6.0f;
 
-        bulletData.lifeTime = 2.0f;
+        bulletData.lifeTime = 4.0f;
     }
     break;
     
@@ -347,6 +429,8 @@ void Enemy::InitEnemy(
     aiFrameskip = frameskip;
 
     ogDamping = gameObj.body.damping;
+
+    ogBulletData = bulletData;
 }
 
 void Enemy::UpdateAI(float dt, Player& player)

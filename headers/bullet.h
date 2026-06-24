@@ -18,6 +18,8 @@ struct BulletProperties
     float spread = 0;
     float radius = 2.0f;
 
+    int pelletCount = 1;
+
     bool explodes = false;
     float explosionRadius = 70.0f;
     float explosionLifeTime = 0.5f;
@@ -138,39 +140,41 @@ inline void ShootBullet(
     BulletProperties* bulletData,
     const Vector2& bulletSpawnPos,
     BulletPool* bulletpool,
-    bool condition)
+    bool condition
+)
 {
-    float angle = bulletData->angle;
-
-    float bulletGravity = bulletData->gravity;
-
-    if(gameObj.data.flipX)
-    {
-        angle = 180.0f - angle;
-    }
-
-    if(gameObj.data.flipY)
-    {
-        angle = -angle;
-        bulletGravity = -bulletData->gravity;
-    }
-
-    float radians = GenerateBulletSpread(angle, bulletData->spread) * (PI / 180.0f);
-
-    Vector2 initialVel = {0,0};
-
-    initialVel.x = bulletData->speed * cosf(radians) + gameObj.body.velocity.x;
-    initialVel.y = bulletData->speed * sinf(radians);
-
+    
     if(bulletData->fireTimer > 0.0f) bulletData->fireTimer -= dt;
 
-    if(condition)
+    if(condition && bulletData->fireTimer <= 0.0f)
     {
-        while((bulletData->fireTimer <= 0.0f))
-        {
-            bulletpool->FireBullet(bulletSpawnPos, initialVel, bulletGravity);
+        float angle = bulletData->angle;
 
-            bulletData->fireTimer = bulletData->fireRate;
+        float bulletGravity = bulletData->gravity;
+
+        if(gameObj.data.flipX)
+        {
+            angle = 180.0f - angle;
         }
+
+        if(gameObj.data.flipY)
+        {
+            angle = -angle;
+            bulletGravity = -bulletData->gravity;
+        }
+
+        for(int i = 0; i < bulletData->pelletCount; i++)
+        {
+            float radians = GenerateBulletSpread(angle, bulletData->spread) * (PI / 180.0f);
+
+            Vector2 initialVel = {0,0};
+
+            initialVel.x = bulletData->speed * cosf(radians) + gameObj.body.velocity.x;
+            initialVel.y = bulletData->speed * sinf(radians);
+
+            bulletpool->FireBullet(bulletSpawnPos, initialVel, bulletGravity);
+        }
+
+        bulletData->fireTimer = bulletData->fireRate;
     }
 }
