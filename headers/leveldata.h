@@ -307,9 +307,11 @@ inline TileType GetTileType(const int(&matrixPosition)[3], const Tile(&levelTile
     return GetTileType(matrixPosition[0], matrixPosition[1], matrixPosition[2], levelTiles);
 }
 
-inline TileRange CalculateTileRange(int x, int y, int range, 
+inline TileRange CalculateTileRange(
+    int x, int y, int range, 
     int minX = 0, int minY = 0, 
-    int maxX = COLS - 1, int maxY = ROWS - 1)
+    int maxX = COLS - 1, int maxY = ROWS - 1
+)
 {
     int gridX = x / GRID_SIZE;
     int gridY = y / GRID_SIZE;

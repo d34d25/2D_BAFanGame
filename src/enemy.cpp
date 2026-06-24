@@ -46,7 +46,11 @@ void Enemy::UpdateRender(float dt)
     break;
             
     default:
-        break;
+    {
+        startFrame = 0;
+        endFrame = 0;
+    }
+    break;
     }
 
     if(characterCurrentFrame > endFrame || characterCurrentFrame < startFrame)

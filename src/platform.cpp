@@ -38,7 +38,7 @@ void Platform::InitPlatform(
     type == PlatformType::MOVING_VERTICAL)
     {
         platformWidth = GRID_SIZE * 3.0f;
-        platformHeight = GRID_SIZE * 0.3f;
+        platformHeight = 15;
     }
 
     Hitbox mainHitbox = {

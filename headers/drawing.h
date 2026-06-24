@@ -109,13 +109,13 @@ inline void DrawSprite(
     float offsetY = entityData.flipY ? -renderData->offset.y : renderData->offset.y;
 
     Rectangle destRect = {
-        roundf(transform.position.x + offsetX),
-        roundf(transform.position.y + offsetY),
+        floorf(transform.position.x + offsetX),
+        floorf(transform.position.y + offsetY),
         width,
         height
     };
 
-    Vector2 origin = {width * 0.5f, height * 0.5f};
+    Vector2 origin = {floorf(width * 0.5f), floorf(height * 0.5f)};
 
     DrawTexturePro(
         *renderData->sourceTexture,

@@ -127,7 +127,7 @@ SpriteRenderData LoadRenderData(const char* path, Vector2 frameSize, Vector2 off
 
 void LoadAssets()
 {
-    Vector2 tileSize = {16,16};
+    Vector2 tileSize = {13,13};
 
     //tiles
 
@@ -165,7 +165,7 @@ void LoadAssets()
 
     //platforms
 
-    movingPlatformRenderData_Vertical.push_back(LoadRenderData("assets/platforms/vertical-moving-platform-spritesheet.png", {48,5}, {0,0}, 2));
+    //movingPlatformRenderData_Vertical.push_back(LoadRenderData("assets/platforms/vertical-moving-platform-spritesheet.png", {48,5}, {0,0}, 2));
 
     //enemies
 

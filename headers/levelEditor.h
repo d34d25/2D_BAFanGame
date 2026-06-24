@@ -4,9 +4,6 @@
 #include "platform.h"
 #include <vector>
 
-const int TILES_PER_ROOM_WIDHT = 20;
-const int TILES_PER_ROOM_HEIGHT = 15;
-
 struct IntPair
 {
     int x = 0;

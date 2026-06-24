@@ -16,13 +16,13 @@ const float MAX_DISTANCE_PLATFORM_PLAYER_SQR_5X = MAX_DISTANCE_PLATFORM_PLAYER_S
 
 const float REC_TO_CIRCLE_RADIUS_MULTIPLIER = 1.5f; //this ensures that the circle doesn't cut the corners of the AABB
 
-const float CAMERA_ZOOM = 1.2f;
+const float CAMERA_ZOOM = 1.0f;
 
-const float ENEMY_SPAWN_RADIUS = GRID_SIZE * 15.0f;
+const float ENEMY_SPAWN_RADIUS = GRID_SIZE * TILES_PER_ROOM_WIDHT * 0.5f;
 
-const float ENEMY_DESPAWN_RADIUS = GRID_SIZE * 17.0f;
+const float ENEMY_DESPAWN_RADIUS = GRID_SIZE * (TILES_PER_ROOM_WIDHT * 0.5f + 2.0f);
 
-const float PLATFORM_UPDATE_RADIUS = GRID_SIZE * 25.0f;
+const float PLATFORM_UPDATE_RADIUS = GRID_SIZE * 28.0f;
 
 struct TileRangeLimits
 {
@@ -156,7 +156,7 @@ private:
                 desired.x = Clamp(desired.x, min.x, max.x);
             }
 
-            if(currentRoom.height < (screenHeight/ camera.zoom))
+            if(currentRoom.height < (screenHeight / camera.zoom))
             {
                 desired.y = currentRoom.y + (currentRoom.height * 0.5f);
             }

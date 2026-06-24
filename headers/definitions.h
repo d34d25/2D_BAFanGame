@@ -38,13 +38,17 @@ static constexpr Color ENEMY_DUMMY = Color{217,160,102,255};
 
 static constexpr Color ENEMY_YUUKA = Color{85,56,171,255};
 
-static constexpr int ROWS = 120;
+static constexpr int GRID_SIZE = 39; //48
 
-static constexpr int COLS = 160;
+static constexpr int TILES_PER_ROOM_WIDHT = 28;
+
+static constexpr int TILES_PER_ROOM_HEIGHT = 21;
+
+static constexpr int ROWS = 8 * TILES_PER_ROOM_HEIGHT;
+
+static constexpr int COLS = 8 * TILES_PER_ROOM_WIDHT;
 
 static constexpr int LAYERS = 2;
-
-static constexpr int GRID_SIZE = 48;
 
 static constexpr int TILE_SCALE = 3; //3
 

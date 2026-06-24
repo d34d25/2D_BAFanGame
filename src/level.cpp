@@ -601,7 +601,7 @@ void Level::MediumFrequencyDiscreteUpdate_First()
 
     float playerRadius = player.gameObj.GetMainAABB().height * REC_TO_CIRCLE_RADIUS_MULTIPLIER;
 
-    float renderRadius = GRID_SIZE * 20.0f;
+    float renderRadius = GRID_SIZE * 28.0f;
 
     for(int p = 0; p < platformCache_update.size(); p++)
     {
