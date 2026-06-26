@@ -940,6 +940,38 @@ void Level::HighFrequencyDiscreteUpdate()
                 
                 if(IsOneWayRightLeft(tile)) continue;
 
+                if(tile.type == TileType::LADDER && CheckCollisionRecs(player.GetLadderDetector(), objTile.GetMainAABB()))
+                {
+                    player.inLadder = true;
+                        
+                    player.ladderSnapPosX = tile.gameObj.transform.position.x;
+
+                    bool isEdgeUp = tile.GetNeighborType(NeighborDirection::UP) == TileType::VOID ||
+                    tile.GetNeighborType(NeighborDirection::UP) == TileType::DECO;
+
+                    bool isEdgeDown = tile.GetNeighborType(NeighborDirection::DOWN) == TileType::VOID ||
+                    tile.GetNeighborType(NeighborDirection::DOWN) == TileType::DECO;
+
+                    if((!isGravityUp && isEdgeUp) || (isGravityUp && isEdgeDown))
+                    {
+                        if((IsAbove(player.gameObj.GetMainAABB(), objTile.GetMainAABB(), 1.0f) && !isGravityUp) || 
+                        (IsBelow(player.gameObj.GetMainAABB(), objTile.GetMainAABB(), 1.0f) && isGravityUp))
+                        {
+                            if(!player.movingDown)
+                            {
+                                SolveCollisionsOneWayUpDown(player.gameObj, objTile, true, isGravityUp, true);
+
+                                player.inLadder = false;
+                                isTileJumpTrigger = true;
+                            }
+                        }
+                        else 
+                        {
+                            isTileJumpTrigger = false;
+                        }
+                    }
+                }
+
                 if(CheckCollisionRecs(player.gameObj.GetMainAABB(), objTile.GetMainAABB()))
                 {
                     switch (tile.type)
@@ -982,39 +1014,6 @@ void Level::HighFrequencyDiscreteUpdate()
                             playerInWater = true;
 
                             player.touchingWater = true;
-                        }
-                    }
-                    break;
-
-                    case TileType::LADDER:
-                    {
-                        player.inLadder = true;
-                        
-                        player.ladderSnapPosX = tile.gameObj.transform.position.x;
-
-                        bool isEdgeUp = tile.GetNeighborType(NeighborDirection::UP) == TileType::VOID ||
-                        tile.GetNeighborType(NeighborDirection::UP) == TileType::DECO;
-
-                        bool isEdgeDown = tile.GetNeighborType(NeighborDirection::DOWN) == TileType::VOID ||
-                        tile.GetNeighborType(NeighborDirection::DOWN) == TileType::DECO;
-
-                        if((!isGravityUp && isEdgeUp) || (isGravityUp && isEdgeDown))
-                        {
-                            if((IsAbove(player.gameObj.GetMainAABB(), objTile.GetMainAABB(), 1.0f) && !isGravityUp) || 
-                            (IsBelow(player.gameObj.GetMainAABB(), objTile.GetMainAABB(), 1.0f) && isGravityUp))
-                            {
-                                if(!player.movingDown)
-                                {
-                                    SolveCollisionsOneWayUpDown(player.gameObj, objTile, true, isGravityUp, true);
-
-                                    player.inLadder = false;
-                                    isTileJumpTrigger = true;
-                                }
-                            }
-                            else 
-                            {
-                                isTileJumpTrigger = false;
-                            }
                         }
                     }
                     break;
@@ -1631,7 +1630,7 @@ void Level::DrawLevel()
         WHITE
     );
 
-    DebugTextDrawing();
+    //DebugTextDrawing();
 }
 
 void Level::DebugDrawing()
@@ -1755,6 +1754,7 @@ void Level::DebugDrawing()
     DrawAABB(player.GetJumpDetector(), MAGENTA);
     DrawAABB(player.GetTreadmillDetector(), GREEN, 0.5f);
     DrawAABB(player.GetCeilingDetector(), RED);
+    DrawAABB(player.GetLadderDetector(), SKYBLUE);
 }
 
 void Level::DebugTextDrawing()

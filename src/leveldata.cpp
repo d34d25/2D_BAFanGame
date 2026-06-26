@@ -1,6 +1,7 @@
 #include "leveldata.h"
 
 #include <map>
+
 #include <string>
 
 static std::map<std::string, Texture2D> textureCache = {};
@@ -127,13 +128,13 @@ SpriteRenderData LoadRenderData(const char* path, Vector2 frameSize, Vector2 off
 
 void LoadAssets()
 {
-    Vector2 tileSize = {13,13};
+    Vector2 tileSize = {12,12};
 
     //tiles
 
     solidTilesRenderData.push_back(LoadRenderData("assets/tiles/solid/solid-tiles-spritesheet.png", tileSize));
 
-    solidTilesRenderData.push_back(LoadRenderData("assets/tiles/solid/solid-tiles-spritesheet-b.png", tileSize));
+    //solidTilesRenderData.push_back(LoadRenderData("assets/tiles/solid/solid-tiles-spritesheet-b.png", tileSize));
 
     //spikes
 
@@ -151,17 +152,43 @@ void LoadAssets()
 
     //decoration
 
-    decoRenderData.push_back(LoadRenderData("assets/tiles/deco/deco-spritesheet-1.png", {14,16}, {0,0},2, 0, 0, 2.0f));
-    decoRenderData.push_back(LoadRenderData("assets/tiles/deco/deco-spritesheet-2.png", {14,16}));
-    decoRenderData.push_back(LoadRenderData("assets/tiles/deco/deco-spritesheet-3.png", {35,29}));
+    decoRenderData.push_back(
+        LoadRenderData(
+            "assets/tiles/deco/deco-spritesheet-1.png",
+            {14,16},
+            {0,0},
+            2, 0, 0,
+            2.0f
+        ));
+
+    decoRenderData.push_back(LoadRenderData(
+        "assets/tiles/deco/deco-spritesheet-2.png",
+        {14,16}
+    ));
+
+    //gdd cat
+    decoRenderData.push_back(LoadRenderData(
+        "assets/tiles/deco/deco-spritesheet-3.png",
+        {35,29}
+    ));
 
     //wind tiles
 
-    windRenderData.push_back(LoadRenderData("assets/tiles/wind-up.png", {16,16},{0,0},3));
+    windRenderData.push_back(LoadRenderData(
+        "assets/tiles/wind-up.png", 
+        tileSize,
+        {0,0},
+        3
+    ));
 
     //water
 
-    waterRenderData.push_back(LoadRenderData("assets/tiles/water.png", {16,16}, {0,0}, 3));
+    waterRenderData.push_back(LoadRenderData(
+        "assets/tiles/water.png",
+        tileSize,
+        {0,0},
+        3
+    ));
 
     //platforms
 
@@ -171,18 +198,28 @@ void LoadAssets()
 
     dummyRenderData.push_back(LoadRenderData("assets/enemies/chibi-dummy.png", {8,12}));
     
-    yuukaRenderData.push_back(LoadRenderData("assets/enemies/yuuka-sprtiesheet.png", {20,22}, {-4,-4}, 1, 0, 0, 10.0f));
+    yuukaRenderData.push_back(LoadRenderData(
+        "assets/enemies/yuuka-new-sprtiesheet.png",
+        {22,22},
+        {-6,-8},
+        1, 0, 0,
+        10.0f
+    ));
 
     //enemies' weapons
 
-    yuukaWeaponRenderData.push_back(LoadRenderData("assets/enemies/yuuka-weapon-holo.png", {10,4}, {39,7}));
+    yuukaWeaponRenderData.push_back(LoadRenderData(
+        "assets/enemies/yuuka-weapon-holo.png",
+        {10,4},
+        {50,7}
+    ));
 
     //player
 
     momoiRenderData.push_back(LoadRenderData(
-        "assets/characters/momoi-spritesheet-b.png",
-        {14.0f, 24.0f},
-        {0.0f, -7.0f},
+        "assets/characters/momoi-new-spritesheet.png",
+        {13.0f, 24.0f},
+        {0.0f, -11.0f},
         1,0,0, 
         10.0f
     ));
@@ -196,33 +233,33 @@ void LoadAssets()
     ));
 
     midoriRenderData.push_back(LoadRenderData(
-        "assets/characters/midori-spritesheet.png",
-        {14.0f, 24.0f},
-        {0.0f, -7.0f},
+        "assets/characters/midori-new-spritesheet.png",
+        {13.0f, 24.0f},
+        {0.0f, -11.0f},
+        1,0,0, 
+        10.0f
+    ));
+
+    yuzuRenderData.push_back(LoadRenderData(
+        "assets/characters/yuzu-new-spritesheet.png",
+        {17.0f, 21.0f},
+        {-8.0f, -5.0f},
         1, 0, 0,
         10.0f
     ));
 
     yuzuRenderData.push_back(LoadRenderData(
-        "assets/characters/yuzu-spritesheet.png",
-        {21.0f, 22.0f},
-        {-4.0f, -4.0f},
-        1, 0, 0,
-        10.0f
-    ));
-
-    yuzuRenderData.push_back(LoadRenderData(
-        "assets/characters/yuzu-battle-spritesheet.png",
-        {18.0f, 24.0f},
-        {-6.0f, -8.0f},
+        "assets/characters/yuzu-battle-new-spritesheet.png",
+        {17.0f, 24.0f},
+        {-8.0f, -12.0f},
         1, 0, 0,
         10.0f
     ));
 
     arisRenderData.push_back(LoadRenderData(
-        "assets/characters/aris-spritesheet.png",
-        {17.0f, 21.0f},
-        {0.0f, -3.0f},
+        "assets/characters/aris-new-spritesheet.png",
+        {16.0f, 21.0f},
+        {-6.0f, -6.0f},
         1, 0, 0,
         10.0f
     ));
@@ -232,7 +269,7 @@ void LoadAssets()
     momoiWeaponRenderData.push_back(LoadRenderData(
         "assets/characters/momoi-weapon-holo.png",
         {10.0f, 5.0f},
-        {39.0f, 7.0f}
+        {50.0f, 7.0f}
     ));
 
     momoiWeaponRenderData.push_back(LoadRenderData(
@@ -244,19 +281,19 @@ void LoadAssets()
     midoriWeaponRenderData.push_back(LoadRenderData(
         "assets/characters/midori-weapon-holo.png",
         {11.0f, 5.0f},
-        {42.0f, 7.0f}
+        {52.0f, 7.0f}
     ));
 
     yuzuWeaponRenderData.push_back(LoadRenderData(
         "assets/characters/yuzu-weapon-holo.png",
         {10.0f, 5.0f},
-        {42.0f, 7.0f}
+        {52.0f, 7.0f}
     ));
 
     arisWeaponRenderData.push_back(LoadRenderData(
         "assets/characters/aris-weapon-holo.png",
         {15.0f, 4.0f},
-        {51.0f, 7.0f}
+        {60.0f, 7.0f}
     ));
 }
 

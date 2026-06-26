@@ -136,6 +136,11 @@ public:
         return gameObj.GetSubAABB(3);
     }
 
+    inline Rectangle& GetLadderDetector()
+    {
+        return gameObj.GetSubAABB(4);
+    }
+
     inline void ResetInput()
     {
         movingLeft = false;

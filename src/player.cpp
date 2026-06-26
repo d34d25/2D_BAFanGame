@@ -14,16 +14,19 @@ void Player::InitPlayer(Vector2 position, float gravity, bool flipY)
 
     gameObj.body.hasGravity = true;
 
-    gameObj.hitboxes.push_back(Hitbox{{0,0}, {25,56}}); //20, 46
+    gameObj.hitboxes.push_back(Hitbox{{0,0}, {28,70}}); //20, 46 //25, 56
 
     //jump detector
-    gameObj.AddSubHitbox({0,23}, {gameObj.GetMainAABB().width * 0.9f, gameObj.GetMainAABB().height * 0.25f});
+    gameObj.AddSubHitbox({0,27}, {gameObj.GetMainAABB().width * 0.9f, gameObj.GetMainAABB().height * 0.25f});
 
     //for treadmills only
-    gameObj.AddSubHitbox({0,23}, {gameObj.GetMainAABB().width, gameObj.GetMainAABB().height * 0.25f});
+    gameObj.AddSubHitbox({0,27}, {gameObj.GetMainAABB().width, gameObj.GetMainAABB().height * 0.25f});
 
     //ceiling detector
-    gameObj.AddSubHitbox({0,-23}, {gameObj.GetMainAABB().width * 0.9f, gameObj.GetMainAABB().height * 0.25f});
+    gameObj.AddSubHitbox({0,-27}, {gameObj.GetMainAABB().width * 0.9f, gameObj.GetMainAABB().height * 0.25f});
+
+    //ladder detector
+    gameObj.AddSubHitbox({0,0}, {gameObj.GetMainAABB().width * 0.25f, gameObj.GetMainAABB().height});
 
     gameObj.UpdateHitboxes();
 
@@ -32,7 +35,7 @@ void Player::InitPlayer(Vector2 position, float gravity, bool flipY)
     bulletData.fireTimer = 0.0f;
     bulletData.speed = 500;
 
-    bulletData.lifeTime = 2.0f;//2.0f
+    bulletData.lifeTime = 2.0f;
 
     bulletData.explodes = false;
     bulletData.piercing = false;
@@ -161,10 +164,14 @@ void Player::UpdateInput()
     //press
 
     if(IsKeyPressed(KEY_Z)) jumpingOffLadder = true;
-
+   
     if(IsKeyPressed(KEY_R)) resetingLevel = true;
 
-    if(IsKeyPressed(KEY_R) && IsKeyDown(KEY_LEFT_SHIFT)) resetingZoom = true;
+    if(IsKeyPressed(KEY_R) && IsKeyDown(KEY_LEFT_SHIFT))
+    {
+        resetingLevel = false;
+        resetingZoom = true;
+    } 
 }
 
 void Player::UpdateRender(float dt)
@@ -198,7 +205,7 @@ void Player::UpdateRender(float dt)
         startFrame = 5;
         endFrame = 6;
 
-        if(character == Character::YUZU_BATTLE) characterRenderData->offset.x = 0;
+        if(character == Character::YUZU_BATTLE) characterRenderData->offset.x += 2;
     }
     else if(!isGrounded)
     {

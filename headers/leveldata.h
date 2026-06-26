@@ -175,7 +175,7 @@ struct TileTypeList
 const std::vector<TileTypeList> TILE_TYPE_LIST = {
     {TileType::VOID, BLANK, "BLANK"},
 
-    {TileType::SOLID, BLACK, "SOLID"},
+    {TileType::SOLID, PINK, "SOLID"},
 
     {TileType::GOAL, GOAL, "GOAL"},
 

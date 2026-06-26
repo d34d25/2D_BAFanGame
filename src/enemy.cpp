@@ -91,7 +91,7 @@ void Enemy::YuukaBehaivour(float dt, Player& player)
         else if(roll <= 80) currentAttack = Attacks::STOMP_N_SHOT;
         else currentAttack = Attacks::RUN_N_SHOOT;
 
-        //currentAttack = Attacks::STOMP_N_SHOT;
+        //currentAttack = Attacks::NOTHING;
 
         if(lastAttack != currentAttack)
         {
@@ -255,7 +255,7 @@ void Enemy::YuukaBehaivour(float dt, Player& player)
         {
             isGrounded = false;
 
-            float jump = -1100;
+            float jump = -1200;
 
             gameObj.body.velocity.y = jump;
 
@@ -369,7 +369,7 @@ void Enemy::InitEnemy(
 
     Hitbox mainHitbox = {
         {0,0},
-        {25,56}
+        {28,70}
     };
 
     Vector2 weaponOffset = {0,0};
@@ -410,9 +410,11 @@ void Enemy::InitEnemy(
 
     gameObj.hitboxes.push_back(mainHitbox);
 
-    gameObj.AddSubHitbox({0,23}, {gameObj.GetMainAABB().width * 0.9f, gameObj.GetMainAABB().height * 0.25f});
+    //jump detector
+    gameObj.AddSubHitbox({0,27}, {gameObj.GetMainAABB().width * 0.9f, gameObj.GetMainAABB().height * 0.25f});
 
-    gameObj.AddSubHitbox({0,-23}, {gameObj.GetMainAABB().width * 0.9f, gameObj.GetMainAABB().height * 0.25f});
+    //ceiling detector
+    gameObj.AddSubHitbox({0,-27}, {gameObj.GetMainAABB().width * 0.9f, gameObj.GetMainAABB().height * 0.25f});
 
     spawnPosition = spawnPos;
 

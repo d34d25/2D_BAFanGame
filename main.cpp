@@ -15,8 +15,8 @@ int main()
     const int SCREEN_WIDTH = 1600;
     const int SCREEN_HEIGHT = 900;
 
-    const int CANVAS_WIDTH = 1092;
-    const int CANVAS_HEIGHT = 819;
+    const int CANVAS_WIDTH = 960;
+    const int CANVAS_HEIGHT = 720;
 
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "");
 
