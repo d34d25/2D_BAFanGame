@@ -15,8 +15,18 @@ int main()
     const int SCREEN_WIDTH = 1600;
     const int SCREEN_HEIGHT = 900;
 
-    const int CANVAS_WIDTH = 960;
-    const int CANVAS_HEIGHT = 720;
+    const int UI_CANVAS_HEIGHT = GRID_SIZE * 4;
+
+    int canvasScale = 6;
+
+    const int GAMEPLAY_CANVAS_WIDTH = (160 + 32) * canvasScale;
+
+    const int UI_CANVAS_WIDTH = GAMEPLAY_CANVAS_WIDTH;
+
+    const int GAMEPLAY_CANVAS_HEIGHT = 144 * canvasScale;
+
+    int totalCanvasWidth = GAMEPLAY_CANVAS_WIDTH;
+    int totalCanvasHeight = GAMEPLAY_CANVAS_HEIGHT + UI_CANVAS_HEIGHT;
 
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "");
 
@@ -25,13 +35,15 @@ int main()
     float accumulator = 0.0f;
     float fixedDt = 1.0f / 60.0f;
 
-    RenderTexture2D canvas = LoadRenderTexture(CANVAS_WIDTH, CANVAS_HEIGHT);
+    RenderTexture2D gameplayCanvas = LoadRenderTexture(GAMEPLAY_CANVAS_WIDTH, GAMEPLAY_CANVAS_HEIGHT);
 
-    SetTextureFilter(canvas.texture, TEXTURE_FILTER_POINT);
+    RenderTexture2D uiCanvas = LoadRenderTexture(UI_CANVAS_WIDTH, UI_CANVAS_HEIGHT);
+
+    SetTextureFilter(gameplayCanvas.texture, TEXTURE_FILTER_POINT);
 
     std::unique_ptr testLevel = std::make_unique<Level>();
 
-    std::unique_ptr editor = std::make_unique<LevelEditor>(CANVAS_WIDTH,CANVAS_HEIGHT, "levels/testLevel", "levels/testRooms");
+    std::unique_ptr editor = std::make_unique<LevelEditor>(GAMEPLAY_CANVAS_WIDTH,GAMEPLAY_CANVAS_HEIGHT, "levels/testLevel", "levels/testRooms");
 
     int iterations = 10;
 
@@ -48,10 +60,11 @@ int main()
         return 0;
     }
 
-    testLevel->screenWidth = CANVAS_WIDTH;
-    testLevel->screenHeight = CANVAS_HEIGHT;
+    testLevel->totalCanvasWidth = totalCanvasWidth;
+    testLevel->totalCanvasHeight = totalCanvasHeight;
 
-    testLevel->canvas = canvas;
+    testLevel->gameplayCanvas = gameplayCanvas;
+    testLevel->uiCanvas = uiCanvas;
 
     bool editorMode = false;
 
@@ -118,7 +131,7 @@ int main()
         if(!editorMode) testLevel->DrawLevel();
         else
         {
-            ClearBackground(LIGHTGRAY);
+            ClearBackground(GBC_GRAY);
             editor->Draw();
         }
 
@@ -201,9 +214,14 @@ int main()
 
     std::cout<<"\n";
 
-    UnloadRenderTexture(canvas);
+    UnloadRenderTexture(gameplayCanvas);
 
     CloseWindow();
+
+    std::cout<<"width: "<<totalCanvasWidth<<"\n";
+    std::cout<<"height: "<<totalCanvasHeight<<"\n";
+
+    std::cout<<"aspect ratio: "<<(float)((float)totalCanvasWidth / (float)totalCanvasHeight)<<"\n";
 
     std::cout<<std::endl;
     

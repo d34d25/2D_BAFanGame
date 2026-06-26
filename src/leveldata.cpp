@@ -168,7 +168,7 @@ void LoadAssets()
 
     //gdd cat
     decoRenderData.push_back(LoadRenderData(
-        "assets/tiles/deco/deco-spritesheet-3.png",
+        "assets/tiles/deco/gdd-cat-gbc.png",
         {35,29}
     ));
 
@@ -249,7 +249,7 @@ void LoadAssets()
     ));
 
     yuzuRenderData.push_back(LoadRenderData(
-        "assets/characters/yuzu-battle-new-spritesheet.png",
+        "assets/characters/yuzu-battle-gbc-spritesheet.png",
         {17.0f, 24.0f},
         {-8.0f, -12.0f},
         1, 0, 0,

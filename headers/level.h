@@ -113,6 +113,9 @@ private:
     //camera
     inline void UpdateCamera(const Vector2& target, const Vector2& offset)
     {
+        int canvasWidth = gameplayCanvas.texture.width;
+        int canvasHeight = gameplayCanvas.texture.height;
+
         int roomIndex = -1;
 
         Rectangle currentRoom = {};
@@ -133,8 +136,8 @@ private:
         if(roomIndex > -1)
         {
             Vector2 halfScreenWorld = {
-                (screenWidth * 0.5f) / camera.zoom,
-                (screenHeight * 0.5f) / camera.zoom
+                (canvasWidth * 0.5f) / camera.zoom,
+                (canvasHeight * 0.5f) / camera.zoom
             };
 
             Vector2 min = {
@@ -147,7 +150,7 @@ private:
                 (currentRoom.y + currentRoom.height) - halfScreenWorld.y
             };
 
-            if(currentRoom.width < (screenWidth / camera.zoom))
+            if(currentRoom.width < (canvasWidth / camera.zoom))
             {
                 desired.x = currentRoom.x + (currentRoom.width * 0.5f);
             }
@@ -156,7 +159,7 @@ private:
                 desired.x = Clamp(desired.x, min.x, max.x);
             }
 
-            if(currentRoom.height < (screenHeight / camera.zoom))
+            if(currentRoom.height < (canvasHeight / camera.zoom))
             {
                 desired.y = currentRoom.y + (currentRoom.height * 0.5f);
             }
@@ -167,9 +170,6 @@ private:
             
         }
 
-        //commented out
-        //camera.target = Vector2Lerp(camera.target, desired, 0.1f);
-
         camera.target.x = desired.x;
         camera.target.y = desired.y;
 
@@ -178,7 +178,7 @@ private:
         camera.target.x = floorf(camera.target.x * zoom) / zoom;
         camera.target.y = floorf(camera.target.y * zoom) / zoom;
 
-        camera.offset = {floorf(screenWidth * 0.5f), floorf(screenHeight * 0.5f)};
+        camera.offset = {floorf(canvasWidth * 0.5f), floorf(canvasHeight * 0.5f)};
 
         int mouseWheel = GetMouseWheelMove();
 
@@ -334,9 +334,11 @@ private:
 
 public:
 
-    int screenWidth, screenHeight;
+    int totalCanvasWidth, totalCanvasHeight;
 
-    RenderTexture2D canvas = {};
+    RenderTexture2D gameplayCanvas = {};
+
+    RenderTexture2D uiCanvas = {};
 
     Level() = default;
 

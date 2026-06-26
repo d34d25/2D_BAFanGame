@@ -40,9 +40,9 @@ static constexpr Color ENEMY_YUUKA = Color{85,56,171,255};
 
 static constexpr int GRID_SIZE = 48;
 
-static constexpr int TILES_PER_ROOM_WIDHT = 20;
+static constexpr int TILES_PER_ROOM_WIDHT = 24;
 
-static constexpr int TILES_PER_ROOM_HEIGHT = 15;
+static constexpr int TILES_PER_ROOM_HEIGHT = 18; //15
 
 static constexpr int ROWS = 8 * TILES_PER_ROOM_HEIGHT;
 
@@ -64,3 +64,5 @@ const float GRAVITY = 3500.0f;
 
 //static constexpr Color ONE_WAY_LEFT = Color{0, 230,160,255};
 
+
+static constexpr Color GBC_GRAY = Color{148,148,148,255};

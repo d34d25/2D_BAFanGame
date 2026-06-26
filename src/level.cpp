@@ -1443,9 +1443,9 @@ void Level::DrawLevel()
 {
     double currentTime = GetTime();
 
-    BeginTextureMode(canvas);
+    BeginTextureMode(gameplayCanvas);
 
-    ClearBackground(LIGHTGRAY);
+    ClearBackground(GBC_GRAY);
 
     BeginMode2D(camera);
     
@@ -1607,24 +1607,62 @@ void Level::DrawLevel()
 
     EndTextureMode();
 
+    BeginTextureMode(uiCanvas);
+
+    ClearBackground(WHITE);
+
+    DrawText("SAMPLE UI TEXT", uiCanvas.texture.width * 0.25f ,uiCanvas.texture.height * 0.5f, 48, BLACK);
+
+    EndTextureMode();
+
     ClearBackground(BLACK);
 
-    float scale = fminf((float)GetScreenWidth() / screenWidth, 
-    (float)GetScreenHeight() / screenHeight);
+    float scale = fminf((float)GetScreenWidth() / totalCanvasWidth, 
+    (float)GetScreenHeight() / totalCanvasHeight);
 
-    Rectangle sourceRec = {0,0, (float)canvas.texture.width, (float)-canvas.texture.height};
+    float offsetX = ((float)GetScreenWidth() - ((float)totalCanvasWidth * scale)) * 0.5f;
+    float offsetY = ((float)GetScreenHeight() - ((float)totalCanvasHeight * scale)) * 0.5f;
 
-    Rectangle destRec = {
-        ((float)GetScreenWidth() - ((float)screenWidth * scale)) * 0.5f,
-        ((float)GetScreenHeight() - ((float)screenHeight * scale)) * 0.5f,
-        (float)screenWidth * scale,
-        (float)screenHeight * scale
+    Rectangle sourceGameplayRec = {
+        0,
+        0, 
+        (float)gameplayCanvas.texture.width, 
+        (float)-gameplayCanvas.texture.height
+    };
+
+    Rectangle destGameplayRec = {
+        offsetX,
+        offsetY,
+        gameplayCanvas.texture.width * scale,
+        gameplayCanvas.texture.height * scale
+    };
+
+    Rectangle sourceUiRec = {
+        0,0,
+        (float)uiCanvas.texture.width,
+        (float)-uiCanvas.texture.height
+    };
+
+    Rectangle destUiRec = {
+        offsetX,
+        offsetY + (gameplayCanvas.texture.height * scale),
+        uiCanvas.texture.width * scale,
+        uiCanvas.texture.height * scale
     };
 
     DrawTexturePro(
-        canvas.texture,
-        sourceRec,
-        destRec,
+        gameplayCanvas.texture,
+        sourceGameplayRec,
+        destGameplayRec,
+        {0,0},
+        0.0f,
+        WHITE
+    );
+
+    DrawTexturePro(
+        uiCanvas.texture,
+        sourceUiRec,
+        destUiRec,
         {0,0},
         0.0f,
         WHITE
