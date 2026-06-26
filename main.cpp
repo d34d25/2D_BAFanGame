@@ -41,6 +41,8 @@ int main()
 
     SetTextureFilter(gameplayCanvas.texture, TEXTURE_FILTER_POINT);
 
+    SetTextureFilter(uiCanvas.texture, TEXTURE_FILTER_POINT);
+
     std::unique_ptr testLevel = std::make_unique<Level>();
 
     std::unique_ptr editor = std::make_unique<LevelEditor>(GAMEPLAY_CANVAS_WIDTH,GAMEPLAY_CANVAS_HEIGHT, "levels/testLevel", "levels/testRooms");
@@ -215,6 +217,8 @@ int main()
     std::cout<<"\n";
 
     UnloadRenderTexture(gameplayCanvas);
+
+    UnloadRenderTexture(uiCanvas);
 
     CloseWindow();
 
