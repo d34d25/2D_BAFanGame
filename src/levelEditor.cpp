@@ -241,19 +241,26 @@ void LevelEditor::Update()
         }
 
         //variant cycling
-        if(mouseWheel != 0 && IsKeyDown(KEY_SPACE))
+        if(activeRenderDataList && !activeRenderDataList->empty())
         {
-            std::vector<SpriteRenderData>* activeRenderDataList = GetTileActiveRenderDataList((TileType)currentTileType);
-
-            if(activeRenderDataList)
+            if(mouseWheel != 0 && IsKeyDown(KEY_SPACE))
             {
-                int direction = (mouseWheel > 0) ? 1 : -1;
+                std::vector<SpriteRenderData>* activeRenderDataList = GetTileActiveRenderDataList((TileType)currentTileType);
 
-                currentVariant += direction;
+                if(activeRenderDataList)
+                {
+                    int direction = (mouseWheel > 0) ? 1 : -1;
 
-                if(currentVariant < 0) currentVariant = 0;
-                else if(currentVariant >= activeRenderDataList->size()) currentVariant = activeRenderDataList->size() - 1;
+                    currentVariant += direction;
+
+                    if(currentVariant < 0) currentVariant = 0;
+                    else if(currentVariant >= activeRenderDataList->size()) currentVariant = activeRenderDataList->size() - 1;
+                }
             }
+        }
+        else
+        {
+            currentVariant = 0;
         }
 
         bool reactiveAnimations = HasReactiveAnimations((TileType)currentTileType);

@@ -19,11 +19,13 @@ std::vector<SpriteRenderData> ladderRenderData = {};
 
 //spikes
 
-std::vector<SpriteRenderData> spikesRenderData = {};
+std::vector<SpriteRenderData> spikeRenderData = {};
 
-std::vector<SpriteRenderData> spikesDobuleRenderData = {};
+std::vector<SpriteRenderData> spikeDobuleRenderData = {};
 
-std::vector<SpriteRenderData> spikesSmallRenderData = {};
+std::vector<SpriteRenderData> spikeSmallRenderData = {};
+
+std::vector<SpriteRenderData> spikeBallRenderData = {};
 
 //wind tiles
 
@@ -123,13 +125,9 @@ SpriteRenderData LoadRenderData(const char* path, Vector2 frameSize, Vector2 off
 
     if(!allFrames.empty() && atlasStartFrame < atlasEndFrame)
     {
-        int fix = 0;
-
-        if(spacing > 1) fix = 1;
-
         renderData.animationFrames.assign(
             allFrames.begin() + atlasStartFrame,
-            allFrames.begin() + atlasEndFrame + fix
+            allFrames.begin() + atlasEndFrame
         );
     }
 
@@ -137,6 +135,17 @@ SpriteRenderData LoadRenderData(const char* path, Vector2 frameSize, Vector2 off
 
     return renderData;
 }
+
+/*
+end - start = quantity of frames
+start atlas frame inclusive, 0 based offset
+end atlas frame is exclusive, is the total count boundary
+for consecutive blocks the end index of the previous
+is the start of the next
+
+start atlas frame is the left side of the sprite
+end atlas frame is the right side
+*/
 
 void LoadAssets()
 {
@@ -151,109 +160,12 @@ void LoadAssets()
 
     solidTilesRenderData.push_back(LoadRenderData(
         "assets/tiles/solid/animated-tiles-a.png",
-        tileSize, {0,0}, 14,
-        0, 97
+        tileSize, {0,0}, 
+        14,
+        0, 140
     ));
 
     ladderRenderData.push_back(LoadRenderData("assets/tiles/ladder.png", tileSize));
-
-    //columns
-
-    solidTilesRenderData.push_back(LoadRenderData(
-        "assets/tiles/solid/columns.png",
-        tileSize, {0,0}, 1,
-        0, 4
-    ));
-
-    solidTilesRenderData.push_back(LoadRenderData(
-        "assets/tiles/solid/columns.png",
-        tileSize, {0,0}, 1,
-        4, 8
-    ));
-
-    solidTilesRenderData.push_back(LoadRenderData(
-        "assets/tiles/solid/columns.png",
-        tileSize, {0,0}, 1,
-        8, 12
-    ));
-
-    solidTilesRenderData.push_back(LoadRenderData(
-        "assets/tiles/solid/columns.png",
-        tileSize, {0,0}, 1,
-        12, 16
-    ));
-
-    solidTilesRenderData.push_back(LoadRenderData(
-        "assets/tiles/solid/columns.png",
-        tileSize, {0,0}, 1,
-        16, 20
-    ));
-
-    solidTilesRenderData.push_back(LoadRenderData(
-        "assets/tiles/solid/columns.png",
-        tileSize, {0,0}, 1,
-        20, 24
-    ));
-
-    solidTilesRenderData.push_back(LoadRenderData(
-        "assets/tiles/solid/columns.png",
-        tileSize, {0,0}, 1,
-        24, 28
-    ));
-
-    solidTilesRenderData.push_back(LoadRenderData(
-        "assets/tiles/solid/columns.png",
-        tileSize, {0,0}, 1,
-        32, 36
-    ));
-
-    solidTilesRenderData.push_back(LoadRenderData(
-        "assets/tiles/solid/columns.png",
-        tileSize, {0,0}, 1,
-        36, 40
-    ));
-
-    solidTilesRenderData.push_back(LoadRenderData(
-        "assets/tiles/solid/columns.png",
-        tileSize, {0,0}, 1,
-        40, 44
-    ));
-
-    solidTilesRenderData.push_back(LoadRenderData(
-        "assets/tiles/solid/columns.png",
-        tileSize, {0,0}, 1,
-        44, 48
-    ));
-
-    solidTilesRenderData.push_back(LoadRenderData(
-        "assets/tiles/solid/columns.png",
-        tileSize, {0,0}, 1,
-        52, 56
-    ));
-
-    solidTilesRenderData.push_back(LoadRenderData(
-        "assets/tiles/solid/columns.png",
-        tileSize, {0,0}, 1,
-        56, 60
-    ));
-
-    solidTilesRenderData.push_back(LoadRenderData(
-        "assets/tiles/solid/columns.png",
-        tileSize, {0,0}, 1,
-        60, 64
-    ));
-
-    solidTilesRenderData.push_back(LoadRenderData(
-        "assets/tiles/solid/columns.png",
-        tileSize, {0,0}, 1,
-        64, 68
-    ));
-
-    solidTilesRenderData.push_back(LoadRenderData(
-        "assets/tiles/solid/columns.png",
-        tileSize, {0,0}, 1,
-        68, 72
-    ));
 
     //panels
 
@@ -268,32 +180,43 @@ void LoadAssets()
 
     //spikes
 
-    spikesRenderData.push_back(LoadRenderData("assets/tiles/spike-sprite-sheet.png", tileSize));
+    spikeRenderData.push_back(LoadRenderData(
+        "assets/tiles/spikes.png", 
+        tileSize, {0,0},
+        1,
+        0,1
+    ));
 
-    spikesDobuleRenderData.push_back(LoadRenderData("assets/tiles/spike-double-sprite-sheet.png", tileSize));
+    spikeSmallRenderData.push_back(LoadRenderData(
+        "assets/tiles/spikes.png", 
+        tileSize, {0,0},
+        1,
+        1,2
+    ));
 
-    spikesSmallRenderData.push_back(LoadRenderData("assets/tiles/spike-small-sprite-sheet.png", tileSize));
+    spikeDobuleRenderData.push_back(LoadRenderData(
+        "assets/tiles/spikes.png", 
+        tileSize, {0,0},
+        1,
+        2,3
+    ));
+
+    spikeBallRenderData.push_back(LoadRenderData(
+        "assets/tiles/spikes.png", 
+        tileSize, {0,0},
+        1,
+        3,4
+    ));
 
     //treadmills
 
-    treadmillRenderData_Right.push_back(LoadRenderData("assets/tiles/treadmill-spritesheet.png", tileSize, {0,0} ,2, 0, 6));
-
-    treadmillRenderData_Left.push_back(LoadRenderData("assets/tiles/treadmill-spritesheet.png", tileSize, {0,0}, 2, 6, 12));
-
     //decoration
 
-    decoRenderData.push_back(
-        LoadRenderData(
-            "assets/tiles/deco/deco-spritesheet-1.png",
-            {14,16},
-            {0,0},
-            2, 0, 0,
-            2.0f
-        ));
-
     decoRenderData.push_back(LoadRenderData(
-        "assets/tiles/deco/deco-spritesheet-2.png",
-        {14,16}
+        "assets/tiles/deco/shadows.png",
+        tileSize,{0,0},
+        1,
+        0,4
     ));
 
     //gdd cat
@@ -453,23 +376,17 @@ void UnloadAssets()
     //tiles
     CleanUp(solidTilesRenderData);
 
-    CleanUp(treadmillRenderData_Left);
-
-    CleanUp(treadmillRenderData_Right);
-
     CleanUp(decoRenderData);
 
     //spikes
 
-    CleanUp(spikesRenderData);
+    CleanUp(spikeRenderData);
 
-    CleanUp(spikesDobuleRenderData);
+    CleanUp(spikeDobuleRenderData);
 
-    CleanUp(spikesSmallRenderData);
+    CleanUp(spikeSmallRenderData);
 
     //platforms
-
-    CleanUp(movingPlatformRenderData_Vertical);
 
     CleanUp(windRenderData);
 

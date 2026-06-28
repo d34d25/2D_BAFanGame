@@ -375,11 +375,13 @@ extern std::vector<SpriteRenderData> ladderRenderData;
 
 //spikes
 
-extern std::vector<SpriteRenderData> spikesRenderData;
+extern std::vector<SpriteRenderData> spikeRenderData;
 
-extern std::vector<SpriteRenderData> spikesDobuleRenderData;
+extern std::vector<SpriteRenderData> spikeDobuleRenderData;
 
-extern std::vector<SpriteRenderData> spikesSmallRenderData;
+extern std::vector<SpriteRenderData> spikeSmallRenderData;
+
+extern std::vector<SpriteRenderData> spikeBallRenderData;
 
 
 //wind tiles
@@ -447,11 +449,13 @@ inline std::vector<SpriteRenderData>* GetTileActiveRenderDataList(TileType type)
 
     //spikes
 
-    case TileType::SPIKE: return &spikesRenderData;
+    case TileType::SPIKE: return &spikeRenderData;
 
-    case TileType::SPIKE_DOUBLE: return &spikesDobuleRenderData;
+    case TileType::SPIKE_DOUBLE: return &spikeDobuleRenderData;
 
-    case TileType::SPIKE_SMALL: return &spikesSmallRenderData;
+    case TileType::SPIKE_SMALL: return &spikeSmallRenderData;
+
+    case TileType::SPIKE_BALL: return &spikeBallRenderData;
 
     //deco
 

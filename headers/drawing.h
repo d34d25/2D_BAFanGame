@@ -61,9 +61,17 @@ inline int GetCurrentFrame(const std::vector<Rectangle>& frames, const int index
 
     int frameCount = (spacing <= 0) ? (int)frames.size() : spacing;
 
-    int frame = (int)(currentTime * animationSpeed) % frameCount;
+    int rowStart = (index / frameCount) * frameCount;
 
-    return index + frame;
+    int ogColumn = index % frameCount;
+
+    int framesAdvanced = (int)(currentTime * animationSpeed);
+
+    int animatedCol = (ogColumn + framesAdvanced) % frameCount;
+
+    int frame = rowStart + animatedCol;
+
+    return frame % (int)frames.size();
 }
 
 inline void DrawTextureScaled(int x, int y, const Texture2D& texture, Color tint = WHITE, int scale = TILE_SCALE)
