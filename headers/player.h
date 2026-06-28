@@ -93,6 +93,11 @@ public:
     bool resetingLevel = false;
     bool resetingZoom = false;
 
+    int currentPortrait = 0;
+    int currentPortraitFrame = 0;
+
+    bool hurt = false;
+
     Vector2 spawnPos = {0,0};
 
     GameObject gameObj = {};

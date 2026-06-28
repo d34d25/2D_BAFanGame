@@ -269,6 +269,8 @@ void LevelEditor::Update()
 
                 int frameCount = (int)activeRenderData->animationFrames.size();
 
+                std::cout<<"currentTexture: "<<currentTexture<<"\n";
+
                 if(currentTexture < 0)
                     currentTexture = frameCount - activeRenderData->spacing;
                 else if(currentTexture >= frameCount)

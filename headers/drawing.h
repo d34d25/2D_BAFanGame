@@ -66,6 +66,69 @@ inline int GetCurrentFrame(const std::vector<Rectangle>& frames, const int index
     return index + frame;
 }
 
+inline void DrawTextureScaled(int x, int y, const Texture2D& texture, Color tint = WHITE, int scale = TILE_SCALE)
+{
+    float width = fabs(texture.width) * TILE_SCALE;
+    float height = fabs(texture.height) * TILE_SCALE;
+
+    Rectangle destRect = {
+        (float)x,
+        (float)y,
+        width,
+        height
+    };
+
+    Vector2 origin = {floorf(width * 0.5f), floorf(height * 0.5f)};
+
+    DrawTexturePro(
+        texture,
+        Rectangle{0,0,(float)texture.width, (float)texture.height},
+        destRect,
+        origin,
+        0,
+        tint
+    );
+}
+
+inline void DrawSprite(
+    const SpriteRenderData* renderData,
+    float x, float y,
+    int frame,
+    bool flipX = false, bool flipY = false,
+    Color tint = WHITE,
+    int scale = TILE_SCALE
+)
+{
+    if(!renderData || frame < 0 || frame >= renderData->animationFrames.size())
+        return;
+
+    Rectangle sourceRect = renderData->animationFrames[frame];
+
+    float width = fabs(sourceRect.width) * scale;
+    float height = fabs(sourceRect.height) * scale;
+
+    float offsetX = flipX ? -renderData->offset.x : renderData->offset.x;
+    float offsetY = flipY ? -renderData->offset.y : renderData->offset.y;
+
+    Rectangle destRect = {
+        floorf(x + offsetX),
+        floorf(y + offsetY),
+        width,
+        height
+    };
+
+    Vector2 origin = {floorf(width * 0.5f), floorf(height * 0.5f)};
+
+    DrawTexturePro(
+        *renderData->sourceTexture,
+        sourceRect,
+        destRect,
+        origin,
+        0,
+        tint
+    );
+}
+
 inline void DrawSprite(
     const Transform2D& transform,
     const SpriteRenderData* renderData,

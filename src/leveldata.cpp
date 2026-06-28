@@ -15,6 +15,8 @@ std::vector<SpriteRenderData> treadmillRenderData_Left = {};
 
 std::vector<SpriteRenderData> decoRenderData = {};
 
+std::vector<SpriteRenderData> ladderRenderData = {};
+
 //spikes
 
 std::vector<SpriteRenderData> spikesRenderData = {};
@@ -61,6 +63,12 @@ std::vector<SpriteRenderData> midoriWeaponRenderData = {};
 
 std::vector<SpriteRenderData> yuzuWeaponRenderData = {};
 std::vector<SpriteRenderData> arisWeaponRenderData = {};
+
+//UI
+
+Texture2D uiBackground = {};
+
+std::vector<SpriteRenderData> portraits = {};
 
 /*
     spacing is how many frames an animation loop has, this value is fixed for each SpriteRenderData
@@ -115,9 +123,13 @@ SpriteRenderData LoadRenderData(const char* path, Vector2 frameSize, Vector2 off
 
     if(!allFrames.empty() && atlasStartFrame < atlasEndFrame)
     {
+        int fix = 0;
+
+        if(spacing > 1) fix = 1;
+
         renderData.animationFrames.assign(
             allFrames.begin() + atlasStartFrame,
-            allFrames.begin() + atlasEndFrame
+            allFrames.begin() + atlasEndFrame + fix
         );
     }
 
@@ -132,9 +144,127 @@ void LoadAssets()
 
     //tiles
 
-    solidTilesRenderData.push_back(LoadRenderData("assets/tiles/solid/solid-tiles-spritesheet.png", tileSize));
+    solidTilesRenderData.push_back(LoadRenderData(
+        "assets/tiles/solid/static-tiles-a.png",
+        tileSize, {0,0}
+    ));
 
-    //solidTilesRenderData.push_back(LoadRenderData("assets/tiles/solid/solid-tiles-spritesheet-b.png", tileSize));
+    solidTilesRenderData.push_back(LoadRenderData(
+        "assets/tiles/solid/animated-tiles-a.png",
+        tileSize, {0,0}, 14,
+        0, 97
+    ));
+
+    ladderRenderData.push_back(LoadRenderData("assets/tiles/ladder.png", tileSize));
+
+    //columns
+
+    solidTilesRenderData.push_back(LoadRenderData(
+        "assets/tiles/solid/columns.png",
+        tileSize, {0,0}, 1,
+        0, 4
+    ));
+
+    solidTilesRenderData.push_back(LoadRenderData(
+        "assets/tiles/solid/columns.png",
+        tileSize, {0,0}, 1,
+        4, 8
+    ));
+
+    solidTilesRenderData.push_back(LoadRenderData(
+        "assets/tiles/solid/columns.png",
+        tileSize, {0,0}, 1,
+        8, 12
+    ));
+
+    solidTilesRenderData.push_back(LoadRenderData(
+        "assets/tiles/solid/columns.png",
+        tileSize, {0,0}, 1,
+        12, 16
+    ));
+
+    solidTilesRenderData.push_back(LoadRenderData(
+        "assets/tiles/solid/columns.png",
+        tileSize, {0,0}, 1,
+        16, 20
+    ));
+
+    solidTilesRenderData.push_back(LoadRenderData(
+        "assets/tiles/solid/columns.png",
+        tileSize, {0,0}, 1,
+        20, 24
+    ));
+
+    solidTilesRenderData.push_back(LoadRenderData(
+        "assets/tiles/solid/columns.png",
+        tileSize, {0,0}, 1,
+        24, 28
+    ));
+
+    solidTilesRenderData.push_back(LoadRenderData(
+        "assets/tiles/solid/columns.png",
+        tileSize, {0,0}, 1,
+        32, 36
+    ));
+
+    solidTilesRenderData.push_back(LoadRenderData(
+        "assets/tiles/solid/columns.png",
+        tileSize, {0,0}, 1,
+        36, 40
+    ));
+
+    solidTilesRenderData.push_back(LoadRenderData(
+        "assets/tiles/solid/columns.png",
+        tileSize, {0,0}, 1,
+        40, 44
+    ));
+
+    solidTilesRenderData.push_back(LoadRenderData(
+        "assets/tiles/solid/columns.png",
+        tileSize, {0,0}, 1,
+        44, 48
+    ));
+
+    solidTilesRenderData.push_back(LoadRenderData(
+        "assets/tiles/solid/columns.png",
+        tileSize, {0,0}, 1,
+        52, 56
+    ));
+
+    solidTilesRenderData.push_back(LoadRenderData(
+        "assets/tiles/solid/columns.png",
+        tileSize, {0,0}, 1,
+        56, 60
+    ));
+
+    solidTilesRenderData.push_back(LoadRenderData(
+        "assets/tiles/solid/columns.png",
+        tileSize, {0,0}, 1,
+        60, 64
+    ));
+
+    solidTilesRenderData.push_back(LoadRenderData(
+        "assets/tiles/solid/columns.png",
+        tileSize, {0,0}, 1,
+        64, 68
+    ));
+
+    solidTilesRenderData.push_back(LoadRenderData(
+        "assets/tiles/solid/columns.png",
+        tileSize, {0,0}, 1,
+        68, 72
+    ));
+
+    //panels
+
+    float panelAnimationSpeed = 0.75f;
+
+    solidTilesRenderData.push_back(LoadRenderData(
+        "assets/tiles/solid/animated-panels.png",
+        tileSize, {0,0}, 2,
+        0, 12,
+        panelAnimationSpeed
+    ));
 
     //spikes
 
@@ -192,14 +322,12 @@ void LoadAssets()
 
     //platforms
 
-    //movingPlatformRenderData_Vertical.push_back(LoadRenderData("assets/platforms/vertical-moving-platform-spritesheet.png", {48,5}, {0,0}, 2));
-
     //enemies
 
     dummyRenderData.push_back(LoadRenderData("assets/enemies/chibi-dummy.png", {8,12}));
     
     yuukaRenderData.push_back(LoadRenderData(
-        "assets/enemies/yuuka-new-sprtiesheet.png",
+        "assets/enemies/yuuka-gbc-sprtiesheet.png",
         {22,22},
         {-6,-8},
         1, 0, 0,
@@ -217,7 +345,7 @@ void LoadAssets()
     //player
 
     momoiRenderData.push_back(LoadRenderData(
-        "assets/characters/momoi-new-spritesheet.png",
+        "assets/characters/momoi-gbc-spritesheet.png",
         {13.0f, 24.0f},
         {0.0f, -11.0f},
         1,0,0, 
@@ -233,7 +361,7 @@ void LoadAssets()
     ));
 
     midoriRenderData.push_back(LoadRenderData(
-        "assets/characters/midori-new-spritesheet.png",
+        "assets/characters/midori-gbc-spritesheet.png",
         {13.0f, 24.0f},
         {0.0f, -11.0f},
         1,0,0, 
@@ -241,7 +369,7 @@ void LoadAssets()
     ));
 
     yuzuRenderData.push_back(LoadRenderData(
-        "assets/characters/yuzu-new-spritesheet.png",
+        "assets/characters/yuzu-gbc-spritesheet.png",
         {17.0f, 21.0f},
         {-8.0f, -5.0f},
         1, 0, 0,
@@ -257,7 +385,7 @@ void LoadAssets()
     ));
 
     arisRenderData.push_back(LoadRenderData(
-        "assets/characters/aris-new-spritesheet.png",
+        "assets/characters/aris-gbc-spritesheet.png",
         {16.0f, 21.0f},
         {-6.0f, -6.0f},
         1, 0, 0,
@@ -294,6 +422,15 @@ void LoadAssets()
         "assets/characters/aris-weapon-holo.png",
         {15.0f, 4.0f},
         {60.0f, 7.0f}
+    ));
+
+    //UI
+
+    uiBackground = LoadTexture("assets/ui/ui-background.png");
+
+    portraits.push_back(LoadRenderData(
+        "assets/ui/yuzu-portrait.png",
+        {32,32}
     ));
 }
 

@@ -710,6 +710,8 @@ void Level::MediumFrequencyDiscreteUpdate_First()
         enemy->ResetFlags();
     }
 
+    if(player.hurt) TriggerScreenShake(0.025f, 5.0f);
+
     player.UpdateRender(dt);
 
     player.Update(dt, iterations);
@@ -915,8 +917,7 @@ void Level::HighFrequencyDiscreteUpdate()
 
                     if(CheckCollisionRecs(player.GetCeilingDetector(), objTile.GetMainAABB()))
                     {
-                        if(!IsOneWayUpDown(tile)) player.hitCeiling = true;
-                        else if(IsOneWayUpDown(tile))
+                        if(IsOneWayUpDown(tile))
                         {
                             if(tile.gameObj.direction == Direction::UP &&
                                 IsAbove(player.gameObj.GetMainAABB(), objTile.GetMainAABB(), 0.0f)
@@ -1445,7 +1446,7 @@ void Level::DrawLevel()
 
     BeginTextureMode(gameplayCanvas);
 
-    ClearBackground(GBC_GRAY);
+    ClearBackground(GBC_SKY_BLUE);
 
     BeginMode2D(camera);
     
@@ -1611,7 +1612,25 @@ void Level::DrawLevel()
 
     ClearBackground(WHITE);
 
+    Vector2 midCanvas = {
+        floorf(uiCanvas.texture.width * 0.5f),
+        floorf(uiCanvas.texture.height * 0.5f),
+    };
+
+    DrawTextureScaled(
+        midCanvas.x,
+        midCanvas.y,
+        uiBackground
+    );
+
     DrawText("SAMPLE UI TEXT", uiCanvas.texture.width * 0.25f ,uiCanvas.texture.height * 0.5f, 48, BLACK);
+
+    DrawSprite(
+        &portraits[0],
+        uiCanvas.texture.width - portraits[player.currentPortrait].frameSize.x - GRID_SIZE * 1.5f,
+        midCanvas.y,
+        player.currentPortraitFrame
+    );
 
     EndTextureMode();
 

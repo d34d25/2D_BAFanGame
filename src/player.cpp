@@ -45,7 +45,7 @@ void Player::InitPlayer(Vector2 position, float gravity, bool flipY)
     characterVariantIndex = 0;
     weaponVariantIndex = 0;
 
-    character = Character::YUZU_BATTLE;
+    character = Character::YUZU;
 
     switch (character)
     {
@@ -171,7 +171,9 @@ void Player::UpdateInput()
     {
         resetingLevel = false;
         resetingZoom = true;
-    } 
+    }
+
+    hurt = IsKeyDown(KEY_W);
 }
 
 void Player::UpdateRender(float dt)
@@ -189,14 +191,19 @@ void Player::UpdateRender(float dt)
     */
 
     int startFrame = 0;
+    
     int endFrame = characterRenderData->animationFrames.size();
 
     characterRenderData->offset = characterRenderData->ogOffset;
 
-    if(!canMove)
+    currentPortraitFrame = 0;
+
+    if(!canMove || hurt)
     {
         startFrame = 7;
         endFrame = 7;
+
+        currentPortraitFrame = 1;
 
         characterRenderData->offset.y += 5.0f;
     }
@@ -268,7 +275,7 @@ void Player::Update(float dt, int iterations)
     {
         //lateral movement
 
-        float moveForce = 16000;
+        float moveForce = 17000; //16000
 
         if(movingLeft)
         {

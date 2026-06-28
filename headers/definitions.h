@@ -66,3 +66,5 @@ const float GRAVITY = 3500.0f;
 
 
 static constexpr Color GBC_GRAY = Color{148,148,148,255};
+static constexpr Color GBC_DARK_VIOLET = Color{91,49,91,255};
+static constexpr Color GBC_SKY_BLUE = Color{100,165,255,255};

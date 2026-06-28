@@ -31,6 +31,10 @@ void SimpleBody2D::UpdateVelocity(float dt, int iterations, float gravity)
         velocity.y += acceleration.y * subDt;
     }
 
+    //velocity.x = Clamp(velocity.x ,-MAX_SPEED.x, MAX_SPEED.x);
+
+    //velocity.y = Clamp(velocity.y ,-MAX_SPEED.y, MAX_SPEED.y);
+
     AddVelocities();
 
     force = {0,0};

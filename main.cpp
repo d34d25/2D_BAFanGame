@@ -133,7 +133,7 @@ int main()
         if(!editorMode) testLevel->DrawLevel();
         else
         {
-            ClearBackground(GBC_GRAY);
+            ClearBackground(GBC_SKY_BLUE);
             editor->Draw();
         }
 

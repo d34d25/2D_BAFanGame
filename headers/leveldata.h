@@ -371,6 +371,8 @@ extern std::vector<SpriteRenderData> treadmillRenderData_Left;
 
 extern std::vector<SpriteRenderData> decoRenderData;
 
+extern std::vector<SpriteRenderData> ladderRenderData;
+
 //spikes
 
 extern std::vector<SpriteRenderData> spikesRenderData;
@@ -382,12 +384,6 @@ extern std::vector<SpriteRenderData> spikesSmallRenderData;
 
 //wind tiles
 extern std::vector<SpriteRenderData> windRenderData;
-
-extern std::vector<SpriteRenderData> windRenderData_Down;
-
-extern std::vector<SpriteRenderData> windRenderData_Left;
-
-extern std::vector<SpriteRenderData> windRenderData_Right;
 
 //water
 
@@ -424,6 +420,12 @@ extern std::vector<SpriteRenderData> midoriWeaponRenderData;
 extern std::vector<SpriteRenderData> yuzuWeaponRenderData;
 extern std::vector<SpriteRenderData> arisWeaponRenderData;
 
+//UI
+
+extern Texture2D uiBackground;
+
+extern std::vector<SpriteRenderData> portraits;
+
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 extern SpriteRenderData LoadRenderData(const char* path, Vector2 frameSize, Vector2 offset = {0,0}, int spacing = 1, int atlasStartFrame = 0, int atlasEndFrame = 0, float animationSpeed = 5.0f);
@@ -440,6 +442,8 @@ inline std::vector<SpriteRenderData>* GetTileActiveRenderDataList(TileType type)
 
     case TileType::TREADMILL_RIGHT: return &treadmillRenderData_Right;
     case TileType::TREADMILL_LEFT: return &treadmillRenderData_Left;
+
+    case TileType::LADDER: return &ladderRenderData;
 
     //spikes
 

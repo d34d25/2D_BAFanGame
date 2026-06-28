@@ -10,6 +10,8 @@
 
 const float MASS = 1;
 
+//a max speed of 2000 is still stable enough
+//even 3000 can work
 const Vector2 MAX_SPEED = {600,600};
 
 enum class Direction
