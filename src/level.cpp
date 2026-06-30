@@ -1623,7 +1623,7 @@ void Level::DrawLevel()
         uiBackground
     );
 
-    DrawText("SAMPLE UI TEXT", uiCanvas.texture.width * 0.25f ,uiCanvas.texture.height * 0.5f, 48, BLACK);
+    DrawText("HP:", GRID_SIZE, GRID_SIZE, GRID_SIZE, BLACK);
 
     DrawSprite(
         &portraits[0],
@@ -1631,6 +1631,8 @@ void Level::DrawLevel()
         midCanvas.y,
         player.currentPortraitFrame
     );
+
+    DrawSprite(&uiElements[0], GRID_SIZE * 3.25f, GRID_SIZE + GRID_SIZE * 0.5f, 0);
 
     EndTextureMode();
 

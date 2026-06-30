@@ -72,6 +72,8 @@ Texture2D uiBackground = {};
 
 std::vector<SpriteRenderData> portraits = {};
 
+std::vector<SpriteRenderData> uiElements = {};
+
 /*
     spacing is how many frames an animation loop has, this value is fixed for each SpriteRenderData
     if the spacing is 0 or less the whole animation vector will be used, if it is 1 the SpriteRenderData won't have animations,
@@ -153,28 +155,145 @@ void LoadAssets()
 
     //tiles
 
+    const int TOTAL_COLUMNS_FILES = 10;
+
+    for(int i = 1; i <= TOTAL_COLUMNS_FILES; i++)
+    {
+        std::string filepath = "assets/tiles/solid/columns-" + std::to_string(i) + ".png";
+
+        solidTilesRenderData.push_back(LoadRenderData(
+            filepath.c_str(), tileSize
+        ));
+    }
+
+    for(int i = 1; i <= TOTAL_COLUMNS_FILES; i++)
+    {
+        std::string filepath = "assets/tiles/solid/yellow-columns-" + std::to_string(i) + ".png";
+
+        solidTilesRenderData.push_back(LoadRenderData(
+            filepath.c_str(), tileSize
+        ));
+    }
+
+    const int TOTAL_BLOCKS_FILES = 8;
+
+    for(int i = 1; i <= TOTAL_BLOCKS_FILES; i++)
+    {
+        std::string filepath = "assets/tiles/solid/blocks-" + std::to_string(i) + ".png";
+
+        solidTilesRenderData.push_back(LoadRenderData(
+            filepath.c_str(), tileSize
+        ));
+    }
+
+    const int TOTAL_YELLOW_BLOCKS_FILES = 10;
+
+    for(int i = 1; i <= TOTAL_YELLOW_BLOCKS_FILES; i++)
+    {
+        std::string filepath = "assets/tiles/solid/yellow-blocks-" + std::to_string(i) + ".png";
+
+        solidTilesRenderData.push_back(LoadRenderData(
+            filepath.c_str(), tileSize
+        ));
+    }
+
     solidTilesRenderData.push_back(LoadRenderData(
-        "assets/tiles/solid/static-tiles-a.png",
-        tileSize, {0,0}
+        "assets/tiles/solid/block-panels.png", tileSize
     ));
 
     solidTilesRenderData.push_back(LoadRenderData(
-        "assets/tiles/solid/animated-tiles-a.png",
-        tileSize, {0,0}, 
-        14,
-        0, 140
+        "assets/tiles/solid/yellow-block-panels.png", tileSize
+    ));
+
+    solidTilesRenderData.push_back(LoadRenderData(
+        "assets/tiles/solid/fixed-color-tiles.png", tileSize
     ));
 
     ladderRenderData.push_back(LoadRenderData("assets/tiles/ladder.png", tileSize));
 
     //panels
 
-    float panelAnimationSpeed = 0.75f;
+    float panelAnimationSpeed = 4.25f;
+
+    Vector2 dTileSize = Vector2Scale(tileSize, 2);
+
+    decoRenderData.push_back(LoadRenderData(
+        "assets/tiles/deco/filler-blocks-a.png", dTileSize, dTileSize
+    ));
+    
+    decoRenderData.push_back(LoadRenderData(
+        "assets/tiles/deco/filler-blocks-b.png", dTileSize, dTileSize
+    ));
+
+    decoRenderData.push_back(LoadRenderData(
+        "assets/tiles/deco/filler-blocks-c.png", dTileSize, dTileSize
+    ));
+
+    decoRenderData.push_back(LoadRenderData(
+        "assets/tiles/deco/filler-blocks-d.png", dTileSize, dTileSize
+    ));
+
+    decoRenderData.push_back(LoadRenderData(
+        "assets/tiles/deco/filler-blocks-e.png", dTileSize, dTileSize
+    ));
+
+    decoRenderData.push_back(LoadRenderData(
+        "assets/tiles/deco/filler-blocks-f.png", dTileSize, dTileSize
+    ));
+
+    decoRenderData.push_back(LoadRenderData(
+        "assets/tiles/deco/filler-blocks-g.png", dTileSize, dTileSize
+    ));
+
+    decoRenderData.push_back(LoadRenderData(
+        "assets/tiles/deco/shadows.png", tileSize
+    ));
+
+    decoRenderData.push_back(LoadRenderData(
+        "assets/tiles/deco/gdd-cat-gbc.png", {35,29}
+    ));
+
+    int panelSpacing = 12;
 
     solidTilesRenderData.push_back(LoadRenderData(
         "assets/tiles/solid/animated-panels.png",
-        tileSize, {0,0}, 2,
+        tileSize, {0,0}, panelSpacing,
         0, 12,
+        panelAnimationSpeed
+    ));
+
+    solidTilesRenderData.push_back(LoadRenderData(
+        "assets/tiles/solid/animated-panels.png",
+        tileSize, {0,0}, panelSpacing,
+        12, 24,
+        panelAnimationSpeed
+    ));
+
+    solidTilesRenderData.push_back(LoadRenderData(
+        "assets/tiles/solid/animated-panels.png",
+        tileSize, {0,0}, panelSpacing,
+        24, 36,
+        panelAnimationSpeed
+    ));
+
+    solidTilesRenderData.push_back(LoadRenderData(
+        "assets/tiles/solid/animated-panels.png",
+        tileSize, {0,0}, panelSpacing,
+        36, 48,
+        panelAnimationSpeed
+    ));
+
+    solidTilesRenderData.push_back(LoadRenderData(
+        "assets/tiles/solid/animated-panels.png",
+        tileSize, {0,0}, panelSpacing,
+        48, 60,
+        panelAnimationSpeed
+    ));
+
+    solidTilesRenderData.push_back(LoadRenderData(
+        "assets/tiles/solid/animated-panels.png",
+        tileSize, {0,0}, panelSpacing,
+        60, 72,
         panelAnimationSpeed
     ));
 
@@ -217,12 +336,6 @@ void LoadAssets()
         tileSize,{0,0},
         1,
         0,4
-    ));
-
-    //gdd cat
-    decoRenderData.push_back(LoadRenderData(
-        "assets/tiles/deco/gdd-cat-gbc.png",
-        {35,29}
     ));
 
     //wind tiles
@@ -354,6 +467,10 @@ void LoadAssets()
     portraits.push_back(LoadRenderData(
         "assets/ui/yuzu-portrait.png",
         {32,32}
+    ));
+
+    uiElements.push_back(LoadRenderData(
+        "assets/ui/health-point.png", tileSize
     ));
 }
 

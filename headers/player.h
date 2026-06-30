@@ -29,7 +29,7 @@ private:
     Character character = Character::MOMOI;
 
     float jumpTime = 0.0f;
-    float maxJumpTime = 0.15f;
+    float maxJumpTime = 0.16f;
 
     float animationTimer = 0.0f;
     

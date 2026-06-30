@@ -10,6 +10,8 @@
 
 #include <cstring>
 
+#include <string>
+
 struct TileRange
 {
     int startX = 0;
@@ -273,7 +275,7 @@ inline bool IsColorOf(Color colorA, Color colorB)
 
 inline bool IsTileEqual(int l, int i, int j, const Tile(&levelTiles)[LAYERS][COLS][ROWS], TileType tileType = TileType::VOID)
 {
-    if(i < 0 || i >= ROWS || j < 0 || j >= COLS || l < 0 || l >= LAYERS) return true;
+    if(i < 0 || i >= COLS || j < 0 || j >= ROWS || l < 0 || l >= LAYERS) return true;
 
     return levelTiles[l][i][j].type == tileType;
 }
@@ -285,7 +287,7 @@ inline bool IsTileEqual(const int(&matrixPosition)[3], const Tile(&levelTiles)[L
 
 inline bool IsTileNotEqual(int l, int i, int j, const Tile(&levelTiles)[LAYERS][COLS][ROWS], TileType tileType = TileType::VOID)
 {
-    if(i < 0 || i >= ROWS || j < 0 || j >= COLS || l < 0 || l >= LAYERS) return true;
+    if(i < 0 || i >= COLS || j < 0 || j >= ROWS || l < 0 || l >= LAYERS) return true;
 
     return levelTiles[l][i][j].type != tileType;
 }
@@ -297,7 +299,7 @@ inline bool IsTileNotEqual(const int(&matrixPosition)[3], const Tile(&levelTiles
 
 inline TileType GetTileType(int l, int i, int j, const Tile(&levelTiles)[LAYERS][COLS][ROWS])
 {
-    if(i < 0 || i >= ROWS || j < 0 || j >= COLS || l < 0 || l >= LAYERS) return TileType::VOID;
+    if(i < 0 || i >= COLS || j < 0 || j >= ROWS || l < 0 || l >= LAYERS) return TileType::VOID;
 
     return levelTiles[l][i][j].type;
 }
@@ -427,6 +429,8 @@ extern std::vector<SpriteRenderData> arisWeaponRenderData;
 extern Texture2D uiBackground;
 
 extern std::vector<SpriteRenderData> portraits;
+
+extern std::vector<SpriteRenderData> uiElements;
 
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 

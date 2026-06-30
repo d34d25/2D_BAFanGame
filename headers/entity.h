@@ -19,6 +19,12 @@ enum class Direction
     UP, RIGHT, DOWN, LEFT
 };
 
+struct Vector2Double
+{
+    double x;
+    double y;
+};
+
 struct Transform2D
 {
     Vector2 position = {0,0};

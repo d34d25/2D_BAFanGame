@@ -253,8 +253,8 @@ void LevelEditor::Update()
 
                     currentVariant += direction;
 
-                    if(currentVariant < 0) currentVariant = 0;
-                    else if(currentVariant >= activeRenderDataList->size()) currentVariant = activeRenderDataList->size() - 1;
+                    if(currentVariant < 0)currentVariant = activeRenderDataList->size() - 1;
+                    else if(currentVariant >= activeRenderDataList->size()) currentVariant = 0;
                 }
             }
         }
