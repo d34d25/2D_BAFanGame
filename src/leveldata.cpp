@@ -155,7 +155,7 @@ void LoadAssets()
 
     //tiles
 
-    const int TOTAL_COLUMNS_FILES = 10;
+    const int TOTAL_COLUMNS_FILES = 11;
 
     for(int i = 1; i <= TOTAL_COLUMNS_FILES; i++)
     {
@@ -198,6 +198,10 @@ void LoadAssets()
     }
 
     solidTilesRenderData.push_back(LoadRenderData(
+        "assets/tiles/solid/block-panels.png", tileSize
+    ));
+
+    decoRenderData.push_back(LoadRenderData(
         "assets/tiles/solid/block-panels.png", tileSize
     ));
 
