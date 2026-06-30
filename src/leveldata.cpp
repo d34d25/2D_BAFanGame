@@ -155,7 +155,7 @@ void LoadAssets()
 
     //tiles
 
-    const int TOTAL_COLUMNS_FILES = 11;
+    const int TOTAL_COLUMNS_FILES = 12;
 
     for(int i = 1; i <= TOTAL_COLUMNS_FILES; i++)
     {
@@ -166,7 +166,9 @@ void LoadAssets()
         ));
     }
 
-    for(int i = 1; i <= TOTAL_COLUMNS_FILES; i++)
+    const int TOTAL_YELLOW_COLUMNS_FILES = 13;
+
+    for(int i = 1; i <= TOTAL_YELLOW_COLUMNS_FILES; i++)
     {
         std::string filepath = "assets/tiles/solid/yellow-columns-" + std::to_string(i) + ".png";
 
