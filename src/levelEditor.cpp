@@ -362,6 +362,10 @@ void LevelEditor::Update()
 
         Tile& targetTile = tempLevel[currentLayer][mouseMatrixPosition.x][mouseMatrixPosition.y];
 
+        bool isDecorationLayer = (currentLayer == BACKGROUND_LAYER || currentLayer == FOREGROUND_LAYER);
+
+        bool canPlaceTile = false;
+
         if(IsMouseButtonDown(MOUSE_BUTTON_LEFT))
         {
             if(currentTileType != (int)TileType::VOID
@@ -369,38 +373,58 @@ void LevelEditor::Update()
                 && !IsTypeInvalid((TileType)currentTileType)
             )
             {
-                if((TileType)currentTileType == TileType::PLAYER_SPAWN)
+                TileType placingType = (TileType)currentTileType;
+
+                if(!isDecorationLayer)
                 {
-                    for(int l = 0; l < LAYERS; l++)
+                    canPlaceTile = true;
+                }
+                else
+                {
+                    if(placingType == TileType::DECO)
                     {
-                        for(int i = 0; i < COLS; i++)
-                        {
-                            for(int j = 0; j < ROWS; j++)
-                            {
-                                if(tempLevel[l][i][j].type == TileType::PLAYER_SPAWN)
-                                {
-                                    tempLevel[l][i][j] = {};
-                                }
-                            }
-                        }
-                    }   
+                        canPlaceTile = true;
+                    }
+                    else
+                    {
+                        std::cout<<"CAN'T PLACE GAMEPLAY ELEMENTS IN THIS LAYER \n";
+                    }
                 }
 
-                targetTile.type = (TileType)currentTileType;
-                targetTile.textureIndex = currentTexture;
-                targetTile.variantIndex = currentVariant;
+                if(canPlaceTile)
+                {
+                    if((TileType)currentTileType == TileType::PLAYER_SPAWN)
+                    {
+                        for(int l = 0; l < LAYERS; l++)
+                        {
+                            for(int i = 0; i < COLS; i++)
+                            {
+                                for(int j = 0; j < ROWS; j++)
+                                {
+                                    if(tempLevel[l][i][j].type == TileType::PLAYER_SPAWN)
+                                    {
+                                        tempLevel[l][i][j] = {};
+                                    }
+                                }
+                            }
+                        }   
+                    }
 
-                targetTile.gameObj.transform.position = GetMouseGridPosition(mouseMatrixPosition);
+                    targetTile.type = placingType;
+                    targetTile.textureIndex = currentTexture;
+                    targetTile.variantIndex = currentVariant;
 
-                targetTile.gameObj.transform.scale = TILE_SCALE;
+                    targetTile.gameObj.transform.position = GetMouseGridPosition(mouseMatrixPosition);
 
-                targetTile.gameObj.transform.angle = currentAngle;
+                    targetTile.gameObj.transform.scale = TILE_SCALE;
 
-                targetTile.gameObj.data = currentData;
+                    targetTile.gameObj.transform.angle = currentAngle;
 
-                targetTile.gameObj.direction = currentDirection;
+                    targetTile.gameObj.data = currentData;
+
+                    targetTile.gameObj.direction = currentDirection;
+                }
             }
-
         }
         else if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT))
         {
@@ -731,25 +755,30 @@ void LevelEditor::Draw()
     }
 
     //grid
+    
+    float lineThickness = 1.5f;
+
+    float dynamicThickness = lineThickness / camera.zoom;
+
     for(int i = 0; i <= worldWidth; i+= GRID_SIZE)
     {
-        //if(i == worldWidth) continue;
-
-        DrawLine(i, 0, i, worldHeight, GRAY);
+        DrawLineEx(
+            {(float)i, 0.0f},
+            {(float)i, (float)worldHeight},
+            dynamicThickness,
+            GRAY
+        );
     }
 
     for(int i = 0; i <= worldHeight; i+= GRID_SIZE)
     {
-        //if(i == worldHeight) continue;
-
-        DrawLine(0, i, worldWidth, i, GRAY);
+        DrawLineEx(
+            {0.0f, (float)i},
+            {(float)worldWidth, (float)i},
+            dynamicThickness,
+            GRAY
+        );
     }
-
-    //DrawLine(halfWorldWidth, -worldWidth, halfWorldWidth, worldWidth, GREEN);
-
-    //DrawLine(-worldHeight, halfWorldHeight, worldHeight, halfWorldHeight, GREEN);
-
-    //DrawCircle(halfWorldWidth, halfWorldHeight, 5,GREEN);
 
     DrawRectangleLines(
         mouseMatrixPosition.x * GRID_SIZE, 
@@ -772,7 +801,22 @@ void LevelEditor::Draw()
     DrawText(GetTileTypeText((TileType)currentTileType), 10, ypos + spacing * 2, 20, BLACK);
     DrawText(TextFormat("tileType: %i", currentTileType ), 10, ypos + spacing * 3,20,BLACK);
 
-    DrawText(TextFormat("current layer: %i", currentLayer), 10, ypos + spacing * 4, 20, RED);
+    const char* layerText = "";
+
+    switch (currentLayer)
+    {
+    case BACKGROUND_LAYER: layerText = "BACKGROUND"; break;
+
+    case FOREGROUND_LAYER: layerText = "FOREGROUND"; break;
+
+    case GAMEPLAY_LAYER_START: layerText = "LAYER 1"; break;
+
+    case GAMEPLAY_LAYER_END: layerText = "LAYER 2"; break;
+    
+    default: break;
+    }
+
+    DrawText(TextFormat("current layer: %s", layerText), 10, ypos + spacing * 4, 20, RED);
 
     DrawText(TextFormat("current angle: %i", currentAngle), 10, ypos + spacing * 5, 20, RED);
 

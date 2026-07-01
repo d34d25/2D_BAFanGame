@@ -50,6 +50,8 @@ private:
 
     bool isGravityUp = false;
 
+    bool debugDrawing = false;
+
     //screen shake
 
     float screenShakeTimer = 0.0f;
@@ -355,6 +357,9 @@ public:
     inline void UpdatePlayerInput()
     {
         player.UpdateInput();
+
+        if(IsKeyPressed(KEY_D)) debugDrawing =  true;
+        else if(IsKeyPressed(KEY_F)) debugDrawing = false;
     }
 
     inline int GetPlatformCount()

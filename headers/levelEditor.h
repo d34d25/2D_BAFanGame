@@ -21,7 +21,7 @@ private:
 
     int screenWidth, screenHeight;
 
-    int currentLayer = 0;
+    int currentLayer = 1;
 
     int currentTileType = (int)TileType::VOID;
     

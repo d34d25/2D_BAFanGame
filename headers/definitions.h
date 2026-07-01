@@ -48,7 +48,15 @@ static constexpr int ROWS = 8 * TILES_PER_ROOM_HEIGHT;
 
 static constexpr int COLS = 8 * TILES_PER_ROOM_WIDHT;
 
-static constexpr int LAYERS = 2;
+static constexpr int LAYERS = 4;
+
+static constexpr int BACKGROUND_LAYER = 0;
+
+static constexpr int GAMEPLAY_LAYER_START = 1;
+
+static constexpr int GAMEPLAY_LAYER_END = 2;
+
+static constexpr int FOREGROUND_LAYER = 3;
 
 static constexpr int TILE_SCALE = 4; //3
 

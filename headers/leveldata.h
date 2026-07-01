@@ -244,6 +244,8 @@ struct Tile
 {
     TileType type = TileType::VOID;
 
+    int currentFrame = 0;
+
     int textureIndex = 0;
 
     int variantIndex = 0;

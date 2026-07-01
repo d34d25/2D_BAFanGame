@@ -42,7 +42,7 @@ void Level::InitLevel(const char* levelPath, const char* roomPath ,float dt, int
 
     enemyList.reserve(800);
 
-    for(int l = 0; l < LAYERS; l++)
+    for(int l = GAMEPLAY_LAYER_START; l <= GAMEPLAY_LAYER_END; l++)
     {
         for(int i = 0; i < COLS; i++)
         {
@@ -635,7 +635,7 @@ void Level::MediumFrequencyDiscreteUpdate_First()
             rangeLimits.maxX, rangeLimits.maxY
             );
 
-            for(int l = 0; l < LAYERS; l++)
+            for(int l = GAMEPLAY_LAYER_START; l <= GAMEPLAY_LAYER_END; l++)
             {
                 for(int i = platformRange.startX; i <= platformRange.endX; i++)
                 {
@@ -719,6 +719,50 @@ void Level::MediumFrequencyDiscreteUpdate_First()
     if(player.canMove) player.Shoot(dt);
 
     player.ResetFalgs();
+
+
+    //tile render update
+
+    double currentTime = GetTime();
+
+    TileRange playerTileRange = CalculateTileRange(
+        camera.target.x,
+        camera.target.y,
+        renderTileCheckRange,
+        rangeLimits.minX, rangeLimits.minY,
+        rangeLimits.maxX, rangeLimits.maxY
+    );
+    
+    for(int l = 0; l < LAYERS; l++)
+    {
+        for(int i = playerTileRange.startX; i <= playerTileRange.endX; i++)
+        {
+            for(int j = playerTileRange.startY; j <= playerTileRange.endY; j++)
+            {
+                Tile& tile = level[l][i][j];
+
+                if(IsNotRealTile(tile.type)) continue;
+
+                SpriteRenderData* tileRenderData = GetTileActiveRenderData(tile.type, tile.variantIndex);
+
+                if(tileRenderData)
+                {
+                    tile.currentFrame = tile.textureIndex;
+
+                    if(tileRenderData->spacing != 1)
+                    {
+                        tile.currentFrame = GetCurrentFrame(
+                            tileRenderData->animationFrames,
+                            tile.textureIndex,
+                            tileRenderData->spacing,
+                            tileRenderData->animationSpeed,
+                            currentTime
+                        );
+                    }
+                }
+            }
+        }
+    }
 }
 
 void Level::MediumFrequencyDiscreteUpdate_Second()
@@ -823,7 +867,7 @@ void Level::HighFrequencyDiscreteUpdate()
 
     player.gameObj.UpdatePositionX(dt, iterations);
 
-    for(int l = 0; l < LAYERS; l++)
+    for(int l = GAMEPLAY_LAYER_START; l <= GAMEPLAY_LAYER_END; l++)
     {
         for(int i = playerTileRange.startX; i <= playerTileRange.endX; i++)
         {
@@ -869,7 +913,7 @@ void Level::HighFrequencyDiscreteUpdate()
 
     player.gameObj.UpdatePositionY(dt, iterations);
 
-    for(int l = 0; l < LAYERS; l++)
+    for(int l = GAMEPLAY_LAYER_START; l <= GAMEPLAY_LAYER_END; l++)
     {
         for(int i = playerTileRange.startX; i <= playerTileRange.endX; i++)
         {
@@ -1140,7 +1184,7 @@ void Level::HighFrequencyDiscreteUpdate()
         //enemy x pass
         enemy->gameObj.UpdatePositionX(dt, iterations);
 
-        for(int l = 0; l < LAYERS; l++)
+        for(int l = GAMEPLAY_LAYER_START; l <= GAMEPLAY_LAYER_END; l++)
         {
             for(int i = enemyTileRange.startX; i <= enemyTileRange.endX; i++)
             {
@@ -1192,7 +1236,7 @@ void Level::HighFrequencyDiscreteUpdate()
         //enemy y pass
         enemy->gameObj.UpdatePositionY(dt, iterations);
 
-        for(int l = 0; l < LAYERS; l++)
+        for(int l = GAMEPLAY_LAYER_START; l <= GAMEPLAY_LAYER_END; l++)
         {
             for(int i = enemyTileRange.startX; i <= enemyTileRange.endX; i++)
             {
@@ -1352,7 +1396,7 @@ void Level::CCD_Update()
                 rangeLimits.maxX, rangeLimits.maxY 
             );
 
-            for(int l = 0; l < LAYERS; l++)
+            for(int l = GAMEPLAY_LAYER_START; l <= GAMEPLAY_LAYER_END; l++)
             {
                 for(int i = bulletRange.startX; i <= bulletRange.endX; i++)
                 {
@@ -1458,7 +1502,31 @@ void Level::DrawLevel()
         rangeLimits.maxX, rangeLimits.maxY
     );
 
-    for(int l = 0; l < LAYERS; l++)
+    //background
+
+    for(int i = playerTileRange.startX; i <= playerTileRange.endX; i++)
+    {
+        for(int j = playerTileRange.startY; j <= playerTileRange.endY; j++)
+        {
+            Tile& tile = level[BACKGROUND_LAYER][i][j];
+
+            if(tile.type != TileType::DECO) continue;
+
+            SpriteRenderData* tileRenderData = GetTileActiveRenderData(tile.type, tile.variantIndex);
+
+            if(tileRenderData)
+            {
+                if(tile.currentFrame >= 0 && tile.currentFrame < (int)tileRenderData->animationFrames.size())
+                {
+                    DrawSprite(tile.gameObj, tileRenderData, tile.currentFrame);
+                }
+            }
+        }
+    }
+
+    //gameplay drawing
+
+    for(int l = GAMEPLAY_LAYER_START; l <= GAMEPLAY_LAYER_END; l++)
     {
         for(int i = playerTileRange.startX; i <= playerTileRange.endX; i++)
         {
@@ -1472,32 +1540,10 @@ void Level::DrawLevel()
 
                 if(tileRenderData)
                 {
-                    int frameToDraw = tile.textureIndex;
-
-                    if(tileRenderData->spacing != 1)
+                    if(tile.currentFrame >= 0 && tile.currentFrame < (int)tileRenderData->animationFrames.size())
                     {
-                        frameToDraw = GetCurrentFrame(
-                            tileRenderData->animationFrames,
-                            tile.textureIndex,
-                            tileRenderData->spacing,
-                            tileRenderData->animationSpeed,
-                            currentTime
-                        );
+                        DrawSprite(tile.gameObj, tileRenderData, tile.currentFrame);
                     }
-
-                    if(frameToDraw >= 0 && frameToDraw < (int)tileRenderData->animationFrames.size())
-                    {
-                        DrawSprite(tile.gameObj, tileRenderData, frameToDraw);
-                    }
-                }
-                else
-                {
-                    Color color = GetTileColor(tile.type);
-
-                    if(IsColorOf(color, BLANK) || tile.type == TileType::PLATFORM_STOP) continue;
-
-                    if(!tile.gameObj.hitboxes.empty()) DrawRectangleRec(tile.gameObj.GetMainAABB(), color);
-                    else DrawRectangle(i * GRID_SIZE, j * GRID_SIZE, GRID_SIZE, GRID_SIZE, color);
                 }
             }
         }
@@ -1602,7 +1648,28 @@ void Level::DrawLevel()
 
     DrawSprite(player.gameObj, player.weaponRenderData, player.weaponCurrentFrame);
 
-    //DebugDrawing();
+    //foreground
+    for(int i = playerTileRange.startX; i <= playerTileRange.endX; i++)
+    {
+        for(int j = playerTileRange.startY; j <= playerTileRange.endY; j++)
+        {
+            Tile& tile = level[FOREGROUND_LAYER][i][j];
+
+            if(tile.type != TileType::DECO) continue;
+
+            SpriteRenderData* tileRenderData = GetTileActiveRenderData(tile.type, tile.variantIndex);
+
+            if(tileRenderData)
+            {
+                if(tile.currentFrame >= 0 && tile.currentFrame < (int)tileRenderData->animationFrames.size())
+                {
+                    DrawSprite(tile.gameObj, tileRenderData, tile.currentFrame);
+                }
+            }
+        }
+    }
+
+    if(debugDrawing) DebugDrawing();
 
     EndMode2D();
 
@@ -1694,11 +1761,41 @@ void Level::DrawLevel()
 
 void Level::DebugDrawing()
 {
-    TileRange playerTileRange = CalculateTileRange(
-        player.gameObj.transform.position.x,
-        player.gameObj.transform.position.y,
-        renderTileCheckRange
-    );
+    int worldWidth = COLS * GRID_SIZE;
+    int worldHeight = ROWS * GRID_SIZE;
+
+    //grid
+
+    Color gridColor = GRAY;
+    gridColor.a = 127;
+
+    float lineThickness = 1.5f;
+
+    float dynamicThickness = lineThickness / camera.zoom;
+
+    for(int i = 0; i <= worldWidth; i+= GRID_SIZE)
+    {
+        DrawLineEx(
+            {(float)i, 0.0f},
+            {(float)i, (float)worldHeight},
+            dynamicThickness,
+            GRAY
+        );
+    }
+
+    for(int i = 0; i <= worldHeight; i+= GRID_SIZE)
+    {
+        DrawLineEx(
+            {0.0f, (float)i},
+            {(float)worldWidth, (float)i},
+            dynamicThickness,
+            GRAY
+        );
+    }
+
+    //tiles
+
+   
 
     for(int i = 0; i < platformCache_rendering.size(); i++)
     {
@@ -1718,33 +1815,70 @@ void Level::DebugDrawing()
         }
     }
 
-    for(int l = 0; l < LAYERS; l++)
+    TileRange playerTileRange = CalculateTileRange(
+        player.gameObj.transform.position.x,
+        player.gameObj.transform.position.y,
+        collisionTileCheckRange,
+        rangeLimits.minX, rangeLimits.minY,
+        rangeLimits.maxX, rangeLimits.maxY
+    );
+
+    for(int l = GAMEPLAY_LAYER_START; l <= GAMEPLAY_LAYER_END; l++)
     {
         for(int i = playerTileRange.startX; i <= playerTileRange.endX; i++)
         {
             for(int j = playerTileRange.startY; j <= playerTileRange.endY; j++)
             {
-                GameObject tileObj = level[l][i][j].gameObj;
+                Tile& tile = level[l][i][j];
 
-                if(tileObj.hitboxes.empty()) continue;
+                if(IsNotRealTile(tile.type)) continue;
+
+                if(tile.gameObj.hitboxes.empty()) continue;
+
+                Color collisionCheckColor = {255,0,0,172};
+
+                DrawRectangle(i * GRID_SIZE, j * GRID_SIZE, GRID_SIZE, GRID_SIZE, collisionCheckColor);
+            }
+        }
+    }
+
+    TileRange playerRenderTileRange = CalculateTileRange(
+        camera.target.x,
+        camera.target.y,
+        renderTileCheckRange,
+        rangeLimits.minX, rangeLimits.minY,
+        rangeLimits.maxX, rangeLimits.maxY
+    );
+
+    for(int l = 0; l < LAYERS; l++)
+    {
+        for(int i = playerRenderTileRange.startX; i <= playerRenderTileRange.endX; i++)
+        {
+            for(int j = playerRenderTileRange.startY; j <= playerRenderTileRange.endY; j++)
+            {
+                Tile& tile = level[l][i][j];
+
+                if(IsNotRealTile(tile.type)) continue;
+
+                if(tile.gameObj.hitboxes.empty()) continue;
 
                 Color mainAABBColor = RED;
 
                 if(level[l][i][j].type == TileType::PLATFORM_STOP) mainAABBColor = BLUE;
 
-                DrawAABB(tileObj.GetMainAABB(), mainAABBColor, 2.0f);
+                DrawAABB(tile.gameObj.GetMainAABB(), mainAABBColor, 2.0f);
 
-                for(int h = 1; h < tileObj.hitboxes.size(); h++)
+                for(int h = 1; h < tile.gameObj.hitboxes.size(); h++)
                 {
-                    DrawAABB(tileObj.GetSubAABB(h), MAGENTA, 1.25f);
+                    DrawAABB(tile.gameObj.GetSubAABB(h), MAGENTA, 1.25f);
                 }
 
-                Vector2 lineEnd = tileObj.transform.position;
+                Vector2 lineEnd = tile.gameObj.transform.position;
 
-                float halfW = tileObj.GetMainAABB().width * 0.5f;
-                float halfH = tileObj.GetMainAABB().height * 0.5f;
+                float halfW = tile.gameObj.GetMainAABB().width * 0.5f;
+                float halfH = tile.gameObj.GetMainAABB().height * 0.5f;
 
-                switch (tileObj.direction)
+                switch (tile.gameObj.direction)
                 {
                 case Direction::UP: lineEnd.y -= halfH; break;
                 case Direction::DOWN: lineEnd.y += halfH; break;
@@ -1753,7 +1887,19 @@ void Level::DebugDrawing()
                 default:break;
                 }
 
-                DrawLineEx(tileObj.transform.position, lineEnd, 1.0f ,GREEN);
+                DrawLineEx(tile.gameObj.transform.position, lineEnd, 1.0f ,GREEN);
+
+                SpriteRenderData* tileRenderData = GetTileActiveRenderData(tile.type, tile.variantIndex);
+
+                if(!tileRenderData)
+                {
+                    Color color = GetTileColor(tile.type);
+
+                    if(IsColorOf(color, BLANK) || tile.type == TileType::PLATFORM_STOP) continue;
+
+                    if(!tile.gameObj.hitboxes.empty()) DrawRectangleRec(tile.gameObj.GetMainAABB(), color);
+                    else DrawRectangle(i * GRID_SIZE, j * GRID_SIZE, GRID_SIZE, GRID_SIZE, color);
+                }
             }
         }
     }
@@ -1793,19 +1939,6 @@ void Level::DebugDrawing()
         {
             DrawAABB(room.aabb, RED, 3.0f);
         }
-    }
-
-    Color gridColor = GRAY;
-    gridColor.a = (int)(255 * 0.5f);
-
-    for(int i = 0; i <= ROWS * GRID_SIZE; i+= GRID_SIZE)
-    {
-        DrawLine(i, 0, i, ROWS * GRID_SIZE, gridColor);
-    }
-
-    for(int j = 0; j <= COLS * GRID_SIZE; j+= GRID_SIZE)
-    {
-        DrawLine(0, j, COLS * GRID_SIZE, j, gridColor);
     }
 
     DrawAABB(player.gameObj.GetMainAABB(), ORANGE);
