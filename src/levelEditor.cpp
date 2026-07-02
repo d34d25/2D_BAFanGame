@@ -116,15 +116,12 @@ LevelEditor::LevelEditor(int screenWidth, int screenHeight, const char* levelPat
     camera.target = {(float)halfWorldWidth, (float)halfWorldHeight};
 
     ResetRooms();
-    
-    LoadAssets();
 
     currentTexture = 0;
 }
 
 LevelEditor::~LevelEditor()
 {
-    UnloadAssets();
 }
 
 void LevelEditor::Update()
@@ -239,6 +236,27 @@ void LevelEditor::Update()
 
             currentDirection = CalculateDirection(currentAngle, currentData);
         }
+
+        std::vector<std::array<Color, MAX_PALETTE_COLS>>* activePaletteList = GetCurrentTilePaletteList((TileType)currentTileType);
+
+        if(!activePaletteList->empty())
+        {
+            if(IsKeyPressed(KEY_W))
+            {
+                currentPalette++;
+
+                if(currentPalette >= activePaletteList->size()) currentPalette = 0;
+            }
+            else if(IsKeyPressed(KEY_S))
+            {
+                currentPalette--;
+
+                if(currentPalette < 0) currentPalette = activePaletteList->size() - 1;
+            }
+
+            currentPaletteColors = activePaletteList->at(currentPalette);
+        }
+       
 
         //variant cycling
         if(activeRenderDataList && !activeRenderDataList->empty())
@@ -423,6 +441,8 @@ void LevelEditor::Update()
                     targetTile.gameObj.data = currentData;
 
                     targetTile.gameObj.direction = currentDirection;
+
+                    targetTile.paletteIndex = currentPalette;
                 }
             }
         }
@@ -592,7 +612,12 @@ void LevelEditor::Draw()
     TileRange cameraTileRange = CalculateTileRange(
         camera.target.x, camera.target.y, 100
     );
-    
+
+    lastPaletteIndex = -1;
+    lastPaletteList = nullptr;
+
+    BeginShaderMode(paletteShader);
+
     for(int l = 0; l < LAYERS; l++)
     {
         for(int i = cameraTileRange.startX; i <= cameraTileRange.endX; i++)
@@ -638,7 +663,7 @@ void LevelEditor::Draw()
 
                 if(tile.textureIndex < 0 || !tileRenderData)
                 {
-                    if(IsColorOf(color, BLANK)) continue;
+                    rlDrawRenderBatchActive();
 
                     if(tile.type == TileType::ROTATING_SPIKE_SINGLE ||
                     tile.type == TileType::ROTATING_SPIKE_DOUBLE)
@@ -668,6 +693,10 @@ void LevelEditor::Draw()
                 }
                 else
                 {
+                    std::vector<std::array<Color, MAX_PALETTE_COLS>>* currentTilePaletteList = GetCurrentTilePaletteList(type);
+
+                    ChangePalette(tile.paletteIndex, currentTilePaletteList);
+
                     DrawSprite(tile.gameObj, tileRenderData, tile.textureIndex, layerTint);
                 }
             }
@@ -712,6 +741,8 @@ void LevelEditor::Draw()
 
         if(currentTexture < 0 || !activeRenderData)
         {
+            rlDrawRenderBatchActive();
+
             if(currentTileType == (int)TileType::ROTATING_SPIKE_SINGLE ||
             currentTileType == (int)TileType::ROTATING_SPIKE_DOUBLE)
             {
@@ -737,15 +768,26 @@ void LevelEditor::Draw()
                     previewColor
                 );
             }
+
+            lastPaletteIndex = -1;
+            lastPaletteList = nullptr;
         }
         else
         {
+            rlDrawRenderBatchActive();
+
             previewColor = WHITE;
             previewColor.a = 100;
 
+            SetShaderPalette(paletteShader, paletteLoc, currentPaletteColors);
+
             DrawSprite(previewTransform, activeRenderData, currentData, currentTexture, previewColor);
+
+            rlDrawRenderBatchActive();
         }
     }
+
+    EndShaderMode();
 
     if(roomMode) DrawCircle(targetNeigbourPos.x, targetNeigbourPos.y, 20, RED);
     
@@ -809,9 +851,9 @@ void LevelEditor::Draw()
 
     case FOREGROUND_LAYER: layerText = "FOREGROUND"; break;
 
-    case GAMEPLAY_LAYER_START: layerText = "LAYER 1"; break;
+    case GAMEPLAY_LAYER_START: layerText = "GAMEPLAY 1"; break;
 
-    case GAMEPLAY_LAYER_END: layerText = "LAYER 2"; break;
+    case GAMEPLAY_LAYER_END: layerText = "GAMEPLAY 2"; break;
     
     default: break;
     }
@@ -826,4 +868,33 @@ void LevelEditor::Draw()
     DrawText(GetDirectionText(currentDirection), 10, ypos + spacing * 8, 20, RED);
 
     DrawText(TextFormat("room mode: %i", roomMode), 10, ypos + spacing * 9, 20, DARKGREEN);
+
+    DrawText(TextFormat("current palette: %i", currentPalette), 10, ypos + spacing * 10, 20, DARKGREEN);
+
+    int size = 20;
+    int offsetY = size;
+
+    for(int y = 0; y < spritePalettes.size(); y++)
+    {
+        for(int x = 0; x < MAX_PALETTE_COLS; x++)
+        {
+            Color colorToDraw = spritePalettes[y][x];
+
+            int offsetX = GetScreenWidth() - (int)(environmentPalettes.size() * size * 1.25f);
+
+            DrawRectangle(offsetX + (x * size), offsetY + (y * size), size, size, colorToDraw);
+        }
+    }
+
+    for(int y = 0; y < environmentPalettes.size(); y++)
+    {
+        for(int x = 0; x < MAX_PALETTE_COLS; x++)
+        {
+            Color colorToDraw = environmentPalettes[y][x];
+
+            int offsetX = GetScreenWidth() - (int)(environmentPalettes.size() * size * 0.5f);
+
+            DrawRectangle(offsetX + (x * size), offsetY + (y * size), size, size, colorToDraw);
+        }
+    }
 }

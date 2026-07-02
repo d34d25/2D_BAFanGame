@@ -8,8 +8,6 @@ Level::~Level()
     ClearTileMatrix();
 
     ClearPlatformList();
-
-    UnloadAssets();
 }
 
 void Level::InitLevel(const char* levelPath, const char* roomPath ,float dt, int iterations)
@@ -129,6 +127,7 @@ void Level::InitLevel(const char* levelPath, const char* roomPath ,float dt, int
                     enemy.InitEnemy(
                         tile->gameObj.transform.position,
                         tile->gameObj.data,
+                        tile->paletteIndex,
                         gravity
                     );
 
@@ -1502,6 +1501,11 @@ void Level::DrawLevel()
         rangeLimits.maxX, rangeLimits.maxY
     );
 
+    lastPaletteIndex = -1;
+    lastPaletteList = nullptr;
+
+    BeginShaderMode(paletteShader);
+
     //background
 
     for(int i = playerTileRange.startX; i <= playerTileRange.endX; i++)
@@ -1516,6 +1520,8 @@ void Level::DrawLevel()
 
             if(tileRenderData)
             {
+                ChangePalette(tile.paletteIndex, &environmentPalettes);
+
                 if(tile.currentFrame >= 0 && tile.currentFrame < (int)tileRenderData->animationFrames.size())
                 {
                     DrawSprite(tile.gameObj, tileRenderData, tile.currentFrame);
@@ -1540,6 +1546,8 @@ void Level::DrawLevel()
 
                 if(tileRenderData)
                 {
+                    ChangePalette(tile.paletteIndex, &environmentPalettes);
+
                     if(tile.currentFrame >= 0 && tile.currentFrame < (int)tileRenderData->animationFrames.size())
                     {
                         DrawSprite(tile.gameObj, tileRenderData, tile.currentFrame);
@@ -1601,11 +1609,17 @@ void Level::DrawLevel()
         if(!enemy->enemyRenderData) DrawRectangleRec(enemy->gameObj.GetMainAABB(), enemy->testColor);
         else
         {
+            ChangePalette(enemy->characterPaletteIndex, &spritePalettes);
+
             DrawSprite(enemy->gameObj, enemy->enemyRenderData, enemy->characterCurrentFrame);
         }
 
+        ChangePalette(enemy->weaponPaletteIndex, &spritePalettes);
+
         DrawSprite(enemy->gameObj, enemy->weaponRenderData, enemy->weaponCurrentFrame);
     }
+
+    ChangePalette(player.characterCurrentPalette, &spritePalettes);
 
     DrawSprite(player.gameObj, player.characterRenderData, player.characterCurrentFrame);
 
@@ -1646,6 +1660,8 @@ void Level::DrawLevel()
         }
     }
 
+    ChangePalette(player.weaponCurrentPalette, &spritePalettes);
+
     DrawSprite(player.gameObj, player.weaponRenderData, player.weaponCurrentFrame);
 
     //foreground
@@ -1661,6 +1677,8 @@ void Level::DrawLevel()
 
             if(tileRenderData)
             {
+                ChangePalette(tile.paletteIndex, &environmentPalettes);
+
                 if(tile.currentFrame >= 0 && tile.currentFrame < (int)tileRenderData->animationFrames.size())
                 {
                     DrawSprite(tile.gameObj, tileRenderData, tile.currentFrame);
@@ -1668,6 +1686,8 @@ void Level::DrawLevel()
             }
         }
     }
+
+    EndShaderMode();
 
     if(debugDrawing) DebugDrawing();
 

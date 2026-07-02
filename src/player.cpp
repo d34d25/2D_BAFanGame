@@ -59,6 +59,9 @@ void Player::InitPlayer(Vector2 position, float gravity, bool flipY)
         bulletData.mainColor = MOMOI_PINK;
         bulletData.backColor = MOMOI_PINK_BG;
 
+        characterCurrentPalette = 1;
+        weaponCurrentPalette = 1;
+
         break;
     case Character::MIDORI:
 
@@ -67,6 +70,9 @@ void Player::InitPlayer(Vector2 position, float gravity, bool flipY)
 
         bulletData.mainColor = MIDORI_GREEN;
         bulletData.backColor = MIDORI_GREEN_BG;
+
+        characterCurrentPalette = 2;
+        weaponCurrentPalette = 2;
 
         break;
     case Character::YUZU:
@@ -82,6 +88,9 @@ void Player::InitPlayer(Vector2 position, float gravity, bool flipY)
         bulletData.backColor = YUZU_COLOR_BG;
 
         bulletData.explodes = true;
+
+        characterCurrentPalette = 0;
+        weaponCurrentPalette = 1;
 
         break;
     case Character::YUZU_BATTLE:
@@ -99,6 +108,9 @@ void Player::InitPlayer(Vector2 position, float gravity, bool flipY)
         bulletData.backColor = YUZU_COLOR_BG;
 
         bulletData.explodes = true;
+
+        characterCurrentPalette = 0;
+        weaponCurrentPalette = 1;
         
         break;
     case Character::ARIS:
@@ -112,6 +124,9 @@ void Player::InitPlayer(Vector2 position, float gravity, bool flipY)
         bulletData.backColor = ARIS_PURPLE_BG;
 
         bulletData.piercing = true;
+
+        characterCurrentPalette = 3;
+        weaponCurrentPalette = 3;
 
         break;
     case Character::MOMOI_CHAQUENA:

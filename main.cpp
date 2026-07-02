@@ -32,6 +32,8 @@ int main()
 
     SetTargetFPS(60);
 
+    LoadAssets();
+
     float accumulator = 0.0f;
     float fixedDt = 1.0f / 60.0f;
 
@@ -215,6 +217,11 @@ int main()
     std::cout<<"total player enemy physics cache count: "<<testLevel->GetEnemyCache_Physics()<<"\n";
 
     std::cout<<"\n";
+
+    testLevel.reset();
+    editor.reset();
+
+    UnloadAssets();
 
     UnloadRenderTexture(gameplayCanvas);
 

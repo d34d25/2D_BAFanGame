@@ -43,6 +43,10 @@ public:
 
     int weaponVariantIndex = 0;
 
+    int characterCurrentPalette = 0;
+
+    int weaponCurrentPalette = 0;
+
     float gravity = 500;
 
     //previous frame flags

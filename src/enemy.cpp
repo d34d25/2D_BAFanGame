@@ -341,6 +341,7 @@ void Enemy::Shoot(float dt)
 void Enemy::InitEnemy(
     const Vector2& spawnPos,
     const EntityData& data,
+    int paletteIndex,
     float gravity,
     int frameskip
 )
@@ -401,6 +402,10 @@ void Enemy::InitEnemy(
         bulletData.radius = 6.0f;
 
         bulletData.lifeTime = 4.0f;
+
+        characterPaletteIndex = paletteIndex;
+
+        weaponPaletteIndex = paletteIndex;
     }
     break;
     

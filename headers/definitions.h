@@ -64,16 +64,38 @@ static constexpr int SINGLE_ROTATING_SPIKE_MAX_HITBOX = 6; //6
 
 static constexpr int DOUBLE_ROTATING_SPIKE_MAX_HITBOX = 4;
 
-const float GRAVITY = 3500.0f;
-
-//these colors can be re used for futures tiles / platforms
-
-//static constexpr Color ONE_WAY_RIGHT = Color{0, 200,190,255};
-
-//static constexpr Color ONE_WAY_LEFT = Color{0, 230,160,255};
+static constexpr float GRAVITY = 3500.0f;
 
 
-static constexpr Color GBC_GRAY = Color{148,148,148,255};
+static constexpr int MAX_PALETTE_ROWS = 8; //number of squares
+
+static constexpr int MAX_PALETTE_COLS = 4; //number of squares
+
+//GBC COLORS
+
+static constexpr Color GBC_WHITE = Color{255,255,255,255};
+
+static constexpr Color GBC_LIGHT_GRAY = Color{165,165,165,255};
+
+static constexpr Color GBC_DARK_GRAY = Color{82,82,82,255};
+
+static constexpr Color GBC_BLACK = Color{0,0,0,255};
+
+
 static constexpr Color GBC_DARK_VIOLET = Color{91,49,91,255};
+
+static constexpr Color GBC_RED = Color{230,0,0,255};
+
+static constexpr Color GBC_MAGENTA = Color{255,0,254,255};
+
 static constexpr Color GBC_SKY_BLUE = Color{100,165,255,255};
-static constexpr Color GBC_PALE_VIOLET = Color{147,148,254,255};
+
+static constexpr Color GBC_PALE_YELLOW = Color{255,255,165,255};
+
+static constexpr Color GBC_DARKEST_BROWN = Color{58,40,2,255};
+
+static constexpr Color GBC_DARK_BROWN = Color{131,49,0,255};
+
+static constexpr Color GBC_BROWN = Color{165,107,49,255};
+
+static constexpr Color GBC_DULL_TURQUOISE = Color{101,164,155,255};

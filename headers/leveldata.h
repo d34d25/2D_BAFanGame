@@ -8,9 +8,13 @@
 
 #include <vector>
 
+#include <array>
+
 #include <cstring>
 
 #include <string>
+
+#include "rlgl.h"
 
 struct TileRange
 {
@@ -249,6 +253,8 @@ struct Tile
     int textureIndex = 0;
 
     int variantIndex = 0;
+
+    int paletteIndex = 0;
     
     bool isJumpTrigger = false;
 
@@ -361,6 +367,22 @@ inline Vector2 GetTileCenter(int i, int j)
 {
     return {i * GRID_SIZE + GRID_SIZE * 0.5f, j * GRID_SIZE + GRID_SIZE * 0.5f};
 }
+
+//palettes
+
+extern std::vector<std::array<Color, MAX_PALETTE_COLS>> spritePalettes;
+
+extern std::vector<std::array<Color, MAX_PALETTE_COLS>> environmentPalettes;
+
+//shader
+
+extern Shader paletteShader;
+
+extern int paletteLoc;
+
+extern int lastPaletteIndex;
+
+extern const std::vector<std::array<Color, MAX_PALETTE_COLS>>* lastPaletteList;
 
 //textures
 
@@ -669,4 +691,67 @@ inline void LoadLevelData(const char* levelPath, Tile(&destination)[LAYERS][COLS
     }
 
     UnloadFileData(roomFileData);
+}
+
+inline std::vector<std::array<Color, 4>> LoadPalette(const char* palettePath)
+{
+    std::vector<std::array<Color, 4>> paletteList = {};
+
+    paletteList.reserve(8);
+
+    const int SQUARE_SIZE = 4; //pixels
+
+    const int GAP = 1; //pixels
+
+    const int STEP = SQUARE_SIZE + GAP;
+
+    Image palleteImg = LoadImage(palettePath);
+
+    Color pixelColor = BLANK;
+
+    for(int y = 0; y < MAX_PALETTE_ROWS; y++)
+    {
+        std::array<Color, MAX_PALETTE_COLS> currentPalette;
+
+        for(int x = 0; x < MAX_PALETTE_COLS; x++)
+        {
+            int squareX = x * STEP;
+            int squareY = y * STEP;
+
+            int pixelX = squareX + 1;
+            int pixelY = squareY + 1;
+            
+            currentPalette[x] = GetImageColor(palleteImg, pixelX, pixelY);
+        }
+
+        paletteList.push_back(currentPalette);
+    }
+
+    UnloadImage(palleteImg);
+
+    return paletteList;
+}
+
+inline std::vector<std::array<Color, 4>>* GetCurrentTilePaletteList(TileType type)
+{
+    if(type > TileType::ENEMY_START && type < TileType::ENEMY_END) return &spritePalettes;
+    else return &environmentPalettes;
+
+    return nullptr;
+}
+
+inline void ChangePalette(int paletteIndex, std::vector<std::array<Color, 4>>* paletteList)
+{
+    if(paletteIndex >= 0 && paletteIndex < (int)paletteList->size())
+    {
+        if(paletteIndex != lastPaletteIndex || paletteList != lastPaletteList)
+        {   
+            rlDrawRenderBatchActive();       
+
+            SetShaderPalette(paletteShader, paletteLoc, paletteList->at(paletteIndex));
+            
+            lastPaletteIndex = paletteIndex;
+            lastPaletteList = paletteList;
+        }
+    }
 }

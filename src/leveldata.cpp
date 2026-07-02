@@ -6,6 +6,20 @@
 
 static std::map<std::string, Texture2D> textureCache = {};
 
+std::vector<std::array<Color, MAX_PALETTE_COLS>> spritePalettes = {};
+
+std::vector<std::array<Color, MAX_PALETTE_COLS>> environmentPalettes = {};
+
+//shader
+
+Shader paletteShader = {0};
+
+int paletteLoc = -1;
+
+int lastPaletteIndex = -1;
+
+const std::vector<std::array<Color, MAX_PALETTE_COLS>>* lastPaletteList = nullptr;
+
 //tiles
 std::vector<SpriteRenderData> solidTilesRenderData = {};
 
@@ -151,157 +165,48 @@ end atlas frame is the right side
 
 void LoadAssets()
 {
+    spritePalettes = LoadPalette("assets/sprite-pallet-set.png");
+
+    environmentPalettes = LoadPalette("assets/environment-pallet-set.png");
+
+    paletteShader = LoadShader(nullptr, "shaders/palette.fs");
+    paletteLoc = GetShaderLocation(paletteShader, "uPalette");
+   
     Vector2 tileSize = {12,12};
 
     //tiles
 
     const int TOTAL_COLUMNS_FILES = 12;
 
-    for(int i = 1; i <= TOTAL_COLUMNS_FILES; i++)
-    {
-        std::string filepath = "assets/tiles/solid/columns-" + std::to_string(i) + ".png";
-
-        solidTilesRenderData.push_back(LoadRenderData(
-            filepath.c_str(), tileSize
-        ));
-    }
-
-    const int TOTAL_YELLOW_COLUMNS_FILES = 13;
-
-    for(int i = 1; i <= TOTAL_YELLOW_COLUMNS_FILES; i++)
-    {
-        std::string filepath = "assets/tiles/solid/yellow-columns-" + std::to_string(i) + ".png";
-
-        solidTilesRenderData.push_back(LoadRenderData(
-            filepath.c_str(), tileSize
-        ));
-    }
-
-    const int TOTAL_BLOCKS_FILES = 8;
-
-    for(int i = 1; i <= TOTAL_BLOCKS_FILES; i++)
-    {
-        std::string filepath = "assets/tiles/solid/blocks-" + std::to_string(i) + ".png";
-
-        solidTilesRenderData.push_back(LoadRenderData(
-            filepath.c_str(), tileSize
-        ));
-    }
-
-    const int TOTAL_YELLOW_BLOCKS_FILES = 10;
-
-    for(int i = 1; i <= TOTAL_YELLOW_BLOCKS_FILES; i++)
-    {
-        std::string filepath = "assets/tiles/solid/yellow-blocks-" + std::to_string(i) + ".png";
-
-        solidTilesRenderData.push_back(LoadRenderData(
-            filepath.c_str(), tileSize
-        ));
-    }
-
     solidTilesRenderData.push_back(LoadRenderData(
-        "assets/tiles/solid/block-panels.png", tileSize
-    ));
-
-    decoRenderData.push_back(LoadRenderData(
-        "assets/tiles/solid/block-panels.png", tileSize
-    ));
-
-    solidTilesRenderData.push_back(LoadRenderData(
-        "assets/tiles/solid/yellow-block-panels.png", tileSize
-    ));
-
-    solidTilesRenderData.push_back(LoadRenderData(
-        "assets/tiles/solid/fixed-color-tiles.png", tileSize
+            "assets/tiles/solid/columns.png", tileSize
     ));
 
     ladderRenderData.push_back(LoadRenderData("assets/tiles/ladder.png", tileSize));
 
-    //panels
-
-    float panelAnimationSpeed = 4.25f;
-
-    Vector2 dTileSize = Vector2Scale(tileSize, 2);
+    //decoration
 
     decoRenderData.push_back(LoadRenderData(
-        "assets/tiles/deco/filler-blocks-a.png", dTileSize, dTileSize
-    ));
-    
-    decoRenderData.push_back(LoadRenderData(
-        "assets/tiles/deco/filler-blocks-b.png", dTileSize, dTileSize
+        "assets/tiles/deco/gdd-cat-gbc.png",
+        {35,29},{0,0},
+        1,
+        0,4
     ));
 
     decoRenderData.push_back(LoadRenderData(
-        "assets/tiles/deco/filler-blocks-c.png", dTileSize, dTileSize
+        "assets/tiles/deco/panels.png",
+        tileSize,{0,0},
+        1,
+        0,4
     ));
 
     decoRenderData.push_back(LoadRenderData(
-        "assets/tiles/deco/filler-blocks-d.png", dTileSize, dTileSize
+        "assets/tiles/deco/shadows.png",
+        tileSize,{0,0},
+        1,
+        0,4
     ));
 
-    decoRenderData.push_back(LoadRenderData(
-        "assets/tiles/deco/filler-blocks-e.png", dTileSize, dTileSize
-    ));
-
-    decoRenderData.push_back(LoadRenderData(
-        "assets/tiles/deco/filler-blocks-f.png", dTileSize, dTileSize
-    ));
-
-    decoRenderData.push_back(LoadRenderData(
-        "assets/tiles/deco/filler-blocks-g.png", dTileSize, dTileSize
-    ));
-
-    decoRenderData.push_back(LoadRenderData(
-        "assets/tiles/deco/shadows.png", tileSize
-    ));
-
-    decoRenderData.push_back(LoadRenderData(
-        "assets/tiles/deco/gdd-cat-gbc.png", {35,29}
-    ));
-
-    int panelSpacing = 12;
-
-    solidTilesRenderData.push_back(LoadRenderData(
-        "assets/tiles/solid/animated-panels.png",
-        tileSize, {0,0}, panelSpacing,
-        0, 12,
-        panelAnimationSpeed
-    ));
-
-    solidTilesRenderData.push_back(LoadRenderData(
-        "assets/tiles/solid/animated-panels.png",
-        tileSize, {0,0}, panelSpacing,
-        12, 24,
-        panelAnimationSpeed
-    ));
-
-    solidTilesRenderData.push_back(LoadRenderData(
-        "assets/tiles/solid/animated-panels.png",
-        tileSize, {0,0}, panelSpacing,
-        24, 36,
-        panelAnimationSpeed
-    ));
-
-    solidTilesRenderData.push_back(LoadRenderData(
-        "assets/tiles/solid/animated-panels.png",
-        tileSize, {0,0}, panelSpacing,
-        36, 48,
-        panelAnimationSpeed
-    ));
-
-    solidTilesRenderData.push_back(LoadRenderData(
-        "assets/tiles/solid/animated-panels.png",
-        tileSize, {0,0}, panelSpacing,
-        48, 60,
-        panelAnimationSpeed
-    ));
-
-    solidTilesRenderData.push_back(LoadRenderData(
-        "assets/tiles/solid/animated-panels.png",
-        tileSize, {0,0}, panelSpacing,
-        60, 72,
-        panelAnimationSpeed
-    ));
 
     //spikes
 
@@ -334,15 +239,6 @@ void LoadAssets()
     ));
 
     //treadmills
-
-    //decoration
-
-    decoRenderData.push_back(LoadRenderData(
-        "assets/tiles/deco/shadows.png",
-        tileSize,{0,0},
-        1,
-        0,4
-    ));
 
     //wind tiles
 
@@ -387,7 +283,7 @@ void LoadAssets()
     //player
 
     momoiRenderData.push_back(LoadRenderData(
-        "assets/characters/momoi-gbc-spritesheet.png",
+        "assets/characters/momoi-midori-gbc-spritesheet.png",
         {13.0f, 24.0f},
         {0.0f, -11.0f},
         1,0,0, 
@@ -403,7 +299,7 @@ void LoadAssets()
     ));
 
     midoriRenderData.push_back(LoadRenderData(
-        "assets/characters/midori-gbc-spritesheet.png",
+        "assets/characters/momoi-midori-gbc-spritesheet.png",
         {13.0f, 24.0f},
         {0.0f, -11.0f},
         1,0,0, 
@@ -540,4 +436,6 @@ void UnloadAssets()
 
     CleanUp(yuzuWeaponRenderData);
     CleanUp(arisWeaponRenderData);
+
+    UnloadShader(paletteShader);
 }

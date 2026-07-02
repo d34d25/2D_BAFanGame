@@ -3,6 +3,8 @@
 #include "raylib.h"
 #include "entity.h"
 
+#include "array"
+
 inline void DrawAABB(Rectangle aabb, Color color, float thickness = 1.0f)
 {
     //up-left to up-right
@@ -227,4 +229,19 @@ inline void DrawExplosion(int x, int y, float radius, SpriteRenderData* renderDa
     {
         DrawCircleLines(x, y, radius, RED);
     }
+}
+
+inline void SetShaderPalette(Shader shader, int location, const std::array<Color, 4>& palette)
+{
+    float floats[16];
+
+    for(size_t i = 0; i < palette.size(); i++)
+    {
+        floats[i * MAX_PALETTE_COLS + 0] = (float)palette[i].r / 255.0f;
+        floats[i * MAX_PALETTE_COLS + 1] = (float)palette[i].g / 255.0f;
+        floats[i * MAX_PALETTE_COLS + 2] = (float)palette[i].b / 255.0f;
+        floats[i * MAX_PALETTE_COLS + 3] = (float)palette[i].a / 255.0f;
+    }
+
+    SetShaderValueV(shader, location, floats, SHADER_UNIFORM_VEC4, 4);
 }

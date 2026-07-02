@@ -113,6 +113,10 @@ public:
 
     int weaponVariantIndex = 0;
 
+    int characterPaletteIndex = 0;
+
+    int weaponPaletteIndex = 0;
+
     //
 
     int aiFrameskip = 2;
@@ -126,6 +130,7 @@ public:
     void InitEnemy(
         const Vector2& spawnPos,
         const EntityData& data,
+        int paletteIndex,
         float gravity,
         int frameskip = 2
     );
