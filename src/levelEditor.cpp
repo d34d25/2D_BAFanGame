@@ -29,7 +29,7 @@ void LevelEditor::ExportLevel()
     }
 }
 
-void LevelEditor::DrawRotatingSpikes(int currentType, Vector2 position, float size, EntityData data, Color color)
+void LevelEditor::DrawRotatingSpikesRec(int currentType, Vector2 position, float size, EntityData data, Color color)
 {
     switch (currentType)
     {
@@ -91,6 +91,67 @@ void LevelEditor::DrawRotatingSpikes(int currentType, Vector2 position, float si
     
     default:
         break;
+    }
+}
+
+void LevelEditor::DrawRotatingSpikesSprite(int currentType, int frame, const SpriteRenderData& renderData, Vector2 position, float size, const EntityData& data)
+{
+    switch (currentType)
+    {
+    
+    case (int)TileType::ROTATING_SPIKE_DOUBLE:
+    {
+        for(int i = 0; i < SINGLE_ROTATING_SPIKE_MAX_HITBOX * 2; i++)
+        {
+            if(i == SINGLE_ROTATING_SPIKE_MAX_HITBOX) continue;
+
+            float size = GRID_SIZE * 0.5f;
+
+            Vector2 currentOffset = {0,0};
+
+            float armSide = (i < SINGLE_ROTATING_SPIKE_MAX_HITBOX) ? 1.0f : -1.0f;
+
+            int localI = i % SINGLE_ROTATING_SPIKE_MAX_HITBOX;
+
+            if(localI > 0)
+            {
+                float multiplier = (float)localI * size * armSide;
+
+                currentOffset.x = data.flipX ? -multiplier : multiplier;
+                currentOffset.y = data.flipY ? multiplier : -multiplier;
+            }
+
+            float xPos = position.x - (size * 0.5f) + currentOffset.x;
+            float yPos = position.y - (size * 0.5f) + currentOffset.y;
+
+            DrawSprite(&renderData, xPos, yPos, frame, data.flipX, data.flipY, WHITE);
+        }
+    }
+    break;
+
+    case (int)TileType::ROTATING_SPIKE_SINGLE:
+    {
+        for(int i = 0; i < SINGLE_ROTATING_SPIKE_MAX_HITBOX; i++)
+        {
+            Vector2 currentOffset = {0,0};
+
+            if(i > 0)
+            {
+                float multiplier = (float)i * size;
+
+                currentOffset.x = data.flipX ? -multiplier : multiplier;
+                currentOffset.y = data.flipY ? multiplier : -multiplier;
+            }
+
+            float xPos = position.x - (size * 0.5f) + currentOffset.x;
+            float yPos = position.y - (size * 0.5f) + currentOffset.y;
+
+            DrawSprite(&renderData, xPos, yPos, frame, data.flipX, data.flipY, WHITE);
+        }
+    }
+    break;
+    
+    default: break;
     }
 }
 
@@ -181,6 +242,35 @@ void LevelEditor::Update()
 
     if(IsKeyPressed(KEY_R)) roomMode = !roomMode;
 
+    if(!environmentPalettes.empty())
+        {
+        if(IsKeyPressed(KEY_UP))
+        {
+            currentBackgroundPalette++;
+
+            if(currentBackgroundPalette >= environmentPalettes.size()) currentBackgroundPalette = 0;
+        }
+        else if(IsKeyPressed(KEY_DOWN))
+        {
+            currentBackgroundPalette--;
+
+            if(currentBackgroundPalette < 0) currentBackgroundPalette = environmentPalettes.size() - 1;
+        }
+
+        if(IsKeyPressed(KEY_RIGHT))
+        {
+            currentBackgroundColor++;
+
+            if(currentBackgroundColor >= environmentPalettes.at(currentBackgroundPalette).size()) currentBackgroundColor = 0;
+        }
+        else if(IsKeyPressed(KEY_LEFT))
+        {
+            currentBackgroundColor--;
+
+            if(currentBackgroundColor < 0) currentBackgroundColor = environmentPalettes.at(currentBackgroundPalette).size() - 1;
+        }
+    }
+
     if(!roomMode)
     {
         if(IsNumKeyPressed())
@@ -256,7 +346,6 @@ void LevelEditor::Update()
 
             currentPaletteColors = activePaletteList->at(currentPalette);
         }
-       
 
         //variant cycling
         if(activeRenderDataList && !activeRenderDataList->empty())
@@ -558,6 +647,12 @@ void LevelEditor::Update()
                 }
             }
 
+            if(IsKeyPressed(KEY_B))
+            {
+                rooms[hoveredRoomIndex].currentPaletteIndex = currentBackgroundPalette;
+                rooms[hoveredRoomIndex].currentColorIndex = currentBackgroundColor;
+            }
+
             if(IsMouseButtonPressed(MOUSE_BUTTON_RIGHT))
             {
                 Rectangle roomToSplit = rooms[hoveredRoomIndex].aabb;
@@ -575,6 +670,7 @@ void LevelEditor::Update()
                     for(int j = 0; j < colsInRoom; j++)
                     {
                         Room unitRoom;
+
                         unitRoom.aabb = {
                             roomToSplit.x + (j * roomWidth),
                             roomToSplit.y + (i * roomHeight),
@@ -607,6 +703,8 @@ void LevelEditor::Draw()
     int halfWorldWidth = (int)floor(worldWidth * 0.5f);
     int halfWorldHeight = (int)floor(worldHeight * 0.5f);
 
+    Color backgroundColor = environmentPalettes.at(currentBackgroundPalette).at(currentBackgroundColor);
+
     BeginMode2D(camera);
 
     TileRange cameraTileRange = CalculateTileRange(
@@ -615,6 +713,13 @@ void LevelEditor::Draw()
 
     lastPaletteIndex = -1;
     lastPaletteList = nullptr;
+
+    ClearBackground(GRAY);
+
+    for(int i = 0; i < rooms.size(); i++)
+    {
+        DrawRectangleRec(rooms[i].aabb, environmentPalettes.at(rooms[i].currentPaletteIndex).at(rooms[i].currentColorIndex));
+    }
 
     BeginShaderMode(paletteShader);
 
@@ -668,7 +773,7 @@ void LevelEditor::Draw()
                     if(tile.type == TileType::ROTATING_SPIKE_SINGLE ||
                     tile.type == TileType::ROTATING_SPIKE_DOUBLE)
                     {
-                        DrawRotatingSpikes((int)tile.type, tile.gameObj.transform.position, GRID_SIZE * 0.5f, tile.gameObj.data, {color.r, color.g, color.b, alpha});
+                        DrawRotatingSpikesRec((int)tile.type, tile.gameObj.transform.position, GRID_SIZE * 0.5f, tile.gameObj.data, {color.r, color.g, color.b, alpha});
                     }
                     else
                     {
@@ -697,7 +802,22 @@ void LevelEditor::Draw()
 
                     ChangePalette(tile.paletteIndex, currentTilePaletteList);
 
-                    DrawSprite(tile.gameObj, tileRenderData, tile.textureIndex, layerTint);
+                    if(tile.type == TileType::ROTATING_SPIKE_SINGLE ||
+                    tile.type == TileType::ROTATING_SPIKE_DOUBLE)
+                    {
+                        DrawRotatingSpikesSprite(
+                            (int)tile.type,
+                            tile.textureIndex,
+                            *tileRenderData,
+                            tile.gameObj.transform.position,
+                            GRID_SIZE * 0.5f,
+                            tile.gameObj.data
+                        );
+                    }
+                    else
+                    {
+                        DrawSprite(tile.gameObj, tileRenderData, tile.textureIndex, layerTint);
+                    }
                 }
             }
         }
@@ -746,7 +866,7 @@ void LevelEditor::Draw()
             if(currentTileType == (int)TileType::ROTATING_SPIKE_SINGLE ||
             currentTileType == (int)TileType::ROTATING_SPIKE_DOUBLE)
             {
-                DrawRotatingSpikes(currentTileType, previewTransform.position, GRID_SIZE * 0.5f, currentData, previewColor);
+                DrawRotatingSpikesRec(currentTileType, previewTransform.position, GRID_SIZE * 0.5f, currentData, previewColor);
             }
             else
             {
@@ -781,8 +901,24 @@ void LevelEditor::Draw()
 
             SetShaderPalette(paletteShader, paletteLoc, currentPaletteColors);
 
-            DrawSprite(previewTransform, activeRenderData, currentData, currentTexture, previewColor);
-
+            if(currentTileType == (int)TileType::ROTATING_SPIKE_SINGLE ||
+                currentTileType == (int)TileType::ROTATING_SPIKE_DOUBLE)
+            
+            {
+                DrawRotatingSpikesSprite(
+                    currentTileType,
+                    currentTexture,
+                    *activeRenderData,
+                    previewTransform.position,
+                    GRID_SIZE * 0.5f,
+                    currentData
+                );
+            }
+            else
+            {
+                DrawSprite(previewTransform, activeRenderData, currentData, currentTexture, previewColor);
+            }
+            
             rlDrawRenderBatchActive();
         }
     }
@@ -836,12 +972,13 @@ void LevelEditor::Draw()
     int ypos = 50;
     int spacing = 30;
 
-    DrawText(TextFormat("mouse x: %i", mouseMatrixPosition.x), 10, ypos, 20, BLACK);
+    DrawText(TextFormat("mouse x: %i", mouseMatrixPosition.x), GRID_SIZE, ypos, 20, WHITE);
 
-    DrawText(TextFormat("mouse y: %i", mouseMatrixPosition.y), 10, ypos + spacing, 20, BLACK);
+    DrawText(TextFormat("mouse y: %i", mouseMatrixPosition.y), GRID_SIZE, ypos + spacing, 20, WHITE);
 
-    DrawText(GetTileTypeText((TileType)currentTileType), 10, ypos + spacing * 2, 20, BLACK);
-    DrawText(TextFormat("tileType: %i", currentTileType ), 10, ypos + spacing * 3,20,BLACK);
+    DrawText(GetTileTypeText((TileType)currentTileType), GRID_SIZE, ypos + spacing * 2, 20, WHITE);
+    
+    DrawText(TextFormat("tileType: %i", currentTileType ), GRID_SIZE, ypos + spacing * 3,20,WHITE);
 
     const char* layerText = "";
 
@@ -858,18 +995,20 @@ void LevelEditor::Draw()
     default: break;
     }
 
-    DrawText(TextFormat("current layer: %s", layerText), 10, ypos + spacing * 4, 20, RED);
+    DrawRectangle(0,0, GRID_SIZE, GRID_SIZE, backgroundColor);
 
-    DrawText(TextFormat("current angle: %i", currentAngle), 10, ypos + spacing * 5, 20, RED);
+    DrawText(TextFormat("current layer: %s", layerText), GRID_SIZE, ypos + spacing * 4, 20, RED);
 
-    DrawText(TextFormat("current flip x: %i", currentData.flipX), 10, ypos + spacing * 6, 20, RED);
-    DrawText(TextFormat("current flip y: %i", currentData.flipY), 10, ypos + spacing * 7, 20, RED);
+    DrawText(TextFormat("current angle: %i", currentAngle), GRID_SIZE, ypos + spacing * 5, 20, RED);
 
-    DrawText(GetDirectionText(currentDirection), 10, ypos + spacing * 8, 20, RED);
+    DrawText(TextFormat("current flip x: %i", currentData.flipX), GRID_SIZE, ypos + spacing * 6, 20, RED);
+    DrawText(TextFormat("current flip y: %i", currentData.flipY), GRID_SIZE, ypos + spacing * 7, 20, RED);
 
-    DrawText(TextFormat("room mode: %i", roomMode), 10, ypos + spacing * 9, 20, DARKGREEN);
+    DrawText(GetDirectionText(currentDirection), GRID_SIZE, ypos + spacing * 8, 20, RED);
 
-    DrawText(TextFormat("current palette: %i", currentPalette), 10, ypos + spacing * 10, 20, DARKGREEN);
+    DrawText(TextFormat("room mode: %i", roomMode), GRID_SIZE, ypos + spacing * 9, 20, GREEN);
+
+    DrawText(TextFormat("current palette: %i", currentPalette), GRID_SIZE, ypos + spacing * 10, 20, GREEN);
 
     int size = 20;
     int offsetY = size;

@@ -31,6 +31,16 @@ std::vector<SpriteRenderData> decoRenderData = {};
 
 std::vector<SpriteRenderData> ladderRenderData = {};
 
+std::vector<SpriteRenderData> windRenderData = {};
+
+std::vector<SpriteRenderData> waterRenderData = {};
+
+std::vector<SpriteRenderData> trampolineRenderData = {};
+
+std::vector<SpriteRenderData> oneWayRenderData = {};
+
+std::vector<SpriteRenderData> gravityChagerRenderData = {};
+
 //spikes
 
 std::vector<SpriteRenderData> spikeRenderData = {};
@@ -41,17 +51,13 @@ std::vector<SpriteRenderData> spikeSmallRenderData = {};
 
 std::vector<SpriteRenderData> spikeBallRenderData = {};
 
-//wind tiles
+std::vector<SpriteRenderData> horizontalMovingPlatform_RenderData = {};
 
-std::vector<SpriteRenderData> windRenderData = {};
-
-//water
-
-std::vector<SpriteRenderData> waterRenderData = {};
+std::vector<SpriteRenderData> movingSpikeRenderData = {};
 
 //platforms
 
-std::vector<SpriteRenderData> movingPlatformRenderData_Vertical = {};
+std::vector<SpriteRenderData> verticalMovingPlatform_RenderData = {};
 
 //enemies
 
@@ -179,8 +185,33 @@ void LoadAssets()
     const int TOTAL_COLUMNS_FILES = 12;
 
     solidTilesRenderData.push_back(LoadRenderData(
-            "assets/tiles/solid/columns.png", tileSize
+        "assets/tiles/solid/columns.png", tileSize
     ));
+
+    solidTilesRenderData.push_back(LoadRenderData(
+        "assets/tiles/solid/metalic-blocks.png", tileSize
+    ));
+
+    solidTilesRenderData.push_back(LoadRenderData(
+        "assets/tiles/solid/tech-tiles.png", tileSize
+    ));
+
+    solidTilesRenderData.push_back(LoadRenderData(
+        "assets/tiles/solid/warning-blocks.png", tileSize
+    ));
+
+    solidTilesRenderData.push_back(LoadRenderData(
+        "assets/tiles/solid/natural-tiles.png", tileSize
+    ));
+
+    for(int i = 0; i < 4; i++)
+    {
+        std::string blocksFilePath = "assets/tiles/solid/blocks-" + std::to_string(i) + ".png";
+
+        solidTilesRenderData.push_back(LoadRenderData(
+            blocksFilePath.c_str(), tileSize
+        ));
+    }
 
     ladderRenderData.push_back(LoadRenderData("assets/tiles/ladder.png", tileSize));
 
@@ -189,15 +220,13 @@ void LoadAssets()
     decoRenderData.push_back(LoadRenderData(
         "assets/tiles/deco/gdd-cat-gbc.png",
         {35,29},{0,0},
-        1,
-        0,4
+        1
     ));
 
     decoRenderData.push_back(LoadRenderData(
         "assets/tiles/deco/panels.png",
         tileSize,{0,0},
-        1,
-        0,4
+        1
     ));
 
     decoRenderData.push_back(LoadRenderData(
@@ -207,6 +236,19 @@ void LoadAssets()
         0,4
     ));
 
+    oneWayRenderData.push_back(LoadRenderData(
+        "assets/tiles/one-way.png", tileSize, {0,0},
+        2
+    ));
+
+    trampolineRenderData.push_back(LoadRenderData(
+        "assets/tiles/trampoline.png", tileSize
+    ));
+
+    gravityChagerRenderData.push_back(LoadRenderData(
+        "assets/tiles/gravity-changer.png", tileSize, {0,0},
+        6
+    ));
 
     //spikes
 
@@ -238,12 +280,29 @@ void LoadAssets()
         3,4
     ));
 
+    movingSpikeRenderData.push_back(LoadRenderData(
+        "assets/tiles/spikes.png", tileSize, {0,0}, 1,
+        4, 5
+    ));
+
     //treadmills
+
+    treadmillRenderData_Right.push_back(LoadRenderData(
+        "assets/tiles/treadmills.png",
+        tileSize, {0,0}, 2,
+        0, 6
+    ));
+
+    treadmillRenderData_Left.push_back(LoadRenderData(
+        "assets/tiles/treadmills.png",
+        tileSize, {0,0}, 2,
+        6, 12
+    ));
 
     //wind tiles
 
     windRenderData.push_back(LoadRenderData(
-        "assets/tiles/wind-up.png", 
+        "assets/tiles/wind.png", 
         tileSize,
         {0,0},
         3
@@ -259,6 +318,18 @@ void LoadAssets()
     ));
 
     //platforms
+
+    verticalMovingPlatform_RenderData.push_back(LoadRenderData(
+        "assets/platforms/vertical-moving-platform.png", 
+        {35, 5}, {0,0},
+        2
+    ));
+
+    horizontalMovingPlatform_RenderData.push_back(LoadRenderData(
+        "assets/platforms/horizontal-moving-platform.png", 
+        {35, 5}, {0,0},
+        2
+    ));
 
     //enemies
 

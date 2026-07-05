@@ -32,6 +32,9 @@ private:
     int currentPalette = 0;
 
     int currentAngle = 0;
+
+    int currentBackgroundColor = 0;
+    int currentBackgroundPalette = 0;
     
     std::array<Color, MAX_PALETTE_COLS> currentPaletteColors = {};
 
@@ -139,12 +142,9 @@ private:
 
     const char* roomPath;
 
-    void DrawRotatingSpikes(int currentType, Vector2 position, float size, EntityData data, Color color);
+    void DrawRotatingSpikesRec(int currentType, Vector2 position, float size, EntityData data, Color color);
 
-    inline void ResetShader()
-    {
-        
-    }
+    void DrawRotatingSpikesSprite(int currentType, int frame, const SpriteRenderData& renderData, Vector2 position, float size, const EntityData& data);
 
 public:
 

@@ -31,31 +31,31 @@ enum class TileType
     
     TILE_START,
 
-    SOLID,
+    SOLID, //texture done
 
-    ONE_WAY,
+    ONE_WAY, //texture done
 
-    TREADMILL_RIGHT,
-    TREADMILL_LEFT,
+    TREADMILL_RIGHT, //texture done
+    TREADMILL_LEFT, //texture done
 
-    TRAMPOLINE,
+    TRAMPOLINE, //texture done
     
-    GRAVITY_CHANGER,
+    GRAVITY_CHANGER, //texture done
 
-    WIND,
+    WIND, //texture done
 
-    WATER,
+    WATER, //texture done
 
-    LADDER,
+    LADDER, //texture done
 
     TILE_END,
 
     SPIKE_START,
 
-    SPIKE,
-    SPIKE_DOUBLE,
-    SPIKE_SMALL,
-    SPIKE_BALL,
+    SPIKE, //texture done
+    SPIKE_DOUBLE, //texture done
+    SPIKE_SMALL, //texture done
+    SPIKE_BALL, //texture done
 
     SPIKE_END,
 
@@ -69,29 +69,29 @@ enum class TileType
 
     MISC_END,
 
-    DECO,
+    DECO, //texture done
 
     //platforms
     PLATFORM_START,
 
-    HORIZONALT_MOVING_PLATFORM,
-    VERTICAL_MOVING_PLATFORM,
+    HORIZONALT_MOVING_PLATFORM, //texture done
+    VERTICAL_MOVING_PLATFORM, //texture done
     FALLING_PLATFORM,
     DISAPPEARING_PLATFORM,
 
-    VERTICAL_MOVING_SPIKE,
-    HORIZONTAL_MOVING_SPIKE,
+    VERTICAL_MOVING_SPIKE, //texture done
+    HORIZONTAL_MOVING_SPIKE, //texture done
 
-    ROTATING_SPIKE_SINGLE,
-    ROTATING_SPIKE_DOUBLE,
+    ROTATING_SPIKE_SINGLE, //texture done
+    ROTATING_SPIKE_DOUBLE, //texture done
 
     PLATFORM_END,
 
     ENEMY_START,
 
-    ENEMY_DUMMY,
+    ENEMY_DUMMY, //texture done
 
-    ENEMY_YUUKA,
+    ENEMY_YUUKA, //texture done
 
     ENEMY_END,
 
@@ -271,6 +271,9 @@ struct Tile
 struct Room
 {
     Rectangle aabb = {};
+
+    int currentPaletteIndex = 0;
+    int currentColorIndex = 0;
 };
 
 inline bool IsColorOf(Color colorA, Color colorB)
@@ -399,6 +402,16 @@ extern std::vector<SpriteRenderData> decoRenderData;
 
 extern std::vector<SpriteRenderData> ladderRenderData;
 
+extern std::vector<SpriteRenderData> windRenderData;
+
+extern std::vector<SpriteRenderData> waterRenderData;
+
+extern std::vector<SpriteRenderData> trampolineRenderData;
+
+extern std::vector<SpriteRenderData> oneWayRenderData;
+
+extern std::vector<SpriteRenderData> gravityChagerRenderData;
+
 //spikes
 
 extern std::vector<SpriteRenderData> spikeRenderData;
@@ -409,17 +422,13 @@ extern std::vector<SpriteRenderData> spikeSmallRenderData;
 
 extern std::vector<SpriteRenderData> spikeBallRenderData;
 
-
-//wind tiles
-extern std::vector<SpriteRenderData> windRenderData;
-
-//water
-
-extern std::vector<SpriteRenderData> waterRenderData;
+extern std::vector<SpriteRenderData> movingSpikeRenderData;
 
 //platforms
 
-extern std::vector<SpriteRenderData> movingPlatformRenderData_Vertical;
+extern std::vector<SpriteRenderData> verticalMovingPlatform_RenderData;
+
+extern std::vector<SpriteRenderData> horizontalMovingPlatform_RenderData;
 
 //enemies
 
@@ -475,6 +484,12 @@ inline std::vector<SpriteRenderData>* GetTileActiveRenderDataList(TileType type)
 
     case TileType::LADDER: return &ladderRenderData;
 
+    case TileType::ONE_WAY: return &oneWayRenderData;
+
+    case TileType::TRAMPOLINE: return &trampolineRenderData;
+
+    case TileType::GRAVITY_CHANGER: return &gravityChagerRenderData;
+
     //spikes
 
     case TileType::SPIKE: return &spikeRenderData;
@@ -484,6 +499,14 @@ inline std::vector<SpriteRenderData>* GetTileActiveRenderDataList(TileType type)
     case TileType::SPIKE_SMALL: return &spikeSmallRenderData;
 
     case TileType::SPIKE_BALL: return &spikeBallRenderData;
+
+    case TileType::VERTICAL_MOVING_SPIKE: return &movingSpikeRenderData;
+
+    case TileType::HORIZONTAL_MOVING_SPIKE: return &movingSpikeRenderData;
+
+    case TileType::ROTATING_SPIKE_SINGLE: return &movingSpikeRenderData;
+
+    case TileType::ROTATING_SPIKE_DOUBLE: return &movingSpikeRenderData;
 
     //deco
 
@@ -499,7 +522,9 @@ inline std::vector<SpriteRenderData>* GetTileActiveRenderDataList(TileType type)
     
     //platforms
 
-    case TileType::VERTICAL_MOVING_PLATFORM: return &movingPlatformRenderData_Vertical;
+    case TileType::VERTICAL_MOVING_PLATFORM: return &verticalMovingPlatform_RenderData;
+
+    case TileType::HORIZONALT_MOVING_PLATFORM: return &horizontalMovingPlatform_RenderData;
 
     //enemies 
 
@@ -527,7 +552,15 @@ inline std::vector<SpriteRenderData>* GetPlatformActiveRenderDataList(PlatformTy
 {
     switch (type)
     {
-    case PlatformType::MOVING_VERTICAL: return &movingPlatformRenderData_Vertical;
+    case PlatformType::MOVING_VERTICAL: return &verticalMovingPlatform_RenderData;
+    case PlatformType::MOVING_HORIZONTAL: return &horizontalMovingPlatform_RenderData;
+
+    //moving spikes
+    case PlatformType::MOVING_SPIKE_HORIZONTAL: return &movingSpikeRenderData;
+    case PlatformType::MOVING_SPIKE_VERTICAL: return &movingSpikeRenderData;
+    case PlatformType::ROTATING_SPIKE_SINGLE: return &movingSpikeRenderData;
+    case PlatformType::ROTATING_SPIKE_DOUBLE: return &movingSpikeRenderData;
+
     default: return nullptr;
     }
 }
@@ -746,7 +779,7 @@ inline void ChangePalette(int paletteIndex, std::vector<std::array<Color, 4>>* p
     {
         if(paletteIndex != lastPaletteIndex || paletteList != lastPaletteList)
         {   
-            rlDrawRenderBatchActive();       
+            rlDrawRenderBatchActive();
 
             SetShaderPalette(paletteShader, paletteLoc, paletteList->at(paletteIndex));
             

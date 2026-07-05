@@ -135,7 +135,7 @@ int main()
         if(!editorMode) testLevel->DrawLevel();
         else
         {
-            ClearBackground(GBC_SKY_BLUE);
+            //ClearBackground(GBC_SKY_BLUE);
             editor->Draw();
         }
 
@@ -219,10 +219,13 @@ int main()
     std::cout<<"\n";
 
     testLevel.reset();
+    
     editor.reset();
 
     UnloadAssets();
-
+testLevel.reset();
+    
+    editor.reset();
     UnloadRenderTexture(gameplayCanvas);
 
     UnloadRenderTexture(uiCanvas);

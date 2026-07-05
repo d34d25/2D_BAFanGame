@@ -1489,7 +1489,22 @@ void Level::DrawLevel()
 
     BeginTextureMode(gameplayCanvas);
 
-    ClearBackground(GBC_SKY_BLUE);
+    Room& currentRoom = rooms[currentRoomIndex];
+
+    Color backgroundColor = GRAY;
+
+    if(!environmentPalettes.empty())
+    {
+        if(currentRoom.currentPaletteIndex >= 0 && currentRoom.currentPaletteIndex < environmentPalettes.size())
+        {
+            if(currentRoom.currentColorIndex >= 0 && currentRoom.currentColorIndex < environmentPalettes.at(currentRoom.currentPaletteIndex).size())
+            {
+                backgroundColor =  environmentPalettes.at(currentRoom.currentPaletteIndex).at(currentRoom.currentColorIndex);
+            }
+        }
+    }
+
+    ClearBackground(backgroundColor);
 
     BeginMode2D(camera);
     
@@ -1578,26 +1593,25 @@ void Level::DrawLevel()
 
             if(frameToDraw >= 0 && frameToDraw < (int)platform->renderData->animationFrames.size())
             {
-                DrawSprite(platform->gameObj, platform->renderData, frameToDraw);
-            }
-        }
-        else
-        {
-            Color platformColor = DECO;
-
-            if(platform->type == PlatformType::MOVING_VERTICAL) platformColor = VERTICAL_MOVING_PLATFORM;
-            else if(platform->type == PlatformType::MOVING_HORIZONTAL) platformColor = HORIZONTAL_MOVING_PLATFORM;
-            else if(platform->type == PlatformType::FALLING) platformColor = FALLING_PLATFORM;
-            else if(platform->type == PlatformType::DISAPPEARING) platformColor = DISAPPEARING_PLATFORM;
-
-            if(!IsPlatformSpike(platform->type))
-                DrawRectangleRec(platform->gameObj.GetMainAABB(), platformColor);
-            else
-            {
-                for(int h = 1; h < platform->gameObj.hitboxes.size(); h++)
+                if(platform->type == PlatformType::ROTATING_SPIKE_DOUBLE || 
+                    platform->type == PlatformType::ROTATING_SPIKE_SINGLE)
                 {
-                    DrawRectangleRec(platform->gameObj.GetSubAABB(h), SPIKE);
+                    for(int h = 0; h < platform->gameObj.hitboxes.size(); h++)
+                    {
+                        Rectangle& aabb = platform->gameObj.hitboxes[h].aabb;
+
+                        float centerX = aabb.x + aabb.width * 0.5f;
+                        float centerY = aabb.y + aabb.height * 0.5f;
+
+                        DrawSprite(platform->renderData, centerX, centerY, frameToDraw,
+                        platform->gameObj.data.flipX, platform->gameObj.data.flipY);
+                    }
+                }     
+                else
+                {
+                    DrawSprite(platform->gameObj, platform->renderData, frameToDraw);
                 }
+                
             }
         }
     }
@@ -1704,14 +1718,20 @@ void Level::DrawLevel()
         floorf(uiCanvas.texture.height * 0.5f),
     };
 
+    BeginShaderMode(paletteShader);
+
+    ChangePalette(0, &spritePalettes);
+
     DrawTextureScaled(
         midCanvas.x,
         midCanvas.y,
         uiBackground
     );
 
-    DrawText("HP:", GRID_SIZE, GRID_SIZE, GRID_SIZE, BLACK);
+    ChangePalette(1, &spritePalettes);
 
+    ChangePalette(player.characterCurrentPalette, &spritePalettes);
+    
     DrawSprite(
         &portraits[0],
         uiCanvas.texture.width - portraits[player.currentPortrait].frameSize.x - GRID_SIZE * 1.5f,
@@ -1719,7 +1739,13 @@ void Level::DrawLevel()
         player.currentPortraitFrame
     );
 
+    ChangePalette(6, &spritePalettes);
+
     DrawSprite(&uiElements[0], GRID_SIZE * 3.25f, GRID_SIZE + GRID_SIZE * 0.5f, 0);
+
+    EndShaderMode();
+
+    DrawText("HP:", GRID_SIZE, GRID_SIZE, GRID_SIZE, BLACK);
 
     EndTextureMode();
 
@@ -1814,8 +1840,6 @@ void Level::DebugDrawing()
     }
 
     //tiles
-
-   
 
     for(int i = 0; i < platformCache_rendering.size(); i++)
     {
@@ -1920,6 +1944,28 @@ void Level::DebugDrawing()
                     if(!tile.gameObj.hitboxes.empty()) DrawRectangleRec(tile.gameObj.GetMainAABB(), color);
                     else DrawRectangle(i * GRID_SIZE, j * GRID_SIZE, GRID_SIZE, GRID_SIZE, color);
                 }
+            }
+        }
+    }
+
+    for(int i = 0; i < platformCache_rendering.size(); i++)
+    {
+        Platform* platform = platformCache_rendering[i];
+
+        Color platformColor = DECO;
+
+        if(platform->type == PlatformType::MOVING_VERTICAL) platformColor = VERTICAL_MOVING_PLATFORM;
+        else if(platform->type == PlatformType::MOVING_HORIZONTAL) platformColor = HORIZONTAL_MOVING_PLATFORM;
+        else if(platform->type == PlatformType::FALLING) platformColor = FALLING_PLATFORM;
+        else if(platform->type == PlatformType::DISAPPEARING) platformColor = DISAPPEARING_PLATFORM;
+
+        if(!IsPlatformSpike(platform->type))
+            DrawAABB(platform->gameObj.GetMainAABB(), platformColor);
+        else
+        {
+            for(int h = 1; h < platform->gameObj.hitboxes.size(); h++)
+            {
+                DrawAABB(platform->gameObj.GetSubAABB(h), SPIKE);
             }
         }
     }

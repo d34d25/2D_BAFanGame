@@ -37,8 +37,8 @@ void Platform::InitPlatform(
     if(type == PlatformType::MOVING_HORIZONTAL ||
     type == PlatformType::MOVING_VERTICAL)
     {
-        platformWidth = GRID_SIZE * 3.0f;
-        platformHeight = 15;
+        platformWidth = (GRID_SIZE * 3.0f) - 4;
+        platformHeight = 17;
     }
 
     Hitbox mainHitbox = {
@@ -86,9 +86,9 @@ void Platform::InitPlatform(
 
         updateRequired = true;
 
-        float factor = 0.8f;
+        float size = GRID_SIZE * 0.5f;
 
-        gameObj.AddSubHitbox({0,0}, {platformWidth * factor, platformHeight * factor});
+        gameObj.AddSubHitbox({0,0}, {size, size});
     }
     break;
 
@@ -100,9 +100,9 @@ void Platform::InitPlatform(
 
         updateRequired = true;
 
-        float factor = 0.8f;
+        float size = GRID_SIZE * 0.5f;
 
-        gameObj.AddSubHitbox({0,0}, {platformWidth * factor, platformHeight * factor});
+        gameObj.AddSubHitbox({0,0}, {size, size});
     }
     break;
 

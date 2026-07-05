@@ -17,13 +17,13 @@ void Player::InitPlayer(Vector2 position, float gravity, bool flipY)
     gameObj.hitboxes.push_back(Hitbox{{0,0}, {28,70}}); //20, 46 //25, 56
 
     //jump detector
-    gameObj.AddSubHitbox({0,27}, {gameObj.GetMainAABB().width * 0.9f, gameObj.GetMainAABB().height * 0.25f});
+    gameObj.AddSubHitbox({0,30}, {gameObj.GetMainAABB().width * 0.9f, gameObj.GetMainAABB().height * 0.25f});
 
     //for treadmills only
     gameObj.AddSubHitbox({0,27}, {gameObj.GetMainAABB().width, gameObj.GetMainAABB().height * 0.25f});
 
     //ceiling detector
-    gameObj.AddSubHitbox({0,-27}, {gameObj.GetMainAABB().width * 0.9f, gameObj.GetMainAABB().height * 0.25f});
+    gameObj.AddSubHitbox({0,-28}, {gameObj.GetMainAABB().width * 0.9f, gameObj.GetMainAABB().height * 0.25f});
 
     //ladder detector
     gameObj.AddSubHitbox({0,0}, {gameObj.GetMainAABB().width * 0.25f, gameObj.GetMainAABB().height});
