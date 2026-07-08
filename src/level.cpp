@@ -40,6 +40,8 @@ void Level::InitLevel(const char* levelPath, const char* roomPath ,float dt, int
 
     enemyList.reserve(800);
 
+    player.gameObj.transform.position = {0,0};
+
     for(int l = GAMEPLAY_LAYER_START; l <= GAMEPLAY_LAYER_END; l++)
     {
         for(int i = 0; i < COLS; i++)
@@ -59,6 +61,8 @@ void Level::InitLevel(const char* levelPath, const char* roomPath ,float dt, int
 
                     player.gameObj.transform.position = spawnPos;
                     player.spawnPos = player.gameObj.transform.position;
+
+                    player.gameObj.data.flipOffset = tile->gameObj.data.flipOffset;
                 }
 
                 if(IsTypeInvalid(type)) level[l][i][j].type = TileType::VOID;
@@ -100,7 +104,8 @@ void Level::InitLevel(const char* levelPath, const char* roomPath ,float dt, int
                         tile->gameObj.direction,
                         gravity,
                         tile->textureIndex,
-                        tile->variantIndex
+                        tile->variantIndex,
+                        tile->paletteIndex
                     );
                 }
 
@@ -1578,40 +1583,49 @@ void Level::DrawLevel()
 
         if(platform->renderData)
         {
-            int frameToDraw = platform->textureIndex;
+            ChangePalette(platform->paletteIndex, &environmentPalettes);
 
-            if(platform->renderData->spacing != 1)
+            if(platform->type == PlatformType::FALLING || platform->type == PlatformType::DISAPPEARING)
             {
-                frameToDraw = GetCurrentFrame(
-                    platform->renderData->animationFrames,
-                    platform->textureIndex,
-                    platform->renderData->spacing,
-                    platform->renderData->animationSpeed,
-                    currentTime
-                );
+                DrawSprite(platform->gameObj, platform->renderData, platform->textureIndex);
             }
-
-            if(frameToDraw >= 0 && frameToDraw < (int)platform->renderData->animationFrames.size())
+            else
             {
-                if(platform->type == PlatformType::ROTATING_SPIKE_DOUBLE || 
-                    platform->type == PlatformType::ROTATING_SPIKE_SINGLE)
-                {
-                    for(int h = 0; h < platform->gameObj.hitboxes.size(); h++)
-                    {
-                        Rectangle& aabb = platform->gameObj.hitboxes[h].aabb;
+                int frameToDraw = platform->textureIndex;
 
-                        float centerX = aabb.x + aabb.width * 0.5f;
-                        float centerY = aabb.y + aabb.height * 0.5f;
-
-                        DrawSprite(platform->renderData, centerX, centerY, frameToDraw,
-                        platform->gameObj.data.flipX, platform->gameObj.data.flipY);
-                    }
-                }     
-                else
+                if(platform->renderData->spacing != 1)
                 {
-                    DrawSprite(platform->gameObj, platform->renderData, frameToDraw);
+                    frameToDraw = GetCurrentFrame(
+                        platform->renderData->animationFrames,
+                        platform->textureIndex,
+                        platform->renderData->spacing,
+                        platform->renderData->animationSpeed,
+                        currentTime
+                    );
                 }
-                
+
+                if(frameToDraw >= 0 && frameToDraw < (int)platform->renderData->animationFrames.size())
+                {
+                    if(platform->type == PlatformType::ROTATING_SPIKE_DOUBLE || 
+                        platform->type == PlatformType::ROTATING_SPIKE_SINGLE)
+                    {
+                        for(int h = 0; h < platform->gameObj.hitboxes.size(); h++)
+                        {
+                            Rectangle& aabb = platform->gameObj.hitboxes[h].aabb;
+
+                            float centerX = aabb.x + aabb.width * 0.5f;
+                            float centerY = aabb.y + aabb.height * 0.5f;
+
+                            DrawSprite(platform->renderData, centerX, centerY, frameToDraw,
+                            platform->gameObj.data.flipX, platform->gameObj.data.flipY);
+                        }
+                    }     
+                    else
+                    {
+                        DrawSprite(platform->gameObj, platform->renderData, frameToDraw);
+                    }
+                    
+                }
             }
         }
     }

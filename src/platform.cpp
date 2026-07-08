@@ -7,7 +7,8 @@ void Platform::InitPlatform(
     const Direction &direction,
     float gravity,
     int textureIndex,
-    int variantIndex
+    int variantIndex,
+    int paletteIndex
 )
 {
     gameObj.hasBody = true;
@@ -22,6 +23,8 @@ void Platform::InitPlatform(
 
     this->textureIndex = textureIndex;
     this->variantIndex = variantIndex;
+
+    this->paletteIndex = paletteIndex;
 
     float platformSpeed = 100.0f;
 

@@ -327,6 +327,18 @@ void LevelEditor::Update()
             currentDirection = CalculateDirection(currentAngle, currentData);
         }
 
+        if(IsKeyPressed(KEY_X) && currentTileType == (int)TileType::SOLID)
+        {
+            chunkSize++;
+
+            if(chunkSize > maxChunkSize) chunkSize = 1;
+            else if(chunkSize < 1) chunkSize = maxChunkSize;
+        }
+        else if(currentTileType != (int)TileType::SOLID)
+        {
+            chunkSize = 1;
+        }
+
         std::vector<std::array<Color, MAX_PALETTE_COLS>>* activePaletteList = GetCurrentTilePaletteList((TileType)currentTileType);
 
         if(!activePaletteList->empty())
@@ -473,6 +485,20 @@ void LevelEditor::Update()
 
         bool canPlaceTile = false;
 
+        //prevents static tiles from flipping their offsets
+        //only the player, platforms and enemies are allowed to flip their offsets (dynamic objects)
+        if(currentTileType == (int)TileType::PLAYER_SPAWN ||
+            currentTileType > (int)TileType::ENEMY_START && currentTileType < (int)TileType::ENEMY_END ||
+            currentTileType > (int)TileType::PLATFORM_START && currentTileType < (int)TileType::PLATFORM_END
+        )
+        {
+            currentData.flipOffset = true;
+        }
+        else
+        {
+            currentData.flipOffset = false;
+        }
+
         if(IsMouseButtonDown(MOUSE_BUTTON_LEFT))
         {
             if(currentTileType != (int)TileType::VOID
@@ -517,29 +543,95 @@ void LevelEditor::Update()
                         }   
                     }
 
-                    targetTile.type = placingType;
-                    targetTile.textureIndex = currentTexture;
-                    targetTile.variantIndex = currentVariant;
+                    bool isFrameSmallerThanTile = activeRenderData->frameSize.x <= TILE_SIZE && activeRenderData->frameSize.y <= TILE_SIZE;
 
-                    targetTile.gameObj.transform.position = GetMouseGridPosition(mouseMatrixPosition);
+                    bool canPlaceChunk = false;
 
-                    targetTile.gameObj.transform.scale = TILE_SCALE;
+                    if(chunkSize > 1 && Vector2Equals(activeRenderData->frameSize, {(float)TILE_SIZE * chunkSize, (float)TILE_SIZE * chunkSize}))
+                    {
+                        canPlaceChunk = true;
+                    }
+                    else if(isFrameSmallerThanTile)
+                    {
+                        canPlaceChunk = true;
+                    }
 
-                    targetTile.gameObj.transform.angle = currentAngle;
+                    if(currentTileType != (int)TileType::SOLID && chunkSize > 1) canPlaceChunk = false;
 
-                    targetTile.gameObj.data = currentData;
+                    if(canPlaceChunk)
+                    {
+                        for(int x = 0; x < chunkSize; x++)
+                        {
+                            for(int y = 0; y < chunkSize; y++)
+                            {
+                                int endMatrixX = mouseMatrixPosition.x + x;
+                                int endMatrixY = mouseMatrixPosition.y + y;
+                                    
+                                endMatrixX = Clamp(endMatrixX, 0, COLS);
+                                endMatrixY = Clamp(endMatrixY, 0, ROWS);
 
-                    targetTile.gameObj.direction = currentDirection;
+                                Tile& targetSubTile = tempLevel[currentLayer][endMatrixX][endMatrixY];
 
-                    targetTile.paletteIndex = currentPalette;
+                                if(targetSubTile.type != TileType::VOID) continue;
+
+                                Vector2 endPos = {(endMatrixX * GRID_SIZE) + GRID_SIZE * 0.5f, (endMatrixY * GRID_SIZE) + GRID_SIZE * 0.5f};
+
+                                bool canPlaceTexture = false;
+
+                                if(isFrameSmallerThanTile)
+                                {
+                                    targetSubTile.textureIndex = currentTexture;
+                                }
+                                else
+                                {
+                                    if(x == 0 && y == 0) targetSubTile.textureIndex = currentTexture;
+                                    else targetSubTile.textureIndex = -1;
+                                }
+
+                                targetSubTile.type = placingType;
+
+                                targetSubTile.variantIndex = currentVariant;
+
+                                targetSubTile.gameObj.transform.position = endPos;
+
+                                targetSubTile.gameObj.transform.scale = TILE_SCALE;
+
+                                targetSubTile.gameObj.transform.angle = currentAngle;
+
+                                targetSubTile.gameObj.data = currentData;
+
+                                targetSubTile.gameObj.direction = currentDirection;
+
+                                targetSubTile.paletteIndex = currentPalette;
+                            }
+                        }
+                    }   
+                }
+                else
+                {
+                    std::cout<<"SOLID TILE FRAME SIZE DOES NOT MATCH WITH THE SIZE OF THE CHUNK\n";
                 }
             }
         }
         else if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT))
         {
-            if(currentTileType != (int)TileType::VOID)
+            for(int x = 0; x < chunkSize; x++)
             {
-                targetTile = {};
+                for(int y = 0; y < chunkSize; y++)
+                {
+                    int endMatrixX = mouseMatrixPosition.x + x;
+                    int endMatrixY = mouseMatrixPosition.y + y;
+                                    
+                    endMatrixX = Clamp(endMatrixX, 0, COLS);
+                    endMatrixY = Clamp(endMatrixY, 0, ROWS);
+
+                    Tile& targetSubTile = tempLevel[currentLayer][endMatrixX][endMatrixY];
+
+                    if(targetSubTile.type != TileType::VOID)
+                    {
+                        targetSubTile = {};
+                    }
+                }
             }
         }
 
@@ -703,6 +795,9 @@ void LevelEditor::Draw()
     int halfWorldWidth = (int)floor(worldWidth * 0.5f);
     int halfWorldHeight = (int)floor(worldHeight * 0.5f);
 
+    float lineThickness = 1.5f;
+    float dynamicThickness = lineThickness / camera.zoom;
+
     Color backgroundColor = environmentPalettes.at(currentBackgroundPalette).at(currentBackgroundColor);
 
     BeginMode2D(camera);
@@ -788,12 +883,19 @@ void LevelEditor::Draw()
                             playerOffsetY = tileSize.y;
                         }
 
-                        DrawRectangle(
-                            i * GRID_SIZE + offsetX,
-                            j * GRID_SIZE + offsetY - playerOffsetY,
-                            size.x, size.y,
-                            {color.r, color.g, color.b, alpha}
-                        );
+                        Rectangle placeHolderRec = {i * GRID_SIZE + offsetX, j * GRID_SIZE + offsetY - playerOffsetY, size.x, size.y};
+
+                        if(tile.type == TileType::SOLID)
+                        {
+                            DrawRectangleLinesEx(
+                                placeHolderRec, dynamicThickness + dynamicThickness * 0.15f,
+                                {color.r, color.g, color.b, alpha}
+                            );
+                        }
+                        else
+                        {
+                            DrawRectangleRec(placeHolderRec, {color.r, color.g, color.b, alpha});
+                        }                        
                     }
                 }
                 else
@@ -884,7 +986,7 @@ void LevelEditor::Draw()
                 DrawRectangle(
                     previewTransform.position.x - (GRID_SIZE * 0.5f) + offsetX, 
                     previewTransform.position.y - (GRID_SIZE * 0.5f) + offsetY - playerOffsetY,
-                    size.x, size.y, 
+                    size.x * chunkSize, size.y * chunkSize,
                     previewColor
                 );
             }
@@ -933,10 +1035,6 @@ void LevelEditor::Draw()
     }
 
     //grid
-    
-    float lineThickness = 1.5f;
-
-    float dynamicThickness = lineThickness / camera.zoom;
 
     for(int i = 0; i <= worldWidth; i+= GRID_SIZE)
     {
@@ -961,7 +1059,7 @@ void LevelEditor::Draw()
     DrawRectangleLines(
         mouseMatrixPosition.x * GRID_SIZE, 
         mouseMatrixPosition.y * GRID_SIZE,
-        GRID_SIZE, GRID_SIZE, RED
+        GRID_SIZE * chunkSize, GRID_SIZE * chunkSize, RED
     );
 
 
@@ -1002,6 +1100,7 @@ void LevelEditor::Draw()
     DrawText(TextFormat("current angle: %i", currentAngle), GRID_SIZE, ypos + spacing * 5, 20, RED);
 
     DrawText(TextFormat("current flip x: %i", currentData.flipX), GRID_SIZE, ypos + spacing * 6, 20, RED);
+
     DrawText(TextFormat("current flip y: %i", currentData.flipY), GRID_SIZE, ypos + spacing * 7, 20, RED);
 
     DrawText(GetDirectionText(currentDirection), GRID_SIZE, ypos + spacing * 8, 20, RED);
@@ -1009,6 +1108,8 @@ void LevelEditor::Draw()
     DrawText(TextFormat("room mode: %i", roomMode), GRID_SIZE, ypos + spacing * 9, 20, GREEN);
 
     DrawText(TextFormat("current palette: %i", currentPalette), GRID_SIZE, ypos + spacing * 10, 20, GREEN);
+
+    DrawText(TextFormat("current chunk size: %i", chunkSize), GRID_SIZE, ypos + spacing * 11, 20, GREEN);
 
     int size = 20;
     int offsetY = size;

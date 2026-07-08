@@ -34,6 +34,8 @@ public:
 
     int variantIndex = 0;
 
+    int paletteIndex = 0;
+
     bool updateRequired = false;
 
     float gravity = 0.0f;
@@ -50,7 +52,8 @@ public:
         const Direction& direction,
         float gravity,
         int textureIndex,
-        int variantIndex
+        int variantIndex,
+        int paletteIndex
     );
 
     inline void SetTimerInit(float time)

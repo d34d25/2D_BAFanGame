@@ -166,8 +166,8 @@ inline void DrawSprite(
     case 90:
     case 270:
     {
-        if(entityData.flipY) sourceRect.width = -sourceRect.width;
-        if(entityData.flipX) sourceRect.height = -sourceRect.height;
+        if(entityData.flipX) sourceRect.width = -sourceRect.width;
+        if(entityData.flipY) sourceRect.height = -sourceRect.height;
     }
     break;
     
@@ -181,9 +181,18 @@ inline void DrawSprite(
     float offsetX = entityData.flipX ? -renderData->offset.x : renderData->offset.x;
     float offsetY = entityData.flipY ? -renderData->offset.y : renderData->offset.y;
 
+    float xpos = floorf(transform.position.x + renderData->offset.x);
+    float ypos = floorf(transform.position.y + renderData->offset.y);
+
+    if(entityData.flipOffset)
+    {
+        xpos = floorf(transform.position.x + offsetX);
+        ypos = floorf(transform.position.y + offsetY);
+    };
+
     Rectangle destRect = {
-        floorf(transform.position.x + offsetX),
-        floorf(transform.position.y + offsetY),
+        xpos,
+        ypos,
         width,
         height
     };

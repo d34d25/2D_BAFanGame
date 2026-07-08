@@ -77,6 +77,12 @@ void Enemy::YuukaBehaivour(float dt, Player& player)
     float moveSpeed = 200 * moveSpeedSign;
 
     if(!lookAtPlayer) gameObj.body.velocity.x >= 0 ? gameObj.data.flipX = false : gameObj.data.flipX = true;
+    else
+    {
+        float distanceToPlayerX = gameObj.transform.position.x - player.gameObj.transform.position.x;
+
+        distanceToPlayerX >= 0 ? gameObj.data.flipX = true : gameObj.data.flipX = false;
+    }
 
     if(stateTimer <= 0.0f)
     {
@@ -132,6 +138,8 @@ void Enemy::YuukaBehaivour(float dt, Player& player)
         moveSpeedSign = 1;
 
         maxTime = 0.5f;
+
+        //lookAtPlayer = true;
 
         if(isGrounded && timer >= maxTime) isJumping = true;
 
@@ -204,10 +212,6 @@ void Enemy::YuukaBehaivour(float dt, Player& player)
         bulletData.pelletCount = 4;
 
         bulletData.spread = 6.0f;
-
-        float distanceToPlayerX = gameObj.transform.position.x - player.gameObj.transform.position.x;
-
-        distanceToPlayerX >= 0 ? gameObj.data.flipX = true : gameObj.data.flipX = false;
 
         gravity = ogGravity * 2.0f;
 

@@ -21,6 +21,10 @@ private:
 
     int screenWidth, screenHeight;
 
+    int chunkSize = 1;
+
+    int maxChunkSize = 4;
+
     int currentLayer = 1;
 
     int currentTileType = (int)TileType::VOID;
@@ -34,6 +38,7 @@ private:
     int currentAngle = 0;
 
     int currentBackgroundColor = 0;
+
     int currentBackgroundPalette = 0;
     
     std::array<Color, MAX_PALETTE_COLS> currentPaletteColors = {};

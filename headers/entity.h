@@ -125,6 +125,8 @@ struct EntityData
 {
     bool flipX = false;
     bool flipY = false;
+
+    bool flipOffset = false;
 };
 
 struct GameObject

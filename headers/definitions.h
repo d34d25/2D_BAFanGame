@@ -40,6 +40,10 @@ static constexpr Color ENEMY_YUUKA = Color{85,56,171,255};
 
 static constexpr int GRID_SIZE = 48;
 
+static constexpr int TILE_SIZE = 12;
+
+static constexpr int TILE_SCALE = 4;
+
 static constexpr int TILES_PER_ROOM_WIDHT = 24;
 
 static constexpr int TILES_PER_ROOM_HEIGHT = 18; //15
@@ -57,8 +61,6 @@ static constexpr int GAMEPLAY_LAYER_START = 1;
 static constexpr int GAMEPLAY_LAYER_END = 2;
 
 static constexpr int FOREGROUND_LAYER = 3;
-
-static constexpr int TILE_SCALE = 4; //3
 
 static constexpr int SINGLE_ROTATING_SPIKE_MAX_HITBOX = 6; //6
 

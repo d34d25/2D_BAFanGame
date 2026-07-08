@@ -70,7 +70,7 @@ int main()
     testLevel->gameplayCanvas = gameplayCanvas;
     testLevel->uiCanvas = uiCanvas;
 
-    bool editorMode = false;
+    bool editorMode = true;
 
     const int MAX_LAST_FRAMES = 120;
 

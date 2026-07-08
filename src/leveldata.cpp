@@ -51,13 +51,17 @@ std::vector<SpriteRenderData> spikeSmallRenderData = {};
 
 std::vector<SpriteRenderData> spikeBallRenderData = {};
 
-std::vector<SpriteRenderData> horizontalMovingPlatform_RenderData = {};
-
 std::vector<SpriteRenderData> movingSpikeRenderData = {};
 
 //platforms
 
 std::vector<SpriteRenderData> verticalMovingPlatform_RenderData = {};
+
+std::vector<SpriteRenderData> horizontalMovingPlatform_RenderData = {};
+
+std::vector<SpriteRenderData> fallingPlatform_RenderData = {};
+
+std::vector<SpriteRenderData> disappearingPlatform_RenderData = {};
 
 //enemies
 
@@ -185,15 +189,15 @@ void LoadAssets()
     const int TOTAL_COLUMNS_FILES = 12;
 
     solidTilesRenderData.push_back(LoadRenderData(
-        "assets/tiles/solid/columns.png", tileSize
+        "assets/tiles/solid/gdd-tileset.png", tileSize
     ));
+
+    /*solidTilesRenderData.push_back(LoadRenderData(
+        "assets/tiles/solid/columns.png", tileSize
+    ));*/
 
     solidTilesRenderData.push_back(LoadRenderData(
         "assets/tiles/solid/metalic-blocks.png", tileSize
-    ));
-
-    solidTilesRenderData.push_back(LoadRenderData(
-        "assets/tiles/solid/tech-tiles.png", tileSize
     ));
 
     solidTilesRenderData.push_back(LoadRenderData(
@@ -204,14 +208,34 @@ void LoadAssets()
         "assets/tiles/solid/natural-tiles.png", tileSize
     ));
 
-    for(int i = 0; i < 4; i++)
-    {
-        std::string blocksFilePath = "assets/tiles/solid/blocks-" + std::to_string(i) + ".png";
+    solidTilesRenderData.push_back(LoadRenderData(
+        "assets/tiles/solid/basic-block.png", tileSize
+    ));
 
-        solidTilesRenderData.push_back(LoadRenderData(
-            blocksFilePath.c_str(), tileSize
-        ));
-    }
+    solidTilesRenderData.push_back(LoadRenderData(
+        "assets/tiles/solid/simple-tiles.png", tileSize
+    ));
+
+    solidTilesRenderData.push_back(LoadRenderData(
+        "assets/tiles/solid/test-tileset.png", tileSize
+    ));
+
+    solidTilesRenderData.push_back(LoadRenderData(
+        "assets/tiles/solid/test-tileset-2.png", tileSize
+    ));
+
+    solidTilesRenderData.push_back(LoadRenderData(
+        "assets/tiles/solid/test-tileset-3.png", tileSize
+    ));
+
+    solidTilesRenderData.push_back(LoadRenderData(
+        "assets/tiles/solid/single-blocks.png", tileSize
+    ));
+
+    solidTilesRenderData.push_back(LoadRenderData(
+        "assets/tiles/solid/2by2TileTest.png", tileSize * 2,
+        tileSize * 2
+    ));
 
     ladderRenderData.push_back(LoadRenderData("assets/tiles/ladder.png", tileSize));
 
@@ -224,10 +248,22 @@ void LoadAssets()
     ));
 
     decoRenderData.push_back(LoadRenderData(
-        "assets/tiles/deco/panels.png",
+        "assets/tiles/deco/gdd-panels.png",
         tileSize,{0,0},
         1
     ));
+
+    decoRenderData.push_back(LoadRenderData(
+        "assets/tiles/deco/windows.png",
+        tileSize,{0,0},
+        1
+    ));
+
+    /*decoRenderData.push_back(LoadRenderData(
+        "assets/tiles/deco/panels.png",
+        tileSize,{0,0},
+        1
+    ));*/
 
     decoRenderData.push_back(LoadRenderData(
         "assets/tiles/deco/shadows.png",
@@ -331,9 +367,19 @@ void LoadAssets()
         2
     ));
 
+    fallingPlatform_RenderData.push_back(LoadRenderData(
+        "assets/platforms/falling-platform.png", 
+        tileSize, {0,0}
+    ));
+
+    disappearingPlatform_RenderData.push_back(LoadRenderData(
+        "assets/platforms/disappearing-platform.png", 
+        tileSize, {0,0}
+    ));
+
     //enemies
 
-    dummyRenderData.push_back(LoadRenderData("assets/enemies/chibi-dummy.png", {8,12}));
+    dummyRenderData.push_back(LoadRenderData("assets/enemies/chibi-dummy.png", {8,12}, {0,-GRID_SIZE}));
     
     yuukaRenderData.push_back(LoadRenderData(
         "assets/enemies/yuuka-gbc-sprtiesheet.png",

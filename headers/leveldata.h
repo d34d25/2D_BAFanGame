@@ -430,6 +430,10 @@ extern std::vector<SpriteRenderData> verticalMovingPlatform_RenderData;
 
 extern std::vector<SpriteRenderData> horizontalMovingPlatform_RenderData;
 
+extern std::vector<SpriteRenderData> fallingPlatform_RenderData;
+
+extern std::vector<SpriteRenderData> disappearingPlatform_RenderData;
+
 //enemies
 
 extern std::vector<SpriteRenderData> dummyRenderData;
@@ -477,7 +481,7 @@ inline std::vector<SpriteRenderData>* GetTileActiveRenderDataList(TileType type)
 {
     switch (type)
     {
-    case TileType::SOLID:return &solidTilesRenderData;
+    case TileType::SOLID: return &solidTilesRenderData;
 
     case TileType::TREADMILL_RIGHT: return &treadmillRenderData_Right;
     case TileType::TREADMILL_LEFT: return &treadmillRenderData_Left;
@@ -526,6 +530,10 @@ inline std::vector<SpriteRenderData>* GetTileActiveRenderDataList(TileType type)
 
     case TileType::HORIZONALT_MOVING_PLATFORM: return &horizontalMovingPlatform_RenderData;
 
+    case TileType::FALLING_PLATFORM: return &fallingPlatform_RenderData;
+
+    case TileType::DISAPPEARING_PLATFORM: return &disappearingPlatform_RenderData;
+
     //enemies 
 
     case TileType::ENEMY_DUMMY: return &dummyRenderData;
@@ -554,6 +562,9 @@ inline std::vector<SpriteRenderData>* GetPlatformActiveRenderDataList(PlatformTy
     {
     case PlatformType::MOVING_VERTICAL: return &verticalMovingPlatform_RenderData;
     case PlatformType::MOVING_HORIZONTAL: return &horizontalMovingPlatform_RenderData;
+
+    case PlatformType::FALLING: return &fallingPlatform_RenderData;
+    case PlatformType::DISAPPEARING: return &disappearingPlatform_RenderData;
 
     //moving spikes
     case PlatformType::MOVING_SPIKE_HORIZONTAL: return &movingSpikeRenderData;
