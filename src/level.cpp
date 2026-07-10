@@ -1746,12 +1746,15 @@ void Level::DrawLevel()
 
     ChangePalette(player.characterCurrentPalette, &spritePalettes);
     
-    DrawSprite(
-        &portraits[0],
-        uiCanvas.texture.width - portraits[player.currentPortrait].frameSize.x - GRID_SIZE * 1.5f,
-        midCanvas.y,
-        player.currentPortraitFrame
-    );
+    if(player.currentPortrait > -1)
+    {
+        DrawSprite(
+            &portraits[0],
+            uiCanvas.texture.width - portraits[player.currentPortrait].frameSize.x - GRID_SIZE * 1.5f,
+            midCanvas.y,
+            player.currentPortraitFrame
+        );
+    }
 
     ChangePalette(6, &spritePalettes);
 
@@ -1759,7 +1762,7 @@ void Level::DrawLevel()
 
     EndShaderMode();
 
-    DrawText("HP:", GRID_SIZE, GRID_SIZE, GRID_SIZE, BLACK);
+    DrawText("HP:", GRID_SIZE, GRID_SIZE, GRID_SIZE, GBC_DARKEST_BROWN);
 
     EndTextureMode();
 

@@ -302,6 +302,8 @@ void LevelEditor::Update()
             currentData = {false, false};
 
             currentDirection = Direction::UP;
+
+            chunkSize = 1;
         }
 
         if(IsDirectionChangeKeyPressed())
@@ -543,8 +545,13 @@ void LevelEditor::Update()
                         }   
                     }
 
-                    bool isFrameSmallerThanTile = activeRenderData->frameSize.x <= TILE_SIZE && activeRenderData->frameSize.y <= TILE_SIZE;
+                    bool isFrameSmallerThanTile = true;
 
+                    if(activeRenderData)
+                    {
+                        isFrameSmallerThanTile = activeRenderData->frameSize.x <= TILE_SIZE && activeRenderData->frameSize.y <= TILE_SIZE;
+                    }
+                    
                     bool canPlaceChunk = false;
 
                     if(chunkSize > 1 && Vector2Equals(activeRenderData->frameSize, {(float)TILE_SIZE * chunkSize, (float)TILE_SIZE * chunkSize}))
@@ -555,6 +562,8 @@ void LevelEditor::Update()
                     {
                         canPlaceChunk = true;
                     }
+
+                    if(currentTileType != (int)TileType::SOLID) canPlaceChunk = true;
 
                     if(currentTileType != (int)TileType::SOLID && chunkSize > 1) canPlaceChunk = false;
 

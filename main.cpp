@@ -19,7 +19,7 @@ int main()
 
     int canvasScale = 6;
 
-    const int GAMEPLAY_CANVAS_WIDTH = (160 + 32) * canvasScale;
+    const int GAMEPLAY_CANVAS_WIDTH = 192 * canvasScale;
 
     const int UI_CANVAS_WIDTH = GAMEPLAY_CANVAS_WIDTH;
 
@@ -70,7 +70,7 @@ int main()
     testLevel->gameplayCanvas = gameplayCanvas;
     testLevel->uiCanvas = uiCanvas;
 
-    bool editorMode = true;
+    bool editorMode = false;
 
     const int MAX_LAST_FRAMES = 120;
 

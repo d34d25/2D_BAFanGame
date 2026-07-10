@@ -47,6 +47,8 @@ void Player::InitPlayer(Vector2 position, float gravity, bool flipY)
 
     character = Character::YUZU;
 
+    currentPortrait = -1;
+
     switch (character)
     {
     case Character::MOMOI:
@@ -90,7 +92,9 @@ void Player::InitPlayer(Vector2 position, float gravity, bool flipY)
         bulletData.explodes = true;
 
         characterCurrentPalette = 0;
-        weaponCurrentPalette = 1;
+        weaponCurrentPalette = 0;
+
+        currentPortrait = 0;
 
         break;
     case Character::YUZU_BATTLE:

@@ -189,27 +189,25 @@ void LoadAssets()
     const int TOTAL_COLUMNS_FILES = 12;
 
     solidTilesRenderData.push_back(LoadRenderData(
-        "assets/tiles/solid/gdd-tileset.png", tileSize
-    ));
-
-    /*solidTilesRenderData.push_back(LoadRenderData(
-        "assets/tiles/solid/columns.png", tileSize
-    ));*/
-
-    solidTilesRenderData.push_back(LoadRenderData(
-        "assets/tiles/solid/metalic-blocks.png", tileSize
+        "assets/tiles/solid/simple-single-blocks.png", tileSize
     ));
 
     solidTilesRenderData.push_back(LoadRenderData(
-        "assets/tiles/solid/warning-blocks.png", tileSize
+        "assets/tiles/solid/simple-columns.png", tileSize
     ));
 
     solidTilesRenderData.push_back(LoadRenderData(
-        "assets/tiles/solid/natural-tiles.png", tileSize
+        "assets/tiles/solid/simple-3block.png", tileSize
     ));
 
     solidTilesRenderData.push_back(LoadRenderData(
-        "assets/tiles/solid/basic-block.png", tileSize
+        "assets/tiles/solid/4block-chunk.png", tileSize * 2,
+        tileSize * 2
+    ));
+
+    solidTilesRenderData.push_back(LoadRenderData(
+        "assets/tiles/solid/2by2TileTest.png", tileSize * 2,
+        tileSize * 2
     ));
 
     solidTilesRenderData.push_back(LoadRenderData(
@@ -217,24 +215,15 @@ void LoadAssets()
     ));
 
     solidTilesRenderData.push_back(LoadRenderData(
-        "assets/tiles/solid/test-tileset.png", tileSize
+        "assets/tiles/solid/xtremelysimpleset.png", tileSize
     ));
 
     solidTilesRenderData.push_back(LoadRenderData(
-        "assets/tiles/solid/test-tileset-2.png", tileSize
+        "assets/tiles/solid/xtremelysimpleset-b.png", tileSize
     ));
 
     solidTilesRenderData.push_back(LoadRenderData(
-        "assets/tiles/solid/test-tileset-3.png", tileSize
-    ));
-
-    solidTilesRenderData.push_back(LoadRenderData(
-        "assets/tiles/solid/single-blocks.png", tileSize
-    ));
-
-    solidTilesRenderData.push_back(LoadRenderData(
-        "assets/tiles/solid/2by2TileTest.png", tileSize * 2,
-        tileSize * 2
+        "assets/tiles/solid/woodfloor.png", tileSize
     ));
 
     ladderRenderData.push_back(LoadRenderData("assets/tiles/ladder.png", tileSize));
@@ -267,9 +256,7 @@ void LoadAssets()
 
     decoRenderData.push_back(LoadRenderData(
         "assets/tiles/deco/shadows.png",
-        tileSize,{0,0},
-        1,
-        0,4
+        tileSize,{0,0}
     ));
 
     oneWayRenderData.push_back(LoadRenderData(
