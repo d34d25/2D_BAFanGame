@@ -47,7 +47,7 @@ static constexpr int TILE_SIZE = 12;
 
 static constexpr int GRID_SIZE = TILE_SIZE; // * META_TILE_FACTOR;
 
-static const int NATIVE_WIDTH = 252;
+static const int NATIVE_WIDTH = 240;
 
 static const int NATIVE_HEIGHT = 240;
 

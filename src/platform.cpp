@@ -26,7 +26,7 @@ void Platform::InitPlatform(
 
     this->paletteIndex = paletteIndex;
 
-    float platformSpeed = 100.0f;
+    float platformSpeed = 25.0f;
 
     SetTimerInit(0.3f);
 
@@ -40,8 +40,8 @@ void Platform::InitPlatform(
     if(type == PlatformType::MOVING_HORIZONTAL ||
     type == PlatformType::MOVING_VERTICAL)
     {
-        platformWidth = (GRID_SIZE * 3.0f) - 4;
-        platformHeight = 17;
+        platformWidth = (GRID_SIZE * 3.0f) - 2;
+        platformHeight = 5;
     }
 
     Hitbox mainHitbox = {

@@ -342,13 +342,13 @@ void LoadAssets()
 
     verticalMovingPlatform_RenderData.push_back(LoadRenderData(
         "assets/platforms/vertical-moving-platform.png", 
-        {35, 5}, {0,0},
+        {34, 5}, {0,0},
         2
     ));
 
     horizontalMovingPlatform_RenderData.push_back(LoadRenderData(
         "assets/platforms/horizontal-moving-platform.png", 
-        {35, 5}, {0,0},
+        {34, 5}, {0,0},
         2
     ));
 

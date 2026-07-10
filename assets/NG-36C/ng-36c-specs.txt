@@ -1,0 +1,21 @@
+This are the specifications of a fictional console I'll
+use as a guide for developing retro games
+
+Fictional console specifications:
+
+NG-36C (NES, Game Boy 36 Color)
+
+SCREEN RESOLUTION: 240X240 px
+
+GRID SIZE / TILE SIZE: 12x12 px
+
+TILES ON SCREEN 20X20 tiles
+
+TILE MODE: Simple Tile (1:1 mapping)
+
+MASTER PALETTE: 35 Real Colors + 1 Transparent
+
+PALETTES 2 X 8 palettes (8 for tiles and background, 8 for sprites)
+
+COLORS PER PALETTE: 4 Real Colors
+
