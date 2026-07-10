@@ -172,8 +172,6 @@ void Level::InitLevel(const char* levelPath, const char* roomPath ,float dt, int
                 tile->neighborsTypes[6] = GetTileType(downLeftArray, level);
                 tile->neighborsTypes[7] = GetTileType(leftArray, level);
 
-                tile->gameObj.transform.scale = TILE_SCALE;
-
                 //decorational tiles don't need a physical body
                 if(level[l][i][j].type == TileType::DECO) continue;
 
@@ -700,7 +698,7 @@ void Level::MediumFrequencyDiscreteUpdate_First()
 
         if(lowFrequencyCounter % enemy->aiFrameskip == 0)
         {
-            if(enemy->type == EnemyType::YUUKA && enemy->isStomping) TriggerScreenShake(0.5f, 5.0f); //5.0f
+            if(enemy->type == EnemyType::YUUKA && enemy->isStomping) TriggerScreenShake(0.5f, 2.5f); //5.0f
 
             enemy->UpdateAI(dt, player);
 
@@ -1668,7 +1666,7 @@ void Level::DrawLevel()
 
             if(!e) continue;
 
-            DrawExplosion(e->position.x, e->position.y, e->radius, e->renderData, 0, TILE_SCALE);
+            DrawExplosion(e->position.x, e->position.y, e->radius, e->renderData, 0);
         }
     }
 
@@ -1749,8 +1747,8 @@ void Level::DrawLevel()
     if(player.currentPortrait > -1)
     {
         DrawSprite(
-            &portraits[0],
-            uiCanvas.texture.width - portraits[player.currentPortrait].frameSize.x - GRID_SIZE * 1.5f,
+            &portraits[player.currentPortrait],
+            uiCanvas.texture.width - (portraits[player.currentPortrait].frameSize.x / 2) - GRID_SIZE,
             midCanvas.y,
             player.currentPortraitFrame
         );

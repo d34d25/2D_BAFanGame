@@ -14,16 +14,18 @@ void Player::InitPlayer(Vector2 position, float gravity, bool flipY)
 
     gameObj.body.hasGravity = true;
 
-    gameObj.hitboxes.push_back(Hitbox{{0,0}, {28,70}}); //20, 46 //25, 56
+    gameObj.hitboxes.push_back(Hitbox{{0,0}, {7, 17}});
+
+    float verticalOffset = 7.0f;
 
     //jump detector
-    gameObj.AddSubHitbox({0,30}, {gameObj.GetMainAABB().width * 0.9f, gameObj.GetMainAABB().height * 0.25f});
+    gameObj.AddSubHitbox({0,verticalOffset}, {gameObj.GetMainAABB().width * 0.9f, gameObj.GetMainAABB().height * 0.25f});
 
     //for treadmills only
-    gameObj.AddSubHitbox({0,27}, {gameObj.GetMainAABB().width, gameObj.GetMainAABB().height * 0.25f});
+    gameObj.AddSubHitbox({0,verticalOffset}, {gameObj.GetMainAABB().width, gameObj.GetMainAABB().height * 0.25f});
 
     //ceiling detector
-    gameObj.AddSubHitbox({0,-28}, {gameObj.GetMainAABB().width * 0.9f, gameObj.GetMainAABB().height * 0.25f});
+    gameObj.AddSubHitbox({0,-verticalOffset}, {gameObj.GetMainAABB().width * 0.9f, gameObj.GetMainAABB().height * 0.25f});
 
     //ladder detector
     gameObj.AddSubHitbox({0,0}, {gameObj.GetMainAABB().width * 0.25f, gameObj.GetMainAABB().height});
@@ -33,7 +35,7 @@ void Player::InitPlayer(Vector2 position, float gravity, bool flipY)
     bulletData = {};
     bulletData.angle = 0;
     bulletData.fireTimer = 0.0f;
-    bulletData.speed = 500;
+    bulletData.speed = 125;
 
     bulletData.lifeTime = 2.0f;
 
@@ -56,7 +58,7 @@ void Player::InitPlayer(Vector2 position, float gravity, bool flipY)
         bulletData.fireRate = 0.2f;
         bulletData.spread = 8.0f;
 
-        bulletData.radius = 4.5f;
+        bulletData.radius = 1.125f;
 
         bulletData.mainColor = MOMOI_PINK;
         bulletData.backColor = MOMOI_PINK_BG;
@@ -68,7 +70,7 @@ void Player::InitPlayer(Vector2 position, float gravity, bool flipY)
     case Character::MIDORI:
 
         bulletData.spread = 1.5f;
-        bulletData.radius = 6.0f;
+        bulletData.radius = 1.5f;
 
         bulletData.mainColor = MIDORI_GREEN;
         bulletData.backColor = MIDORI_GREEN_BG;
@@ -79,10 +81,10 @@ void Player::InitPlayer(Vector2 position, float gravity, bool flipY)
         break;
     case Character::YUZU:
 
-        bulletData.gravity = 1000.0f;
+        bulletData.gravity = 250.0f;
 
         bulletData.spread = 0.0f;
-        bulletData.radius = 8.0f;
+        bulletData.radius = 2.0f;
         bulletData.angle = -40;
         bulletData.fireRate = 1.2f;
 
@@ -101,10 +103,10 @@ void Player::InitPlayer(Vector2 position, float gravity, bool flipY)
 
         characterVariantIndex = 1;
 
-        bulletData.gravity = 1000.0f;
+        bulletData.gravity = 250.0f;
 
         bulletData.spread = 0.0f;
-        bulletData.radius = 8.0f;
+        bulletData.radius = 2.0f;
         bulletData.angle = -40;
         bulletData.fireRate = 1.2f;
 
@@ -120,7 +122,7 @@ void Player::InitPlayer(Vector2 position, float gravity, bool flipY)
     case Character::ARIS:
 
         bulletData.spread = 0.0f;
-        bulletData.radius = 10.0f;
+        bulletData.radius = 2.5f;
 
         bulletData.fireRate = 1.0f;
 
@@ -141,7 +143,7 @@ void Player::InitPlayer(Vector2 position, float gravity, bool flipY)
         bulletData.fireRate = 0.2f;
         bulletData.spread = 8.0f;
 
-        bulletData.radius = 4.5f;
+        bulletData.radius = 1.125f;
 
         bulletData.mainColor = MOMOI_PINK;
         bulletData.backColor = MOMOI_PINK_BG;
@@ -224,7 +226,7 @@ void Player::UpdateRender(float dt)
 
         currentPortraitFrame = 1;
 
-        characterRenderData->offset.y += 5.0f;
+        characterRenderData->offset.y += 1.0f;
     }
     else if(climbing)
     {
@@ -240,7 +242,7 @@ void Player::UpdateRender(float dt)
     }
     else
     {
-        if(std::abs(gameObj.body.velocity.x) > 50.0f)
+        if(std::abs(gameObj.body.velocity.x) > 25.0f)
         {
             startFrame = 1;
             endFrame = 3;
@@ -273,7 +275,7 @@ void Player::UpdateRender(float dt)
 
 void Player::Update(float dt, int iterations)
 {
-    float jumpVel = -200;
+    float jumpVel = -50;
 
     float jump = jumpVel;
 
@@ -294,7 +296,7 @@ void Player::Update(float dt, int iterations)
     {
         //lateral movement
 
-        float moveForce = 17000; //16000
+        float moveForce = 4250; //16000
 
         if(movingLeft)
         {
@@ -332,7 +334,7 @@ void Player::Update(float dt, int iterations)
                 gameObj.body.velocity = {0,0};
                 gameObj.body.altVelocity = {0,0};
 
-                float climbingSpeed = 200;
+                float climbingSpeed = 50;
 
                 if(holdingUp) gameObj.body.velocity.y = -climbingSpeed;
                 else if(holdingDown)

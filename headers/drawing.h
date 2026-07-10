@@ -76,10 +76,10 @@ inline int GetCurrentFrame(const std::vector<Rectangle>& frames, const int index
     return frame % (int)frames.size();
 }
 
-inline void DrawTextureScaled(int x, int y, const Texture2D& texture, Color tint = WHITE, int scale = TILE_SCALE)
+inline void DrawTextureScaled(int x, int y, const Texture2D& texture, Color tint = WHITE)
 {
-    float width = fabs(texture.width) * TILE_SCALE;
-    float height = fabs(texture.height) * TILE_SCALE;
+    float width = fabs(texture.width);
+    float height = fabs(texture.height);
 
     Rectangle destRect = {
         (float)x,
@@ -105,8 +105,7 @@ inline void DrawSprite(
     float x, float y,
     int frame,
     bool flipX = false, bool flipY = false,
-    Color tint = WHITE,
-    int scale = TILE_SCALE
+    Color tint = WHITE
 )
 {
     if(!renderData || frame < 0 || frame >= renderData->animationFrames.size())
@@ -114,8 +113,8 @@ inline void DrawSprite(
 
     Rectangle sourceRect = renderData->animationFrames[frame];
 
-    float width = fabs(sourceRect.width) * scale;
-    float height = fabs(sourceRect.height) * scale;
+    float width = fabs(sourceRect.width);
+    float height = fabs(sourceRect.height);
 
     float offsetX = flipX ? -renderData->offset.x : renderData->offset.x;
     float offsetY = flipY ? -renderData->offset.y : renderData->offset.y;
@@ -175,8 +174,8 @@ inline void DrawSprite(
         break;
     }
 
-    float width = fabs(sourceRect.width) * transform.scale;
-    float height = fabs(sourceRect.height) * transform.scale;
+    float width = fabs(sourceRect.width);
+    float height = fabs(sourceRect.height);
 
     float offsetX = entityData.flipX ? -renderData->offset.x : renderData->offset.x;
     float offsetY = entityData.flipY ? -renderData->offset.y : renderData->offset.y;
@@ -228,7 +227,7 @@ inline void DrawBullet(int x, int y, float radius, Color mainColor, Color backCo
     DrawCircle(x, y, radius, mainColor);
 };
 
-inline void DrawExplosion(int x, int y, float radius, SpriteRenderData* renderData, int frameIndex = 0, float scale = TILE_SCALE, Color color = WHITE)
+inline void DrawExplosion(int x, int y, float radius, SpriteRenderData* renderData, int frameIndex = 0, Color color = WHITE)
 {
     if(renderData)
     {

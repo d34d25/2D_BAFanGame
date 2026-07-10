@@ -15,17 +15,7 @@ int main()
     const int SCREEN_WIDTH = 1600;
     const int SCREEN_HEIGHT = 900;
 
-    const int UI_CANVAS_HEIGHT = GRID_SIZE * 4;
-
-    int canvasScale = 6;
-
-    const int GAMEPLAY_CANVAS_WIDTH = 192 * canvasScale;
-
-    const int UI_CANVAS_WIDTH = GAMEPLAY_CANVAS_WIDTH;
-
-    const int GAMEPLAY_CANVAS_HEIGHT = 144 * canvasScale;
-
-    int totalCanvasWidth = GAMEPLAY_CANVAS_WIDTH;
+    int totalCanvasWidth = CANVAS_WIDTH;
     int totalCanvasHeight = GAMEPLAY_CANVAS_HEIGHT + UI_CANVAS_HEIGHT;
 
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "");
@@ -37,9 +27,9 @@ int main()
     float accumulator = 0.0f;
     float fixedDt = 1.0f / 60.0f;
 
-    RenderTexture2D gameplayCanvas = LoadRenderTexture(GAMEPLAY_CANVAS_WIDTH, GAMEPLAY_CANVAS_HEIGHT);
+    RenderTexture2D gameplayCanvas = LoadRenderTexture(CANVAS_WIDTH, GAMEPLAY_CANVAS_HEIGHT);
 
-    RenderTexture2D uiCanvas = LoadRenderTexture(UI_CANVAS_WIDTH, UI_CANVAS_HEIGHT);
+    RenderTexture2D uiCanvas = LoadRenderTexture(CANVAS_WIDTH, UI_CANVAS_HEIGHT);
 
     SetTextureFilter(gameplayCanvas.texture, TEXTURE_FILTER_POINT);
 
@@ -47,7 +37,7 @@ int main()
 
     std::unique_ptr testLevel = std::make_unique<Level>();
 
-    std::unique_ptr editor = std::make_unique<LevelEditor>(GAMEPLAY_CANVAS_WIDTH,GAMEPLAY_CANVAS_HEIGHT, "levels/testLevel", "levels/testRooms");
+    std::unique_ptr editor = std::make_unique<LevelEditor>(CANVAS_WIDTH,GAMEPLAY_CANVAS_HEIGHT, "levels/testLevel", "levels/testRooms");
 
     int iterations = 10;
 
@@ -135,7 +125,6 @@ int main()
         if(!editorMode) testLevel->DrawLevel();
         else
         {
-            //ClearBackground(GBC_SKY_BLUE);
             editor->Draw();
         }
 

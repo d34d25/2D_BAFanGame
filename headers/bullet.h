@@ -21,7 +21,7 @@ struct BulletProperties
     int pelletCount = 1;
 
     bool explodes = false;
-    float explosionRadius = 70.0f;
+    float explosionRadius = 17.0f;
     float explosionLifeTime = 0.5f;
 
     bool piercing = false;

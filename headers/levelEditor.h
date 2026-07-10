@@ -155,7 +155,7 @@ public:
 
     LevelEditor(int screenWidth, int screenHeight, const char* levelPath, const char* roomPath);
 
-    ~LevelEditor();
+    ~LevelEditor() = default;
 
     void Update();
 

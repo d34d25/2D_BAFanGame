@@ -38,19 +38,39 @@ static constexpr Color ENEMY_DUMMY = Color{217,160,102,255};
 
 static constexpr Color ENEMY_YUUKA = Color{85,56,171,255};
 
-static constexpr int GRID_SIZE = 48;
+
+//grid
 
 static constexpr int TILE_SIZE = 12;
 
-static constexpr int TILE_SCALE = 4;
+//static constexpr int META_TILE_FACTOR = 1;
 
-static constexpr int TILES_PER_ROOM_WIDHT = 24;
+static constexpr int GRID_SIZE = TILE_SIZE; // * META_TILE_FACTOR;
 
-static constexpr int TILES_PER_ROOM_HEIGHT = 18; //15
+static const int NATIVE_WIDTH = 252;
 
-static constexpr int ROWS = 8 * TILES_PER_ROOM_HEIGHT;
+static const int NATIVE_HEIGHT = 240;
 
-static constexpr int COLS = 8 * TILES_PER_ROOM_WIDHT;
+static const int UI_HEIGHT = TILE_SIZE * 4;
+
+//canvas
+static constexpr int CANVAS_WIDTH = NATIVE_WIDTH;
+
+static constexpr int GAMEPLAY_CANVAS_HEIGHT = (NATIVE_HEIGHT - UI_HEIGHT);
+
+static constexpr int UI_CANVAS_HEIGHT = UI_HEIGHT;
+
+//rooms
+static constexpr int TILES_PER_ROOM_WIDHT = NATIVE_WIDTH / GRID_SIZE;
+
+static constexpr int TILES_PER_ROOM_HEIGHT = (NATIVE_HEIGHT - UI_HEIGHT) / GRID_SIZE;
+
+
+static constexpr int ROWS = TILES_PER_ROOM_HEIGHT * 10;
+
+static constexpr int COLS = TILES_PER_ROOM_WIDHT * 10;
+
+
 
 static constexpr int LAYERS = 4;
 
@@ -66,7 +86,7 @@ static constexpr int SINGLE_ROTATING_SPIKE_MAX_HITBOX = 6; //6
 
 static constexpr int DOUBLE_ROTATING_SPIKE_MAX_HITBOX = 4;
 
-static constexpr float GRAVITY = 3500.0f;
+static constexpr float GRAVITY = 875.0f;
 
 
 static constexpr int MAX_PALETTE_ROWS = 8; //number of squares

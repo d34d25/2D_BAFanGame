@@ -181,10 +181,6 @@ LevelEditor::LevelEditor(int screenWidth, int screenHeight, const char* levelPat
     currentTexture = 0;
 }
 
-LevelEditor::~LevelEditor()
-{
-}
-
 void LevelEditor::Update()
 {
     UpdateCamera();
@@ -547,18 +543,22 @@ void LevelEditor::Update()
 
                     bool isFrameSmallerThanTile = true;
 
-                    if(activeRenderData)
-                    {
-                        isFrameSmallerThanTile = activeRenderData->frameSize.x <= TILE_SIZE && activeRenderData->frameSize.y <= TILE_SIZE;
-                    }
-                    
                     bool canPlaceChunk = false;
 
-                    if(chunkSize > 1 && Vector2Equals(activeRenderData->frameSize, {(float)TILE_SIZE * chunkSize, (float)TILE_SIZE * chunkSize}))
+                    if(activeRenderData)
                     {
-                        canPlaceChunk = true;
+                        isFrameSmallerThanTile = activeRenderData->frameSize.x <= GRID_SIZE && activeRenderData->frameSize.y <= GRID_SIZE;
+
+                        if(chunkSize > 1 && Vector2Equals(activeRenderData->frameSize, {(float)GRID_SIZE * chunkSize, (float)GRID_SIZE * chunkSize}))
+                        {
+                            canPlaceChunk = true;
+                        }
+                        else if(isFrameSmallerThanTile)
+                        {
+                            canPlaceChunk = true;
+                        }
                     }
-                    else if(isFrameSmallerThanTile)
+                    else
                     {
                         canPlaceChunk = true;
                     }
@@ -602,8 +602,6 @@ void LevelEditor::Update()
                                 targetSubTile.variantIndex = currentVariant;
 
                                 targetSubTile.gameObj.transform.position = endPos;
-
-                                targetSubTile.gameObj.transform.scale = TILE_SCALE;
 
                                 targetSubTile.gameObj.transform.angle = currentAngle;
 
@@ -948,7 +946,6 @@ void LevelEditor::Draw()
         Transform2D previewTransform;
 
         previewTransform.position = GetMouseGridPosition(mouseMatrixPosition);
-        previewTransform.scale = TILE_SCALE;
         previewTransform.angle = currentAngle;
 
         float offsetX = 0;

@@ -23,8 +23,6 @@ struct Transform2D
 {
     Vector2 position = {0,0};
 
-    float scale = TILE_SCALE;
-
     float angle = 0.0f; //in degrees
 };
 

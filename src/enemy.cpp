@@ -27,11 +27,11 @@ void Enemy::UpdateRender(float dt)
             startFrame = 5;
             endFrame = 5;
 
-            enemyRenderData->offset.y += 5.0f;
+            enemyRenderData->offset.y += 1.0f;
         }
         else
         {
-            if(std::abs(gameObj.body.velocity.x) > 50.0f)
+            if(std::abs(gameObj.body.velocity.x) > 25.0f)
             {
                 startFrame = 1;
                 endFrame = 3;
@@ -74,7 +74,7 @@ void Enemy::UpdateRender(float dt)
 
 void Enemy::YuukaBehaivour(float dt, Player& player)
 {
-    float moveSpeed = 200 * moveSpeedSign;
+    float moveSpeed = 50 * moveSpeedSign;
 
     if(!lookAtPlayer) gameObj.body.velocity.x >= 0 ? gameObj.data.flipX = false : gameObj.data.flipX = true;
     else
@@ -179,7 +179,7 @@ void Enemy::YuukaBehaivour(float dt, Player& player)
         {
             isGrounded = false;
 
-            float jump = -1500;
+            float jump = -375;
 
             gameObj.body.velocity.y = jump;
 
@@ -259,11 +259,11 @@ void Enemy::YuukaBehaivour(float dt, Player& player)
         {
             isGrounded = false;
 
-            float jump = -1200;
+            float jump = -300;
 
             gameObj.body.velocity.y = jump;
 
-            float rawVelocityX = 200;
+            float rawVelocityX = 50;
 
             float velocityX = (float)GetRandomValue(-rawVelocityX, rawVelocityX);
 
@@ -370,11 +370,11 @@ void Enemy::InitEnemy(
     bulletData.mainColor = GOLD;
     bulletData.backColor = BLACK;
 
-    bulletData.explosionRadius = 60.0f;
+    bulletData.explosionRadius = 15.0f;
 
     Hitbox mainHitbox = {
         {0,0},
-        {28,70}
+        {7,17}
     };
 
     Vector2 weaponOffset = {0,0};
@@ -397,13 +397,13 @@ void Enemy::InitEnemy(
 
         bulletData.angle = 0;
         bulletData.fireTimer = 0.0f;
-        bulletData.speed = 150;
+        bulletData.speed = 36;
         
         bulletData.fireRate = 1.0f;
 
         bulletData.spread = 1.0f;
 
-        bulletData.radius = 6.0f;
+        bulletData.radius = 1.5f;
 
         bulletData.lifeTime = 4.0f;
 
@@ -419,11 +419,13 @@ void Enemy::InitEnemy(
 
     gameObj.hitboxes.push_back(mainHitbox);
 
+    float verticalOffset = 7.0f;
+
     //jump detector
-    gameObj.AddSubHitbox({0,27}, {gameObj.GetMainAABB().width * 0.9f, gameObj.GetMainAABB().height * 0.25f});
+    gameObj.AddSubHitbox({0,verticalOffset}, {gameObj.GetMainAABB().width * 0.9f, gameObj.GetMainAABB().height * 0.25f});
 
     //ceiling detector
-    gameObj.AddSubHitbox({0,-27}, {gameObj.GetMainAABB().width * 0.9f, gameObj.GetMainAABB().height * 0.25f});
+    gameObj.AddSubHitbox({0,-verticalOffset}, {gameObj.GetMainAABB().width * 0.9f, gameObj.GetMainAABB().height * 0.25f});
 
     spawnPosition = spawnPos;
 

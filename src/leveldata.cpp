@@ -182,11 +182,9 @@ void LoadAssets()
     paletteShader = LoadShader(nullptr, "shaders/palette.fs");
     paletteLoc = GetShaderLocation(paletteShader, "uPalette");
    
-    Vector2 tileSize = {12,12};
+    Vector2 tileSize = {TILE_SIZE,TILE_SIZE};
 
     //tiles
-
-    const int TOTAL_COLUMNS_FILES = 12;
 
     solidTilesRenderData.push_back(LoadRenderData(
         "assets/tiles/solid/simple-single-blocks.png", tileSize
@@ -202,12 +200,12 @@ void LoadAssets()
 
     solidTilesRenderData.push_back(LoadRenderData(
         "assets/tiles/solid/4block-chunk.png", tileSize * 2,
-        tileSize * 2
+        tileSize * 0.5
     ));
 
     solidTilesRenderData.push_back(LoadRenderData(
         "assets/tiles/solid/2by2TileTest.png", tileSize * 2,
-        tileSize * 2
+        tileSize * 0.5f
     ));
 
     solidTilesRenderData.push_back(LoadRenderData(
@@ -366,12 +364,12 @@ void LoadAssets()
 
     //enemies
 
-    dummyRenderData.push_back(LoadRenderData("assets/enemies/chibi-dummy.png", {8,12}, {0,-GRID_SIZE}));
+    dummyRenderData.push_back(LoadRenderData("assets/enemies/chibi-dummy.png", {8,12}, {0,0}));
     
     yuukaRenderData.push_back(LoadRenderData(
         "assets/enemies/yuuka-gbc-sprtiesheet.png",
         {22,22},
-        {-6,-8},
+        {-1,-2},
         1, 0, 0,
         10.0f
     ));
@@ -381,7 +379,7 @@ void LoadAssets()
     yuukaWeaponRenderData.push_back(LoadRenderData(
         "assets/enemies/yuuka-weapon-holo.png",
         {10,4},
-        {50,7}
+        {13,2}
     ));
 
     //player
@@ -389,7 +387,7 @@ void LoadAssets()
     momoiRenderData.push_back(LoadRenderData(
         "assets/characters/momoi-midori-gbc-spritesheet.png",
         {13.0f, 24.0f},
-        {0.0f, -11.0f},
+        {0.0f, -3.0f},
         1,0,0, 
         10.0f
     ));
@@ -405,7 +403,7 @@ void LoadAssets()
     midoriRenderData.push_back(LoadRenderData(
         "assets/characters/momoi-midori-gbc-spritesheet.png",
         {13.0f, 24.0f},
-        {0.0f, -11.0f},
+        {0.0f, -3.0f},
         1,0,0, 
         10.0f
     ));
@@ -413,7 +411,7 @@ void LoadAssets()
     yuzuRenderData.push_back(LoadRenderData(
         "assets/characters/yuzu-gbc-spritesheet.png",
         {17.0f, 21.0f},
-        {-8.0f, -5.0f},
+        {-2.0f, -1.0f},
         1, 0, 0,
         10.0f
     ));
@@ -421,7 +419,7 @@ void LoadAssets()
     yuzuRenderData.push_back(LoadRenderData(
         "assets/characters/yuzu-battle-gbc-spritesheet.png",
         {17.0f, 24.0f},
-        {-8.0f, -12.0f},
+        {-2.0f, -3.0f},
         1, 0, 0,
         10.0f
     ));
@@ -429,7 +427,7 @@ void LoadAssets()
     arisRenderData.push_back(LoadRenderData(
         "assets/characters/aris-gbc-spritesheet.png",
         {16.0f, 21.0f},
-        {-6.0f, -6.0f},
+        {-1.0f, -1.0f},
         1, 0, 0,
         10.0f
     ));
@@ -439,31 +437,31 @@ void LoadAssets()
     momoiWeaponRenderData.push_back(LoadRenderData(
         "assets/characters/momoi-weapon-holo.png",
         {10.0f, 5.0f},
-        {50.0f, 7.0f}
+        {13.0f, 2.0f}
     ));
 
     momoiWeaponRenderData.push_back(LoadRenderData(
         "assets/characters/momoi-chaquena-weapon-holo.png",
         {5.0f, 7.0f},
-        {39.0f, 7.0f}
+        {10.0f, 2.0f}
     ));
 
     midoriWeaponRenderData.push_back(LoadRenderData(
         "assets/characters/midori-weapon-holo.png",
         {11.0f, 5.0f},
-        {52.0f, 7.0f}
+        {13.0f, 2.0f}
     ));
 
     yuzuWeaponRenderData.push_back(LoadRenderData(
         "assets/characters/yuzu-weapon-holo.png",
         {10.0f, 5.0f},
-        {52.0f, 7.0f}
+        {13, 2}
     ));
 
     arisWeaponRenderData.push_back(LoadRenderData(
         "assets/characters/aris-weapon-holo.png",
         {15.0f, 4.0f},
-        {60.0f, 7.0f}
+        {15.0f, 2.0f}
     ));
 
     //UI
