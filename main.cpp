@@ -12,13 +12,17 @@
 
 int main()
 {
-    const int SCREEN_WIDTH = 1600;
-    const int SCREEN_HEIGHT = 900;
+    bool editorMode = true;
+
+    int screenWidth = 900;
+    int screenHeight = 900;
+
+    if(editorMode) screenWidth = 1600;
 
     int totalCanvasWidth = CANVAS_WIDTH;
     int totalCanvasHeight = GAMEPLAY_CANVAS_HEIGHT + UI_CANVAS_HEIGHT;
 
-    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "");
+    InitWindow(screenWidth, screenHeight, "");
 
     SetTargetFPS(60);
 
@@ -59,8 +63,6 @@ int main()
 
     testLevel->gameplayCanvas = gameplayCanvas;
     testLevel->uiCanvas = uiCanvas;
-
-    bool editorMode = false;
 
     const int MAX_LAST_FRAMES = 120;
 
@@ -205,6 +207,14 @@ int main()
     std::cout<<"total player enemy cache count: "<<testLevel->GetEnemyCache()<<"\n";
     std::cout<<"total player enemy physics cache count: "<<testLevel->GetEnemyCache_Physics()<<"\n";
 
+    std::cout<<"Tile struct size: "<<(int)sizeof(Tile)<<"\n";
+
+    std::cout<<"level map size: "<<(int)sizeof(testLevel->level)<<"\n";
+
+    std::cout<<"Platform struct size: "<<(int)sizeof(Platform)<<"\n";
+
+    std::cout<<"Enemy struct size: "<<(int)sizeof(Enemy)<<"\n";
+
     std::cout<<"\n";
 
     testLevel.reset();
@@ -212,7 +222,7 @@ int main()
     editor.reset();
 
     UnloadAssets();
-testLevel.reset();
+    testLevel.reset();
     
     editor.reset();
     UnloadRenderTexture(gameplayCanvas);
@@ -226,6 +236,5 @@ testLevel.reset();
 
     std::cout<<"aspect ratio: "<<(float)((float)totalCanvasWidth / (float)totalCanvasHeight)<<"\n";
 
-    std::cout<<std::endl;
-    
+    std::cout<<std::endl;   
 }

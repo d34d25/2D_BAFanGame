@@ -4,31 +4,33 @@
 #include "entity.h"
 #include "leveldata.h"
 
-const Vector2 DESPAWN_LOCATION = {1000 * GRID_SIZE,  1000 * GRID_SIZE};
+const Vector2 DESPAWN_LOCATION = {1000 * TILE_SIZE,  1000 * TILE_SIZE};
 
-class Platform
+struct Platform
 {
-private:
+    GameObject gameObj = {};
+
+    SpriteRenderData* renderData = nullptr;
+
+    Vector2 ogPosition = {0,0};
 
     float timer = 0.0f; 
+
     float maxTime = 0.3f;
 
     float respawnMaxTime = 0.4f;
 
     float ogTime = 0.0f;
+
     float ogRespawnTime = 0.0f;
 
     float rotationAngle = 0.0f;
 
-public:
+    float gravity = 0.0f;
 
-    Vector2 ogPosition = {0,0};
-
-    GameObject gameObj = {};
+    float respawnTimer = 0.0f;
 
     PlatformType type = PlatformType::NONE;
-
-    SpriteRenderData* renderData = nullptr;
 
     int textureIndex = -1;
 
@@ -38,18 +40,13 @@ public:
 
     bool updateRequired = false;
 
-    float gravity = 0.0f;
-
-    float respawnTimer = 0.0f;
-
     Platform() = default;
 
     ~Platform() = default;
 
     void InitPlatform(
         const Transform2D& transform,
-        const EntityData& data,
-        const Direction& direction,
+        const SpriteFlipData& data,
         float gravity,
         int textureIndex,
         int variantIndex,

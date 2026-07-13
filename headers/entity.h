@@ -14,7 +14,7 @@ const float MASS = 1;
 //even 3000 can work
 const Vector2 MAX_SPEED = {600,600};
 
-enum class Direction
+enum struct Direction
 {
     UP, RIGHT, DOWN, LEFT
 };
@@ -28,16 +28,13 @@ struct Transform2D
 
 struct SimpleBody2D
 {
-private:
+    Vector2 velocity = {0,0};
+
+    Vector2 altVelocity = {0,0};
 
     Vector2 finalVelocity = {0,0};
 
     Vector2 acceleration = {0,0};
-
-public:
-
-    Vector2 velocity = {0,0};
-    Vector2 altVelocity = {0,0};
 
     Vector2 force = {0,0};
 
@@ -119,7 +116,7 @@ struct Hitbox
     }
 };
 
-struct EntityData
+struct SpriteFlipData
 {
     bool flipX = false;
     bool flipY = false;
@@ -129,20 +126,15 @@ struct EntityData
 
 struct GameObject
 {
-    Transform2D transform = {};
-
-    EntityData data = {};
-
-    Direction direction = Direction::UP;
+    SimpleBody2D body = {};
 
     std::vector<Hitbox> hitboxes = {};
 
-    SimpleBody2D body = {};
+    Transform2D transform = {};
 
-    bool canEntityCollidePhysically = false;
-    bool canPlatformCollidePhysically = false;
+    SpriteFlipData flipData = {};
 
-    bool hasBody = false;
+    //Direction direction = Direction::UP;    
 
     GameObject() = default;
 
@@ -209,6 +201,8 @@ struct GameObject
 
 struct SpriteRenderData
 {
+    std::vector<Rectangle> animationFrames = {};
+
     Texture2D* sourceTexture = nullptr;
 
     Vector2 offset = {0,0};
@@ -218,16 +212,15 @@ struct SpriteRenderData
     Vector2 frameSize = {0,0};
 
     //animation
-    std::vector<Rectangle> animationFrames = {};
+
+    float animationSpeed = 5.0f;
 
     int spacing = 0; //used for time based animations (passive animations)
 
     int maxFrames = 1;
-
-    float animationSpeed = 5.0f;
 };
 
-inline Direction CalculateDirection(float angle, EntityData data)
+inline Direction CalculateDirection(float angle, SpriteFlipData data)
 {
     //un-flipped
 
@@ -289,14 +282,14 @@ inline Vector2 GetTextureBulletSpawnPos(const GameObject& gameObj, const SpriteR
 
     int textureWidth = renderData->frameSize.x;
 
-    if(gameObj.data.flipX)
+    if(gameObj.flipData.flipX)
     {
         offset.x = -offset.x;
 
         textureWidth = -textureWidth;
     }
 
-    if(gameObj.data.flipY)
+    if(gameObj.flipData.flipY)
     {
         offset.y = -offset.y;
     }

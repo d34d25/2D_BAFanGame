@@ -139,20 +139,20 @@ inline void DrawSprite(
 }
 
 inline void DrawSprite(
-    const Transform2D& transform,
+    Vector2 position,
+    float angle,
     const SpriteRenderData* renderData,
-    const EntityData& entityData,
+    const SpriteFlipData& entityData,
     int currentFrame = 0,
     Color color = WHITE
 )
 {
-
     if(!renderData || currentFrame < 0 || currentFrame >= renderData->animationFrames.size())
         return;
 
     Rectangle sourceRect = renderData->animationFrames[currentFrame];
 
-    switch ((int)transform.angle)
+    switch ((int)angle)
     {
     case 0:
     case 180:
@@ -180,13 +180,13 @@ inline void DrawSprite(
     float offsetX = entityData.flipX ? -renderData->offset.x : renderData->offset.x;
     float offsetY = entityData.flipY ? -renderData->offset.y : renderData->offset.y;
 
-    float xpos = floorf(transform.position.x + renderData->offset.x);
-    float ypos = floorf(transform.position.y + renderData->offset.y);
+    float xpos = floorf(position.x + renderData->offset.x);
+    float ypos = floorf(position.y + renderData->offset.y);
 
     if(entityData.flipOffset)
     {
-        xpos = floorf(transform.position.x + offsetX);
-        ypos = floorf(transform.position.y + offsetY);
+        xpos = floorf(position.x + offsetX);
+        ypos = floorf(position.y + offsetY);
     };
 
     Rectangle destRect = {
@@ -203,7 +203,26 @@ inline void DrawSprite(
         sourceRect,
         destRect,
         origin,
+        angle,
+        color
+    );
+
+}
+
+inline void DrawSprite(
+    const Transform2D& transform,
+    const SpriteRenderData* renderData,
+    const SpriteFlipData& entityData,
+    int currentFrame = 0,
+    Color color = WHITE
+)
+{
+    DrawSprite(
+        transform.position,
         transform.angle,
+        renderData,
+        entityData,
+        currentFrame,
         color
     );
 }
@@ -213,7 +232,7 @@ inline void DrawSprite(const GameObject& gameObj, SpriteRenderData* renderData, 
     DrawSprite(
         gameObj.transform,
         renderData,
-        gameObj.data,
+        gameObj.flipData,
         currentFrame,
         color
     );

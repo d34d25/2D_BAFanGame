@@ -1,14 +1,12 @@
 #include "physics.h"
 
-void SolveCollisions(GameObject& objA, GameObject& objB, bool isX, bool gravityUp, bool isTrampoline, bool isPlatform)
+void SolveCollisions(GameObject& objA, const Rectangle& recB, const Vector2& vel ,bool isX, bool gravityUp, bool isTrampoline, bool isPlatform)
 {
-    //if(!CheckCollisionRecs(objA->GetMainAABB(), objB->GetMainAABB())) return;
-
     float overlap = 0;
 
     float offset = 0.001f;
 
-    float trampolineImpulse = 1800.0f;
+    float trampolineImpulse = 250.0f;
 
     float trampolineImpulseFactor = 0.6f;
 
@@ -16,9 +14,9 @@ void SolveCollisions(GameObject& objA, GameObject& objB, bool isX, bool gravityU
 
     if(isX)
     {
-        if(objA.GetMainAABB().x <= objB.GetMainAABB().x) // A is at the left
+        if(objA.GetMainAABB().x <= recB.x) // A is at the left
         {
-            overlap = (objA.GetMainAABB().x + objA.GetMainAABB().width) - objB.GetMainAABB().x;
+            overlap = (objA.GetMainAABB().x + objA.GetMainAABB().width) - recB.x;
             objA.transform.position.x -= (overlap + offset);
 
             if(objA.body.velocity.x > 0) objA.body.velocity.x = 0;
@@ -27,7 +25,7 @@ void SolveCollisions(GameObject& objA, GameObject& objB, bool isX, bool gravityU
         }
         else // A is at the right
         {
-            overlap = (objB.GetMainAABB().x + objB.GetMainAABB().width) - objA.GetMainAABB().x;
+            overlap = (recB.x + recB.width) - objA.GetMainAABB().x;
             objA.transform.position.x += (overlap + offset);
 
             if(objA.body.velocity.x < 0) objA.body.velocity.x = 0;
@@ -37,12 +35,12 @@ void SolveCollisions(GameObject& objA, GameObject& objB, bool isX, bool gravityU
     }
     else
     {
-        if(objA.GetMainAABB().y <= objB.GetMainAABB().y) // A is above of B
+        if(objA.GetMainAABB().y <= recB.y) // A is above of B
         {
-            overlap = (objA.GetMainAABB().y + objA.GetMainAABB().height) - objB.GetMainAABB().y;
+            overlap = (objA.GetMainAABB().y + objA.GetMainAABB().height) - recB.y;
             objA.transform.position.y -= (overlap + offset);
 
-            if(!gravityUp && isPlatform) objA.body.altVelocity = objB.body.velocity;
+            if(!gravityUp && isPlatform) objA.body.altVelocity = vel;
 
             if(objA.body.velocity.y > 0) objA.body.velocity.y = 0;
 
@@ -51,10 +49,10 @@ void SolveCollisions(GameObject& objA, GameObject& objB, bool isX, bool gravityU
         }
         else //A is below B
         {
-            overlap = (objB.GetMainAABB().y + objB.GetMainAABB().height) - objA.GetMainAABB().y;
+            overlap = (recB.y + recB.height) - objA.GetMainAABB().y;
             objA.transform.position.y += (overlap + offset);
 
-            if(gravityUp && isPlatform) objA.body.altVelocity = objB.body.velocity;
+            if(gravityUp && isPlatform) objA.body.altVelocity = vel;
 
             if(objA.body.velocity.y < 0) objA.body.velocity.y = 0;
 
@@ -66,34 +64,32 @@ void SolveCollisions(GameObject& objA, GameObject& objB, bool isX, bool gravityU
     objA.UpdateHitboxes();
 }
 
-void SolveCollisions_Platform(GameObject& objA, GameObject& objB, bool isX)
+void SolveCollisions_Platform(GameObject &objA, const Rectangle &recB, bool isX)
 {
-    //if(!CheckCollisionRecs(objA->GetMainAABB(), objB->GetMainAABB())) return;
-
     float offset = 0.001f;
 
     if(isX)
     {
-        if(objA.GetMainAABB().x <= objB.GetMainAABB().x)
+        if(objA.GetMainAABB().x <= recB.x)
         {
-            objA.GetMainAABB().x = (objB.GetMainAABB().x - objA.GetMainAABB().width * 0.5f) - offset;
+            objA.GetMainAABB().x = (recB.x - objA.GetMainAABB().width * 0.5f) - offset;
         }
         else
         {
-            objA.transform.position.x = ((objB.GetMainAABB().x + objB.GetMainAABB().width) + objA.GetMainAABB().width * 0.5f) + offset;
+            objA.transform.position.x = ((recB.x + recB.width) + objA.GetMainAABB().width * 0.5f) + offset;
         }
 
         objA.body.velocity.x *= -1;
     }
     else
     {
-        if(objA.GetMainAABB().y <= objB.GetMainAABB().y)
+        if(objA.GetMainAABB().y <= recB.y)
         {
-            objA.transform.position.y = (objB.GetMainAABB().y - objA.GetMainAABB().height * 0.5f) - offset;
+            objA.transform.position.y = (recB.y - objA.GetMainAABB().height * 0.5f) - offset;
         }
         else
         {
-            objA.transform.position.y = ((objB.GetMainAABB().y + objB.GetMainAABB().height) + objA.GetMainAABB().height * 0.5f) + offset;
+            objA.transform.position.y = ((recB.y + recB.height) + objA.GetMainAABB().height * 0.5f) + offset;
         }
 
         objA.body.velocity.y *= -1;

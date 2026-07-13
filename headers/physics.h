@@ -13,9 +13,10 @@ struct CCD_CollisionResult
     float exitTime = 0.0f;
 };
 
-void SolveCollisions(GameObject& objA, GameObject& objB, bool isX, bool gravityUp, bool isTrampoline, bool isPlatform);
+void SolveCollisions(GameObject& objA, const Rectangle& recB, const Vector2& vel ,bool isX, bool gravityUp, bool isTrampoline, bool isPlatform);
 
-void SolveCollisions_Platform(GameObject& objA, GameObject& objB, bool isX);
+void SolveCollisions_Platform(GameObject& objA, const Rectangle& recB, bool isX);
+
 
 CCD_CollisionResult CheckCollisionsBulletVsEntity_CCD(Bullet* bullet, GameObject* target, float dt);
 
@@ -51,52 +52,63 @@ inline bool IsBelow(const Rectangle& aabb_A, const Rectangle& aabb_B, float offs
     return (top > bottom - offset);
 }
 
-inline void SolveCollisionsOneWayLeftRight(GameObject& objA, GameObject& objB, bool isRight)
+inline void SolveCollisionsOneWayLeftRight(GameObject& objA, const Rectangle& recB, Vector2 vel ,bool isRight)
 {
     bool isLeft = !isRight;
 
     float offset = 6.0f;
 
-    if(isLeft) if(IsLeft(objA.GetMainAABB(), objB.GetMainAABB(), offset) || objA.body.velocity.x <= 0.0f) return;
+    if(isLeft) if(IsLeft(objA.GetMainAABB(), recB, offset) || objA.body.velocity.x <= 0.0f) return;
 
-    if(isRight) if(IsRight(objA.GetMainAABB(), objB.GetMainAABB(), offset) || objA.body.velocity.x >= 0.0f) return;
+    if(isRight) if(IsRight(objA.GetMainAABB(), recB, offset) || objA.body.velocity.x >= 0.0f) return;
 
-    SolveCollisions(objA, objB, true, false, false, false);
+    SolveCollisions(
+        objA,
+        recB, 
+        vel,
+        true, false, false, false
+    );
 }
 
-inline void SolveCollisionsOneWayUpDown(GameObject& objA, GameObject& objB, bool isUp ,bool gravityUp, bool isPlatform)
+inline void SolveCollisionsOneWayUpDown(GameObject& objA, const Rectangle& recB, Vector2 vel, bool isUp ,bool gravityUp, bool isPlatform)
 {
     bool isDown = !isUp;
 
-    float offset = 15.0f;
+    float offset = 5.0f;
 
     if(!isPlatform)
     {
-        if(isUp) if(!IsAbove(objA.GetMainAABB(), objB.GetMainAABB(), offset) || objA.body.velocity.y <= 0.0f) return;
+        if(isUp) if(!IsAbove(objA.GetMainAABB(), recB, offset) || objA.body.velocity.y <= 0.0f) return;
 
-        if(isDown) if(!IsBelow(objA.GetMainAABB(), objB.GetMainAABB(), offset) || objA.body.velocity.y >= 0.0f) return;
+        if(isDown) if(!IsBelow(objA.GetMainAABB(), recB, offset) || objA.body.velocity.y >= 0.0f) return;
     }
     else
     {
         if(!gravityUp)
         {
-            if(isUp) if(!IsAbove(objA.GetMainAABB(), objB.GetMainAABB(), offset) || objA.body.velocity.y <= 0.0f) return;
+            if(isUp) if(!IsAbove(objA.GetMainAABB(), recB, offset) || objA.body.velocity.y <= 0.0f) return;
 
-            if(isDown) if(!IsBelow(objA.GetMainAABB(), objB.GetMainAABB(), offset) || objA.body.velocity.y >= 0.0f) return;
+            if(isDown) if(!IsBelow(objA.GetMainAABB(), recB, offset) || objA.body.velocity.y >= 0.0f) return;
         }
         else
         {
-            if(isDown) if(!IsAbove(objA.GetMainAABB(), objB.GetMainAABB(), offset) || objA.body.velocity.y <= 0.0f) return;
+            if(isDown) if(!IsAbove(objA.GetMainAABB(), recB, offset) || objA.body.velocity.y <= 0.0f) return;
 
-            if(isUp) if(!IsBelow(objA.GetMainAABB(), objB.GetMainAABB(), offset) || objA.body.velocity.y >= 0.0f) return;
+            if(isUp) if(!IsBelow(objA.GetMainAABB(), recB, offset) || objA.body.velocity.y >= 0.0f) return;
         }
-    }    
+    }
 
-    SolveCollisions(objA, objB, false, gravityUp, false, isPlatform);
+    SolveCollisions(
+        objA,
+        recB,
+        vel,
+        false, gravityUp, false, isPlatform
+    );
 }
 
 inline void ApplyWind(
-    GameObject* objA, GameObject* objB,
+    GameObject& objA,
+    const Rectangle& aabb,
     Direction direction, 
     bool isEdgeUp, bool isEdgeDown,
     bool gravityUp
@@ -110,48 +122,48 @@ inline void ApplyWind(
 
     bool right = direction == Direction::RIGHT;
 
-    float windForce = 1600 * objA->body.damping;
+    float windForce = 520 * objA.body.damping;
 
     bool isEdge = (!gravityUp && isEdgeUp) || (gravityUp && isEdgeDown);
 
-    float offset = objB->GetMainAABB().height * 0.8f;
+    float offset = aabb.height * 0.8f;
 
-    bool above = IsAbove(objA->GetMainAABB(), objB->GetMainAABB(), offset);
+    bool above = IsAbove(objA.GetMainAABB(), aabb, offset);
 
-    bool below = IsBelow(objA->GetMainAABB(), objB->GetMainAABB(), offset);
+    bool below = IsBelow(objA.GetMainAABB(), aabb, offset);
 
     bool onTop = !gravityUp ? above : below;
 
-    bool falling = !gravityUp ? objA->body.velocity.y > 0 : objA->body.velocity.y < 0;
+    bool falling = !gravityUp ? objA.body.velocity.y > 0 : objA.body.velocity.y < 0;
 
     if(isEdge && onTop && falling) return;
     
     if(right || left)
     {
-        windForce = 350 * objA->body.damping;
+        windForce *= 0.7f;
     }
 
     if(up)
     {
-        objA->body.force.y -= windForce;
+        objA.body.force.y -= windForce;
     }
     else if(down)
     {
-        objA->body.force.y += windForce;
+        objA.body.force.y += windForce;
     }
     else if(right)
     {
-        objA->body.force.x += windForce;
+        objA.body.force.x += windForce;
     }
     else if(left)
     {
-        objA->body.force.x -= windForce;
+        objA.body.force.x -= windForce;
     }
 }
 
 inline void ApplyWaterPhysics(GameObject* objA, bool gravityUp)
 {
-    float force = 700 * objA->body.damping;
+    float force = 175 * objA->body.damping; //175
 
     if(!gravityUp) objA->body.force.y -= force;
     else objA->body.force.y += force;

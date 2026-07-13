@@ -3,21 +3,17 @@
 
 void Platform::InitPlatform(
     const Transform2D &transform,
-    const EntityData &data,
-    const Direction &direction,
+    const SpriteFlipData &data,
     float gravity,
     int textureIndex,
     int variantIndex,
     int paletteIndex
 )
 {
-    gameObj.hasBody = true;
-
     this->gravity = gravity;
 
     gameObj.transform = transform;
-    gameObj.data = data;
-    gameObj.direction = direction;
+    gameObj.flipData = data;
 
     ogPosition = gameObj.transform.position;
 
@@ -34,13 +30,13 @@ void Platform::InitPlatform(
 
     gameObj.hitboxes.clear();
 
-    float platformWidth = GRID_SIZE;
-    float platformHeight = GRID_SIZE;
+    float platformWidth = TILE_SIZE;
+    float platformHeight = TILE_SIZE;
 
     if(type == PlatformType::MOVING_HORIZONTAL ||
     type == PlatformType::MOVING_VERTICAL)
     {
-        platformWidth = (GRID_SIZE * 3.0f) - 2;
+        platformWidth = (TILE_SIZE * 3.0f) - 2;
         platformHeight = 5;
     }
 
@@ -83,13 +79,11 @@ void Platform::InitPlatform(
 
     case PlatformType::MOVING_SPIKE_VERTICAL:
     {
-        platformSpeed *= 1.5f;
-
-        gameObj.body.velocity.y = -platformSpeed;
+        gameObj.body.velocity.y = -platformSpeed * 2.5f;
 
         updateRequired = true;
 
-        float size = GRID_SIZE * 0.5f;
+        float size = TILE_SIZE * 0.5f;
 
         gameObj.AddSubHitbox({0,0}, {size, size});
     }
@@ -97,13 +91,11 @@ void Platform::InitPlatform(
 
     case PlatformType::MOVING_SPIKE_HORIZONTAL:
     {
-        platformSpeed *= 1.5f;
-
-        gameObj.body.velocity.x = platformSpeed;
+        gameObj.body.velocity.x = platformSpeed * 2.5f;
 
         updateRequired = true;
 
-        float size = GRID_SIZE * 0.5f;
+        float size = TILE_SIZE * 0.5f;
 
         gameObj.AddSubHitbox({0,0}, {size, size});
     }
@@ -112,11 +104,14 @@ void Platform::InitPlatform(
     case PlatformType::ROTATING_SPIKE_SINGLE:
     {
         updateRequired = true;
-        gameObj.body.velocity.x = platformSpeed;
 
-        if(gameObj.data.flipX) gameObj.body.velocity.x = -platformSpeed;
+        int multiplier = 5;
 
-        float size = GRID_SIZE * 0.5f;
+        gameObj.body.velocity.x = platformSpeed * multiplier;
+
+        if(gameObj.flipData.flipX) gameObj.body.velocity.x = -platformSpeed * multiplier;
+
+        float size = TILE_SIZE * 0.5f;
 
         for(int h = 0; h < SINGLE_ROTATING_SPIKE_MAX_HITBOX; h++)
         {
@@ -126,8 +121,8 @@ void Platform::InitPlatform(
             {
                 float multiplier = (float)h * size;
 
-                offset.x = gameObj.data.flipX ? -multiplier : multiplier;
-                offset.y = gameObj.data.flipY ? multiplier : -multiplier;
+                offset.x = gameObj.flipData.flipX ? -multiplier : multiplier;
+                offset.y = gameObj.flipData.flipY ? multiplier : -multiplier;
 
                 gameObj.AddSubHitbox(offset, {size,size});
             }
@@ -138,11 +133,14 @@ void Platform::InitPlatform(
     case PlatformType::ROTATING_SPIKE_DOUBLE:
     {
         updateRequired = true;
-        gameObj.body.velocity.x = platformSpeed;
 
-        if(gameObj.data.flipX) gameObj.body.velocity.x = -platformSpeed;
+        int multiplier = 5;
 
-        float size = GRID_SIZE * 0.5f;
+        gameObj.body.velocity.x = platformSpeed * multiplier;
+
+        if(gameObj.flipData.flipX) gameObj.body.velocity.x = -platformSpeed * multiplier;
+
+        float size = TILE_SIZE * 0.5f;
 
         for(int h = 0; h < DOUBLE_ROTATING_SPIKE_MAX_HITBOX * 2.0f; h++)
         {
@@ -157,8 +155,8 @@ void Platform::InitPlatform(
             {
                 float multiplier = (float)localH * size * armSide;
 
-                offset.x = gameObj.data.flipX ? -multiplier : multiplier;
-                offset.y = gameObj.data.flipY ? multiplier : -multiplier;
+                offset.x = gameObj.flipData.flipX ? -multiplier : multiplier;
+                offset.y = gameObj.flipData.flipY ? multiplier : -multiplier;
 
                 Hitbox subHitbox = {
                     offset, {size, size}
@@ -223,7 +221,7 @@ void Platform::Update(float dt, int iterations)
         float cosA = cosf(rotationAngle);
         float sinA = sinf(rotationAngle);
 
-        float size = GRID_SIZE * 0.5f;
+        float size = TILE_SIZE * 0.5f;
 
         for(int h = 1; h < gameObj.hitboxes.size(); h++)
         {

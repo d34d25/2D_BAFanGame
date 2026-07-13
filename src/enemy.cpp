@@ -76,12 +76,12 @@ void Enemy::YuukaBehaivour(float dt, Player& player)
 {
     float moveSpeed = 50 * moveSpeedSign;
 
-    if(!lookAtPlayer) gameObj.body.velocity.x >= 0 ? gameObj.data.flipX = false : gameObj.data.flipX = true;
+    if(!lookAtPlayer) gameObj.body.velocity.x >= 0 ? gameObj.flipData.flipX = false : gameObj.flipData.flipX = true;
     else
     {
         float distanceToPlayerX = gameObj.transform.position.x - player.gameObj.transform.position.x;
 
-        distanceToPlayerX >= 0 ? gameObj.data.flipX = true : gameObj.data.flipX = false;
+        distanceToPlayerX >= 0 ? gameObj.flipData.flipX = true : gameObj.flipData.flipX = false;
     }
 
     if(stateTimer <= 0.0f)
@@ -344,20 +344,19 @@ void Enemy::Shoot(float dt)
 
 void Enemy::InitEnemy(
     const Vector2& spawnPos,
-    const EntityData& data,
+    const SpriteFlipData& data,
     int paletteIndex,
     float gravity,
     int frameskip
 )
 {
-    gameObj.hasBody = true;
     gameObj.body = {};
 
     gameObj.UpdateHitboxes();
 
     spawnData = data;
 
-    gameObj.data = spawnData;
+    gameObj.flipData = spawnData;
 
     this->gravity = gravity;
 
@@ -459,7 +458,7 @@ void Enemy::UpdateAI(float dt, Player& player)
 
 void Enemy::Update(float dt, int iterations)
 {
-    FlipHitboxY(gameObj.hitboxes[1], gameObj.data.flipY, false);
+    FlipHitboxY(gameObj.hitboxes[1], gameObj.flipData.flipY, false);
 
-    FlipHitboxY(gameObj.hitboxes[2], gameObj.data.flipY, true);
+    FlipHitboxY(gameObj.hitboxes[2], gameObj.flipData.flipY, true);
 }

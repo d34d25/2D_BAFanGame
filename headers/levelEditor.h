@@ -15,9 +15,29 @@ inline Vector2 ConvertFromIntPairToVector2(IntPair pair, int scale, int offsetX 
     return {(float)pair.x * scale + offsetX, (float)pair.y * scale + offsetY};
 }
 
-class LevelEditor
+struct LevelEditor
 {
-private:
+    Tile tempLevel[LAYERS][COLS][ROWS];
+
+    std::vector<Room> rooms = {};
+
+    std::array<Color, MAX_PALETTE_COLS> currentPaletteColors = {};
+
+    Camera2D camera = {};
+
+    SpriteRenderData* activeRenderData = nullptr;
+
+    const char* levelPath;
+
+    const char* roomPath;
+
+    Vector2 targetNeigbourPos = {0,0};
+
+    IntPair mouseMatrixPosition = {0,0};
+
+    Direction currentDirection = Direction::UP;
+
+    SpriteFlipData currentData = {};
 
     int screenWidth, screenHeight;
 
@@ -40,26 +60,22 @@ private:
     int currentBackgroundColor = 0;
 
     int currentBackgroundPalette = 0;
-    
-    std::array<Color, MAX_PALETTE_COLS> currentPaletteColors = {};
 
     bool roomMode = false;
 
-    std::vector<Room> rooms = {};
+    LevelEditor(int screenWidth, int screenHeight, const char* levelPath, const char* roomPath);
 
-    Vector2 targetNeigbourPos = {0,0};
+    ~LevelEditor() = default;
 
-    Direction currentDirection = Direction::UP;
+    void ExportLevel();
 
-    EntityData currentData = {};
+    void DrawRotatingSpikesRec(int currentType, Vector2 position, float size, SpriteFlipData data, Color color);
 
-    Tile tempLevel[LAYERS][COLS][ROWS];
+    void DrawRotatingSpikesSprite(int currentType, int frame, const SpriteRenderData& renderData, Vector2 position, float size, const SpriteFlipData& data);
 
-    Camera2D camera = {};
+    void Update();
 
-    IntPair mouseMatrixPosition = {0,0};
-
-    SpriteRenderData* activeRenderData = nullptr;
+    void Draw();
 
     inline bool HasReactiveAnimations(const TileType& type)
     {
@@ -101,16 +117,16 @@ private:
     inline Vector2 GetMouseGridPosition(IntPair mousePosition)
     {
         return {
-            mousePosition.x * GRID_SIZE + GRID_SIZE * 0.5f,
-            mousePosition.y * GRID_SIZE + GRID_SIZE * 0.5f
+            mousePosition.x * TILE_SIZE + TILE_SIZE * 0.5f,
+            mousePosition.y * TILE_SIZE + TILE_SIZE * 0.5f
         };
     }
 
     inline Vector2 GetMouseCell(IntPair mousePosition)
     {
         return {
-            (float)mousePosition.x * GRID_SIZE,
-            (float)mousePosition.y * GRID_SIZE
+            (float)mousePosition.x * TILE_SIZE,
+            (float)mousePosition.y * TILE_SIZE
         };
     }
 
@@ -118,8 +134,8 @@ private:
     {
         rooms.clear();
 
-        float roomWidth = (float)(TILES_PER_ROOM_WIDHT * GRID_SIZE);
-        float roomHeight = (float)(TILES_PER_ROOM_HEIGHT * GRID_SIZE);
+        float roomWidth = (float)(TILES_PER_ROOM_WIDHT * TILE_SIZE);
+        float roomHeight = (float)(TILES_PER_ROOM_HEIGHT * TILE_SIZE);
 
         int worldScreenCols = COLS / TILES_PER_ROOM_WIDHT;
         int worldScreenRows = ROWS / TILES_PER_ROOM_HEIGHT;
@@ -140,25 +156,4 @@ private:
             }
         }
     }
-
-    void ExportLevel();
-    
-    const char* levelPath;
-
-    const char* roomPath;
-
-    void DrawRotatingSpikesRec(int currentType, Vector2 position, float size, EntityData data, Color color);
-
-    void DrawRotatingSpikesSprite(int currentType, int frame, const SpriteRenderData& renderData, Vector2 position, float size, const EntityData& data);
-
-public:
-
-    LevelEditor(int screenWidth, int screenHeight, const char* levelPath, const char* roomPath);
-
-    ~LevelEditor() = default;
-
-    void Update();
-
-    void Draw();
-
 };

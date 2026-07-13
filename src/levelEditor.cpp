@@ -17,6 +17,7 @@ void LevelEditor::ExportLevel()
     }
 
     int roomCount = rooms.size();
+    
     int roomDataSize = sizeof(Room) * roomCount;
 
     if(SaveFileData("testRooms", rooms.data(), roomDataSize))
@@ -29,7 +30,7 @@ void LevelEditor::ExportLevel()
     }
 }
 
-void LevelEditor::DrawRotatingSpikesRec(int currentType, Vector2 position, float size, EntityData data, Color color)
+void LevelEditor::DrawRotatingSpikesRec(int currentType, Vector2 position, float size, SpriteFlipData data, Color color)
 {
     switch (currentType)
     {
@@ -63,7 +64,7 @@ void LevelEditor::DrawRotatingSpikesRec(int currentType, Vector2 position, float
         {
             if(i == SINGLE_ROTATING_SPIKE_MAX_HITBOX) continue;
 
-            float size = GRID_SIZE * 0.5f;
+            float size = TILE_SIZE * 0.5f;
 
             Vector2 currentOffset = {0,0};
 
@@ -94,7 +95,7 @@ void LevelEditor::DrawRotatingSpikesRec(int currentType, Vector2 position, float
     }
 }
 
-void LevelEditor::DrawRotatingSpikesSprite(int currentType, int frame, const SpriteRenderData& renderData, Vector2 position, float size, const EntityData& data)
+void LevelEditor::DrawRotatingSpikesSprite(int currentType, int frame, const SpriteRenderData& renderData, Vector2 position, float size, const SpriteFlipData& data)
 {
     switch (currentType)
     {
@@ -105,7 +106,7 @@ void LevelEditor::DrawRotatingSpikesSprite(int currentType, int frame, const Spr
         {
             if(i == SINGLE_ROTATING_SPIKE_MAX_HITBOX) continue;
 
-            float size = GRID_SIZE * 0.5f;
+            float size = TILE_SIZE * 0.5f;
 
             Vector2 currentOffset = {0,0};
 
@@ -168,8 +169,8 @@ LevelEditor::LevelEditor(int screenWidth, int screenHeight, const char* levelPat
     this->screenWidth = screenWidth;
     this->screenHeight = screenHeight;
 
-    int worldWidth = COLS * GRID_SIZE;
-    int worldHeight = ROWS * GRID_SIZE;
+    int worldWidth = COLS * TILE_SIZE;
+    int worldHeight = ROWS * TILE_SIZE;
 
     int halfWorldWidth = (int)floor(worldWidth * 0.5f);
     int halfWorldHeight = (int)floor(worldHeight * 0.5f);
@@ -187,8 +188,8 @@ void LevelEditor::Update()
 
     Vector2 mouseWorldPos = GetScreenToWorld2D(GetMousePosition(), camera);
 
-    int i = (int)floor(mouseWorldPos.x / GRID_SIZE);
-    int j = (int)floor(mouseWorldPos.y / GRID_SIZE);
+    int i = (int)floor(mouseWorldPos.x / TILE_SIZE);
+    int j = (int)floor(mouseWorldPos.y / TILE_SIZE);
 
     i = Clamp(i, 0, COLS - 1);
     j = Clamp(j, 0, ROWS - 1);
@@ -547,9 +548,9 @@ void LevelEditor::Update()
 
                     if(activeRenderData)
                     {
-                        isFrameSmallerThanTile = activeRenderData->frameSize.x <= GRID_SIZE && activeRenderData->frameSize.y <= GRID_SIZE;
+                        isFrameSmallerThanTile = activeRenderData->frameSize.x <= TILE_SIZE && activeRenderData->frameSize.y <= TILE_SIZE;
 
-                        if(chunkSize > 1 && Vector2Equals(activeRenderData->frameSize, {(float)GRID_SIZE * chunkSize, (float)GRID_SIZE * chunkSize}))
+                        if(chunkSize > 1 && Vector2Equals(activeRenderData->frameSize, {(float)TILE_SIZE * chunkSize, (float)TILE_SIZE * chunkSize}))
                         {
                             canPlaceChunk = true;
                         }
@@ -583,7 +584,7 @@ void LevelEditor::Update()
 
                                 if(targetSubTile.type != TileType::VOID) continue;
 
-                                Vector2 endPos = {(endMatrixX * GRID_SIZE) + GRID_SIZE * 0.5f, (endMatrixY * GRID_SIZE) + GRID_SIZE * 0.5f};
+                                Vector2 endPos = {(endMatrixX * TILE_SIZE) + TILE_SIZE * 0.5f, (endMatrixY * TILE_SIZE) + TILE_SIZE * 0.5f};
 
                                 bool canPlaceTexture = false;
 
@@ -601,13 +602,11 @@ void LevelEditor::Update()
 
                                 targetSubTile.variantIndex = currentVariant;
 
-                                targetSubTile.gameObj.transform.position = endPos;
+                                targetSubTile.angle = currentAngle;
 
-                                targetSubTile.gameObj.transform.angle = currentAngle;
+                                targetSubTile.flipData = currentData;
 
-                                targetSubTile.gameObj.data = currentData;
-
-                                targetSubTile.gameObj.direction = currentDirection;
+                                targetSubTile.direction = currentDirection;
 
                                 targetSubTile.paletteIndex = currentPalette;
                             }
@@ -675,7 +674,7 @@ void LevelEditor::Update()
         {
             Rectangle currentAABB = rooms[hoveredRoomIndex].aabb;
 
-            int threshold = GRID_SIZE * 2;
+            int threshold = TILE_SIZE * 2;
 
             //this starts at the center of the current room
             targetNeigbourPos = {
@@ -683,7 +682,7 @@ void LevelEditor::Update()
                 currentAABB.y + currentAABB.height * 0.5f
             };
 
-            int offset = GRID_SIZE;
+            int offset = TILE_SIZE;
 
             Vector2 displacement = {
                 currentAABB.width * 0.5f + offset,
@@ -756,8 +755,8 @@ void LevelEditor::Update()
             {
                 Rectangle roomToSplit = rooms[hoveredRoomIndex].aabb;
 
-                float roomWidth = (float)(TILES_PER_ROOM_WIDHT * GRID_SIZE);
-                float roomHeight = (float)(TILES_PER_ROOM_HEIGHT * GRID_SIZE);
+                float roomWidth = (float)(TILES_PER_ROOM_WIDHT * TILE_SIZE);
+                float roomHeight = (float)(TILES_PER_ROOM_HEIGHT * TILE_SIZE);
 
                 int colsInRoom = (int)roundf(roomToSplit.width / roomWidth);
                 int rowsInRoom = (int)roundf(roomToSplit.height / roomHeight);
@@ -796,8 +795,8 @@ void LevelEditor::Update()
 
 void LevelEditor::Draw()
 {
-    int worldWidth = COLS * GRID_SIZE;
-    int worldHeight = ROWS * GRID_SIZE;
+    int worldWidth = COLS * TILE_SIZE;
+    int worldHeight = ROWS * TILE_SIZE;
 
     int halfWorldWidth = (int)floor(worldWidth * 0.5f);
     int halfWorldHeight = (int)floor(worldHeight * 0.5f);
@@ -837,7 +836,9 @@ void LevelEditor::Draw()
 
                 Color layerTint = {255,255,255,alpha};
 
-                Tile tile = tempLevel[l][i][j];
+                Tile& tile = tempLevel[l][i][j];
+
+                Vector2 tilePosition = GetTileCenter(i,j);
 
                 TileType type = tile.type;
 
@@ -847,7 +848,7 @@ void LevelEditor::Draw()
 
                 SpriteRenderData* tileRenderData = GetTileActiveRenderData(type, tile.variantIndex);
 
-                Vector2 tileSize = {GRID_SIZE, GRID_SIZE};
+                Vector2 tileSize = {TILE_SIZE, TILE_SIZE};
 
                 float offsetX = 0;
                 float offsetY = 0;
@@ -857,10 +858,10 @@ void LevelEditor::Draw()
                 case TileType::VERTICAL_MOVING_PLATFORM:
                 case TileType::HORIZONALT_MOVING_PLATFORM:
                 {
-                    tileSize.x = GRID_SIZE * 3.0f;
-                    tileSize.y = GRID_SIZE * 0.3f;
+                    tileSize.x = TILE_SIZE * 3.0f;
+                    tileSize.y = TILE_SIZE * 0.3f;
 
-                    offsetX = -GRID_SIZE;
+                    offsetX = -TILE_SIZE;
                     offsetY = tileSize.y;
                 }
                 break;
@@ -875,7 +876,7 @@ void LevelEditor::Draw()
                     if(tile.type == TileType::ROTATING_SPIKE_SINGLE ||
                     tile.type == TileType::ROTATING_SPIKE_DOUBLE)
                     {
-                        DrawRotatingSpikesRec((int)tile.type, tile.gameObj.transform.position, GRID_SIZE * 0.5f, tile.gameObj.data, {color.r, color.g, color.b, alpha});
+                        DrawRotatingSpikesRec((int)tile.type, tilePosition, TILE_SIZE * 0.5f, tile.flipData, {color.r, color.g, color.b, alpha});
                     }
                     else
                     {
@@ -890,7 +891,7 @@ void LevelEditor::Draw()
                             playerOffsetY = tileSize.y;
                         }
 
-                        Rectangle placeHolderRec = {i * GRID_SIZE + offsetX, j * GRID_SIZE + offsetY - playerOffsetY, size.x, size.y};
+                        Rectangle placeHolderRec = {i * TILE_SIZE + offsetX, j * TILE_SIZE + offsetY - playerOffsetY, size.x, size.y};
 
                         if(tile.type == TileType::SOLID)
                         {
@@ -918,14 +919,14 @@ void LevelEditor::Draw()
                             (int)tile.type,
                             tile.textureIndex,
                             *tileRenderData,
-                            tile.gameObj.transform.position,
-                            GRID_SIZE * 0.5f,
-                            tile.gameObj.data
+                            tilePosition,
+                            TILE_SIZE * 0.5f,
+                            tile.flipData
                         );
                     }
                     else
                     {
-                        DrawSprite(tile.gameObj, tileRenderData, tile.textureIndex, layerTint);
+                        DrawSprite(tilePosition, tile.angle, tileRenderData, tile.flipData, tile.textureIndex, layerTint);
                     }
                 }
             }
@@ -941,7 +942,7 @@ void LevelEditor::Draw()
 
         if(currentTileType != (int)TileType::VOID) previewColor.a = 50;
 
-        Vector2 tileSize = {GRID_SIZE, GRID_SIZE};
+        Vector2 tileSize = {TILE_SIZE, TILE_SIZE};
         
         Transform2D previewTransform;
 
@@ -956,10 +957,10 @@ void LevelEditor::Draw()
         case TileType::VERTICAL_MOVING_PLATFORM:
         case TileType::HORIZONALT_MOVING_PLATFORM:
         {
-            tileSize.x = GRID_SIZE * 3.0f;
-            tileSize.y = GRID_SIZE * 0.3f;
+            tileSize.x = TILE_SIZE * 3.0f;
+            tileSize.y = TILE_SIZE * 0.3f;
 
-            offsetX = -GRID_SIZE;
+            offsetX = -TILE_SIZE;
             offsetY = tileSize.y;
         }
         break;
@@ -974,7 +975,7 @@ void LevelEditor::Draw()
             if(currentTileType == (int)TileType::ROTATING_SPIKE_SINGLE ||
             currentTileType == (int)TileType::ROTATING_SPIKE_DOUBLE)
             {
-                DrawRotatingSpikesRec(currentTileType, previewTransform.position, GRID_SIZE * 0.5f, currentData, previewColor);
+                DrawRotatingSpikesRec(currentTileType, previewTransform.position, TILE_SIZE * 0.5f, currentData, previewColor);
             }
             else
             {
@@ -990,8 +991,8 @@ void LevelEditor::Draw()
                 }
 
                 DrawRectangle(
-                    previewTransform.position.x - (GRID_SIZE * 0.5f) + offsetX, 
-                    previewTransform.position.y - (GRID_SIZE * 0.5f) + offsetY - playerOffsetY,
+                    previewTransform.position.x - (TILE_SIZE * 0.5f) + offsetX, 
+                    previewTransform.position.y - (TILE_SIZE * 0.5f) + offsetY - playerOffsetY,
                     size.x * chunkSize, size.y * chunkSize,
                     previewColor
                 );
@@ -1018,7 +1019,7 @@ void LevelEditor::Draw()
                     currentTexture,
                     *activeRenderData,
                     previewTransform.position,
-                    GRID_SIZE * 0.5f,
+                    TILE_SIZE * 0.5f,
                     currentData
                 );
             }
@@ -1033,16 +1034,16 @@ void LevelEditor::Draw()
 
     EndShaderMode();
 
-    if(roomMode) DrawCircle(targetNeigbourPos.x, targetNeigbourPos.y, 20, RED);
+    if(roomMode) DrawCircle(targetNeigbourPos.x, targetNeigbourPos.y, 5, RED);
     
     for(int i = 0; i < rooms.size(); i++)
     {
-        DrawAABB(rooms[i].aabb, PURPLE, 6.0f);
+        DrawAABB(rooms[i].aabb, PURPLE, 4.0f);
     }
 
     //grid
 
-    for(int i = 0; i <= worldWidth; i+= GRID_SIZE)
+    for(int i = 0; i <= worldWidth; i+= TILE_SIZE)
     {
         DrawLineEx(
             {(float)i, 0.0f},
@@ -1052,7 +1053,7 @@ void LevelEditor::Draw()
         );
     }
 
-    for(int i = 0; i <= worldHeight; i+= GRID_SIZE)
+    for(int i = 0; i <= worldHeight; i+= TILE_SIZE)
     {
         DrawLineEx(
             {0.0f, (float)i},
@@ -1063,9 +1064,9 @@ void LevelEditor::Draw()
     }
 
     DrawRectangleLines(
-        mouseMatrixPosition.x * GRID_SIZE, 
-        mouseMatrixPosition.y * GRID_SIZE,
-        GRID_SIZE * chunkSize, GRID_SIZE * chunkSize, RED
+        mouseMatrixPosition.x * TILE_SIZE, 
+        mouseMatrixPosition.y * TILE_SIZE,
+        TILE_SIZE * chunkSize, TILE_SIZE * chunkSize, RED
     );
 
 
@@ -1076,13 +1077,13 @@ void LevelEditor::Draw()
     int ypos = 50;
     int spacing = 30;
 
-    DrawText(TextFormat("mouse x: %i", mouseMatrixPosition.x), GRID_SIZE, ypos, 20, WHITE);
+    DrawText(TextFormat("mouse x: %i", mouseMatrixPosition.x), TILE_SIZE, ypos, 20, WHITE);
 
-    DrawText(TextFormat("mouse y: %i", mouseMatrixPosition.y), GRID_SIZE, ypos + spacing, 20, WHITE);
+    DrawText(TextFormat("mouse y: %i", mouseMatrixPosition.y), TILE_SIZE, ypos + spacing, 20, WHITE);
 
-    DrawText(GetTileTypeText((TileType)currentTileType), GRID_SIZE, ypos + spacing * 2, 20, WHITE);
+    DrawText(GetTileTypeText((TileType)currentTileType), TILE_SIZE, ypos + spacing * 2, 20, WHITE);
     
-    DrawText(TextFormat("tileType: %i", currentTileType ), GRID_SIZE, ypos + spacing * 3,20,WHITE);
+    DrawText(TextFormat("tileType: %i", currentTileType ), TILE_SIZE, ypos + spacing * 3,20,WHITE);
 
     const char* layerText = "";
 
@@ -1099,23 +1100,23 @@ void LevelEditor::Draw()
     default: break;
     }
 
-    DrawRectangle(0,0, GRID_SIZE, GRID_SIZE, backgroundColor);
+    DrawRectangle(0,0, TILE_SIZE * 4, TILE_SIZE * 4, backgroundColor);
 
-    DrawText(TextFormat("current layer: %s", layerText), GRID_SIZE, ypos + spacing * 4, 20, RED);
+    DrawText(TextFormat("current layer: %s", layerText), TILE_SIZE, ypos + spacing * 4, 20, RED);
 
-    DrawText(TextFormat("current angle: %i", currentAngle), GRID_SIZE, ypos + spacing * 5, 20, RED);
+    DrawText(TextFormat("current angle: %i", currentAngle), TILE_SIZE, ypos + spacing * 5, 20, RED);
 
-    DrawText(TextFormat("current flip x: %i", currentData.flipX), GRID_SIZE, ypos + spacing * 6, 20, RED);
+    DrawText(TextFormat("current flip x: %i", currentData.flipX), TILE_SIZE, ypos + spacing * 6, 20, RED);
 
-    DrawText(TextFormat("current flip y: %i", currentData.flipY), GRID_SIZE, ypos + spacing * 7, 20, RED);
+    DrawText(TextFormat("current flip y: %i", currentData.flipY), TILE_SIZE, ypos + spacing * 7, 20, RED);
 
-    DrawText(GetDirectionText(currentDirection), GRID_SIZE, ypos + spacing * 8, 20, RED);
+    DrawText(GetDirectionText(currentDirection), TILE_SIZE, ypos + spacing * 8, 20, RED);
 
-    DrawText(TextFormat("room mode: %i", roomMode), GRID_SIZE, ypos + spacing * 9, 20, GREEN);
+    DrawText(TextFormat("room mode: %i", roomMode), TILE_SIZE, ypos + spacing * 9, 20, GREEN);
 
-    DrawText(TextFormat("current palette: %i", currentPalette), GRID_SIZE, ypos + spacing * 10, 20, GREEN);
+    DrawText(TextFormat("current palette: %i", currentPalette), TILE_SIZE, ypos + spacing * 10, 20, GREEN);
 
-    DrawText(TextFormat("current chunk size: %i", chunkSize), GRID_SIZE, ypos + spacing * 11, 20, GREEN);
+    DrawText(TextFormat("current chunk size: %i", chunkSize), TILE_SIZE, ypos + spacing * 11, 20, GREEN);
 
     int size = 20;
     int offsetY = size;

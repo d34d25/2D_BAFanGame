@@ -18,11 +18,11 @@ const float REC_TO_CIRCLE_RADIUS_MULTIPLIER = 1.5f; //this ensures that the circ
 
 const float CAMERA_ZOOM = 1.0f;
 
-const float ENEMY_SPAWN_RADIUS = GRID_SIZE * TILES_PER_ROOM_WIDHT * 0.5f;
+const float ENEMY_SPAWN_RADIUS = TILE_SIZE * TILES_PER_ROOM_WIDHT * 0.5f;
 
-const float ENEMY_DESPAWN_RADIUS = GRID_SIZE * (TILES_PER_ROOM_WIDHT * 0.5f + 2.0f);
+const float ENEMY_DESPAWN_RADIUS = TILE_SIZE * (TILES_PER_ROOM_WIDHT * 0.5f + 2.0f);
 
-const float PLATFORM_UPDATE_RADIUS = GRID_SIZE * 28.0f;
+const float PLATFORM_UPDATE_RADIUS = TILE_SIZE * 28.0f;
 
 struct TileRangeLimits
 {
@@ -32,41 +32,16 @@ struct TileRangeLimits
     int maxY = COLS - 1;
 };
 
-class Level
+struct Level
 {
-private:
-
-    float dt;
-
-    int iterations = 1;
-
-    int lowFrequencyCounter = 0;
-
-    int collisionTileCheckRange = 2;
-
-    int renderTileCheckRange = 15;
-
-    float gravity = 500;
-
-    bool isGravityUp = false;
-
-    bool debugDrawing = false;
-
-    //screen shake
-
-    float screenShakeTimer = 0.0f;
-    float screenShakeDuration = 0.0f;
-    int screenShakeMagnitude = 0;
-
-    Vector2 screenShakeOffset = {0,0};
-
     //level
     Tile level[LAYERS][COLS][ROWS];
 
-    std::vector<Room> rooms = {};
+    std::vector<Enemy> enemyList = {};
 
     std::vector<Platform> platformList = {};
-    std::vector<Enemy> enemyList = {};
+
+    std::vector<Room> rooms = {};
 
     std::vector<std::vector<Enemy>> enemyBuckets = {};
     std::vector<std::vector<Platform>> platformBuckets = {};
@@ -78,15 +53,59 @@ private:
     std::vector<Enemy*> enemyCache = {};
     std::vector<Enemy*> enemyCache_physics = {};
 
-    int previousRoomIndex = -1;
-    int currentRoomIndex = -1;
-
-    Camera2D camera = {};
-
     Player player = {};
 
+    RenderTexture2D gameplayCanvas = {};
+
+    RenderTexture2D uiCanvas = {};
+
+    Camera2D camera = {};
+    
     //clamps the tile range to the current room
     TileRangeLimits rangeLimits = {};
+
+    Vector2 screenShakeOffset = {0,0};
+
+    //screen shake
+    float screenShakeTimer = 0.0f;
+
+    float screenShakeDuration = 0.0f;
+
+    float dt;
+
+    float gravity = 500.0f;
+
+    int totalCanvasWidth, totalCanvasHeight;
+
+    int iterations = 1;
+
+    int lowFrequencyCounter = 0;
+
+    int collisionTileCheckRange = 2;
+
+    int renderTileCheckRange = 15;
+
+    int previousRoomIndex = -1;
+
+    int currentRoomIndex = -1;
+
+    int screenShakeMagnitude = 0; //screen shake
+
+    bool isGravityUp = false;
+
+    bool debugDrawing = false;
+
+    Level() = default;
+
+    ~Level();
+
+    void InitLevel(const char* levelPath, const char* roomPath ,float dt, int iterations);
+
+    void UpdateLevel();
+
+    void DrawLevel();
+
+    void ResetLevel();
 
     void ResetRoom();
 
@@ -109,95 +128,9 @@ private:
         platformList.clear();
     }
 
-    //change the target relative to the speed of the player
-    //so the camera points a bit ahead of where the player is moving
-
     //camera
-    inline void UpdateCamera(const Vector2& target, const Vector2& offset)
-    {
-        int canvasWidth = gameplayCanvas.texture.width;
-        int canvasHeight = gameplayCanvas.texture.height;
 
-        int roomIndex = -1;
-
-        Rectangle currentRoom = {};
-
-        for(int r = 0; r < rooms.size(); r++)
-        {
-            if(CheckCollisionPointRec(target, rooms[r].aabb))
-            {
-                roomIndex = r;
-                currentRoom = rooms[r].aabb;
-
-                break;
-            }
-        }
-
-        Vector2 desired = Vector2Add(target, offset);
-
-        if(roomIndex > -1)
-        {
-            Vector2 halfScreenWorld = {
-                (canvasWidth * 0.5f) / camera.zoom,
-                (canvasHeight * 0.5f) / camera.zoom
-            };
-
-            Vector2 min = {
-                currentRoom.x + halfScreenWorld.x,
-                currentRoom.y + halfScreenWorld.y
-            };
-
-            Vector2 max = {
-                (currentRoom.x + currentRoom.width) - halfScreenWorld.x,
-                (currentRoom.y + currentRoom.height) - halfScreenWorld.y
-            };
-
-            if(currentRoom.width < (canvasWidth / camera.zoom))
-            {
-                desired.x = currentRoom.x + (currentRoom.width * 0.5f);
-            }
-            else
-            {
-                desired.x = Clamp(desired.x, min.x, max.x);
-            }
-
-            if(currentRoom.height < (canvasHeight / camera.zoom))
-            {
-                desired.y = currentRoom.y + (currentRoom.height * 0.5f);
-            }
-            else
-            {
-                desired.y = Clamp(desired.y, min.y, max.y);
-            }
-            
-        }
-
-        camera.target.x = desired.x;
-        camera.target.y = desired.y;
-
-        float zoom = camera.zoom;
-
-        camera.target.x = floorf(camera.target.x * zoom) / zoom;
-        camera.target.y = floorf(camera.target.y * zoom) / zoom;
-
-        camera.offset = {floorf(canvasWidth * 0.5f), floorf(canvasHeight * 0.5f)};
-
-        int mouseWheel = GetMouseWheelMove();
-
-        float cameraFactor = 0.2f;
-
-        if(IsKeyDown(KEY_LEFT_ALT))
-        {
-            if(mouseWheel > 0) camera.zoom += cameraFactor;
-            else if(mouseWheel < 0) camera.zoom -= cameraFactor;
-
-            float step = 1.0f / (float)GRID_SIZE;
-
-            camera.zoom = roundf(camera.zoom / step) * step;
-
-            camera.zoom = Clamp(camera.zoom, 0.25f, 15.25f);
-        }
-    }
+    void UpdateCamera(const Vector2& target, const Vector2& offset);
 
     inline void TriggerScreenShake(float duration, int magnitude)
     {
@@ -238,7 +171,7 @@ private:
     {
         if(tile.type == TileType::ONE_WAY)
         {
-            if(tile.gameObj.direction == Direction::UP || tile.gameObj.direction == Direction::DOWN)
+            if(tile.direction == Direction::UP || tile.direction == Direction::DOWN)
                 return true;
         }
 
@@ -249,7 +182,7 @@ private:
     {
         if(tile.type == TileType::ONE_WAY)
         {
-            if(tile.gameObj.direction == Direction::RIGHT || tile.gameObj.direction == Direction::LEFT)
+            if(tile.direction == Direction::RIGHT || tile.direction == Direction::LEFT)
                 return true;
         }
 
@@ -324,35 +257,15 @@ private:
             Rectangle& currentRoom = rooms[currentRoomIndex].aabb;
 
             rangeLimits = {
-                (int)(currentRoom.x / GRID_SIZE),
-                (int)(currentRoom.y / GRID_SIZE),
-                (int)((currentRoom.x + currentRoom.width) / GRID_SIZE) - 1,
-                (int)((currentRoom.y + currentRoom.height) / GRID_SIZE) - 1
+                (int)(currentRoom.x / TILE_SIZE),
+                (int)(currentRoom.y / TILE_SIZE),
+                (int)((currentRoom.x + currentRoom.width) / TILE_SIZE) - 1,
+                (int)((currentRoom.y + currentRoom.height) / TILE_SIZE) - 1
             };
         }
 
         return rangeLimits;
     }
-
-public:
-
-    int totalCanvasWidth, totalCanvasHeight;
-
-    RenderTexture2D gameplayCanvas = {};
-
-    RenderTexture2D uiCanvas = {};
-
-    Level() = default;
-
-    ~Level();
-
-    void InitLevel(const char* levelPath, const char* roomPath ,float dt, int iterations);
-
-    void UpdateLevel();
-
-    void DrawLevel();
-
-    void ResetLevel();
 
     inline void UpdatePlayerInput()
     {

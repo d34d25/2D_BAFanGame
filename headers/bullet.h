@@ -152,12 +152,12 @@ inline void ShootBullet(
 
         float bulletGravity = bulletData->gravity;
 
-        if(gameObj.data.flipX)
+        if(gameObj.flipData.flipX)
         {
             angle = 180.0f - angle;
         }
 
-        if(gameObj.data.flipY)
+        if(gameObj.flipData.flipY)
         {
             angle = -angle;
             bulletGravity = -bulletData->gravity;

@@ -43,10 +43,6 @@ static constexpr Color ENEMY_YUUKA = Color{85,56,171,255};
 
 static constexpr int TILE_SIZE = 12;
 
-//static constexpr int META_TILE_FACTOR = 1;
-
-static constexpr int GRID_SIZE = TILE_SIZE; // * META_TILE_FACTOR;
-
 static const int NATIVE_WIDTH = 240;
 
 static const int NATIVE_HEIGHT = 240;
@@ -61,9 +57,9 @@ static constexpr int GAMEPLAY_CANVAS_HEIGHT = (NATIVE_HEIGHT - UI_HEIGHT);
 static constexpr int UI_CANVAS_HEIGHT = UI_HEIGHT;
 
 //rooms
-static constexpr int TILES_PER_ROOM_WIDHT = NATIVE_WIDTH / GRID_SIZE;
+static constexpr int TILES_PER_ROOM_WIDHT = NATIVE_WIDTH / TILE_SIZE;
 
-static constexpr int TILES_PER_ROOM_HEIGHT = (NATIVE_HEIGHT - UI_HEIGHT) / GRID_SIZE;
+static constexpr int TILES_PER_ROOM_HEIGHT = (NATIVE_HEIGHT - UI_HEIGHT) / TILE_SIZE;
 
 
 static constexpr int ROWS = TILES_PER_ROOM_HEIGHT * 10;

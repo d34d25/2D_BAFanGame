@@ -4,7 +4,7 @@ void Player::InitPlayer(Vector2 position, float gravity, bool flipY)
 {
     this->gravity = gravity;
 
-    gameObj.data.flipY = flipY;
+    gameObj.flipData.flipY = flipY;
 
     spawnPos = position;
 
@@ -160,10 +160,6 @@ void Player::InitPlayer(Vector2 position, float gravity, bool flipY)
     bulletpool = std::make_unique<BulletPool>(30, bulletData);
 }
 
-Player::~Player()
-{
-}
-
 void Player::UpdateInput()
 {
     movingLeft = IsKeyDown(KEY_LEFT);
@@ -279,16 +275,16 @@ void Player::Update(float dt, int iterations)
 
     float jump = jumpVel;
 
-    if(gameObj.data.flipY) jump = -jumpVel;
+    if(gameObj.flipData.flipY) jump = -jumpVel;
 
     //jump detector
-    FlipHitboxY(gameObj.hitboxes[1], gameObj.data.flipY, false);
+    FlipHitboxY(gameObj.hitboxes[1], gameObj.flipData.flipY, false);
 
     //treadmill detector
-    FlipHitboxY(gameObj.hitboxes[2], gameObj.data.flipY, false);
+    FlipHitboxY(gameObj.hitboxes[2], gameObj.flipData.flipY, false);
 
     //ceiling detector
-    FlipHitboxY(gameObj.hitboxes[3], gameObj.data.flipY, true);
+    FlipHitboxY(gameObj.hitboxes[3], gameObj.flipData.flipY, true);
 
     canMove = stunTimer >= maxStunTime;
 
@@ -302,13 +298,13 @@ void Player::Update(float dt, int iterations)
         {
             gameObj.body.force.x -= moveForce;
             
-            gameObj.data.flipX = true;
+            gameObj.flipData.flipX = true;
         }
         else if(movingRight)
         {
             gameObj.body.force.x += moveForce;
 
-            gameObj.data.flipX = false;
+            gameObj.flipData.flipX = false;
         }
 
         //ladder

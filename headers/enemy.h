@@ -21,47 +21,13 @@ enum class Attacks
     RUN_N_SHOOT
 };
 
-class Enemy
+struct Enemy
 {
-
-private:
-
-    void YuukaBehaivour(float dt, Player& player);
-
-    Attacks currentAttack = Attacks::NOTHING;
-
-    Attacks lastAttack = Attacks::NOTHING;
-
-    //generic timer for being used inside the enemies patterns
-    float timer = 0.0f;
-    float maxTime = 0.2f;
-
-    int moveSpeedSign = 1;
-
-    float animationTimer = 0.0f;
-
-    //can the enemy stun the player?
-    StunState stunState = StunState::NOT_STUNNED;
-
-    bool alreadyFlipped = false;
-
-    bool lookAtPlayer = false;
-
-    float ogDamping = 0.0f;
-
-    BulletProperties ogBulletData = {};
-
-public:
-
-    Vector2 spawnPosition = {0,0};
-
-    EntityData spawnData = {false, false};
-
     GameObject gameObj = {};
-
-    EnemyType type = EnemyType::DUMMY;
-
-    Color testColor = ENEMY_DUMMY;
+    
+    BulletProperties ogBulletData = {};
+    
+    BulletProperties bulletData = {};
 
     Rectangle roomSize = {};
 
@@ -69,12 +35,13 @@ public:
 
     SpriteRenderData* weaponRenderData = nullptr;
 
-    //bullets
-    bool shooting = false;
-
-    BulletProperties bulletData = {};
+    Vector2 spawnPosition = {0,0};
 
     std::unique_ptr<BulletPool> bulletpool = {};
+
+    Color testColor = ENEMY_DUMMY;
+
+    SpriteFlipData spawnData = {false, false};
 
     float stateTimer = 0.0f;
 
@@ -82,7 +49,48 @@ public:
 
     float ogGravity = 0.0f;
 
+    float ogDamping = 0.0f;
+
+    //generic timer for being used inside the enemies patterns
+    float timer = 0.0f;
+
+    float maxTime = 0.2f;
+    //
+    float animationTimer = 0.0f;
+
+    EnemyType type = EnemyType::DUMMY;
+
+    //can the enemy stun the player?
+    StunState stunState = StunState::NOT_STUNNED;
+
+    Attacks currentAttack = Attacks::NOTHING;
+
+    Attacks lastAttack = Attacks::NOTHING;
+
+    //animation
+
+    int characterCurrentFrame = 0;
+
+    int characterVariantIndex = 0;
+
+    int weaponCurrentFrame = 0;
+
+    int weaponVariantIndex = 0;
+
+    int characterPaletteIndex = 0;
+
+    int weaponPaletteIndex = 0;
+
+    //
+    int moveSpeedSign = 1;
+    
+    int aiFrameskip = 2;
+
     //flags
+    bool alreadyFlipped = false;
+
+    bool lookAtPlayer = false;
+
     bool isGrounded = false;
 
     bool wasGrounded = false;
@@ -100,26 +108,11 @@ public:
     //jump
     bool isJumping = false;
 
+    //bullets
+    bool shooting = false;
+
     //
     bool isActive = false;
-
-    //animation
-
-    int characterCurrentFrame = 0;
-
-    int characterVariantIndex = 0;
-
-    int weaponCurrentFrame = 0;
-
-    int weaponVariantIndex = 0;
-
-    int characterPaletteIndex = 0;
-
-    int weaponPaletteIndex = 0;
-
-    //
-
-    int aiFrameskip = 2;
 
     Enemy() = default;
 
@@ -129,11 +122,13 @@ public:
 
     void InitEnemy(
         const Vector2& spawnPos,
-        const EntityData& data,
+        const SpriteFlipData& data,
         int paletteIndex,
         float gravity,
         int frameskip = 2
     );
+
+    void YuukaBehaivour(float dt, Player& player);
 
     void UpdateAI(float dt, Player& player);
 
@@ -178,7 +173,7 @@ public:
         gameObj.body.velocity = {0,0};
         gameObj.body.altVelocity = {0,0};
 
-        gameObj.data = spawnData;
+        gameObj.flipData = spawnData;
 
         ResetFlags();
 

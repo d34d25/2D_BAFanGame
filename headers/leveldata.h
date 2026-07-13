@@ -25,7 +25,7 @@ struct TileRange
     int endY = COLS;
 };
 
-enum class TileType
+enum struct TileType
 {
     VOID,
     
@@ -98,7 +98,7 @@ enum class TileType
     COUNT
 };
 
-enum class PlatformType
+enum struct PlatformType
 {
     NONE,
     
@@ -123,13 +123,13 @@ enum class PlatformType
     MOVING_END
 };
 
-enum class EnemyType
+enum struct EnemyType
 {
     DUMMY,
     YUUKA
 };
 
-enum class Character
+enum struct Character
 {
     MOMOI,
     MIDORI,
@@ -245,9 +245,23 @@ enum class NeighborDirection
     LEFT
 };
 
+//TODO: refactor this and move out the game object
+
 struct Tile
 {
+    std::vector<Hitbox> hitboxes = {};
+
+    TileType neighborsTypes[8] = {TileType::VOID};
+
     TileType type = TileType::VOID;
+
+    float treadmillVel = 0.0f;
+
+    float angle = 0.0f;
+
+    SpriteFlipData flipData = {};
+
+    Direction direction = Direction::UP;
 
     int currentFrame = 0;
 
@@ -256,17 +270,14 @@ struct Tile
     int variantIndex = 0;
 
     int paletteIndex = 0;
-    
+
+    bool isMiddle = false;
+
     bool isJumpTrigger = false;
 
-    GameObject gameObj = {};
+    bool canEntityCollidePhysically = false;
 
-    TileType neighborsTypes[8] = {TileType::VOID};
-
-    inline TileType GetNeighborType(NeighborDirection direction)
-    {
-        return neighborsTypes[(int)direction];
-    }
+    bool canPlatformCollidePhysically = false;
 };
 
 struct Room
@@ -327,8 +338,8 @@ inline TileRange CalculateTileRange(
     int maxX = COLS - 1, int maxY = ROWS - 1
 )
 {
-    int gridX = x / GRID_SIZE;
-    int gridY = y / GRID_SIZE;
+    int gridX = x / TILE_SIZE;
+    int gridY = y / TILE_SIZE;
 
     TileRange rangeTiles = {};
 
@@ -369,7 +380,7 @@ inline const char* GetTileTypeText(TileType type)
 
 inline Vector2 GetTileCenter(int i, int j)
 {
-    return {i * GRID_SIZE + GRID_SIZE * 0.5f, j * GRID_SIZE + GRID_SIZE * 0.5f};
+    return {i * TILE_SIZE + TILE_SIZE * 0.5f, j * TILE_SIZE + TILE_SIZE * 0.5f};
 }
 
 //palettes

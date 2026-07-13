@@ -21,20 +21,37 @@ const Color YUZU_COLOR_BG = BLACK;
 const Color ARIS_PURPLE = Color{120,100,255,255};
 const Color ARIS_PURPLE_BG = Color{200,162,255,255};
 
-class Player
+struct Player
 {
+    GameObject gameObj = {};
 
-private:
+    Vector2 spawnPos = {0,0};
 
-    Character character = Character::MOMOI;
+    std::unique_ptr<BulletPool> bulletpool = {};
+
+    SpriteRenderData* characterRenderData = {};
+
+    SpriteRenderData* weaponRenderData = {};
+
+    BulletProperties bulletData = {};
+
+    Character character = Character::YUZU;
 
     float jumpTime = 0.0f;
     float maxJumpTime = 0.16f;
 
     float animationTimer = 0.0f;
-    
-public:
 
+    float gravity = 500;
+
+    float ladderSnapPosX = 0.0f;
+
+    //stun
+    float stunTimer = 0.0f;
+
+    float maxStunTime = 0.0f;
+
+    //ints
     int characterCurrentFrame = 0;
 
     int characterVariantIndex = 0;
@@ -47,7 +64,9 @@ public:
 
     int weaponCurrentPalette = 0;
 
-    float gravity = 500;
+    int currentPortrait = 0;
+
+    int currentPortraitFrame = 0;
 
     //previous frame flags
     bool wasGrounded = false;
@@ -73,11 +92,6 @@ public:
     //jump flags
     bool isJumping = false;
 
-    //stun
-    float stunTimer = 0.0f;
-
-    float maxStunTime = 0.0f;
-
     //input
 
     bool movingLeft = false;
@@ -97,30 +111,13 @@ public:
     bool resetingLevel = false;
     bool resetingZoom = false;
 
-    int currentPortrait = 0;
-    int currentPortraitFrame = 0;
-
     bool hurt = false;
-
-    Vector2 spawnPos = {0,0};
-
-    GameObject gameObj = {};
-
-    SpriteRenderData* characterRenderData = {};
-
-    SpriteRenderData* weaponRenderData = {};
-
-    BulletProperties bulletData = {};
-
-    std::unique_ptr<BulletPool> bulletpool = {};
-
-    float ladderSnapPosX = 0.0f;
 
     Player() = default;
 
     void InitPlayer(Vector2 position, float gravity, bool flipY);
 
-    ~Player();
+    ~Player() = default;
 
     void UpdateInput();
 
@@ -195,7 +192,7 @@ public:
 
     inline bool IsFalling()
     {
-        if(gameObj.data.flipY) return gameObj.body.velocity.y <= 0;
+        if(gameObj.flipData.flipY) return gameObj.body.velocity.y <= 0;
         else return gameObj.body.velocity.y >= 0;
     }
 
@@ -223,18 +220,18 @@ public:
 
     inline bool IsHoldingDown()
     {
-        if(!gameObj.data.flipY && IsKeyDown(KEY_DOWN)) return true;
+        if(!gameObj.flipData.flipY && IsKeyDown(KEY_DOWN)) return true;
         
-        if(gameObj.data.flipY && IsKeyDown(KEY_UP)) return true;
+        if(gameObj.flipData.flipY && IsKeyDown(KEY_UP)) return true;
 
         return false;
     }
 
     inline bool IsHoldingUp()
     {
-        if(!gameObj.data.flipY && IsKeyDown(KEY_UP)) return true;
+        if(!gameObj.flipData.flipY && IsKeyDown(KEY_UP)) return true;
         
-        if(gameObj.data.flipY && IsKeyDown(KEY_DOWN)) return true;
+        if(gameObj.flipData.flipY && IsKeyDown(KEY_DOWN)) return true;
 
         return false;
     }
