@@ -240,7 +240,7 @@ void LevelEditor::Update()
     if(IsKeyPressed(KEY_R)) roomMode = !roomMode;
 
     if(!environmentPalettes.empty())
-        {
+    {
         if(IsKeyPressed(KEY_UP))
         {
             currentBackgroundPalette++;

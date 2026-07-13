@@ -383,7 +383,7 @@ void LoadAssets()
     yuzuRenderData.push_back(LoadRenderData(
         "assets/characters/yuzu-gbc-spritesheet.png",
         {17.0f, 21.0f},
-        {-2.0f, -1.0f},
+        {-2.0f, -2.0f},
         1, 0, 0,
         10.0f
     ));

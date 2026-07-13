@@ -245,8 +245,6 @@ enum class NeighborDirection
     LEFT
 };
 
-//TODO: refactor this and move out the game object
-
 struct Tile
 {
     std::vector<Hitbox> hitboxes = {};

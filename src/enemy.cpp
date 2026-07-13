@@ -97,8 +97,6 @@ void Enemy::YuukaBehaivour(float dt, Player& player)
         else if(roll <= 80) currentAttack = Attacks::STOMP_N_SHOT;
         else currentAttack = Attacks::RUN_N_SHOOT;
 
-        //currentAttack = Attacks::RUN_N_SHOOT;
-
         if(lastAttack != currentAttack)
         {
             lookAtPlayer = false;

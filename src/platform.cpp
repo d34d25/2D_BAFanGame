@@ -37,7 +37,7 @@ void Platform::InitPlatform(
     type == PlatformType::MOVING_VERTICAL)
     {
         platformWidth = (TILE_SIZE * 3.0f) - 2;
-        platformHeight = 5;
+        platformHeight = 4;
     }
 
     Hitbox mainHitbox = {

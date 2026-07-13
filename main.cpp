@@ -12,7 +12,7 @@
 
 int main()
 {
-    bool editorMode = true;
+    bool editorMode = false;
 
     int screenWidth = 900;
     int screenHeight = 900;

@@ -9,6 +9,9 @@
 
 struct BulletProperties
 {
+    Color mainColor = RAYWHITE;
+    Color backColor = BLACK;
+
     float fireTimer = 0;
     float fireRate = 1.0f;
     float lifeTime = 2.0f;
@@ -18,23 +21,21 @@ struct BulletProperties
     float spread = 0;
     float radius = 2.0f;
 
-    int pelletCount = 1;
-
-    bool explodes = false;
     float explosionRadius = 17.0f;
     float explosionLifeTime = 0.5f;
 
-    bool piercing = false;
+    int pelletCount = 1;
 
-    Color mainColor = RAYWHITE;
-    Color backColor = BLACK;
+    bool explodes = false;
+
+    bool piercing = false;
 };
 
 struct Explosion
 {
-    SpriteRenderData* renderData = nullptr;
-
     Vector2 position = {0.0f,0.0f};
+
+    SpriteRenderData* renderData = nullptr;
 
     float radius = 10.0f;
 
@@ -83,18 +84,17 @@ class BulletPool
 {
 public:
 
+    std::vector<std::unique_ptr<Bullet>> bullets = {};
+    std::vector<std::unique_ptr<Explosion>> explosions = {};
+
     std::vector<Bullet*> activeBullets = {};
     std::vector<Bullet*> inactiveBullets = {};
-
-    std::vector<std::unique_ptr<Bullet>> bullets = {};
+   
+    std::vector<Explosion*> activeExplosions = {};
+    std::vector<Explosion*> inactiveExplosions = {}; 
 
     bool explodes = false;
     bool pierces = false;
-
-    std::vector<Explosion*> activeExplosions = {};
-    std::vector<Explosion*> inactiveExplosions = {};
-
-    std::vector<std::unique_ptr<Explosion>> explosions = {};
 
     BulletPool() = default;
 
