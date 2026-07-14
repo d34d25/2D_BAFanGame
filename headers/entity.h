@@ -132,9 +132,7 @@ struct GameObject
 
     Transform2D transform = {};
 
-    SpriteFlipData flipData = {};
-
-    //Direction direction = Direction::UP;    
+    SpriteFlipData flipData = {};  
 
     GameObject() = default;
 
@@ -210,8 +208,6 @@ struct SpriteRenderData
     Vector2 ogOffset = {0,0};
 
     Vector2 frameSize = {0,0};
-
-    //animation
 
     float animationSpeed = 5.0f;
 

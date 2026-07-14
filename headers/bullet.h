@@ -137,20 +137,20 @@ inline float GenerateBulletSpread(float angle, float spread)
 inline void ShootBullet(
     float dt,
     const GameObject& gameObj,
-    BulletProperties* bulletData,
+    BulletProperties& bulletData,
     const Vector2& bulletSpawnPos,
     BulletPool* bulletpool,
     bool condition
 )
 {
     
-    if(bulletData->fireTimer > 0.0f) bulletData->fireTimer -= dt;
+    if(bulletData.fireTimer > 0.0f) bulletData.fireTimer -= dt;
 
-    if(condition && bulletData->fireTimer <= 0.0f)
+    if(condition && bulletData.fireTimer <= 0.0f)
     {
-        float angle = bulletData->angle;
+        float angle = bulletData.angle;
 
-        float bulletGravity = bulletData->gravity;
+        float bulletGravity = bulletData.gravity;
 
         if(gameObj.flipData.flipX)
         {
@@ -160,21 +160,21 @@ inline void ShootBullet(
         if(gameObj.flipData.flipY)
         {
             angle = -angle;
-            bulletGravity = -bulletData->gravity;
+            bulletGravity = -bulletData.gravity;
         }
 
-        for(int i = 0; i < bulletData->pelletCount; i++)
+        for(int i = 0; i < bulletData.pelletCount; i++)
         {
-            float radians = GenerateBulletSpread(angle, bulletData->spread) * (PI / 180.0f);
+            float radians = GenerateBulletSpread(angle, bulletData.spread) * (PI / 180.0f);
 
             Vector2 initialVel = {0,0};
 
-            initialVel.x = bulletData->speed * cosf(radians) + gameObj.body.velocity.x;
-            initialVel.y = bulletData->speed * sinf(radians);
+            initialVel.x = bulletData.speed * cosf(radians) + gameObj.body.velocity.x;
+            initialVel.y = bulletData.speed * sinf(radians);
 
             bulletpool->FireBullet(bulletSpawnPos, initialVel, bulletGravity);
         }
 
-        bulletData->fireTimer = bulletData->fireRate;
+        bulletData.fireTimer = bulletData.fireRate;
     }
 }

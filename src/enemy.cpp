@@ -17,6 +17,8 @@ void Enemy::UpdateRender(float dt)
     {
     case EnemyType::YUUKA:
     {
+        bool& isStomping = genericCondition;
+
         if(!isGrounded)
         {
             startFrame = 4;
@@ -72,55 +74,94 @@ void Enemy::UpdateRender(float dt)
     if(characterCurrentFrame < 0) characterCurrentFrame = 0;
 }
 
-void Enemy::YuukaBehaivour(float dt, Player& player)
+void Enemy::AmasDroneBehavior(float dt, Player &player)
+{
+    float distanceToPlayerX = gameObj.transform.position.x - player.gameObj.transform.position.x;
+    float distanceToPlayerY = gameObj.transform.position.y - player.gameObj.transform.position.y;
+
+    float hoverSpeed = 50;
+    float diveSpeed = 150;
+
+    float triggerRange = TILE_SIZE * 4;
+
+    float hoverHeight = TILE_SIZE * 3;
+
+    bool& isDiving = genericCondition;
+    
+    if(!isDiving)
+    {
+        float minDist = 1;
+
+        if(std::abs(distanceToPlayerX) > minDist)
+        {
+            if(distanceToPlayerX > 0) gameObj.body.velocity.x = -hoverSpeed;
+            else gameObj.body.velocity.x = hoverSpeed;
+        }
+        else
+        {
+            gameObj.body.velocity.x = 0;
+        }
+
+        float currentHoverHeight = hoverHeight;
+
+        if(gameObj.transform.position.y > player.gameObj.transform.position.y)
+        {
+            currentHoverHeight = -hoverHeight;
+        }
+
+        float targetY = (player.gameObj.transform.position.y - currentHoverHeight);
+
+        float distanceToTargetY = targetY - gameObj.transform.position.y;
+
+        if(std::abs(distanceToTargetY) > minDist * 5)
+        {
+            if(distanceToTargetY > 0) gameObj.body.velocity.y = hoverSpeed;
+            else gameObj.body.velocity.y = -hoverSpeed;
+        }
+        else
+        {
+            gameObj.body.velocity.y = 0;
+        }
+
+        if(std::abs(distanceToPlayerX) < triggerRange && std::abs(distanceToPlayerY) < triggerRange)
+        {
+            isDiving = true;
+
+            float diveXSpeed = hoverSpeed * 1.2f;
+
+            gameObj.body.velocity.x = (distanceToPlayerX > 0) ? -diveXSpeed : diveXSpeed;
+
+            gameObj.body.velocity.y = (distanceToPlayerY > 0) ? -diveSpeed : diveSpeed;
+        }
+    }
+    else
+    {
+        bool passedPlayer = false;
+
+        if(gameObj.body.velocity.y > 0)
+        {
+            if(gameObj.transform.position.y > player.gameObj.transform.position.y + triggerRange)
+                passedPlayer = true;
+        }
+        else
+        {
+            if(gameObj.transform.position.y < player.gameObj.transform.position.y - triggerRange)
+                passedPlayer = true;
+        }
+
+        if(passedPlayer ||std::abs(distanceToPlayerX) > triggerRange)
+        {
+            isDiving = false;
+        }
+    }
+}
+
+//re visit later
+void Enemy::YuukaBehavior(float dt, Player& player)
 {
     float moveSpeed = 50 * moveSpeedSign;
 
-    if(!lookAtPlayer) gameObj.body.velocity.x >= 0 ? gameObj.flipData.flipX = false : gameObj.flipData.flipX = true;
-    else
-    {
-        float distanceToPlayerX = gameObj.transform.position.x - player.gameObj.transform.position.x;
-
-        distanceToPlayerX >= 0 ? gameObj.flipData.flipX = true : gameObj.flipData.flipX = false;
-    }
-
-    if(stateTimer <= 0.0f)
-    {
-        lastAttack = currentAttack;
-
-        int roll = GetRandomValue(1,100);
-
-        if(roll <= 50) moveSpeedSign = -1;
-        else moveSpeedSign = 1;
-
-        if (roll <= 50) currentAttack = Attacks::STOMP;
-        else if(roll <= 80) currentAttack = Attacks::STOMP_N_SHOT;
-        else currentAttack = Attacks::RUN_N_SHOOT;
-
-        if(lastAttack != currentAttack)
-        {
-            lookAtPlayer = false;
-
-            timer = maxTime;
-
-            gravity = ogGravity;
-
-            gameObj.body.velocity = {0,0};
-            gameObj.body.altVelocity = {0,0};
-
-            gameObj.body.hasGravity = true;
-
-            shooting = false;
-
-            isStomping = false;
-
-            gameObj.body.damping = ogDamping;
-
-            bulletData = ogBulletData;
-        }
-    }
-
-    stateTimer += dt;
+    bool& isStomping = genericCondition;
 
     switch (currentAttack)
     {
@@ -136,8 +177,6 @@ void Enemy::YuukaBehaivour(float dt, Player& player)
         moveSpeedSign = 1;
 
         maxTime = 0.5f;
-
-        //lookAtPlayer = true;
 
         if(isGrounded && timer >= maxTime) isJumping = true;
 
@@ -331,11 +370,74 @@ void Enemy::YuukaBehaivour(float dt, Player& player)
     }
 }
 
+void Enemy::UpdateAI(float dt, Player& player)
+{
+    if(!lookAtPlayer) gameObj.body.velocity.x >= 0 ? gameObj.flipData.flipX = false : gameObj.flipData.flipX = true;
+    else
+    {
+        float distanceToPlayerX = gameObj.transform.position.x - player.gameObj.transform.position.x;
+
+        distanceToPlayerX >= 0 ? gameObj.flipData.flipX = true : gameObj.flipData.flipX = false;
+    }
+    
+    if(stateTimer <= 0.0f)
+    {
+        lastAttack = currentAttack;
+
+        int roll = GetRandomValue(1,100);
+
+        if(roll <= 50) moveSpeedSign = -1;
+        else moveSpeedSign = 1;
+
+        if (roll <= 50) currentAttack = Attacks::STOMP;
+        else if(roll <= 80) currentAttack = Attacks::STOMP_N_SHOT;
+        else currentAttack = Attacks::RUN_N_SHOOT;
+
+        if(lastAttack != currentAttack)
+        {
+            lookAtPlayer = false;
+
+            timer = maxTime;
+
+            gravity = ogGravity;
+
+            gameObj.body.velocity = {0,0};
+            
+            gameObj.body.altVelocity = {0,0};
+
+            if(canFly) gameObj.body.hasGravity = false;
+            else gameObj.body.hasGravity = true;
+
+            shooting = false;
+
+            genericCondition = false;
+
+            gameObj.body.damping = ogDamping;
+
+            bulletData = ogBulletData;
+        }
+    }
+
+    if(randomAttack) stateTimer += dt;
+
+    switch (type)
+    {
+
+    case EnemyType::AMAS_DRONE: AmasDroneBehavior(dt, player); break;
+
+    case EnemyType::YUUKA: YuukaBehavior(dt, player); break;
+
+    default: break;
+    }
+}
+
 void Enemy::Shoot(float dt)
 {
+    if(!bulletpool) return;
+
     ShootBullet(
         dt, gameObj,
-        &bulletData, GetTextureBulletSpawnPos(gameObj, weaponRenderData),
+        bulletData, GetTextureBulletSpawnPos(gameObj, weaponRenderData),
         bulletpool.get(), shooting
     );
 }
@@ -382,7 +484,18 @@ void Enemy::InitEnemy(
     {
         testColor = ENEMY_DUMMY;
 
-        gameObj.body.hasGravity = true;
+        canFly = false;
+    }
+    break;
+
+    case EnemyType::AMAS_DRONE:
+    {
+        mainHitbox.aabb.width = 13;
+        mainHitbox.aabb.height = 6;
+
+        gameObj.body.damping = 0;
+
+        canFly = true;
     }
     break;
 
@@ -390,7 +503,9 @@ void Enemy::InitEnemy(
     {
         testColor = ENEMY_YUUKA;
 
-        gameObj.body.hasGravity = true;
+        canFly = false;
+
+        randomAttack = true;
 
         bulletData.angle = 0;
         bulletData.fireTimer = 0.0f;
@@ -403,10 +518,6 @@ void Enemy::InitEnemy(
         bulletData.radius = 1.5f;
 
         bulletData.lifeTime = 4.0f;
-
-        characterPaletteIndex = paletteIndex;
-
-        weaponPaletteIndex = paletteIndex;
     }
     break;
     
@@ -436,22 +547,20 @@ void Enemy::InitEnemy(
 
     weaponRenderData = GetEnemyWeaponActiveRenderData(type, weaponVariantIndex);
 
+    characterPaletteIndex = paletteIndex;
+
+    weaponPaletteIndex = paletteIndex;
+
     aiFrameskip = frameskip;
 
     ogDamping = gameObj.body.damping;
 
     ogBulletData = bulletData;
-}
 
-void Enemy::UpdateAI(float dt, Player& player)
-{
-    switch (type)
-    {
+    if(canFly) gameObj.body.hasGravity = false;
+    else gameObj.body.hasGravity = true;
 
-    case EnemyType::YUUKA: YuukaBehaivour(dt, player); break;
-
-    default: break;
-    }
+    if(!randomAttack) stateTimer = 1000;
 }
 
 void Enemy::Update(float dt, int iterations)

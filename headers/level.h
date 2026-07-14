@@ -10,7 +10,7 @@
 #include "leveldata.h"
 #include "enemy.h"
 
-const float MAX_DISTANCE_PLATFORM_PLAYER_SQR = 800 * 800;
+const float MAX_DISTANCE_PLATFORM_PLAYER_SQR = 500 * 500;
 
 const float MAX_DISTANCE_PLATFORM_PLAYER_SQR_5X = MAX_DISTANCE_PLATFORM_PLAYER_SQR * 5;
 
@@ -74,8 +74,6 @@ struct Level
     float dt;
 
     float gravity = 500.0f;
-
-    int totalCanvasWidth, totalCanvasHeight;
 
     int iterations = 1;
 

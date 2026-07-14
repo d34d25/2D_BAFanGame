@@ -411,7 +411,7 @@ void Player::Shoot(float dt)
 {
     ShootBullet(
         dt, gameObj,
-        &bulletData, GetTextureBulletSpawnPos(gameObj, weaponRenderData),
+        bulletData, GetTextureBulletSpawnPos(gameObj, weaponRenderData),
         bulletpool.get(), holdingShoot
     );
 }

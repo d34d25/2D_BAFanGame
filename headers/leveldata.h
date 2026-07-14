@@ -91,6 +91,8 @@ enum struct TileType
 
     ENEMY_DUMMY, //texture done
 
+    ENEMY_AMAS_DRONE,
+
     ENEMY_YUUKA, //texture done
 
     ENEMY_END,
@@ -126,6 +128,7 @@ enum struct PlatformType
 enum struct EnemyType
 {
     DUMMY,
+    AMAS_DRONE,
     YUUKA
 };
 
@@ -448,6 +451,8 @@ extern std::vector<SpriteRenderData> disappearingPlatform_RenderData;
 
 extern std::vector<SpriteRenderData> dummyRenderData;
 
+extern std::vector<SpriteRenderData> amasDroneRenderData;
+
 extern std::vector<SpriteRenderData> yuukaRenderData;
 
 //enemy's weapons
@@ -548,6 +553,8 @@ inline std::vector<SpriteRenderData>* GetTileActiveRenderDataList(TileType type)
 
     case TileType::ENEMY_DUMMY: return &dummyRenderData;
 
+    case TileType::ENEMY_AMAS_DRONE: return &amasDroneRenderData;
+
     case TileType::ENEMY_YUUKA: return &yuukaRenderData;
 
     default: return nullptr;
@@ -604,6 +611,8 @@ inline std::vector<SpriteRenderData>* GetEnemyActiveRenderDataList(EnemyType typ
     {
     case EnemyType::DUMMY: return &dummyRenderData;
     
+    case EnemyType::AMAS_DRONE: return &amasDroneRenderData;
+
     case EnemyType::YUUKA: return &yuukaRenderData;
 
     default: return nullptr;

@@ -8,9 +8,9 @@ void SolveCollisions(GameObject& objA, const Rectangle& recB, const Vector2& vel
 
     float trampolineImpulse = 250.0f;
 
-    float trampolineImpulseFactor = 0.6f;
+    float trampolineImpulseFactor = 0.7f;
 
-    float trampolineFactor_Y = 3.0f;
+    float trampolineFactor_Y = 2.0f;
 
     if(isX)
     {

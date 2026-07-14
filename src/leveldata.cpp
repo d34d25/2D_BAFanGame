@@ -67,6 +67,8 @@ std::vector<SpriteRenderData> disappearingPlatform_RenderData = {};
 
 std::vector<SpriteRenderData> dummyRenderData = {};
 
+std::vector<SpriteRenderData> amasDroneRenderData = {};
+
 std::vector<SpriteRenderData> yuukaRenderData = {};
 
 //enemies' weapons
@@ -191,6 +193,10 @@ void LoadAssets()
     ));
 
     solidTilesRenderData.push_back(LoadRenderData(
+        "assets/tiles/solid/xtremelysimpleset-2.png", tileSize
+    ));
+
+    solidTilesRenderData.push_back(LoadRenderData(
         "assets/tiles/solid/2by2TileTest.png", tileSize * 2,
         tileSize * 0.5f
     ));
@@ -224,7 +230,7 @@ void LoadAssets()
 
     decoRenderData.push_back(LoadRenderData(
         "assets/tiles/deco/test-background.png", 
-        {120,96}, {TILE_SIZE * 4.5f, TILE_SIZE * 3.5f}
+        {120,96}, {-TILE_SIZE * 0.5f, -TILE_SIZE * 0.5f}
     ));
 
     //rest of tiles
@@ -337,6 +343,11 @@ void LoadAssets()
     //enemies
 
     dummyRenderData.push_back(LoadRenderData("assets/enemies/chibi-dummy.png", {8,12}, {0,0}));
+
+    amasDroneRenderData.push_back(LoadRenderData(
+        "assets/enemies/amas-drone.png", {15,8},
+        {0,0}
+    ));
     
     yuukaRenderData.push_back(LoadRenderData(
         "assets/enemies/yuuka-gbc-sprtiesheet.png",

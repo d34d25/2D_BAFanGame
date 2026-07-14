@@ -53,6 +53,8 @@ void Platform::InitPlatform(
     {
         gameObj.body.velocity.y = -platformSpeed;
 
+        if(gameObj.flipData.flipY) gameObj.body.velocity.y = platformSpeed;
+
         updateRequired = true;
     }
     break;
@@ -60,6 +62,8 @@ void Platform::InitPlatform(
     case PlatformType::MOVING_HORIZONTAL:
     {
         gameObj.body.velocity.x = platformSpeed;
+
+        if(gameObj.flipData.flipX) gameObj.body.velocity.x = -platformSpeed;
 
         updateRequired = true;
     }
@@ -81,6 +85,8 @@ void Platform::InitPlatform(
     {
         gameObj.body.velocity.y = -platformSpeed * 2.5f;
 
+        if(gameObj.flipData.flipY) gameObj.body.velocity.y = platformSpeed * 2.5f;
+
         updateRequired = true;
 
         float size = TILE_SIZE * 0.5f;
@@ -92,6 +98,8 @@ void Platform::InitPlatform(
     case PlatformType::MOVING_SPIKE_HORIZONTAL:
     {
         gameObj.body.velocity.x = platformSpeed * 2.5f;
+
+        if(gameObj.flipData.flipX) gameObj.body.velocity.x = -platformSpeed * 2.5f;
 
         updateRequired = true;
 
@@ -171,6 +179,8 @@ void Platform::InitPlatform(
     default: break;
     } 
 
+    ogVelocity = gameObj.body.velocity;
+    
     gameObj.UpdateHitboxes();
 
     renderData = GetPlatformActiveRenderData(type, variantIndex);

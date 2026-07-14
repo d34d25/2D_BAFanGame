@@ -127,7 +127,9 @@ void Level::InitLevel(const char* levelPath, const char* roomPath ,float dt, int
 
                     switch (type)
                     {
-                    case TileType::ENEMY_DUMMY: enemy.type = EnemyType::DUMMY;break; 
+                    case TileType::ENEMY_DUMMY: enemy.type = EnemyType::DUMMY; break;
+
+                    case TileType::ENEMY_AMAS_DRONE: enemy.type = EnemyType::AMAS_DRONE; break;
 
                     case TileType::ENEMY_YUUKA: enemy.type = EnemyType::YUUKA; break;
                     
@@ -432,11 +434,11 @@ void Level::InitLevel(const char* levelPath, const char* roomPath ,float dt, int
     platformList.clear();
     platformList.shrink_to_fit();
 
-    platformCache_update.reserve(800);
-    platformCache_physics.reserve(60);
-    platformCache_rendering.reserve(600);
+    platformCache_update.reserve(100);
+    platformCache_physics.reserve(100);
+    platformCache_rendering.reserve(100);
 
-    enemyCache.reserve(800);
+    enemyCache.reserve(100);
 }
 
 /*
@@ -795,7 +797,7 @@ void Level::MediumFrequencyDiscreteUpdate_First()
 
         if(lowFrequencyCounter % enemy->aiFrameskip == 0)
         {
-            if(enemy->type == EnemyType::YUUKA && enemy->isStomping) TriggerScreenShake(0.5f, 2.5f); //5.0f
+            if(enemy->type == EnemyType::YUUKA && enemy->genericCondition) TriggerScreenShake(0.5f, 2.5f); //5.0f
 
             enemy->UpdateAI(dt, player);
 
@@ -1278,6 +1280,24 @@ void Level::HighFrequencyDiscreteUpdate()
     }
    
     //player vs enemies
+    for(int i = 0; i < enemyCache_physics.size(); i++)
+    {
+        Enemy* enemy = enemyCache_physics[i];
+
+        if(!enemy) continue;
+
+        if(!CheckCollisionCircles(
+            player.gameObj.transform.position,
+            player.gameObj.GetMainAABB().height * REC_TO_CIRCLE_RADIUS_MULTIPLIER,
+            enemy->gameObj.transform.position,
+            enemy->gameObj.GetMainAABB().width * REC_TO_CIRCLE_RADIUS_MULTIPLIER
+        )) continue;
+
+        if(CheckCollisionRecs(player.gameObj.GetMainAABB(), enemy->gameObj.GetMainAABB()))
+        {
+            enemy->hitPlayer = true;
+        }
+    }
 
     //enemies vs tiles
 
@@ -1310,6 +1330,8 @@ void Level::HighFrequencyDiscreteUpdate()
             {
                 for(int j = enemyTileRange.startY; j <= enemyTileRange.endY; j++)
                 {
+                    if(enemy->canFly) continue;
+
                     Tile& tile = level[l][i][j];
 
                     Vector2 tilePosition = GetTileCenter(i,j);
@@ -1369,6 +1391,8 @@ void Level::HighFrequencyDiscreteUpdate()
             {
                 for(int j = enemyTileRange.startY; j <= enemyTileRange.endY; j++)
                 {
+                    if(enemy->canFly) continue;
+                    
                     Tile& tile = level[l][i][j];
 
                     Vector2 tilePosition = GetTileCenter(i,j);
@@ -1907,11 +1931,11 @@ void Level::DrawLevel()
 
     ClearBackground(BLACK);
 
-    float scale = fminf((float)GetScreenWidth() / totalCanvasWidth, 
-    (float)GetScreenHeight() / totalCanvasHeight);
+    float scale = fminf((float)GetScreenWidth() / NATIVE_WIDTH, 
+    (float)GetScreenHeight() / NATIVE_HEIGHT);
 
-    float offsetX = ((float)GetScreenWidth() - ((float)totalCanvasWidth * scale)) * 0.5f;
-    float offsetY = ((float)GetScreenHeight() - ((float)totalCanvasHeight * scale)) * 0.5f;
+    float offsetX = ((float)GetScreenWidth() - ((float)NATIVE_WIDTH * scale)) * 0.5f;
+    float offsetY = ((float)GetScreenHeight() - ((float)NATIVE_HEIGHT * scale)) * 0.5f;
 
     Rectangle sourceGameplayRec = {
         0,

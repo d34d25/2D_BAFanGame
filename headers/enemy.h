@@ -16,6 +16,8 @@ enum class StunState
 enum class Attacks
 {
     NOTHING,
+
+    //YUUKA
     STOMP,
     STOMP_N_SHOT,
     RUN_N_SHOOT
@@ -36,6 +38,8 @@ struct Enemy
     SpriteRenderData* weaponRenderData = nullptr;
 
     Vector2 spawnPosition = {0,0};
+
+    Vector2 targetPos = {0,0};
 
     std::unique_ptr<BulletPool> bulletpool = {};
 
@@ -95,7 +99,7 @@ struct Enemy
 
     bool wasGrounded = false;
 
-    bool isStomping = false;
+    bool genericCondition = false;
 
     bool inWater = false;
 
@@ -111,8 +115,14 @@ struct Enemy
     //bullets
     bool shooting = false;
 
+    bool hitPlayer = false;
+
     //
     bool isActive = false;
+
+    bool canFly = false;
+
+    bool randomAttack = false;
 
     Enemy() = default;
 
@@ -128,7 +138,9 @@ struct Enemy
         int frameskip = 2
     );
 
-    void YuukaBehaivour(float dt, Player& player);
+    void AmasDroneBehavior(float dt, Player& player);
+
+    void YuukaBehavior(float dt, Player& player);
 
     void UpdateAI(float dt, Player& player);
 
@@ -158,6 +170,8 @@ struct Enemy
         isTouchingWall = false;
         isGrounded = false;
         hitCeiling = false;
+
+        hitPlayer = false;
     }
 
     inline void UpdateFlags()
@@ -177,7 +191,7 @@ struct Enemy
 
         ResetFlags();
 
-        isStomping = false;
+        genericCondition = false;
 
         gameObj.UpdateHitboxes();
 

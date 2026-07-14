@@ -14,6 +14,8 @@ struct Platform
 
     Vector2 ogPosition = {0,0};
 
+    Vector2 ogVelocity = {0,0};
+
     float timer = 0.0f; 
 
     float maxTime = 0.3f;
@@ -100,6 +102,8 @@ struct Platform
         timer = 0.0f;
 
         gameObj.transform.position = ogPosition;
+
+        gameObj.body.velocity = ogVelocity;
 
         gameObj.UpdateHitboxes();
     }

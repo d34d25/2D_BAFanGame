@@ -57,15 +57,14 @@ static constexpr int GAMEPLAY_CANVAS_HEIGHT = (NATIVE_HEIGHT - UI_HEIGHT);
 static constexpr int UI_CANVAS_HEIGHT = UI_HEIGHT;
 
 //rooms
-static constexpr int TILES_PER_ROOM_WIDHT = NATIVE_WIDTH / TILE_SIZE;
+static constexpr int TILES_PER_ROOM_WIDHT = CANVAS_WIDTH / TILE_SIZE;
 
-static constexpr int TILES_PER_ROOM_HEIGHT = (NATIVE_HEIGHT - UI_HEIGHT) / TILE_SIZE;
+static constexpr int TILES_PER_ROOM_HEIGHT = GAMEPLAY_CANVAS_HEIGHT / TILE_SIZE;
 
 
 static constexpr int ROWS = TILES_PER_ROOM_HEIGHT * 10;
 
 static constexpr int COLS = TILES_PER_ROOM_WIDHT * 10;
-
 
 
 static constexpr int LAYERS = 4;

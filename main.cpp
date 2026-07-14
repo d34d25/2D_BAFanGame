@@ -19,9 +19,6 @@ int main()
 
     if(editorMode) screenWidth = 1600;
 
-    int totalCanvasWidth = CANVAS_WIDTH;
-    int totalCanvasHeight = GAMEPLAY_CANVAS_HEIGHT + UI_CANVAS_HEIGHT;
-
     InitWindow(screenWidth, screenHeight, "");
 
     SetTargetFPS(60);
@@ -41,7 +38,7 @@ int main()
 
     std::unique_ptr testLevel = std::make_unique<Level>();
 
-    std::unique_ptr editor = std::make_unique<LevelEditor>(CANVAS_WIDTH,GAMEPLAY_CANVAS_HEIGHT, "levels/testLevel", "levels/testRooms");
+    std::unique_ptr editor = std::make_unique<LevelEditor>(NATIVE_WIDTH, NATIVE_HEIGHT, "levels/testLevel", "levels/testRooms");
 
     int iterations = 10;
 
@@ -57,9 +54,6 @@ int main()
         std::cout<<"ITERATIONS CAN'T BE LESS THAN 1"<<std::endl;
         return 0;
     }
-
-    testLevel->totalCanvasWidth = totalCanvasWidth;
-    testLevel->totalCanvasHeight = totalCanvasHeight;
 
     testLevel->gameplayCanvas = gameplayCanvas;
     testLevel->uiCanvas = uiCanvas;
@@ -231,10 +225,10 @@ int main()
 
     CloseWindow();
 
-    std::cout<<"width: "<<totalCanvasWidth<<"\n";
-    std::cout<<"height: "<<totalCanvasHeight<<"\n";
+    std::cout<<"width: "<<NATIVE_WIDTH<<"\n";
+    std::cout<<"height: "<<NATIVE_HEIGHT<<"\n";
 
-    std::cout<<"aspect ratio: "<<(float)((float)totalCanvasWidth / (float)totalCanvasHeight)<<"\n";
+    std::cout<<"aspect ratio: "<<(float)((float)NATIVE_WIDTH / (float)NATIVE_HEIGHT)<<"\n";
 
     std::cout<<std::endl;   
 }

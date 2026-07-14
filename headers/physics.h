@@ -7,10 +7,10 @@
 
 struct CCD_CollisionResult
 {
-    bool collision = false;
-
     float entryTime = 0.0f;
     float exitTime = 0.0f;
+
+    bool collision = false;
 };
 
 void SolveCollisions(GameObject& objA, const Rectangle& recB, const Vector2& vel ,bool isX, bool gravityUp, bool isTrampoline, bool isPlatform);
