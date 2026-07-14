@@ -127,11 +127,13 @@ void Enemy::AmasDroneBehavior(float dt, Player &player)
         {
             isDiving = true;
 
-            float diveXSpeed = hoverSpeed * 1.2f;
+            float distanceRatio = std::abs(distanceToPlayerX) / triggerRange;
 
-            gameObj.body.velocity.x = (distanceToPlayerX > 0) ? -diveXSpeed : diveXSpeed;
+            float totalDiveXSpeed = hoverSpeed * 1.5f + (hoverSpeed * distanceRatio);
 
-            gameObj.body.velocity.y = (distanceToPlayerY > 0) ? -diveSpeed : diveSpeed;
+            gameObj.body.velocity.x = (distanceToPlayerX > 0) ? -totalDiveXSpeed : totalDiveXSpeed;
+
+            gameObj.body.velocity.y = (distanceToPlayerY > 0) ? -totalDiveXSpeed : totalDiveXSpeed;
         }
     }
     else
