@@ -15,6 +15,22 @@ void Enemy::UpdateRender(float dt)
 
     switch (type)
     {
+
+    case EnemyType::SWEEPER_A:
+    {
+        if(std::abs(gameObj.body.velocity.x) > 1.0f)
+        {
+            startFrame = 1;
+            endFrame = 3;
+        }
+        else
+        {
+            startFrame = 0;
+            endFrame = 0;
+        }
+    }
+    break;
+
     case EnemyType::YUUKA:
     {
         bool& isStomping = genericCondition;
@@ -155,6 +171,25 @@ void Enemy::AmasDroneBehavior(float dt, Player &player)
         {
             isDiving = false;
         }
+    }
+}
+
+void Enemy::SweeperABehavior(float dt, Player &player)
+{
+    float distanceToPlayerX = gameObj.transform.position.x - player.gameObj.transform.position.x;
+
+    float minDist = 1;
+
+    float moveSpeed = 50;
+
+    if(std::abs(distanceToPlayerX) > minDist)
+    {
+        if(distanceToPlayerX > 0) gameObj.body.velocity.x = -moveSpeed;
+        else gameObj.body.velocity.x = moveSpeed;
+    }
+    else
+    {
+        gameObj.body.velocity.x = 0;
     }
 }
 
@@ -427,6 +462,8 @@ void Enemy::UpdateAI(float dt, Player& player)
 
     case EnemyType::AMAS_DRONE: AmasDroneBehavior(dt, player); break;
 
+    case EnemyType::SWEEPER_A: SweeperABehavior(dt, player); break;
+
     case EnemyType::YUUKA: YuukaBehavior(dt, player); break;
 
     default: break;
@@ -456,9 +493,9 @@ void Enemy::InitEnemy(
 
     gameObj.UpdateHitboxes();
 
-    spawnData = data;
+    spawnFlipData = data;
 
-    gameObj.flipData = spawnData;
+    gameObj.flipData = spawnFlipData;
 
     this->gravity = gravity;
 
@@ -498,6 +535,13 @@ void Enemy::InitEnemy(
         gameObj.body.damping = 0;
 
         canFly = true;
+    }
+    break;
+
+    case EnemyType::SWEEPER_A:
+    {
+        mainHitbox.aabb.width = 14;
+        mainHitbox.aabb.height = 12;
     }
     break;
 

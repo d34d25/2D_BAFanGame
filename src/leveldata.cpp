@@ -69,6 +69,8 @@ std::vector<SpriteRenderData> dummyRenderData = {};
 
 std::vector<SpriteRenderData> amasDroneRenderData = {};
 
+std::vector<SpriteRenderData> sweeperARenderData = {};
+
 std::vector<SpriteRenderData> yuukaRenderData = {};
 
 //enemies' weapons
@@ -349,6 +351,11 @@ void LoadAssets()
         {0,0}
     ));
     
+    sweeperARenderData.push_back(LoadRenderData(
+        "assets/enemies/sweeper-1.png", {14,17},
+        {0,-2}, 1, 0,0, 10.0f
+    ));
+
     yuukaRenderData.push_back(LoadRenderData(
         "assets/enemies/yuuka-gbc-sprtiesheet.png",
         {22,22},

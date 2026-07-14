@@ -45,7 +45,7 @@ struct Enemy
 
     Color testColor = ENEMY_DUMMY;
 
-    SpriteFlipData spawnData = {false, false};
+    SpriteFlipData spawnFlipData = {false, false};
 
     float stateTimer = 0.0f;
 
@@ -140,6 +140,8 @@ struct Enemy
 
     void AmasDroneBehavior(float dt, Player& player);
 
+    void SweeperABehavior(float dt, Player& player);
+
     void YuukaBehavior(float dt, Player& player);
 
     void UpdateAI(float dt, Player& player);
@@ -187,7 +189,7 @@ struct Enemy
         gameObj.body.velocity = {0,0};
         gameObj.body.altVelocity = {0,0};
 
-        gameObj.flipData = spawnData;
+        gameObj.flipData = spawnFlipData;
 
         ResetFlags();
 

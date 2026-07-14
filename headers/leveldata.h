@@ -93,6 +93,8 @@ enum struct TileType
 
     ENEMY_AMAS_DRONE,
 
+    ENEMY_SWEEPER_A,
+
     ENEMY_YUUKA, //texture done
 
     ENEMY_END,
@@ -129,6 +131,7 @@ enum struct EnemyType
 {
     DUMMY,
     AMAS_DRONE,
+    SWEEPER_A,
     YUUKA
 };
 
@@ -230,6 +233,10 @@ const std::vector<TileTypeList> TILE_TYPE_LIST = {
 
     //enemies / bosses
     {TileType::ENEMY_DUMMY, ENEMY_DUMMY, "ENEMY_DUMMY"},
+
+    {TileType::ENEMY_AMAS_DRONE, ENEMY_DUMMY, "ENEMY_AMAS_DRONE"},
+
+    {TileType::ENEMY_SWEEPER_A, ENEMY_DUMMY, "ENEMY_SWEEPER_A"},
 
     {TileType::ENEMY_YUUKA, ENEMY_YUUKA, "ENEMY_YUUKA"},
 };
@@ -453,6 +460,8 @@ extern std::vector<SpriteRenderData> dummyRenderData;
 
 extern std::vector<SpriteRenderData> amasDroneRenderData;
 
+extern std::vector<SpriteRenderData> sweeperARenderData;
+
 extern std::vector<SpriteRenderData> yuukaRenderData;
 
 //enemy's weapons
@@ -555,6 +564,8 @@ inline std::vector<SpriteRenderData>* GetTileActiveRenderDataList(TileType type)
 
     case TileType::ENEMY_AMAS_DRONE: return &amasDroneRenderData;
 
+    case TileType::ENEMY_SWEEPER_A: return &sweeperARenderData;
+
     case TileType::ENEMY_YUUKA: return &yuukaRenderData;
 
     default: return nullptr;
@@ -612,6 +623,8 @@ inline std::vector<SpriteRenderData>* GetEnemyActiveRenderDataList(EnemyType typ
     case EnemyType::DUMMY: return &dummyRenderData;
     
     case EnemyType::AMAS_DRONE: return &amasDroneRenderData;
+
+    case EnemyType::SWEEPER_A: return &sweeperARenderData;
 
     case EnemyType::YUUKA: return &yuukaRenderData;
 

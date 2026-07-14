@@ -55,7 +55,7 @@ void Level::InitLevel(const char* levelPath, const char* roomPath ,float dt, int
 
                 if(type == TileType::PLAYER_SPAWN)
                 {
-                    Vector2 spawnPos = tilePosition; //tile.gameObj.transform.position;
+                    Vector2 spawnPos = tilePosition;
 
                     player.InitPlayer(spawnPos, gravity, gravity < 0);
 
@@ -130,6 +130,8 @@ void Level::InitLevel(const char* levelPath, const char* roomPath ,float dt, int
                     case TileType::ENEMY_DUMMY: enemy.type = EnemyType::DUMMY; break;
 
                     case TileType::ENEMY_AMAS_DRONE: enemy.type = EnemyType::AMAS_DRONE; break;
+
+                    case TileType::ENEMY_SWEEPER_A: enemy.type = EnemyType::SWEEPER_A; break;
 
                     case TileType::ENEMY_YUUKA: enemy.type = EnemyType::YUUKA; break;
                     
