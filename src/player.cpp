@@ -14,7 +14,7 @@ void Player::InitPlayer(Vector2 position, float gravity, bool flipY)
 
     gameObj.body.hasGravity = true;
 
-    gameObj.hitboxes.push_back(Hitbox{{0,0}, {7, 17}});
+    gameObj.hitboxes.push_back(Hitbox{{0,0}, {6, 14}});
 
     float verticalOffset = 7.0f;
 
@@ -153,6 +153,8 @@ void Player::InitPlayer(Vector2 position, float gravity, bool flipY)
         break;
     }
 
+    weaponVariantIndex = 2;
+
     characterRenderData = GetPlayerActiveRenderData(character, characterVariantIndex);
 
     weaponRenderData = GetPlayerWeaponActiveRenderData(character, weaponVariantIndex);
@@ -191,6 +193,8 @@ void Player::UpdateInput()
     }
 
     hurt = IsKeyDown(KEY_W);
+
+    eegg = IsKeyDown(KEY_S);
 }
 
 void Player::UpdateRender(float dt)
@@ -215,33 +219,43 @@ void Player::UpdateRender(float dt)
 
     currentPortraitFrame = 0;
 
-    if(!canMove || hurt)
+    if(eegg)
     {
-        startFrame = 7;
-        endFrame = 7;
+        startFrame = 10;
+        endFrame = 10;
+    }
+    else if(!canMove || hurt)
+    {
+        startFrame = 9;
+        endFrame = 9;
 
         currentPortraitFrame = 1;
-
-        characterRenderData->offset.y += 1.0f;
     }
     else if(climbing)
     {
-        startFrame = 5;
-        endFrame = 6;
-
-        if(character == Character::YUZU_BATTLE) characterRenderData->offset.x += 2;
+        startFrame = 7;
+        endFrame = 8;
     }
     else if(!isGrounded)
     {
-        startFrame = 4;
-        endFrame = 4;
+        startFrame = 6;
+        endFrame = 6;
+
+        if(
+            gameObj.flipData.flipY && gameObj.body.velocity.y > 25.0f ||
+            !gameObj.flipData.flipY && gameObj.body.velocity.y < 25.0f
+        )
+        {
+            startFrame = 5;
+            endFrame = 5;
+        }
     }
     else
     {
         if(std::abs(gameObj.body.velocity.x) > 25.0f)
         {
             startFrame = 1;
-            endFrame = 3;
+            endFrame = 4;
         }
         else
         {
@@ -292,7 +306,7 @@ void Player::Update(float dt, int iterations)
     {
         //lateral movement
 
-        float moveForce = 4250; //16000
+        float moveForce = 4250;
 
         if(movingLeft)
         {

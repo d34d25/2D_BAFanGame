@@ -10,9 +10,12 @@
 
 const float MASS = 1;
 
-//a max speed of 2000 is still stable enough
-//even 3000 can work
-const Vector2 MAX_SPEED = {600,600};
+//a max speed of 2000 is still stable enough (even after scaling the game down by 4)
+
+//if both objects are moving against each other at the same speed then the max speed is 1000 for each
+//2000 is the limit for the relative velocity of two objects
+
+const Vector2 MAX_SPEED = {300,300};
 
 enum struct Direction
 {

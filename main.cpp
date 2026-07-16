@@ -42,12 +42,18 @@ int main()
 
     int iterations = 10;
 
+    auto levelInitTimeStart = std::chrono::high_resolution_clock::now();
+
     testLevel->InitLevel(
         "levels/testLevel",
         "levels/testRooms",
         fixedDt,
         iterations
     );
+
+    auto levelInitTimeEnd = std::chrono::high_resolution_clock::now();
+
+    double levelInitTime = std::chrono::duration<double, std::milli>(levelInitTimeEnd - levelInitTimeStart).count();
 
     if(iterations < 1)
     {
@@ -142,6 +148,10 @@ int main()
 
         EndDrawing();
     }
+
+    std::cout<<"\n";
+
+    std::cout<<"Level loading time: "<<levelInitTime<<" ms\n";
 
     std::cout<<"\n";
 

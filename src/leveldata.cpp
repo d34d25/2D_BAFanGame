@@ -184,6 +184,7 @@ void LoadAssets()
     environmentPalettes = LoadPalette("assets/environment-pallet-set.png");
 
     paletteShader = LoadShader(nullptr, "shaders/palette.fs");
+
     paletteLoc = GetShaderLocation(paletteShader, "uPalette");
    
     Vector2 tileSize = {TILE_SIZE,TILE_SIZE};
@@ -234,6 +235,17 @@ void LoadAssets()
         "assets/tiles/deco/test-background.png", 
         {120,96}, {-TILE_SIZE * 0.5f, -TILE_SIZE * 0.5f}
     ));
+
+    decoRenderData.push_back(LoadRenderData(
+        "assets/tiles/deco/buildings-background-1.png", 
+        {120,96}, {-TILE_SIZE * 0.5f, -TILE_SIZE * 0.5f}
+    ));
+
+    decoRenderData.push_back(LoadRenderData(
+        "assets/tiles/deco/buildings-background-2.png", 
+        {120,96}, {-TILE_SIZE * 0.5f, -TILE_SIZE * 0.5f}
+    ));
+
 
     //rest of tiles
 
@@ -353,7 +365,7 @@ void LoadAssets()
     
     sweeperARenderData.push_back(LoadRenderData(
         "assets/enemies/sweeper-1.png", {14,17},
-        {0,-2}, 1, 0,0, 10.0f
+        {-1,0}, 1, 0,0, 10.0f
     ));
 
     yuukaRenderData.push_back(LoadRenderData(
@@ -375,51 +387,35 @@ void LoadAssets()
     //player
 
     momoiRenderData.push_back(LoadRenderData(
-        "assets/characters/momoi-midori-gbc-spritesheet.png",
-        {13.0f, 24.0f},
-        {0.0f, -3.0f},
-        1,0,0, 
-        10.0f
-    ));
-
-    momoiRenderData.push_back(LoadRenderData(
-        "assets/characters/momoi-chaquena-spritesheet.png",
-        {18.0f, 23.0f},
-        {0.0f, -7.0f},
-        1,0,0, 
-        10.0f
+        "assets/characters/minimalist-momoi-midori.png",
+        {13.0f, 19.0f},
+        {-1.0f, -1.0f},
+        1,0,0,
+        7.0f
     ));
 
     midoriRenderData.push_back(LoadRenderData(
-        "assets/characters/momoi-midori-gbc-spritesheet.png",
-        {13.0f, 24.0f},
-        {0.0f, -3.0f},
-        1,0,0, 
-        10.0f
+        "assets/characters/minimalist-momoi-midori.png",
+        {13.0f, 19.0f},
+        {-1.0f, -1.0f},
+        1,0,0,
+        7.0f
     ));
 
     yuzuRenderData.push_back(LoadRenderData(
-        "assets/characters/yuzu-gbc-spritesheet.png",
-        {17.0f, 21.0f},
-        {-2.0f, -2.0f},
-        1, 0, 0,
-        10.0f
-    ));
-
-    yuzuRenderData.push_back(LoadRenderData(
-        "assets/characters/yuzu-battle-gbc-spritesheet.png",
-        {17.0f, 24.0f},
-        {-2.0f, -3.0f},
-        1, 0, 0,
-        10.0f
+        "assets/characters/minimalist-yuzu.png",
+        {14.0f, 16.0f},
+        {0.0f, 0.0f},
+        1,0,0,
+        7.0f
     ));
 
     arisRenderData.push_back(LoadRenderData(
-        "assets/characters/aris-gbc-spritesheet.png",
-        {16.0f, 21.0f},
-        {-1.0f, -1.0f},
-        1, 0, 0,
-        10.0f
+        "assets/characters/minimalist-aris.png",
+        {15.0f, 17.0f},
+        {0.0f, 0.0f},
+        1,0,0,
+        7.0f
     ));
 
     //player's weapons

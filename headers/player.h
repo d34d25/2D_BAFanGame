@@ -111,6 +111,8 @@ struct Player
     bool resetingLevel = false;
     bool resetingZoom = false;
 
+    bool eegg = false;
+
     bool hurt = false;
 
     Player() = default;

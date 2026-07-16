@@ -390,6 +390,20 @@ void Level::InitLevel(const char* levelPath, const char* roomPath ,float dt, int
         }
     }
 
+    //safety check
+    for(int l = 0; l < LAYERS; l++)
+    {
+        for(int i = 0; i < COLS; i++)
+        {
+            for(int j = 0; j < ROWS; j++)
+            {
+                Tile& tile = level[l][i][j];
+
+                if(IsNotRealTile(tile.type)) tile.type == TileType::VOID;
+            }
+        }
+    }
+
     std::stable_sort(platformList.begin(), platformList.end(), [](const Platform& a, const Platform& b)
     {
         bool isASpike = IsPlatformSpike(a.type);
@@ -636,8 +650,8 @@ void Level::LowFrequencyUpdate()
         {
             Enemy& enemy = activeEnemyBucket[e];
 
-            float despawnDistanceSqr = Vector2DistanceSqr(camera.target, enemy.gameObj.transform.position);
-            float spawnDistanceSqr = Vector2DistanceSqr(camera.target, enemy.spawnPosition);
+            float despawnDistanceSqr = Vector2DistanceSqr(player.gameObj.transform.position, enemy.gameObj.transform.position);
+            float spawnDistanceSqr = Vector2DistanceSqr(player.gameObj.transform.position, enemy.spawnPosition);
 
             if(despawnDistanceSqr > ENEMY_DESPAWN_RADIUS * ENEMY_DESPAWN_RADIUS)
             {

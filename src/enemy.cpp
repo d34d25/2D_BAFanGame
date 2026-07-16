@@ -540,8 +540,8 @@ void Enemy::InitEnemy(
 
     case EnemyType::SWEEPER_A:
     {
-        mainHitbox.aabb.width = 14;
-        mainHitbox.aabb.height = 12;
+        mainHitbox.aabb.width = 10;
+        mainHitbox.aabb.height = 14;
     }
     break;
 
