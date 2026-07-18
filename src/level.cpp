@@ -1130,8 +1130,8 @@ void Level::HighFrequencyDiscreteUpdate()
 
                     if((!isGravityUp && isEdgeUp) || (isGravityUp && isEdgeDown))
                     {
-                        if((IsAbove(player.gameObj.GetMainAABB(), tileMainAABB, 1.0f) && !isGravityUp) || 
-                        (IsBelow(player.gameObj.GetMainAABB(), tileMainAABB, 1.0f) && isGravityUp))
+                        if((IsAbove(player.gameObj.GetMainAABB(), tileMainAABB, ONE_WAY_TOLERANCE) && !isGravityUp) || 
+                        (IsBelow(player.gameObj.GetMainAABB(), tileMainAABB, ONE_WAY_TOLERANCE) && isGravityUp))
                         {
                             if(!player.movingDown)
                             {
@@ -1146,6 +1146,15 @@ void Level::HighFrequencyDiscreteUpdate()
 
                                 player.inLadder = false;
                                 isTileJumpTrigger = true;
+                            }
+                            else
+                            {
+                                //forces the player into a climbing state
+                                //when doing a single press to climb down a ladder
+                                player.climbing = true;
+
+                                if(!isGravityUp) player.gameObj.transform.position.y += ONE_WAY_TOLERANCE;
+                                else player.gameObj.transform.position.y -= ONE_WAY_TOLERANCE;
                             }
                         }
                         else 
@@ -1682,10 +1691,6 @@ void Level::DrawLevel()
         }
     }
 
-    ClearBackground(backgroundColor);
-
-    BeginMode2D(camera);
-    
     TileRange playerTileRange = CalculateTileRange(
         camera.target.x,
         camera.target.y,
@@ -1697,7 +1702,20 @@ void Level::DrawLevel()
     lastPaletteIndex = -1;
     lastPaletteList = nullptr;
 
+    ClearBackground(backgroundColor);
+
+    Texture2D* activeBackground = GetActvieBackground(currentRoom.backgroundTextureIndex);
+
     BeginShaderMode(paletteShader);
+
+    if(activeBackground)
+    {
+        ChangePalette(currentRoom.currentPaletteIndex, &environmentPalettes);
+
+        DrawTexture(*activeBackground, 0,0, WHITE);
+    }
+
+    BeginMode2D(camera);
 
     //background
 
@@ -1902,6 +1920,7 @@ void Level::DrawLevel()
 
     EndTextureMode();
 
+    //UI
     BeginTextureMode(uiCanvas);
 
     ClearBackground(WHITE);
@@ -1913,23 +1932,13 @@ void Level::DrawLevel()
 
     BeginShaderMode(paletteShader);
 
-    ChangePalette(0, &spritePalettes);
-
-    DrawTextureScaled(
-        midCanvas.x,
-        midCanvas.y,
-        uiBackground
-    );
-
-    ChangePalette(1, &spritePalettes);
-
     ChangePalette(player.characterCurrentPalette, &spritePalettes);
     
     if(player.currentPortrait > -1)
     {
         DrawSprite(
             &portraits[player.currentPortrait],
-            uiCanvas.texture.width - (portraits[player.currentPortrait].frameSize.x / 2) - TILE_SIZE,
+            uiCanvas.texture.width - (portraits[player.currentPortrait].frameSize.x / 2),
             midCanvas.y,
             player.currentPortraitFrame
         );
@@ -1937,7 +1946,7 @@ void Level::DrawLevel()
 
     ChangePalette(6, &spritePalettes);
 
-    DrawSprite(&uiElements[0], TILE_SIZE * 3.25f, TILE_SIZE + TILE_SIZE * 0.5f, 0);
+    DrawSprite(&uiElements[0], TILE_SIZE * 4, TILE_SIZE + TILE_SIZE * 0.5f, 0);
 
     EndShaderMode();
 

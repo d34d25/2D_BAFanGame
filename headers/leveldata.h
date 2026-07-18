@@ -294,6 +294,8 @@ struct Room
 
     int currentPaletteIndex = 0;
     int currentColorIndex = 0;
+
+    int backgroundTextureIndex = -1;
 };
 
 inline bool IsColorOf(Color colorA, Color colorB)
@@ -487,11 +489,13 @@ extern std::vector<SpriteRenderData> arisWeaponRenderData;
 
 //UI
 
-extern Texture2D uiBackground;
-
 extern std::vector<SpriteRenderData> portraits;
 
 extern std::vector<SpriteRenderData> uiElements;
+
+//background
+
+extern std::vector<Texture2D> backgrounds;
 
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -728,6 +732,16 @@ inline SpriteRenderData* GetPlayerWeaponActiveRenderData(Character type, int var
     if(activeRenderData && variant >= 0 && variant < (int)activeRenderData->size())
     {
         return &activeRenderData->at(variant);
+    }
+
+    return nullptr;
+}
+
+inline Texture2D* GetActvieBackground(int index)
+{
+    if(index > -1 && index < backgrounds.size())
+    {
+        return &backgrounds[index];
     }
 
     return nullptr;

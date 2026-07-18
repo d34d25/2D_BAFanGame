@@ -41,11 +41,13 @@ static constexpr Color ENEMY_YUUKA = Color{85,56,171,255};
 
 //grid
 
-static constexpr int TILE_SIZE = 12;
+const constexpr int ONE_WAY_TOLERANCE = 3;
 
-static const int NATIVE_WIDTH = 240;
+static constexpr int TILE_SIZE = 8;
 
-static const int NATIVE_HEIGHT = 240;
+static const int NATIVE_WIDTH = 160;
+
+static const int NATIVE_HEIGHT = 160;
 
 static const int UI_HEIGHT = TILE_SIZE * 4;
 
@@ -81,7 +83,7 @@ static constexpr int SINGLE_ROTATING_SPIKE_MAX_HITBOX = 6; //6
 
 static constexpr int DOUBLE_ROTATING_SPIKE_MAX_HITBOX = 4;
 
-static constexpr float GRAVITY = 875.0f;
+static constexpr float GRAVITY = 1250.0f;
 
 
 static constexpr int MAX_PALETTE_ROWS = 8; //number of squares

@@ -56,11 +56,9 @@ inline void SolveCollisionsOneWayLeftRight(GameObject& objA, const Rectangle& re
 {
     bool isLeft = !isRight;
 
-    float offset = 6.0f;
+    if(isLeft) if(IsLeft(objA.GetMainAABB(), recB, ONE_WAY_TOLERANCE) || objA.body.velocity.x <= 0.0f) return;
 
-    if(isLeft) if(IsLeft(objA.GetMainAABB(), recB, offset) || objA.body.velocity.x <= 0.0f) return;
-
-    if(isRight) if(IsRight(objA.GetMainAABB(), recB, offset) || objA.body.velocity.x >= 0.0f) return;
+    if(isRight) if(IsRight(objA.GetMainAABB(), recB, ONE_WAY_TOLERANCE) || objA.body.velocity.x >= 0.0f) return;
 
     SolveCollisions(
         objA,
@@ -74,27 +72,25 @@ inline void SolveCollisionsOneWayUpDown(GameObject& objA, const Rectangle& recB,
 {
     bool isDown = !isUp;
 
-    float offset = 5.0f;
-
     if(!isPlatform)
     {
-        if(isUp) if(!IsAbove(objA.GetMainAABB(), recB, offset) || objA.body.velocity.y <= 0.0f) return;
+        if(isUp) if(!IsAbove(objA.GetMainAABB(), recB, ONE_WAY_TOLERANCE) || objA.body.velocity.y <= 0.0f) return;
 
-        if(isDown) if(!IsBelow(objA.GetMainAABB(), recB, offset) || objA.body.velocity.y >= 0.0f) return;
+        if(isDown) if(!IsBelow(objA.GetMainAABB(), recB, ONE_WAY_TOLERANCE) || objA.body.velocity.y >= 0.0f) return;
     }
     else
     {
         if(!gravityUp)
         {
-            if(isUp) if(!IsAbove(objA.GetMainAABB(), recB, offset) || objA.body.velocity.y <= 0.0f) return;
+            if(isUp) if(!IsAbove(objA.GetMainAABB(), recB, ONE_WAY_TOLERANCE) || objA.body.velocity.y <= 0.0f) return;
 
-            if(isDown) if(!IsBelow(objA.GetMainAABB(), recB, offset) || objA.body.velocity.y >= 0.0f) return;
+            if(isDown) if(!IsBelow(objA.GetMainAABB(), recB, ONE_WAY_TOLERANCE) || objA.body.velocity.y >= 0.0f) return;
         }
         else
         {
-            if(isDown) if(!IsAbove(objA.GetMainAABB(), recB, offset) || objA.body.velocity.y <= 0.0f) return;
+            if(isDown) if(!IsAbove(objA.GetMainAABB(), recB, ONE_WAY_TOLERANCE) || objA.body.velocity.y <= 0.0f) return;
 
-            if(isUp) if(!IsBelow(objA.GetMainAABB(), recB, offset) || objA.body.velocity.y >= 0.0f) return;
+            if(isUp) if(!IsBelow(objA.GetMainAABB(), recB, ONE_WAY_TOLERANCE) || objA.body.velocity.y >= 0.0f) return;
         }
     }
 
@@ -122,7 +118,7 @@ inline void ApplyWind(
 
     bool right = direction == Direction::RIGHT;
 
-    float windForce = 520 * objA.body.damping;
+    float windForce = 3000;
 
     bool isEdge = (!gravityUp && isEdgeUp) || (gravityUp && isEdgeDown);
 
@@ -140,7 +136,7 @@ inline void ApplyWind(
     
     if(right || left)
     {
-        windForce *= 0.7f;
+        windForce = 400;
     }
 
     if(up)
@@ -163,7 +159,7 @@ inline void ApplyWind(
 
 inline void ApplyWaterPhysics(GameObject* objA, bool gravityUp)
 {
-    float force = 175 * objA->body.damping; //175
+    float force = 120 * objA->body.damping; //175
 
     if(!gravityUp) objA->body.force.y -= force;
     else objA->body.force.y += force;

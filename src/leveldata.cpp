@@ -96,11 +96,13 @@ std::vector<SpriteRenderData> arisWeaponRenderData = {};
 
 //UI
 
-Texture2D uiBackground = {};
-
 std::vector<SpriteRenderData> portraits = {};
 
 std::vector<SpriteRenderData> uiElements = {};
+
+//backgrounds
+
+std::vector<Texture2D> backgrounds = {};
 
 /*
     spacing is how many frames an animation loop has, this value is fixed for each SpriteRenderData
@@ -189,19 +191,12 @@ void LoadAssets()
    
     Vector2 tileSize = {TILE_SIZE,TILE_SIZE};
 
+    backgrounds.push_back(LoadTexture("assets/backgrounds/testBackground.png"));
+
     //tiles
 
     solidTilesRenderData.push_back(LoadRenderData(
-        "assets/tiles/solid/xtremelysimpleset.png", tileSize
-    ));
-
-    solidTilesRenderData.push_back(LoadRenderData(
-        "assets/tiles/solid/xtremelysimpleset-2.png", tileSize
-    ));
-
-    solidTilesRenderData.push_back(LoadRenderData(
-        "assets/tiles/solid/2by2TileTest.png", tileSize * 2,
-        tileSize * 0.5f
+        "assets/tiles/solid/brave-aris-tiles.png", tileSize
     ));
 
     ladderRenderData.push_back(LoadRenderData("assets/tiles/ladder.png", tileSize));
@@ -227,23 +222,43 @@ void LoadAssets()
     ));
 
     decoRenderData.push_back(LoadRenderData(
+        "assets/tiles/deco/windows-2.png",
+        tileSize,{0,0},
+        1
+    ));
+
+    float treeOffset = (-TILE_SIZE * 0.5f) - 1;
+
+    decoRenderData.push_back(LoadRenderData(
+        "assets/tiles/deco/tree-background-1a.png", {32,80}, {0, treeOffset}
+    ));
+
+    decoRenderData.push_back(LoadRenderData(
+        "assets/tiles/deco/tree-background-1b.png", {32,80}, {0, treeOffset}
+    ));
+
+    decoRenderData.push_back(LoadRenderData(
+        "assets/tiles/deco/tree-background-2a.png", {32,80}, {0, treeOffset}
+    ));
+
+    decoRenderData.push_back(LoadRenderData(
+        "assets/tiles/deco/tree-background-2b.png", {32,80}, {0, treeOffset}
+    ));
+
+    decoRenderData.push_back(LoadRenderData(
+        "assets/tiles/deco/sky-background-gradient-a.png", {80,32}, {TILE_SIZE * 0.5f, TILE_SIZE * 0.5f},
+        1
+    ));
+
+    decoRenderData.push_back(LoadRenderData(
+        "assets/tiles/deco/2x3Windows-2.png",
+        {TILE_SIZE * 2, TILE_SIZE * 3},{TILE_SIZE * 0.5f, TILE_SIZE},
+        1
+    ));
+
+    decoRenderData.push_back(LoadRenderData(
         "assets/tiles/deco/shadows.png",
         tileSize,{0,0}
-    ));
-
-    decoRenderData.push_back(LoadRenderData(
-        "assets/tiles/deco/test-background.png", 
-        {120,96}, {-TILE_SIZE * 0.5f, -TILE_SIZE * 0.5f}
-    ));
-
-    decoRenderData.push_back(LoadRenderData(
-        "assets/tiles/deco/buildings-background-1.png", 
-        {120,96}, {-TILE_SIZE * 0.5f, -TILE_SIZE * 0.5f}
-    ));
-
-    decoRenderData.push_back(LoadRenderData(
-        "assets/tiles/deco/buildings-background-2.png", 
-        {120,96}, {-TILE_SIZE * 0.5f, -TILE_SIZE * 0.5f}
     ));
 
 
@@ -318,7 +333,7 @@ void LoadAssets()
         "assets/tiles/wind.png", 
         tileSize,
         {0,0},
-        3
+        2
     ));
 
     //water
@@ -327,20 +342,19 @@ void LoadAssets()
         "assets/tiles/water.png",
         tileSize,
         {0,0},
-        3
+        2
     ));
 
     //platforms
 
     verticalMovingPlatform_RenderData.push_back(LoadRenderData(
         "assets/platforms/vertical-moving-platform.png", 
-        {34, 5}, {0,0},
-        2
+        {22, 3}, {0,0}
     ));
 
     horizontalMovingPlatform_RenderData.push_back(LoadRenderData(
         "assets/platforms/horizontal-moving-platform.png", 
-        {34, 5}, {0,0},
+        {22, 3}, {0,0},
         2
     ));
 
@@ -353,19 +367,20 @@ void LoadAssets()
         "assets/platforms/disappearing-platform.png", 
         tileSize, {0,0}
     ));
+    
 
     //enemies
 
     dummyRenderData.push_back(LoadRenderData("assets/enemies/chibi-dummy.png", {8,12}, {0,0}));
 
     amasDroneRenderData.push_back(LoadRenderData(
-        "assets/enemies/amas-drone.png", {15,8},
+        "assets/enemies/amas-drone.png", {12,6},
         {0,0}
     ));
     
     sweeperARenderData.push_back(LoadRenderData(
-        "assets/enemies/sweeper-1.png", {14,17},
-        {-1,0}, 1, 0,0, 10.0f
+        "assets/enemies/sweeper-1.png", {9,10},
+        {0,0}, 1, 0,0, 10.0f
     ));
 
     yuukaRenderData.push_back(LoadRenderData(
@@ -404,7 +419,7 @@ void LoadAssets()
 
     yuzuRenderData.push_back(LoadRenderData(
         "assets/characters/minimalist-yuzu.png",
-        {14.0f, 16.0f},
+        {15.0f, 16.0f},
         {0.0f, 0.0f},
         1,0,0,
         7.0f
@@ -412,8 +427,8 @@ void LoadAssets()
 
     arisRenderData.push_back(LoadRenderData(
         "assets/characters/minimalist-aris.png",
-        {15.0f, 17.0f},
-        {0.0f, 0.0f},
+        {16.0f, 17.0f},
+        {-1.0f, 0.0f},
         1,0,0,
         7.0f
     ));
@@ -452,8 +467,6 @@ void LoadAssets()
 
     //UI
 
-    uiBackground = LoadTexture("assets/ui/ui-background.png");
-
     portraits.push_back(LoadRenderData(
         "assets/ui/yuzu-portrait.png",
         {32,32}
@@ -481,9 +494,24 @@ void UnloadAssets()
     };
 
     //tiles
+
     CleanUp(solidTilesRenderData);
 
     CleanUp(decoRenderData);
+
+    CleanUp(windRenderData);
+
+    CleanUp(waterRenderData);
+
+    CleanUp(gravityChagerRenderData);
+
+    CleanUp(oneWayRenderData);
+
+    CleanUp(ladderRenderData);
+
+    CleanUp(treadmillRenderData_Left);
+
+    CleanUp(treadmillRenderData_Right);
 
     //spikes
 
@@ -495,15 +523,25 @@ void UnloadAssets()
 
     //platforms
 
-    CleanUp(windRenderData);
+    CleanUp(movingSpikeRenderData);
 
-    CleanUp(waterRenderData);
+    CleanUp(verticalMovingPlatform_RenderData);
+
+    CleanUp(horizontalMovingPlatform_RenderData);
+
+    CleanUp(fallingPlatform_RenderData);
+
+    CleanUp(disappearingPlatform_RenderData);
 
     //enemies
 
     CleanUp(dummyRenderData);
 
     CleanUp(yuukaRenderData);
+
+    CleanUp(amasDroneRenderData);
+
+    CleanUp(sweeperARenderData);
 
     //enemies' weapons
 
@@ -524,6 +562,19 @@ void UnloadAssets()
 
     CleanUp(yuzuWeaponRenderData);
     CleanUp(arisWeaponRenderData);
+
+    //UI
+    CleanUp(portraits);
+
+    CleanUp(uiElements);
+
+    for(int i = 0; i < backgrounds.size(); i++)
+    {
+        UnloadTexture(backgrounds[i]);
+    }
+
+    backgrounds.clear();
+    backgrounds.shrink_to_fit();
 
     UnloadShader(paletteShader);
 }

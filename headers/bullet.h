@@ -21,7 +21,7 @@ struct BulletProperties
     float spread = 0;
     float radius = 2.0f;
 
-    float explosionRadius = 17.0f;
+    float explosionRadius = 12;
     float explosionLifeTime = 0.5f;
 
     int pelletCount = 1;

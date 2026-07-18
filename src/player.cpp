@@ -16,19 +16,21 @@ void Player::InitPlayer(Vector2 position, float gravity, bool flipY)
 
     gameObj.hitboxes.push_back(Hitbox{{0,0}, {6, 14}});
 
-    float verticalOffset = 7.0f;
+    float verticalOffset = 6.0f;
+
+    float jumpDetectorWidth = 6.0f;
 
     //jump detector
-    gameObj.AddSubHitbox({0,verticalOffset}, {gameObj.GetMainAABB().width * 0.9f, gameObj.GetMainAABB().height * 0.25f});
+    gameObj.AddSubHitbox({0,verticalOffset}, {jumpDetectorWidth, gameObj.GetMainAABB().height * 0.25f});
 
     //for treadmills only
     gameObj.AddSubHitbox({0,verticalOffset}, {gameObj.GetMainAABB().width, gameObj.GetMainAABB().height * 0.25f});
 
     //ceiling detector
-    gameObj.AddSubHitbox({0,-verticalOffset}, {gameObj.GetMainAABB().width * 0.9f, gameObj.GetMainAABB().height * 0.25f});
+    gameObj.AddSubHitbox({0,-verticalOffset}, {jumpDetectorWidth, gameObj.GetMainAABB().height * 0.25f});
 
     //ladder detector
-    gameObj.AddSubHitbox({0,0}, {gameObj.GetMainAABB().width * 0.25f, gameObj.GetMainAABB().height});
+    gameObj.AddSubHitbox({0,0}, {gameObj.GetMainAABB().width * 0.45f, gameObj.GetMainAABB().height + 1});
 
     gameObj.UpdateHitboxes();
 
@@ -233,6 +235,17 @@ void Player::UpdateRender(float dt)
     }
     else if(climbing)
     {
+        switch (character)
+        {
+        case Character::MOMOI:
+        case Character::MIDORI:
+            characterRenderData->offset.x = 0;
+            break;
+        
+        default:
+            break;
+        }
+
         startFrame = 7;
         endFrame = 8;
     }
@@ -252,7 +265,7 @@ void Player::UpdateRender(float dt)
     }
     else
     {
-        if(std::abs(gameObj.body.velocity.x) > 25.0f)
+        if((movingLeft || movingRight) && std::abs(gameObj.body.velocity.x) > 1.0f)
         {
             startFrame = 1;
             endFrame = 4;
@@ -285,7 +298,7 @@ void Player::UpdateRender(float dt)
 
 void Player::Update(float dt, int iterations)
 {
-    float jumpVel = -50;
+    float jumpVel = -56;
 
     float jump = jumpVel;
 
@@ -306,7 +319,7 @@ void Player::Update(float dt, int iterations)
     {
         //lateral movement
 
-        float moveForce = 4250;
+        float moveForce = 5000;
 
         if(movingLeft)
         {

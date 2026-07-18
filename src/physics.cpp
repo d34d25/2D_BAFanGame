@@ -6,11 +6,11 @@ void SolveCollisions(GameObject& objA, const Rectangle& recB, const Vector2& vel
 
     float offset = 0.001f;
 
-    float trampolineImpulse = 250.0f;
+    float trampolineImpulse = 350.0f;
 
     float trampolineImpulseFactor = 0.7f;
 
-    float trampolineFactor_Y = 2.0f;
+    float trampolineFactor_Y = 3.0f;
 
     if(isX)
     {

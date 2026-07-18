@@ -95,8 +95,8 @@ void Enemy::AmasDroneBehavior(float dt, Player &player)
     float distanceToPlayerX = gameObj.transform.position.x - player.gameObj.transform.position.x;
     float distanceToPlayerY = gameObj.transform.position.y - player.gameObj.transform.position.y;
 
-    float hoverSpeed = 50;
-    float diveSpeed = 150;
+    float hoverSpeed = 40;
+    float diveSpeed = 70;
 
     float triggerRange = TILE_SIZE * 4;
 
@@ -529,7 +529,7 @@ void Enemy::InitEnemy(
 
     case EnemyType::AMAS_DRONE:
     {
-        mainHitbox.aabb.width = 13;
+        mainHitbox.aabb.width = 12;
         mainHitbox.aabb.height = 6;
 
         gameObj.body.damping = 0;
@@ -540,8 +540,8 @@ void Enemy::InitEnemy(
 
     case EnemyType::SWEEPER_A:
     {
-        mainHitbox.aabb.width = 10;
-        mainHitbox.aabb.height = 14;
+        mainHitbox.aabb.width = 7;
+        mainHitbox.aabb.height = 8;
     }
     break;
 

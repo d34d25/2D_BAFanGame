@@ -239,22 +239,22 @@ void LevelEditor::Update()
 
     if(IsKeyPressed(KEY_R)) roomMode = !roomMode;
 
-    if(!environmentPalettes.empty())
+    if(!environmentPalettes.empty() && roomMode)
     {
-        if(IsKeyPressed(KEY_UP))
+        if(IsKeyPressed(KEY_UP) || IsKeyPressed(KEY_W))
         {
             currentBackgroundPalette++;
 
             if(currentBackgroundPalette >= environmentPalettes.size()) currentBackgroundPalette = 0;
         }
-        else if(IsKeyPressed(KEY_DOWN))
+        else if(IsKeyPressed(KEY_DOWN) || IsKeyPressed(KEY_S))
         {
             currentBackgroundPalette--;
 
             if(currentBackgroundPalette < 0) currentBackgroundPalette = environmentPalettes.size() - 1;
         }
 
-        if(IsKeyPressed(KEY_RIGHT))
+       if(IsKeyPressed(KEY_RIGHT))
         {
             currentBackgroundColor++;
 
@@ -265,6 +265,19 @@ void LevelEditor::Update()
             currentBackgroundColor--;
 
             if(currentBackgroundColor < 0) currentBackgroundColor = environmentPalettes.at(currentBackgroundPalette).size() - 1;
+        }
+
+        if(IsKeyPressed(KEY_D))
+        {
+            currentBackgroundIndex++;
+
+            if(currentBackgroundIndex >= backgrounds.size()) currentBackgroundIndex = -1;
+        }
+        else if(IsKeyPressed(KEY_A))
+        {
+            currentBackgroundIndex--;
+
+            if(currentBackgroundIndex < -1) currentBackgroundIndex = backgrounds.size() - 1;
         }
     }
 
@@ -749,6 +762,8 @@ void LevelEditor::Update()
             {
                 rooms[hoveredRoomIndex].currentPaletteIndex = currentBackgroundPalette;
                 rooms[hoveredRoomIndex].currentColorIndex = currentBackgroundColor;
+
+                rooms[hoveredRoomIndex].backgroundTextureIndex = currentBackgroundIndex;
             }
 
             if(IsMouseButtonPressed(MOUSE_BUTTON_RIGHT))
@@ -780,9 +795,13 @@ void LevelEditor::Update()
                     }
                 }
             }
+
+            currentRoomIndex = hoveredRoomIndex;
         }
     }
    
+    
+
     if(IsKeyPressed(KEY_F5))
     {
         ExportLevel();
@@ -819,10 +838,46 @@ void LevelEditor::Draw()
 
     for(int i = 0; i < rooms.size(); i++)
     {
-        DrawRectangleRec(rooms[i].aabb, environmentPalettes.at(rooms[i].currentPaletteIndex).at(rooms[i].currentColorIndex));
-    }
+        Room& currentRoom =rooms[i];
 
+        Texture2D* activeBackground = GetActvieBackground(currentRoom.backgroundTextureIndex);
+
+        if(activeBackground)
+        {
+            BeginShaderMode(paletteShader);
+
+            ChangePalette(currentRoom.currentPaletteIndex, &environmentPalettes);
+
+            DrawTextureScaled(currentRoom.aabb.x + currentRoom.aabb.width * 0.5f, 
+                currentRoom.aabb.y + currentRoom.aabb.height * 0.5f, *activeBackground
+            );
+
+            EndShaderMode();
+        }
+        else
+        {
+            DrawRectangleRec(currentRoom.aabb, environmentPalettes.at(currentRoom.currentPaletteIndex).at(currentRoom.currentColorIndex));
+        }
+    }
+    
     BeginShaderMode(paletteShader);
+
+    if(roomMode && currentRoomIndex > -1)
+    {
+        Texture2D* activeBackground = GetActvieBackground(currentBackgroundIndex);
+
+        if(activeBackground)
+        {
+            ChangePalette(currentBackgroundPalette, &environmentPalettes);
+
+            Room& hoveredRoom = rooms[currentRoomIndex];
+
+            DrawTextureScaled(hoveredRoom.aabb.x + hoveredRoom.aabb.width * 0.5f, 
+                hoveredRoom.aabb.y + hoveredRoom.aabb.height * 0.5f, *activeBackground,
+                {255,255,255,100}
+            );
+        }
+    }
 
     for(int l = 0; l < LAYERS; l++)
     {
@@ -1117,6 +1172,8 @@ void LevelEditor::Draw()
     DrawText(TextFormat("current palette: %i", currentPalette), TILE_SIZE, ypos + spacing * 10, 20, GREEN);
 
     DrawText(TextFormat("current chunk size: %i", chunkSize), TILE_SIZE, ypos + spacing * 11, 20, GREEN);
+
+    DrawText(TextFormat("current room background index: %i", currentBackgroundIndex), TILE_SIZE, ypos + spacing * 12, 20, GREEN);
 
     int size = 20;
     int offsetY = size;

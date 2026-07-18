@@ -10,12 +10,21 @@
 
 const float MASS = 1;
 
-//a max speed of 2000 is still stable enough (even after scaling the game down by 4)
+/*
+max relative velocity 1750
 
-//if both objects are moving against each other at the same speed then the max speed is 1000 for each
-//2000 is the limit for the relative velocity of two objects
+with a ONE_WAY_TOLERANCE of 3 (the thinnest collider's width / height)
 
-const Vector2 MAX_SPEED = {300,300};
+this means that the combined velocity of
+both objects involved in the collision has to
+add up to 1750 at maximum
+
+if both objects are moving at the same speed 
+in opposite directions the max speed for each
+one would be 1750 / 2 = 875 
+*/
+
+const Vector2 MAX_SPEED = {600,600};
 
 enum struct Direction
 {
@@ -41,7 +50,7 @@ struct SimpleBody2D
 
     Vector2 force = {0,0};
 
-    float damping = 4.0f;
+    float damping = 7.0f; //4.0f
 
     bool hasGravity = false;
 

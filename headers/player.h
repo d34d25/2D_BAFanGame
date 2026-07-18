@@ -74,6 +74,7 @@ struct Player
     bool wasTouchingSpike = false;
 
     bool inLadder = false;
+
     bool climbing = false;
 
     //current frame flags

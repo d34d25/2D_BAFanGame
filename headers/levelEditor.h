@@ -61,6 +61,10 @@ struct LevelEditor
 
     int currentBackgroundPalette = 0;
 
+    int currentBackgroundIndex = -1;
+
+    int currentRoomIndex = -1;
+
     bool roomMode = false;
 
     LevelEditor(int screenWidth, int screenHeight, const char* levelPath, const char* roomPath);
