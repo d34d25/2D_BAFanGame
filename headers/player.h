@@ -31,8 +31,6 @@ struct Player
 
     SpriteRenderData* characterRenderData = {};
 
-    SpriteRenderData* weaponRenderData = {};
-
     BulletProperties bulletData = {};
 
     Character character = Character::YUZU;

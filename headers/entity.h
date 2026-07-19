@@ -290,6 +290,7 @@ inline Vector2 GetTextureBulletSpawnPos(const GameObject& gameObj, const SpriteR
     Vector2 offset = renderData->offset;
 
     int textureWidth = renderData->frameSize.x;
+    int textureHeight = renderData->frameSize.y;
 
     if(gameObj.flipData.flipX)
     {
@@ -301,10 +302,12 @@ inline Vector2 GetTextureBulletSpawnPos(const GameObject& gameObj, const SpriteR
     if(gameObj.flipData.flipY)
     {
         offset.y = -offset.y;
+
+        textureHeight = -textureHeight;
     }
 
-    spawnPos.x += offset.x + textureWidth;
-    spawnPos.y += offset.y;
+    spawnPos.x += offset.x + textureWidth * 0.5f;
+    spawnPos.y += offset.y + textureHeight * 0.15f;
 
     return spawnPos;
 };

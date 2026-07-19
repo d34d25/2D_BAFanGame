@@ -35,8 +35,6 @@ struct Enemy
 
     SpriteRenderData* enemyRenderData = nullptr;
 
-    SpriteRenderData* weaponRenderData = nullptr;
-
     Vector2 spawnPosition = {0,0};
 
     Vector2 targetPos = {0,0};
