@@ -37,27 +37,67 @@ void Enemy::UpdateRender(float dt)
 
         if(!isGrounded)
         {
-            startFrame = 4;
-            endFrame = 4;
-        }
-        else if(isStomping)
-        {
-            startFrame = 5;
-            endFrame = 5;
-
-            enemyRenderData->offset.y += 1.0f;
-        }
-        else
-        {
-            if(std::abs(gameObj.body.velocity.x) > 25.0f)
+            if(shooting)
             {
-                startFrame = 1;
-                endFrame = 3;
+                startFrame = 14;
+                endFrame = 14;
             }
             else
             {
-                startFrame = 0;
-                endFrame = 0;
+                startFrame = 6;
+                endFrame = 6;
+            }
+            
+            //moving upwards
+            if(
+                gameObj.flipData.flipY && gameObj.body.velocity.y > 25.0f ||
+                !gameObj.flipData.flipY && gameObj.body.velocity.y < 25.0f
+            )
+            {
+                if(shooting)
+                {
+                    startFrame = 12;
+                    endFrame = 12;
+                }
+                else
+                {
+                    startFrame = 5;
+                    endFrame = 5;
+                }
+            }
+        }
+        else if(isStomping)
+        {
+            startFrame = 7;
+            endFrame = 7;
+        }
+        else
+        {
+            if(std::abs(gameObj.body.velocity.x) > 1.0f)
+            {
+                if(shooting)
+                {
+                    startFrame = 9;
+                    endFrame = 12;
+                }
+                else
+                {
+                    startFrame = 1;
+                    endFrame = 4;
+                }
+            }
+            else
+            {
+                if(shooting)
+                {
+                    startFrame = 8;
+                    endFrame = 8;
+                }
+                else
+                {
+                    startFrame = 0;
+                    endFrame = 0;
+                }
             }
         }
     }
@@ -176,6 +216,8 @@ void Enemy::AmasDroneBehavior(float dt, Player &player)
 
 void Enemy::SweeperABehavior(float dt, Player &player)
 {
+    lookAtPlayer = true;
+
     float distanceToPlayerX = gameObj.transform.position.x - player.gameObj.transform.position.x;
 
     float minDist = 1;
@@ -207,9 +249,9 @@ void Enemy::YuukaBehavior(float dt, Player& player)
 
     case Attacks::STOMP:
     {
-        gravity = ogGravity * 2.0f;
-
         gameObj.body.damping = 0.0f;
+
+        gravity = ogGravity * 0.4f;
 
         moveSpeedSign = 1;
 
@@ -253,7 +295,7 @@ void Enemy::YuukaBehavior(float dt, Player& player)
         {
             isGrounded = false;
 
-            float jump = -375;
+            float jump = -150;
 
             gameObj.body.velocity.y = jump;
 
@@ -281,13 +323,13 @@ void Enemy::YuukaBehavior(float dt, Player& player)
     {
         lookAtPlayer = true;
 
+        gravity = ogGravity * 0.4f;
+
         bulletData.speed = ogBulletData.speed * 3.0f;
 
         bulletData.pelletCount = 4;
 
         bulletData.spread = 6.0f;
-
-        gravity = ogGravity * 2.0f;
 
         gameObj.body.damping = 0.0f;
 
@@ -333,7 +375,7 @@ void Enemy::YuukaBehavior(float dt, Player& player)
         {
             isGrounded = false;
 
-            float jump = -300;
+            float jump = -140;
 
             gameObj.body.velocity.y = jump;
 
@@ -512,7 +554,7 @@ void Enemy::InitEnemy(
 
     Hitbox mainHitbox = {
         {0,0},
-        {7,17}
+        {6,14}
     };
 
     Vector2 weaponOffset = {0,0};
@@ -541,7 +583,7 @@ void Enemy::InitEnemy(
     case EnemyType::SWEEPER_A:
     {
         mainHitbox.aabb.width = 7;
-        mainHitbox.aabb.height = 8;
+        mainHitbox.aabb.height = 11;
     }
     break;
 
@@ -591,11 +633,7 @@ void Enemy::InitEnemy(
 
     enemyRenderData = GetEnemyActiveRenderData(type, characterVariantIndex);
 
-    weaponRenderData = GetEnemyWeaponActiveRenderData(type, weaponVariantIndex);
-
     characterPaletteIndex = paletteIndex;
-
-    weaponPaletteIndex = paletteIndex;
 
     aiFrameskip = frameskip;
 

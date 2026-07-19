@@ -125,7 +125,7 @@ void LevelEditor::DrawRotatingSpikesSprite(int currentType, int frame, const Spr
             float xPos = position.x - (size * 0.5f) + currentOffset.x;
             float yPos = position.y - (size * 0.5f) + currentOffset.y;
 
-            DrawSprite(&renderData, xPos, yPos, frame, data.flipX, data.flipY, WHITE);
+            DrawSprite(&renderData, xPos, yPos, frame, data.flipX, data.flipY, true ,WHITE);
         }
     }
     break;
@@ -147,7 +147,7 @@ void LevelEditor::DrawRotatingSpikesSprite(int currentType, int frame, const Spr
             float xPos = position.x - (size * 0.5f) + currentOffset.x;
             float yPos = position.y - (size * 0.5f) + currentOffset.y;
 
-            DrawSprite(&renderData, xPos, yPos, frame, data.flipX, data.flipY, WHITE);
+            DrawSprite(&renderData, xPos, yPos, frame, data.flipX, data.flipY, true, WHITE);
         }
     }
     break;
@@ -1098,13 +1098,15 @@ void LevelEditor::Draw()
 
     //grid
 
+    Color gridColor = {70,70,70,255};
+
     for(int i = 0; i <= worldWidth; i+= TILE_SIZE)
     {
         DrawLineEx(
             {(float)i, 0.0f},
             {(float)i, (float)worldHeight},
             dynamicThickness,
-            GRAY
+            gridColor
         );
     }
 
@@ -1114,7 +1116,7 @@ void LevelEditor::Draw()
             {0.0f, (float)i},
             {(float)worldWidth, (float)i},
             dynamicThickness,
-            GRAY
+            gridColor
         );
     }
 

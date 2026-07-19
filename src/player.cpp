@@ -47,7 +47,6 @@ void Player::InitPlayer(Vector2 position, float gravity, bool flipY)
     bulletData.gravity = 0.0f;
 
     characterVariantIndex = 0;
-    weaponVariantIndex = 0;
 
     character = Character::YUZU;
 
@@ -66,7 +65,6 @@ void Player::InitPlayer(Vector2 position, float gravity, bool flipY)
         bulletData.backColor = MOMOI_PINK_BG;
 
         characterCurrentPalette = 1;
-        weaponCurrentPalette = 1;
 
         break;
     case Character::MIDORI:
@@ -78,7 +76,6 @@ void Player::InitPlayer(Vector2 position, float gravity, bool flipY)
         bulletData.backColor = MIDORI_GREEN_BG;
 
         characterCurrentPalette = 2;
-        weaponCurrentPalette = 2;
 
         break;
     case Character::YUZU:
@@ -96,7 +93,6 @@ void Player::InitPlayer(Vector2 position, float gravity, bool flipY)
         bulletData.explodes = true;
 
         characterCurrentPalette = 0;
-        weaponCurrentPalette = 0;
 
         currentPortrait = 0;
 
@@ -118,7 +114,6 @@ void Player::InitPlayer(Vector2 position, float gravity, bool flipY)
         bulletData.explodes = true;
 
         characterCurrentPalette = 0;
-        weaponCurrentPalette = 1;
         
         break;
     case Character::ARIS:
@@ -134,13 +129,11 @@ void Player::InitPlayer(Vector2 position, float gravity, bool flipY)
         bulletData.piercing = true;
 
         characterCurrentPalette = 3;
-        weaponCurrentPalette = 3;
 
         break;
     case Character::MOMOI_CHAQUENA:
 
         characterVariantIndex = 1;
-        weaponVariantIndex = 1;
 
         bulletData.fireRate = 0.2f;
         bulletData.spread = 8.0f;
@@ -155,13 +148,14 @@ void Player::InitPlayer(Vector2 position, float gravity, bool flipY)
         break;
     }
 
-    weaponVariantIndex = 2;
 
     characterRenderData = GetPlayerActiveRenderData(character, characterVariantIndex);
 
-    weaponRenderData = GetPlayerWeaponActiveRenderData(character, weaponVariantIndex);
-
     bulletpool = std::make_unique<BulletPool>(30, bulletData);
+
+    gameObj.flipData.flipOffset = true;
+
+    ogFlipOffset = gameObj.flipData.flipOffset;
 }
 
 void Player::UpdateInput()
@@ -219,6 +213,8 @@ void Player::UpdateRender(float dt)
 
     characterRenderData->offset = characterRenderData->ogOffset;
 
+    gameObj.flipData.flipOffset = ogFlipOffset;
+
     currentPortraitFrame = 0;
 
     if(eegg)
@@ -235,45 +231,77 @@ void Player::UpdateRender(float dt)
     }
     else if(climbing)
     {
-        switch (character)
+        gameObj.flipData.flipOffset = false;
+   
+        if(holdingShoot && std::abs(gameObj.body.velocity.y) <= 0.1f)
         {
-        case Character::MOMOI:
-        case Character::MIDORI:
-            characterRenderData->offset.x = 0;
-            break;
-        
-        default:
-            break;
+            startFrame = 16;
+            endFrame = 16;
         }
-
-        startFrame = 7;
-        endFrame = 8;
+        else
+        {
+            startFrame = 7;
+            endFrame = 8;
+        }
     }
     else if(!isGrounded)
     {
-        startFrame = 6;
-        endFrame = 6;
+        if(holdingShoot)
+        {
+            startFrame = 18;
+            endFrame = 18;
+        }
+        else
+        {
+            startFrame = 6;
+            endFrame = 6;
+        }
 
+        //moving upwards
         if(
             gameObj.flipData.flipY && gameObj.body.velocity.y > 25.0f ||
             !gameObj.flipData.flipY && gameObj.body.velocity.y < 25.0f
         )
         {
-            startFrame = 5;
-            endFrame = 5;
+            if(holdingShoot)
+            {
+                startFrame = 17;
+                endFrame = 17;
+            }
+            else
+            {
+                startFrame = 5;
+                endFrame = 5;
+            }   
         }
     }
     else
     {
         if((movingLeft || movingRight) && std::abs(gameObj.body.velocity.x) > 1.0f)
         {
-            startFrame = 1;
-            endFrame = 4;
+            if(holdingShoot)
+            {
+                startFrame = 12;
+                endFrame = 15;
+            }
+            else
+            {
+                startFrame = 1;
+                endFrame = 4;
+            }
         }
         else
         {
-            startFrame = 0;
-            endFrame = 0;
+            if(holdingShoot)
+            {
+                startFrame = 11;
+                endFrame = 11;
+            }
+            else
+            {
+                startFrame = 0;
+                endFrame = 0;
+            }
         }
     }
 
@@ -323,13 +351,13 @@ void Player::Update(float dt, int iterations)
 
         if(movingLeft)
         {
-            gameObj.body.force.x -= moveForce;
+            if(!climbing) gameObj.body.force.x -= moveForce;
             
             gameObj.flipData.flipX = true;
         }
         else if(movingRight)
         {
-            gameObj.body.force.x += moveForce;
+            if(!climbing) gameObj.body.force.x += moveForce;
 
             gameObj.flipData.flipX = false;
         }
@@ -426,7 +454,7 @@ void Player::Update(float dt, int iterations)
     {
         ResetInput();
 
-        gameObj.body.velocity = {0,0};
+        gameObj.body.velocity.x = 0.0f;
 
         stunTimer += dt;
 
@@ -436,6 +464,11 @@ void Player::Update(float dt, int iterations)
 
 void Player::Shoot(float dt)
 {
+    if(climbing && std::abs(gameObj.body.velocity.y) > 0.1f)
+    {
+        return;
+    }
+
     ShootBullet(
         dt, gameObj,
         bulletData, GetTextureBulletSpawnPos(gameObj, weaponRenderData),

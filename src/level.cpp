@@ -1344,7 +1344,7 @@ void Level::HighFrequencyDiscreteUpdate()
 
         bool enemyInWater = false;
 
-        enemy->gameObj.body.UpdateVelocity(dt, iterations, gravity);
+        enemy->gameObj.body.UpdateVelocity(dt, iterations, enemy->gravity);
 
         //enemy x pass
         enemy->gameObj.UpdatePositionX(dt, iterations);
@@ -1499,7 +1499,6 @@ void Level::HighFrequencyDiscreteUpdate()
                             {
                                 ApplyWaterPhysics(&enemy->gameObj, false);
                                 
-
                                 enemyInWater = true;
 
                                 enemy->inWater = true;
@@ -1836,10 +1835,6 @@ void Level::DrawLevel()
 
             DrawSprite(enemy->gameObj, enemy->enemyRenderData, enemy->characterCurrentFrame);
         }
-
-        ChangePalette(enemy->weaponPaletteIndex, &spritePalettes);
-
-        DrawSprite(enemy->gameObj, enemy->weaponRenderData, enemy->weaponCurrentFrame);
     }
 
     ChangePalette(player.characterCurrentPalette, &spritePalettes);
@@ -1882,10 +1877,6 @@ void Level::DrawLevel()
             DrawBullet(bullet->posititon.x, bullet->posititon.y, bullet->radius, bullet->mainColor, bullet->backColor);
         }
     }
-
-    ChangePalette(player.weaponCurrentPalette, &spritePalettes);
-
-    DrawSprite(player.gameObj, player.weaponRenderData, player.weaponCurrentFrame);
 
     //foreground
     for(int i = playerTileRange.startX; i <= playerTileRange.endX; i++)

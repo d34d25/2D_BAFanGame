@@ -466,10 +466,6 @@ extern std::vector<SpriteRenderData> sweeperARenderData;
 
 extern std::vector<SpriteRenderData> yuukaRenderData;
 
-//enemy's weapons
-
-extern std::vector<SpriteRenderData> yuukaWeaponRenderData;
-
 //player
 
 extern std::vector<SpriteRenderData> momoiRenderData;
@@ -477,15 +473,6 @@ extern std::vector<SpriteRenderData> midoriRenderData;
 
 extern std::vector<SpriteRenderData> yuzuRenderData;
 extern std::vector<SpriteRenderData> arisRenderData;
-
-//player's weapons
-
-extern std::vector<SpriteRenderData> momoiWeaponRenderData;
-
-extern std::vector<SpriteRenderData> midoriWeaponRenderData;
-
-extern std::vector<SpriteRenderData> yuzuWeaponRenderData;
-extern std::vector<SpriteRenderData> arisWeaponRenderData;
 
 //UI
 
@@ -648,29 +635,6 @@ inline SpriteRenderData* GetEnemyActiveRenderData(EnemyType type, int variant = 
     return nullptr;
 }
 
-inline std::vector<SpriteRenderData>* GetEnemyWeaponActiveRenderDataList(EnemyType type)
-{
-    switch (type)
-    {
-    
-    case EnemyType::YUUKA: return &yuukaWeaponRenderData;
-
-    default: return nullptr;
-    }
-}
-
-inline SpriteRenderData* GetEnemyWeaponActiveRenderData(EnemyType type, int variant = 0)
-{
-    std::vector<SpriteRenderData>* activeRenderData = GetEnemyWeaponActiveRenderDataList(type);
-
-    if(activeRenderData && variant >= 0 && variant < (int)activeRenderData->size())
-    {
-        return &activeRenderData->at(variant);
-    }
-
-    return nullptr;
-}
-
 inline std::vector<SpriteRenderData>* GetPlayerActiveRenderDataList(Character type)
 {
     switch (type)
@@ -695,39 +659,6 @@ inline std::vector<SpriteRenderData>* GetPlayerActiveRenderDataList(Character ty
 inline SpriteRenderData* GetPlayerActiveRenderData(Character type, int variant = 0)
 {
     std::vector<SpriteRenderData>* activeRenderData = GetPlayerActiveRenderDataList(type);
-
-    if(activeRenderData && variant >= 0 && variant < (int)activeRenderData->size())
-    {
-        return &activeRenderData->at(variant);
-    }
-
-    return nullptr;
-}
-
-inline std::vector<SpriteRenderData>* GetPlayerWeaponActiveRenderDataList(Character type)
-{
-    switch (type)
-    {
-    
-    case Character::MOMOI:
-    case Character::MOMOI_CHAQUENA:
-        return &momoiWeaponRenderData;
-
-    case Character::MIDORI: return &midoriWeaponRenderData;
-
-    case Character::YUZU:
-    case Character::YUZU_BATTLE:
-        return &yuzuWeaponRenderData;
-
-    case Character::ARIS: return &arisWeaponRenderData;
-
-    default: return nullptr;
-    }
-}
-
-inline SpriteRenderData* GetPlayerWeaponActiveRenderData(Character type, int variant = 0)
-{
-    std::vector<SpriteRenderData>* activeRenderData = GetPlayerWeaponActiveRenderDataList(type);
 
     if(activeRenderData && variant >= 0 && variant < (int)activeRenderData->size())
     {

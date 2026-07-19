@@ -77,13 +77,7 @@ struct Enemy
 
     int characterVariantIndex = 0;
 
-    int weaponCurrentFrame = 0;
-
-    int weaponVariantIndex = 0;
-
     int characterPaletteIndex = 0;
-
-    int weaponPaletteIndex = 0;
 
     //
     int moveSpeedSign = 1;

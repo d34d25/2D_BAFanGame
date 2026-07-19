@@ -149,7 +149,7 @@ SpriteRenderData LoadRenderData(const char* path, Vector2 frameSize, Vector2 off
 
     renderData.sourceTexture = &textureCache[key];
 
-    std::vector<Rectangle> allFrames = CropImage(*renderData.sourceTexture, renderData.frameSize, 1);
+    std::vector<Rectangle> allFrames = CropImage(*renderData.sourceTexture, renderData.frameSize, 0);
 
     if(atlasEndFrame <= 0 || atlasEndFrame > (int)allFrames.size()) atlasEndFrame = (int)allFrames.size();
 
@@ -199,8 +199,6 @@ void LoadAssets()
         "assets/tiles/solid/brave-aris-tiles.png", tileSize
     ));
 
-    ladderRenderData.push_back(LoadRenderData("assets/tiles/ladder.png", tileSize));
-
     //decoration
 
     decoRenderData.push_back(LoadRenderData(
@@ -227,29 +225,6 @@ void LoadAssets()
         1
     ));
 
-    float treeOffset = (-TILE_SIZE * 0.5f) - 1;
-
-    decoRenderData.push_back(LoadRenderData(
-        "assets/tiles/deco/tree-background-1a.png", {32,80}, {0, treeOffset}
-    ));
-
-    decoRenderData.push_back(LoadRenderData(
-        "assets/tiles/deco/tree-background-1b.png", {32,80}, {0, treeOffset}
-    ));
-
-    decoRenderData.push_back(LoadRenderData(
-        "assets/tiles/deco/tree-background-2a.png", {32,80}, {0, treeOffset}
-    ));
-
-    decoRenderData.push_back(LoadRenderData(
-        "assets/tiles/deco/tree-background-2b.png", {32,80}, {0, treeOffset}
-    ));
-
-    decoRenderData.push_back(LoadRenderData(
-        "assets/tiles/deco/sky-background-gradient-a.png", {80,32}, {TILE_SIZE * 0.5f, TILE_SIZE * 0.5f},
-        1
-    ));
-
     decoRenderData.push_back(LoadRenderData(
         "assets/tiles/deco/2x3Windows-2.png",
         {TILE_SIZE * 2, TILE_SIZE * 3},{TILE_SIZE * 0.5f, TILE_SIZE},
@@ -261,9 +236,10 @@ void LoadAssets()
         tileSize,{0,0}
     ));
 
-
     //rest of tiles
 
+    ladderRenderData.push_back(LoadRenderData("assets/tiles/ladder.png", tileSize));
+    
     oneWayRenderData.push_back(LoadRenderData(
         "assets/tiles/one-way.png", tileSize, {0,0},
         2
@@ -379,90 +355,50 @@ void LoadAssets()
     ));
     
     sweeperARenderData.push_back(LoadRenderData(
-        "assets/enemies/sweeper-1.png", {9,10},
-        {0,0}, 1, 0,0, 10.0f
+        "assets/enemies/sweeper-1.png", {11,12},
+        {-1,0}, 1, 0,0, 10.0f
     ));
 
     yuukaRenderData.push_back(LoadRenderData(
-        "assets/enemies/yuuka-gbc-sprtiesheet.png",
-        {22,22},
-        {-1,-2},
-        1, 0, 0,
-        10.0f
-    ));
-
-    //enemies' weapons
-
-    yuukaWeaponRenderData.push_back(LoadRenderData(
-        "assets/enemies/yuuka-weapon-holo.png",
-        {10,4},
-        {13,2}
+        "assets/enemies/yuuka.png",
+        {17.0f, 17.0f},
+        {-1.0f, -1.0f},
+        1,0,0,
+        7.0f
     ));
 
     //player
 
     momoiRenderData.push_back(LoadRenderData(
-        "assets/characters/minimalist-momoi-midori.png",
-        {13.0f, 19.0f},
-        {-1.0f, -1.0f},
+        "assets/characters/momoi-midori.png",
+        {17.0f, 19.0f},
+        {-1.0f, -2.0f},
         1,0,0,
         7.0f
     ));
 
     midoriRenderData.push_back(LoadRenderData(
-        "assets/characters/minimalist-momoi-midori.png",
-        {13.0f, 19.0f},
-        {-1.0f, -1.0f},
+        "assets/characters/momoi-midori.png",
+        {17.0f, 19.0f},
+        {-1.0f, -2.0f},
         1,0,0,
         7.0f
     ));
 
     yuzuRenderData.push_back(LoadRenderData(
-        "assets/characters/minimalist-yuzu.png",
-        {15.0f, 16.0f},
-        {0.0f, 0.0f},
+        "assets/characters/yuzu.png",
+        {17.0f, 17.0f},
+        {-1.0f, -1.0f},
         1,0,0,
         7.0f
     ));
 
     arisRenderData.push_back(LoadRenderData(
-        "assets/characters/minimalist-aris.png",
-        {16.0f, 17.0f},
-        {-1.0f, 0.0f},
+        "assets/characters/aris.png",
+        {17.0f, 17.0f},
+        {-1.0f, -1.0f},
         1,0,0,
         7.0f
-    ));
-
-    //player's weapons
-
-    momoiWeaponRenderData.push_back(LoadRenderData(
-        "assets/characters/momoi-weapon-holo.png",
-        {10.0f, 5.0f},
-        {13.0f, 2.0f}
-    ));
-
-    momoiWeaponRenderData.push_back(LoadRenderData(
-        "assets/characters/momoi-chaquena-weapon-holo.png",
-        {5.0f, 7.0f},
-        {10.0f, 2.0f}
-    ));
-
-    midoriWeaponRenderData.push_back(LoadRenderData(
-        "assets/characters/midori-weapon-holo.png",
-        {11.0f, 5.0f},
-        {13.0f, 2.0f}
-    ));
-
-    yuzuWeaponRenderData.push_back(LoadRenderData(
-        "assets/characters/yuzu-weapon-holo.png",
-        {10.0f, 5.0f},
-        {13, 2}
-    ));
-
-    arisWeaponRenderData.push_back(LoadRenderData(
-        "assets/characters/aris-weapon-holo.png",
-        {15.0f, 4.0f},
-        {15.0f, 2.0f}
     ));
 
     //UI

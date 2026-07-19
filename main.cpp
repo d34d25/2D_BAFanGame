@@ -23,10 +23,22 @@ int main()
 
     SetTargetFPS(60);
 
-    LoadAssets();
-
     float accumulator = 0.0f;
+    
     float fixedDt = 1.0f / 60.0f;
+
+    int iterations = 10;
+
+    if(iterations < 1)
+    {
+        std::cout<<"ITERATIONS CAN'T BE LESS THAN 1"<<std::endl;
+
+        CloseWindow();
+
+        return 0;
+    }
+
+    LoadAssets();
 
     RenderTexture2D gameplayCanvas = LoadRenderTexture(CANVAS_WIDTH, GAMEPLAY_CANVAS_HEIGHT);
 
@@ -40,8 +52,6 @@ int main()
 
     std::unique_ptr editor = std::make_unique<LevelEditor>(NATIVE_WIDTH, NATIVE_HEIGHT, "levels/testLevel", "levels/testRooms");
 
-    int iterations = 10;
-
     auto levelInitTimeStart = std::chrono::high_resolution_clock::now();
 
     testLevel->InitLevel(
@@ -53,13 +63,7 @@ int main()
 
     auto levelInitTimeEnd = std::chrono::high_resolution_clock::now();
 
-    double levelInitTime = std::chrono::duration<double, std::milli>(levelInitTimeEnd - levelInitTimeStart).count();
-
-    if(iterations < 1)
-    {
-        std::cout<<"ITERATIONS CAN'T BE LESS THAN 1"<<std::endl;
-        return 0;
-    }
+    double levelInitTime = std::chrono::duration<double, std::milli>(levelInitTimeEnd - levelInitTimeStart).count();    
 
     testLevel->gameplayCanvas = gameplayCanvas;
     testLevel->uiCanvas = uiCanvas;

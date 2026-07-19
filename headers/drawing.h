@@ -105,6 +105,7 @@ inline void DrawSprite(
     float x, float y,
     int frame,
     bool flipX = false, bool flipY = false,
+    bool flipOffset = true,
     Color tint = WHITE
 )
 {
@@ -119,9 +120,18 @@ inline void DrawSprite(
     float offsetX = flipX ? -renderData->offset.x : renderData->offset.x;
     float offsetY = flipY ? -renderData->offset.y : renderData->offset.y;
 
+    float xpos = floorf(x + renderData->offset.x);
+    float ypos = floorf(y + renderData->offset.y);
+
+    if(flipOffset)
+    {
+        xpos = floorf(x + offsetX);
+        ypos = floorf(y + offsetY);
+    };
+
     Rectangle destRect = {
-        floorf(x + offsetX),
-        floorf(y + offsetY),
+        xpos,
+        ypos,
         width,
         height
     };

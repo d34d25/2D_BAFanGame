@@ -13,7 +13,8 @@ const float MASS = 1;
 /*
 max relative velocity 1750
 
-with a ONE_WAY_TOLERANCE of 3 (the thinnest collider's width / height)
+with a ONE_WAY_TOLERANCE of 3 (the thinnest collider's width / height) 
+and 10 iterations with a fixed 60fps delta time 
 
 this means that the combined velocity of
 both objects involved in the collision has to

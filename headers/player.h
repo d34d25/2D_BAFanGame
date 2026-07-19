@@ -56,13 +56,7 @@ struct Player
 
     int characterVariantIndex = 0;
 
-    int weaponCurrentFrame = 0;
-
-    int weaponVariantIndex = 0;
-
     int characterCurrentPalette = 0;
-
-    int weaponCurrentPalette = 0;
 
     int currentPortrait = 0;
 
@@ -115,6 +109,10 @@ struct Player
     bool eegg = false;
 
     bool hurt = false;
+
+    bool shooting = false;
+
+    bool ogFlipOffset = false;
 
     Player() = default;
 
