@@ -31,6 +31,35 @@ void Enemy::UpdateRender(float dt)
     }
     break;
 
+    case EnemyType::HELMET_GANG:
+    {
+        bool& blocking = genericCondition;
+
+        if(blocking)
+        {
+            startFrame = 1;
+            endFrame = 1;
+
+            if(!isGrounded)
+            {
+                startFrame = 3;
+                endFrame = 3;
+            }
+        }
+        else
+        {
+            startFrame = 2;
+            endFrame = 2;
+
+            if(!isGrounded && shooting)
+            {
+                startFrame = 4;
+                endFrame = 4;
+            }
+        }
+    }
+    break;
+
     case EnemyType::YUUKA:
     {
         bool& isStomping = genericCondition;
@@ -130,6 +159,24 @@ void Enemy::UpdateRender(float dt)
     if(characterCurrentFrame < 0) characterCurrentFrame = 0;
 }
 
+/*
+enemies to add:
+
+stationary turret
+
+bomber drone (hover over you and drops a bomb) (same hover behaviour as the AMAS drone)
+
+a simple jumper enemy (yuuka's stomp pattern but simpler)
+
+tanky enemy (still need to think of a pattern)
+
+a turret that blokcs (normal turret + helmet gang behavior, basically Met)
+
+and 1 boss more (at least)
+
+number of stages, around 4 or 5 (at least)
+*/
+
 void Enemy::AmasDroneBehavior(float dt, Player &player)
 {
     float distanceToPlayerX = gameObj.transform.position.x - player.gameObj.transform.position.x;
@@ -216,8 +263,6 @@ void Enemy::AmasDroneBehavior(float dt, Player &player)
 
 void Enemy::SweeperABehavior(float dt, Player &player)
 {
-    lookAtPlayer = true;
-
     float distanceToPlayerX = gameObj.transform.position.x - player.gameObj.transform.position.x;
 
     float minDist = 1;
@@ -235,7 +280,63 @@ void Enemy::SweeperABehavior(float dt, Player &player)
     }
 }
 
-//re visit later
+void Enemy::HelmetGangBehavior(float dt, Player &player)
+{
+    gravity = ogGravity * 0.75f;
+
+    bool& blocking = genericCondition;
+
+    timer += dt;
+
+    if(timer >= maxTime)
+    {
+        timer = 0.0f;
+
+        int roll = GetRandomValue(1,100);
+
+        if(roll <= 50)
+        {
+            blocking = true;
+            shooting = false;
+        }
+        else
+        {
+            blocking = false;
+            shooting = true;
+        }
+    }
+
+    if(blocking) shooting = false;
+    if(shooting) blocking = false;
+
+    bool playerInRange = false;
+
+    float dist = TILE_SIZE * 10;
+
+    if(Vector2DistanceSqr(gameObj.transform.position, player.gameObj.transform.position) <= dist * dist)
+    {
+        int threshold = TILE_SIZE;
+
+        bool isPlayerAbove = (gravity >= 0 && player.gameObj.transform.position.y < 
+        gameObj.transform.position.y - threshold);
+
+        if(isPlayerAbove && canJump && isGrounded)
+        {
+            canJump = false;
+
+            float jumpVel = -400;
+
+            if(gravity < 0) jumpVel = -jumpVel;
+
+            gameObj.body.velocity.y = jumpVel;
+
+            isGrounded = false;
+        }
+    }
+
+    if(isGrounded) canJump = true;
+}
+
 void Enemy::YuukaBehavior(float dt, Player& player)
 {
     float moveSpeed = 50 * moveSpeedSign;
@@ -257,13 +358,13 @@ void Enemy::YuukaBehavior(float dt, Player& player)
 
         maxTime = 0.5f;
 
-        if(isGrounded && timer >= maxTime) isJumping = true;
+        if(isGrounded && timer >= maxTime) canJump = true;
 
-        if((!isGrounded && hitCeiling)) isJumping = false;
+        if((!isGrounded && hitCeiling)) canJump = false;
 
         if(isGrounded)
         {
-            if(justLanded && stunState == StunState::NOT_STUNNED && !isJumping)
+            if(justLanded && stunState == StunState::NOT_STUNNED && !canJump)
             {
                 if(player.isGrounded)
                 {
@@ -291,7 +392,7 @@ void Enemy::YuukaBehavior(float dt, Player& player)
             stunState = StunState::NOT_STUNNED;
         }
        
-        if(isJumping)
+        if(canJump)
         {
             isGrounded = false;
 
@@ -299,15 +400,16 @@ void Enemy::YuukaBehavior(float dt, Player& player)
 
             gameObj.body.velocity.y = jump;
 
-            float distanceToPlayerX = gameObj.transform.position.x - player.gameObj.transform.position.x;
+            //distance to target is always target - source
+            float distanceToPlayerX = player.gameObj.transform.position.x - gameObj.transform.position.x;
 
-            float airTime = (2 * jump) / gravity;
+            float airTime = fabsf(2.0f * jump) / gravity;
 
             float requiredVelocity = distanceToPlayerX / airTime;
 
-            gameObj.body.velocity.x = requiredVelocity * 0.48f;
+            gameObj.body.velocity.x = requiredVelocity;
 
-            isJumping = false;
+            canJump = false;
         }
 
         isStomping = isGrounded;
@@ -337,13 +439,13 @@ void Enemy::YuukaBehavior(float dt, Player& player)
 
         maxTime = 0.5f;
 
-        if(isGrounded && timer >= maxTime) isJumping = true;
+        if(isGrounded && timer >= maxTime) canJump = true;
 
-        if((!isGrounded && hitCeiling)) isJumping = false;
+        if(hitCeiling) canJump = false;
 
         if(isGrounded)
         {
-            if(justLanded && stunState == StunState::NOT_STUNNED && !isJumping)
+            if(justLanded && stunState == StunState::NOT_STUNNED && !canJump)
             {
                 if(player.isGrounded)
                 {
@@ -371,9 +473,9 @@ void Enemy::YuukaBehavior(float dt, Player& player)
             stunState = StunState::NOT_STUNNED;
         }
        
-        if(isJumping)
+        if(canJump)
         {
-            isGrounded = false;
+            canJump = false;
 
             float jump = -140;
 
@@ -385,14 +487,14 @@ void Enemy::YuukaBehavior(float dt, Player& player)
 
             gameObj.body.velocity.x = velocityX;
 
-            isJumping = false;
+            isGrounded = false;
         }
 
         isStomping = isGrounded;
 
         int shoots = GetRandomValue(1, 100);
 
-        shooting = ((shoots <= 80) && isGrounded && !isJumping);
+        shooting = ((shoots <= 80) && isGrounded && !canJump);
 
         if(stateTimer >= 3.0f)
         {
@@ -508,6 +610,8 @@ void Enemy::UpdateAI(float dt, Player& player)
 
     case EnemyType::YUUKA: YuukaBehavior(dt, player); break;
 
+    case EnemyType::HELMET_GANG: HelmetGangBehavior(dt, player); break;
+
     default: break;
     }
 }
@@ -584,6 +688,19 @@ void Enemy::InitEnemy(
     {
         mainHitbox.aabb.width = 7;
         mainHitbox.aabb.height = 11;
+
+        lookAtPlayer = true;
+    }
+    break;
+
+    case EnemyType::HELMET_GANG:
+    {
+        lookAtPlayer = true;
+
+        maxTime = 0.4f;
+
+        bulletData.speed = 50;
+        bulletData.fireRate = 1.5f;
     }
     break;
 

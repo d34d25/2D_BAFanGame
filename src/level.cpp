@@ -133,6 +133,8 @@ void Level::InitLevel(const char* levelPath, const char* roomPath ,float dt, int
 
                     case TileType::ENEMY_SWEEPER_A: enemy.type = EnemyType::SWEEPER_A; break;
 
+                    case TileType::ENEMY_HELMET_GANG: enemy.type = EnemyType::HELMET_GANG; break;
+
                     case TileType::ENEMY_YUUKA: enemy.type = EnemyType::YUUKA; break;
                     
                     default:
@@ -831,12 +833,11 @@ void Level::MediumFrequencyDiscreteUpdate_First()
 
     player.UpdateRender(dt);
 
-    player.Update(dt, iterations);
+    player.Update(dt);
 
     if(player.canMove) player.Shoot(dt);
 
     player.ResetFalgs();
-
 
     //tile render update
 
@@ -892,7 +893,7 @@ void Level::MediumFrequencyDiscreteUpdate_Second()
     if(!player.wasTouchingGravityChanger && player.isTouchingGravityChanger)
     {
         player.isGrounded = false;
-        player.isJumping = false;
+        player.canJump = false;
 
         gravity *= -1;
         isGravityUp = gravity < 0;
@@ -1106,6 +1107,10 @@ void Level::HighFrequencyDiscreteUpdate()
                             {
                                 player.hitCeiling = true;
                             }
+                        }
+                        else if(tile.canEntityCollidePhysically && !IsOneWayRightLeft(tile))
+                        {
+                            player.hitCeiling = true;
                         }
                     }
                 }

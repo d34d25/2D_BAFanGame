@@ -14,8 +14,10 @@ int main()
 {
     bool editorMode = false;
 
-    int screenWidth = 900;
-    int screenHeight = 900;
+    int screenScale = 6;
+
+    int screenWidth = NATIVE_WIDTH * screenScale;
+    int screenHeight = NATIVE_HEIGHT * screenScale;
 
     if(editorMode) screenWidth = 1600;
 

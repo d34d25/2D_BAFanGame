@@ -72,10 +72,13 @@ struct Player
     //current frame flags
 
     bool isGrounded = false;
+
     bool isTouchingGravityChanger = false;
+
     bool isTouchingSpike = false;
 
     bool touchingWind = false;
+
     bool touchingWater = false;
 
     bool hitCeiling = false;
@@ -83,7 +86,7 @@ struct Player
     bool canMove = true;
 
     //jump flags
-    bool isJumping = false;
+    bool canJump = false;
 
     //input
 
@@ -97,6 +100,9 @@ struct Player
     bool holdingDown = false;
 
     bool holdingJump = false;
+
+    bool jumpRleased = false;
+
     bool jumpingOffLadder = false;
 
     bool holdingShoot = false;
@@ -107,8 +113,6 @@ struct Player
     bool eegg = false;
 
     bool hurt = false;
-
-    bool shooting = false;
 
     bool ogFlipOffset = false;
 
@@ -122,7 +126,7 @@ struct Player
 
     void UpdateRender(float dt);
 
-    void Update(float dt, int iterations);
+    void Update(float dt);
 
     void Shoot(float dt);
 
@@ -176,7 +180,7 @@ struct Player
 
         gameObj.body.altVelocity = {0,0};
 
-        isJumping = false;
+        canJump = false;
         
         isGrounded = false;
 

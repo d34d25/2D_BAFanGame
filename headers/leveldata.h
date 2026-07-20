@@ -31,31 +31,31 @@ enum struct TileType
     
     TILE_START,
 
-    SOLID, //texture done
+    SOLID,
 
-    ONE_WAY, //texture done
+    ONE_WAY,
 
-    TREADMILL_RIGHT, //texture done
-    TREADMILL_LEFT, //texture done
+    TREADMILL_RIGHT,
+    TREADMILL_LEFT,
 
-    TRAMPOLINE, //texture done
+    TRAMPOLINE, 
     
-    GRAVITY_CHANGER, //texture done
+    GRAVITY_CHANGER,
 
-    WIND, //texture done
+    WIND,
 
-    WATER, //texture done
+    WATER,
 
-    LADDER, //texture done
+    LADDER,
 
     TILE_END,
 
     SPIKE_START,
 
-    SPIKE, //texture done
-    SPIKE_DOUBLE, //texture done
-    SPIKE_SMALL, //texture done
-    SPIKE_BALL, //texture done
+    SPIKE,
+    SPIKE_DOUBLE,
+    SPIKE_SMALL,
+    SPIKE_BALL,
 
     SPIKE_END,
 
@@ -69,33 +69,35 @@ enum struct TileType
 
     MISC_END,
 
-    DECO, //texture done
+    DECO,
 
     //platforms
     PLATFORM_START,
 
-    HORIZONALT_MOVING_PLATFORM, //texture done
-    VERTICAL_MOVING_PLATFORM, //texture done
+    HORIZONALT_MOVING_PLATFORM,
+    VERTICAL_MOVING_PLATFORM,
     FALLING_PLATFORM,
     DISAPPEARING_PLATFORM,
 
-    VERTICAL_MOVING_SPIKE, //texture done
-    HORIZONTAL_MOVING_SPIKE, //texture done
+    VERTICAL_MOVING_SPIKE,
+    HORIZONTAL_MOVING_SPIKE,
 
-    ROTATING_SPIKE_SINGLE, //texture done
-    ROTATING_SPIKE_DOUBLE, //texture done
+    ROTATING_SPIKE_SINGLE,
+    ROTATING_SPIKE_DOUBLE,
 
     PLATFORM_END,
 
     ENEMY_START,
 
-    ENEMY_DUMMY, //texture done
+    ENEMY_DUMMY,
 
     ENEMY_AMAS_DRONE,
 
     ENEMY_SWEEPER_A,
 
-    ENEMY_YUUKA, //texture done
+    ENEMY_HELMET_GANG,
+
+    ENEMY_YUUKA,
 
     ENEMY_END,
 
@@ -132,6 +134,7 @@ enum struct EnemyType
     DUMMY,
     AMAS_DRONE,
     SWEEPER_A,
+    HELMET_GANG,
     YUUKA
 };
 
@@ -464,6 +467,8 @@ extern std::vector<SpriteRenderData> amasDroneRenderData;
 
 extern std::vector<SpriteRenderData> sweeperARenderData;
 
+extern std::vector<SpriteRenderData> helmetGangRenderData;
+
 extern std::vector<SpriteRenderData> yuukaRenderData;
 
 //player
@@ -557,6 +562,8 @@ inline std::vector<SpriteRenderData>* GetTileActiveRenderDataList(TileType type)
 
     case TileType::ENEMY_SWEEPER_A: return &sweeperARenderData;
 
+    case TileType::ENEMY_HELMET_GANG: return &helmetGangRenderData;
+
     case TileType::ENEMY_YUUKA: return &yuukaRenderData;
 
     default: return nullptr;
@@ -616,6 +623,8 @@ inline std::vector<SpriteRenderData>* GetEnemyActiveRenderDataList(EnemyType typ
     case EnemyType::AMAS_DRONE: return &amasDroneRenderData;
 
     case EnemyType::SWEEPER_A: return &sweeperARenderData;
+
+    case EnemyType::HELMET_GANG: return &helmetGangRenderData;
 
     case EnemyType::YUUKA: return &yuukaRenderData;
 

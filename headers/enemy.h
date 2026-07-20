@@ -53,6 +53,10 @@ struct Enemy
 
     float ogDamping = 0.0f;
 
+    float jumpTimer = 0.0f;
+
+    float maxJumpTime = 0.0f;
+
     //generic timer for being used inside the enemies patterns
     float timer = 0.0f;
 
@@ -102,7 +106,7 @@ struct Enemy
     bool justLanded = false;
 
     //jump
-    bool isJumping = false;
+    bool canJump = false;
 
     //bullets
     bool shooting = false;
@@ -133,6 +137,8 @@ struct Enemy
     void AmasDroneBehavior(float dt, Player& player);
 
     void SweeperABehavior(float dt, Player& player);
+
+    void HelmetGangBehavior(float dt, Player& player);
 
     void YuukaBehavior(float dt, Player& player);
 

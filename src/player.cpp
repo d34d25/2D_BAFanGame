@@ -48,7 +48,7 @@ void Player::InitPlayer(Vector2 position, float gravity, bool flipY)
 
     characterVariantIndex = 0;
 
-    character = Character::MIDORI;
+    character = Character::YUZU;
 
     currentPortrait = -1;
 
@@ -188,6 +188,9 @@ void Player::UpdateInput()
         resetingZoom = true;
     }
 
+    //release
+    jumpRleased = IsKeyReleased(KEY_Z);
+
     hurt = IsKeyDown(KEY_W);
 
     eegg = IsKeyDown(KEY_S);
@@ -324,9 +327,9 @@ void Player::UpdateRender(float dt)
     if(characterCurrentFrame < 0) characterCurrentFrame = 0;
 }
 
-void Player::Update(float dt, int iterations)
+void Player::Update(float dt)
 {
-    float jumpVel = -56;
+    float jumpVel = -3500;
 
     float jump = jumpVel;
 
@@ -419,8 +422,6 @@ void Player::Update(float dt, int iterations)
 
         //jump
 
-        if(!isGrounded && hitCeiling) isJumping = false;
-
         if(isGrounded)
         {
             jumpTime = 0.0f;
@@ -434,20 +435,22 @@ void Player::Update(float dt, int iterations)
 
         if(holdingJump)
         {
-            if(isGrounded) isJumping = true;
+            if(isGrounded) canJump = true;
 
-            if(isJumping && jumpTime < maxJumpTime)
+            if(hitCeiling) canJump = false;
+
+            if(canJump && jumpTime < maxJumpTime)
             {
-                gameObj.body.velocity.y += jump;
+                gameObj.body.velocity.y += jump * dt;
             }
             else
             {
-                isJumping = false;
+                canJump = false;
             }
         }
         else
         {
-            isJumping = false;
+            canJump = false;
         }
     }
     else 
