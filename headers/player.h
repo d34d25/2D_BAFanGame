@@ -9,17 +9,13 @@
 
 #include "leveldata.h"
 
-const Color MOMOI_PINK = Color{255,30,150,255};
-const Color MOMOI_PINK_BG = Color{255,180,230,255};
+const Color MOMOI_PINK = Color{255,97,178,255};
 
-const Color MIDORI_GREEN = Color{120,230,10,255};
-const Color MIDORI_GREEN_BG = YELLOW;
+const Color MIDORI_GREEN = Color{154,235,0,255};
 
-const Color YUZU_COLOR = GOLD;
-const Color YUZU_COLOR_BG = BLACK;
+const Color YUZU_COLOR = BULLET_COLOR;
 
-const Color ARIS_PURPLE = Color{120,100,255,255};
-const Color ARIS_PURPLE_BG = Color{200,162,255,255};
+const Color ARIS_PURPLE = Color{97,211,227,255};
 
 struct Player
 {

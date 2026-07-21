@@ -93,7 +93,11 @@ enum struct TileType
 
     ENEMY_AMAS_DRONE,
 
+    ENEMY_BOMBER_DRONE,
+
     ENEMY_SWEEPER_A,
+
+    ENEMY_SWEEPER_B,
 
     ENEMY_HELMET_GANG,
 
@@ -133,7 +137,9 @@ enum struct EnemyType
 {
     DUMMY,
     AMAS_DRONE,
+    BOMBER_DRONE,
     SWEEPER_A,
+    SWEEPER_B,
     HELMET_GANG,
     YUUKA
 };
@@ -143,9 +149,9 @@ enum struct Character
     MOMOI,
     MIDORI,
     YUZU,
-    YUZU_BATTLE,
-    ARIS,
-    MOMOI_CHAQUENA
+    ARIS
+    //YUZU_BATTLE,
+    //MOMOI_CHAQUENA
 };
 
 inline bool IsTypeInvalid(TileType type)
@@ -239,7 +245,11 @@ const std::vector<TileTypeList> TILE_TYPE_LIST = {
 
     {TileType::ENEMY_AMAS_DRONE, ENEMY_DUMMY, "ENEMY_AMAS_DRONE"},
 
+    {TileType::ENEMY_BOMBER_DRONE, ENEMY_DUMMY, "ENEMY_BOMBER_DRONE"},
+
     {TileType::ENEMY_SWEEPER_A, ENEMY_DUMMY, "ENEMY_SWEEPER_A"},
+
+    {TileType::ENEMY_SWEEPER_B, ENEMY_DUMMY, "ENEMY_SWEEPER_B"},
 
     {TileType::ENEMY_YUUKA, ENEMY_YUUKA, "ENEMY_YUUKA"},
 };
@@ -465,7 +475,11 @@ extern std::vector<SpriteRenderData> dummyRenderData;
 
 extern std::vector<SpriteRenderData> amasDroneRenderData;
 
+extern std::vector<SpriteRenderData> bomberDroneRenderData;
+
 extern std::vector<SpriteRenderData> sweeperARenderData;
+
+extern std::vector<SpriteRenderData> sweeperBRenderData;
 
 extern std::vector<SpriteRenderData> helmetGangRenderData;
 
@@ -560,7 +574,11 @@ inline std::vector<SpriteRenderData>* GetTileActiveRenderDataList(TileType type)
 
     case TileType::ENEMY_AMAS_DRONE: return &amasDroneRenderData;
 
+    case TileType::ENEMY_BOMBER_DRONE: return &bomberDroneRenderData;
+
     case TileType::ENEMY_SWEEPER_A: return &sweeperARenderData;
+
+    case TileType::ENEMY_SWEEPER_B: return &sweeperBRenderData;
 
     case TileType::ENEMY_HELMET_GANG: return &helmetGangRenderData;
 
@@ -622,7 +640,11 @@ inline std::vector<SpriteRenderData>* GetEnemyActiveRenderDataList(EnemyType typ
     
     case EnemyType::AMAS_DRONE: return &amasDroneRenderData;
 
+    case EnemyType::BOMBER_DRONE: return &bomberDroneRenderData;
+
     case EnemyType::SWEEPER_A: return &sweeperARenderData;
+
+    case EnemyType::SWEEPER_B: return &sweeperBRenderData;
 
     case EnemyType::HELMET_GANG: return &helmetGangRenderData;
 
@@ -650,13 +672,13 @@ inline std::vector<SpriteRenderData>* GetPlayerActiveRenderDataList(Character ty
     {
     
     case Character::MOMOI: 
-    case Character::MOMOI_CHAQUENA:
+    //case Character::MOMOI_CHAQUENA:
         return &momoiRenderData;
 
     case Character::MIDORI: return &midoriRenderData;
 
     case Character::YUZU:
-    case Character::YUZU_BATTLE:
+    //case Character::YUZU_BATTLE:
         return &yuzuRenderData;
 
     case Character::ARIS: return &arisRenderData;

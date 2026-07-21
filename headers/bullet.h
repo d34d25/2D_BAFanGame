@@ -9,8 +9,7 @@
 
 struct BulletProperties
 {
-    Color mainColor = RAYWHITE;
-    Color backColor = BLACK;
+    Color mainColor = BULLET_COLOR;
 
     float fireTimer = 0;
     float fireRate = 1.0f;
@@ -29,13 +28,15 @@ struct BulletProperties
     bool explodes = false;
 
     bool piercing = false;
+
+    bool fanShaped = false;
+
+    bool inertia = true;
 };
 
 struct Explosion
 {
     Vector2 position = {0.0f,0.0f};
-
-    SpriteRenderData* renderData = nullptr;
 
     float radius = 10.0f;
 
@@ -99,8 +100,7 @@ public:
     BulletPool() = default;
 
     BulletPool(
-        int quantity, const BulletProperties& bulletData,
-        SpriteRenderData* explosionRenderData = nullptr
+        int quantity, const BulletProperties& bulletData
     );
 
     ~BulletPool() = default;
@@ -165,11 +165,37 @@ inline void ShootBullet(
 
         for(int i = 0; i < bulletData.pelletCount; i++)
         {
-            float radians = GenerateBulletSpread(angle, bulletData.spread) * (PI / 180.0f);
+            float radians = angle;
+
+            if(bulletData.fanShaped)
+            {
+                switch (i)
+                {
+                case 1: radians += bulletData.spread; break;
+
+                case 2: radians -= bulletData.spread; break;
+                
+                default: break;
+                }
+            }
+            else
+            {
+                radians = GenerateBulletSpread(angle, bulletData.spread);
+            }
+
+            radians *= (PI / 180.0f);
 
             Vector2 initialVel = {0,0};
 
-            initialVel.x = bulletData.speed * cosf(radians) + gameObj.body.velocity.x;
+            if(bulletData.inertia)
+            {
+                initialVel.x = bulletData.speed * cosf(radians) + gameObj.body.velocity.x;
+            }
+            else
+            {
+                initialVel.x = bulletData.speed * cosf(radians);
+            }
+
             initialVel.y = bulletData.speed * sinf(radians);
 
             bulletpool->FireBullet(bulletSpawnPos, initialVel, bulletGravity);

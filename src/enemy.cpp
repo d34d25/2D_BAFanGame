@@ -16,12 +16,44 @@ void Enemy::UpdateRender(float dt)
     switch (type)
     {
 
+    case EnemyType::BOMBER_DRONE:
+    {
+        if(shooting)
+        {
+            startFrame = 1;
+            endFrame = 1;
+        }
+        else
+        {
+            startFrame = 0;
+            endFrame = 0;
+        }
+    }
+    break;
+
     case EnemyType::SWEEPER_A:
     {
         if(std::abs(gameObj.body.velocity.x) > 1.0f)
         {
             startFrame = 1;
             endFrame = 3;
+        }
+        else
+        {
+            startFrame = 0;
+            endFrame = 0;
+        }
+    }
+    break;
+
+    case EnemyType::SWEEPER_B:
+    {
+        bool& blocking = genericCondition;
+
+        if(blocking)
+        {
+            startFrame = 1;
+            endFrame = 1;
         }
         else
         {
@@ -164,23 +196,21 @@ enemies to add:
 
 stationary turret
 
-bomber drone (hover over you and drops a bomb) (same hover behaviour as the AMAS drone)
-
 a simple jumper enemy (yuuka's stomp pattern but simpler)
 
-tanky enemy (still need to think of a pattern)
-
-a turret that blokcs (normal turret + helmet gang behavior, basically Met)
+tanky enemy (I still need to think of a pattern)
 
 and 1 boss more (at least)
 
 number of stages, around 4 or 5 (at least)
 */
 
+//vector difference calculation is always target - source
+
 void Enemy::AmasDroneBehavior(float dt, Player &player)
 {
-    float distanceToPlayerX = gameObj.transform.position.x - player.gameObj.transform.position.x;
-    float distanceToPlayerY = gameObj.transform.position.y - player.gameObj.transform.position.y;
+    float distanceToPlayerX = player.gameObj.transform.position.x - gameObj.transform.position.x;
+    float distanceToPlayerY = player.gameObj.transform.position.y - gameObj.transform.position.y;
 
     float hoverSpeed = 40;
     float diveSpeed = 70;
@@ -197,7 +227,7 @@ void Enemy::AmasDroneBehavior(float dt, Player &player)
 
         if(std::abs(distanceToPlayerX) > minDist)
         {
-            if(distanceToPlayerX > 0) gameObj.body.velocity.x = -hoverSpeed;
+            if(distanceToPlayerX <= 0) gameObj.body.velocity.x = -hoverSpeed;
             else gameObj.body.velocity.x = hoverSpeed;
         }
         else
@@ -218,8 +248,8 @@ void Enemy::AmasDroneBehavior(float dt, Player &player)
 
         if(std::abs(distanceToTargetY) > minDist * 5)
         {
-            if(distanceToTargetY > 0) gameObj.body.velocity.y = hoverSpeed;
-            else gameObj.body.velocity.y = -hoverSpeed;
+            if(distanceToTargetY <= 0) gameObj.body.velocity.y = -hoverSpeed;
+            else gameObj.body.velocity.y = hoverSpeed;
         }
         else
         {
@@ -234,9 +264,9 @@ void Enemy::AmasDroneBehavior(float dt, Player &player)
 
             float totalDiveXSpeed = hoverSpeed * 1.5f + (hoverSpeed * distanceRatio);
 
-            gameObj.body.velocity.x = (distanceToPlayerX > 0) ? -totalDiveXSpeed : totalDiveXSpeed;
+            gameObj.body.velocity.x = (distanceToPlayerX <= 0) ? -totalDiveXSpeed : totalDiveXSpeed;
 
-            gameObj.body.velocity.y = (distanceToPlayerY > 0) ? -totalDiveXSpeed : totalDiveXSpeed;
+            gameObj.body.velocity.y = (distanceToPlayerY <= 0) ? -totalDiveXSpeed : totalDiveXSpeed;
         }
     }
     else
@@ -261,9 +291,53 @@ void Enemy::AmasDroneBehavior(float dt, Player &player)
     }
 }
 
+void Enemy::BomberDroneBehavior(float dt, Player &player)
+{
+    float distanceToPlayerX = player.gameObj.transform.position.x - gameObj.transform.position.x;
+
+    float hoverSpeed = 40;
+
+    float minDist = 1;
+
+    float hoverHeight = TILE_SIZE * 4;
+
+    if(std::abs(distanceToPlayerX) > minDist)
+    {
+        if(distanceToPlayerX <= 0) gameObj.body.velocity.x = -hoverSpeed;
+        else gameObj.body.velocity.x = hoverSpeed;
+    }
+    else
+    {
+        gameObj.body.velocity.x = 0;
+    }
+
+    shooting = std::abs(distanceToPlayerX) <= TILE_SIZE;
+    
+    float currentHoverHeight = hoverHeight;
+
+    if((gravity < 0) && (gameObj.transform.position.y > player.gameObj.transform.position.y))
+    {
+        currentHoverHeight = -hoverHeight;
+    }
+
+    float targetY = (player.gameObj.transform.position.y - currentHoverHeight);
+
+    float distanceToTargetY = targetY - gameObj.transform.position.y;
+
+    if(std::abs(distanceToTargetY) > minDist * 5)
+    {
+        if(distanceToTargetY <= 0) gameObj.body.velocity.y = -hoverSpeed;
+        else gameObj.body.velocity.y = hoverSpeed;
+    }
+    else
+    {
+        gameObj.body.velocity.y = 0;
+    }
+}
+
 void Enemy::SweeperABehavior(float dt, Player &player)
 {
-    float distanceToPlayerX = gameObj.transform.position.x - player.gameObj.transform.position.x;
+    float distanceToPlayerX = player.gameObj.transform.position.x - gameObj.transform.position.x;
 
     float minDist = 1;
 
@@ -271,13 +345,41 @@ void Enemy::SweeperABehavior(float dt, Player &player)
 
     if(std::abs(distanceToPlayerX) > minDist)
     {
-        if(distanceToPlayerX > 0) gameObj.body.velocity.x = -moveSpeed;
+        if(distanceToPlayerX <= 0) gameObj.body.velocity.x = -moveSpeed;
         else gameObj.body.velocity.x = moveSpeed;
     }
     else
     {
         gameObj.body.velocity.x = 0;
     }
+}
+
+void Enemy::SweeperBBehavior(float dt, Player &player)
+{
+    bool& blocking = genericCondition;
+
+    timer += dt;
+
+    if(timer >= maxTime)
+    {
+        timer = 0.0f;
+
+        int roll = GetRandomValue(1,100);
+
+        if(roll <= 50)
+        {
+            blocking = true;
+            shooting = false;
+        }
+        else
+        {
+            blocking = false;
+            shooting = true;
+        }
+    }
+
+    if(blocking) shooting = false;
+    if(shooting) blocking = false;
 }
 
 void Enemy::HelmetGangBehavior(float dt, Player &player)
@@ -554,12 +656,7 @@ void Enemy::YuukaBehavior(float dt, Player& player)
 void Enemy::UpdateAI(float dt, Player& player)
 {
     if(!lookAtPlayer) gameObj.body.velocity.x >= 0 ? gameObj.flipData.flipX = false : gameObj.flipData.flipX = true;
-    else
-    {
-        float distanceToPlayerX = gameObj.transform.position.x - player.gameObj.transform.position.x;
-
-        distanceToPlayerX >= 0 ? gameObj.flipData.flipX = true : gameObj.flipData.flipX = false;
-    }
+    else player.gameObj.transform.position.x > gameObj.transform.position.x ? gameObj.flipData.flipX = false : gameObj.flipData.flipX = true;
     
     if(stateTimer <= 0.0f)
     {
@@ -606,7 +703,11 @@ void Enemy::UpdateAI(float dt, Player& player)
 
     case EnemyType::AMAS_DRONE: AmasDroneBehavior(dt, player); break;
 
+    case EnemyType::BOMBER_DRONE: BomberDroneBehavior(dt, player); break;
+
     case EnemyType::SWEEPER_A: SweeperABehavior(dt, player); break;
+
+    case EnemyType::SWEEPER_B: SweeperBBehavior(dt, player); break;
 
     case EnemyType::YUUKA: YuukaBehavior(dt, player); break;
 
@@ -614,17 +715,6 @@ void Enemy::UpdateAI(float dt, Player& player)
 
     default: break;
     }
-}
-
-void Enemy::Shoot(float dt)
-{
-    if(!bulletpool) return;
-
-    ShootBullet(
-        dt, gameObj,
-        bulletData, GetTextureBulletSpawnPos(gameObj, enemyRenderData),
-        bulletpool.get(), shooting
-    );
 }
 
 void Enemy::InitEnemy(
@@ -650,9 +740,6 @@ void Enemy::InitEnemy(
     bulletData = {};
 
     bulletData.explodes = false;
-
-    bulletData.mainColor = GOLD;
-    bulletData.backColor = BLACK;
 
     bulletData.explosionRadius = 15.0f;
 
@@ -684,6 +771,29 @@ void Enemy::InitEnemy(
     }
     break;
 
+    case EnemyType::BOMBER_DRONE:
+    {
+        mainHitbox.aabb.width = 12;
+        mainHitbox.aabb.height = 6;
+
+        gameObj.body.damping = 0;
+
+        bulletData.speed = 50;
+
+        bulletData.angle = 90;
+
+        canFly = true;
+
+        bulletData.inertia = false;
+
+        bulletData.fireRate = 0.6f;
+
+        bulletData.explosionRadius = 12;
+
+        bulletData.explodes = true;
+    }
+    break;
+
     case EnemyType::SWEEPER_A:
     {
         mainHitbox.aabb.width = 7;
@@ -693,13 +803,36 @@ void Enemy::InitEnemy(
     }
     break;
 
+    case EnemyType::SWEEPER_B:
+    {
+        mainHitbox.aabb.width = 7;
+        mainHitbox.aabb.height = 11;
+
+        maxTime = 0.6f;
+
+        lookAtPlayer = true;
+
+        bulletData.radius = 1.0f;
+
+        bulletData.fireRate = 1.2f;
+
+        bulletData.speed = 80;
+
+        bulletData.spread = 10;
+
+        bulletData.pelletCount = 3;
+
+        bulletData.fanShaped = true;
+    }
+    break;
+
     case EnemyType::HELMET_GANG:
     {
         lookAtPlayer = true;
 
         maxTime = 0.4f;
 
-        bulletData.speed = 50;
+        bulletData.speed = 80;
         bulletData.fireRate = 1.5f;
     }
     break;
@@ -762,6 +895,22 @@ void Enemy::InitEnemy(
     else gameObj.body.hasGravity = true;
 
     if(!randomAttack) stateTimer = 1000;
+}
+
+void Enemy::Shoot(float dt)
+{
+    if(!bulletpool) return;
+
+    Vector2 bulletSpawnPos;
+
+    if(type == EnemyType::BOMBER_DRONE) bulletSpawnPos = gameObj.transform.position;
+    else bulletSpawnPos = GetTextureBulletSpawnPos(gameObj, enemyRenderData);
+
+    ShootBullet(
+        dt, gameObj,
+        bulletData, bulletSpawnPos,
+        bulletpool.get(), shooting
+    );
 }
 
 void Enemy::Update(float dt, int iterations)

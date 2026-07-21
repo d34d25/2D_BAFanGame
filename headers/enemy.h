@@ -136,7 +136,11 @@ struct Enemy
 
     void AmasDroneBehavior(float dt, Player& player);
 
+    void BomberDroneBehavior(float dt, Player& player);
+
     void SweeperABehavior(float dt, Player& player);
+
+    void SweeperBBehavior(float dt, Player& player);
 
     void HelmetGangBehavior(float dt, Player& player);
 

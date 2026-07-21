@@ -90,31 +90,10 @@ static constexpr int MAX_PALETTE_ROWS = 8; //number of squares
 
 static constexpr int MAX_PALETTE_COLS = 4; //number of squares
 
-//GBC COLORS
+static constexpr Color BULLET_COLOR = Color{255,222,0,255};
 
-static constexpr Color GBC_WHITE = Color{255,255,255,255};
+static constexpr Color EXPLOSION_COLOR_A = Color{255,222,0,255};
 
-static constexpr Color GBC_LIGHT_GRAY = Color{165,165,165,255};
+static constexpr Color EXPLOSION_COLOR_B = WHITE;
 
-static constexpr Color GBC_DARK_GRAY = Color{82,82,82,255};
-
-static constexpr Color GBC_BLACK = Color{0,0,0,255};
-
-
-static constexpr Color GBC_DARK_VIOLET = Color{91,49,91,255};
-
-static constexpr Color GBC_RED = Color{230,0,0,255};
-
-static constexpr Color GBC_MAGENTA = Color{255,0,254,255};
-
-static constexpr Color GBC_SKY_BLUE = Color{100,165,255,255};
-
-static constexpr Color GBC_PALE_YELLOW = Color{255,255,165,255};
-
-static constexpr Color GBC_DARKEST_BROWN = Color{58,40,2,255};
-
-static constexpr Color GBC_DARK_BROWN = Color{131,49,0,255};
-
-static constexpr Color GBC_BROWN = Color{165,107,49,255};
-
-static constexpr Color GBC_DULL_TURQUOISE = Color{101,164,155,255};
+static constexpr Color DARKEST_BROWN = Color{58,40,2,255};

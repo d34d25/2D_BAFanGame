@@ -46,6 +46,8 @@ void Player::InitPlayer(Vector2 position, float gravity, bool flipY)
 
     bulletData.gravity = 0.0f;
 
+    bulletData.explosionRadius = 12;
+
     characterVariantIndex = 0;
 
     character = Character::YUZU;
@@ -59,10 +61,9 @@ void Player::InitPlayer(Vector2 position, float gravity, bool flipY)
         bulletData.fireRate = 0.2f;
         bulletData.spread = 8.0f;
 
-        bulletData.radius = 1.125f;
+        bulletData.radius = 1;
 
         bulletData.mainColor = MOMOI_PINK;
-        bulletData.backColor = MOMOI_PINK_BG;
 
         characterCurrentPalette = 1;
 
@@ -70,10 +71,9 @@ void Player::InitPlayer(Vector2 position, float gravity, bool flipY)
     case Character::MIDORI:
 
         bulletData.spread = 1.5f;
-        bulletData.radius = 1.5f;
+        bulletData.radius = 2;
 
         bulletData.mainColor = MIDORI_GREEN;
-        bulletData.backColor = MIDORI_GREEN_BG;
 
         characterCurrentPalette = 2;
 
@@ -88,7 +88,6 @@ void Player::InitPlayer(Vector2 position, float gravity, bool flipY)
         bulletData.fireRate = 1.2f;
 
         bulletData.mainColor = YUZU_COLOR;
-        bulletData.backColor = YUZU_COLOR_BG;
 
         bulletData.explodes = true;
 
@@ -97,7 +96,23 @@ void Player::InitPlayer(Vector2 position, float gravity, bool flipY)
         currentPortrait = 0;
 
         break;
-    case Character::YUZU_BATTLE:
+
+    case Character::ARIS:
+
+        bulletData.spread = 0.0f;
+        bulletData.radius = 3;
+
+        bulletData.fireRate = 1.0f;
+
+        bulletData.mainColor = ARIS_PURPLE;
+
+        bulletData.piercing = true;
+
+        characterCurrentPalette = 3;
+
+        break;
+
+    /*case Character::YUZU_BATTLE:
 
         characterVariantIndex = 1;
 
@@ -109,29 +124,14 @@ void Player::InitPlayer(Vector2 position, float gravity, bool flipY)
         bulletData.fireRate = 1.2f;
 
         bulletData.mainColor = YUZU_COLOR;
-        bulletData.backColor = YUZU_COLOR_BG;
 
         bulletData.explodes = true;
 
         characterCurrentPalette = 0;
         
-        break;
-    case Character::ARIS:
-
-        bulletData.spread = 0.0f;
-        bulletData.radius = 2.5f;
-
-        bulletData.fireRate = 1.0f;
-
-        bulletData.mainColor = ARIS_PURPLE;
-        bulletData.backColor = ARIS_PURPLE_BG;
-
-        bulletData.piercing = true;
-
-        characterCurrentPalette = 3;
-
-        break;
-    case Character::MOMOI_CHAQUENA:
+        break;*/
+    
+    /*case Character::MOMOI_CHAQUENA:
 
         characterVariantIndex = 1;
 
@@ -141,13 +141,12 @@ void Player::InitPlayer(Vector2 position, float gravity, bool flipY)
         bulletData.radius = 1.125f;
 
         bulletData.mainColor = MOMOI_PINK;
-        bulletData.backColor = MOMOI_PINK_BG;
 
-        break;
+        break;*/
+        
     default:
         break;
     }
-
 
     characterRenderData = GetPlayerActiveRenderData(character, characterVariantIndex);
 
@@ -410,7 +409,7 @@ void Player::Update(float dt)
 
                     climbing = false;
 
-                    gameObj.body.velocity.y = jump * 4;
+                    gameObj.body.velocity.y = jump * 0.08f;
                 }
             }
         }

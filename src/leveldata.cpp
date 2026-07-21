@@ -69,7 +69,11 @@ std::vector<SpriteRenderData> dummyRenderData = {};
 
 std::vector<SpriteRenderData> amasDroneRenderData = {};
 
+std::vector<SpriteRenderData> bomberDroneRenderData = {};
+
 std::vector<SpriteRenderData> sweeperARenderData = {};
+
+std::vector<SpriteRenderData> sweeperBRenderData = {};
 
 std::vector<SpriteRenderData> helmetGangRenderData = {};
 
@@ -355,9 +359,19 @@ void LoadAssets()
         "assets/enemies/amas-drone.png", {12,6},
         {0,0}
     ));
+
+    bomberDroneRenderData.push_back(LoadRenderData(
+        "assets/enemies/bomber-drone.png", {12,8},
+        {0,1}
+    ));
     
     sweeperARenderData.push_back(LoadRenderData(
         "assets/enemies/sweeper-1.png", {11,12},
+        {-1,0}, 1, 0,0, 10.0f
+    ));
+
+    sweeperBRenderData.push_back(LoadRenderData(
+        "assets/enemies/sweeper-2.png", {11,11},
         {-1,0}, 1, 0,0, 10.0f
     ));
 

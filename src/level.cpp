@@ -131,7 +131,11 @@ void Level::InitLevel(const char* levelPath, const char* roomPath ,float dt, int
 
                     case TileType::ENEMY_AMAS_DRONE: enemy.type = EnemyType::AMAS_DRONE; break;
 
+                    case TileType::ENEMY_BOMBER_DRONE: enemy.type = EnemyType::BOMBER_DRONE; break;
+
                     case TileType::ENEMY_SWEEPER_A: enemy.type = EnemyType::SWEEPER_A; break;
+
+                    case TileType::ENEMY_SWEEPER_B: enemy.type = EnemyType::SWEEPER_B; break;
 
                     case TileType::ENEMY_HELMET_GANG: enemy.type = EnemyType::HELMET_GANG; break;
 
@@ -1618,6 +1622,55 @@ void Level::CCD_Update()
         if(!enemy) continue;
 
         enemy->bulletpool.get()->UpdateBullets(dt);
+
+        for(int i = 0; i < enemy->bulletpool->activeBullets.size(); i++)
+        {
+            Bullet* bullet = enemy->bulletpool->activeBullets[i];
+
+            if(!bullet) continue;
+
+            TileRange bulletRange = CalculateTileRange(
+                bullet->posititon.x, bullet->posititon.y,
+                2.0f, rangeLimits.minX, rangeLimits.minY,
+                rangeLimits.maxX, rangeLimits.maxY 
+            );
+
+            if(currentRoomIndex > -1 && currentRoomIndex < rooms.size())
+            {
+                Rectangle& currentRoom = rooms[currentRoomIndex].aabb;
+
+                if(!CheckCollisionPointRec(bullet->posititon, currentRoom)) bullet->didHit = true;
+            }
+
+            if(enemy->bulletpool->explodes)
+            {
+                for(int l = GAMEPLAY_LAYER_START; l <= GAMEPLAY_LAYER_END; l++)
+                {
+                    for(int i = bulletRange.startX; i <= bulletRange.endX; i++)
+                    {
+                        for(int j = bulletRange.startY; j <= bulletRange.endY; j++)
+                        {
+                            Tile& tile = level[l][i][j];
+
+                            if(tile.hitboxes.empty()) continue;
+
+                            Rectangle& tileMainAABB = tile.hitboxes[0].aabb;
+
+                            if(tile.canEntityCollidePhysically)
+                            {
+                                if(CheckCollisionCircleRec(
+                                    bullet->posititon, bullet->radius,
+                                    tileMainAABB
+                                ))
+                                {
+                                    bullet->didHit = true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -1846,43 +1899,6 @@ void Level::DrawLevel()
 
     DrawSprite(player.gameObj, player.characterRenderData, player.characterCurrentFrame);
 
-    for(int i = 0; i < player.bulletpool->activeBullets.size(); i++)
-    {
-        Bullet* b = player.bulletpool->activeBullets[i];
-
-        if(!b) continue;
-
-        DrawBullet(b->posititon.x, b->posititon.y, b->radius, b->mainColor, b->backColor);
-    }
-
-    if(!player.bulletpool->explosions.empty())
-    {
-        for(int i = 0; i < player.bulletpool->activeExplosions.size(); i++)
-        {
-            Explosion* e = player.bulletpool->activeExplosions[i];
-
-            if(!e) continue;
-
-            DrawExplosion(e->position.x, e->position.y, e->radius, e->renderData, 0);
-        }
-    }
-
-    for(int e = 0; e < enemyCache.size(); e++)
-    {
-        Enemy* enemy = enemyCache[e];
-
-        if(!enemy) continue;
-
-        for(int b = 0; b < enemy->bulletpool->activeBullets.size(); b++)
-        {
-            Bullet* bullet = enemy->bulletpool->activeBullets[b];
-
-            if(!bullet) continue;
-
-            DrawBullet(bullet->posititon.x, bullet->posititon.y, bullet->radius, bullet->mainColor, bullet->backColor);
-        }
-    }
-
     //foreground
     for(int i = playerTileRange.startX; i <= playerTileRange.endX; i++)
     {
@@ -1909,6 +1925,55 @@ void Level::DrawLevel()
     }
 
     EndShaderMode();
+
+    for(int i = 0; i < player.bulletpool->activeBullets.size(); i++)
+    {
+        Bullet* b = player.bulletpool->activeBullets[i];
+
+        if(!b) continue;
+
+        DrawBullet(b->posititon.x, b->posititon.y, b->radius, b->mainColor);
+    }
+
+    if(!player.bulletpool->explosions.empty())
+    {
+        for(int i = 0; i < player.bulletpool->activeExplosions.size(); i++)
+        {
+            Explosion* e = player.bulletpool->activeExplosions[i];
+
+            if(!e) continue;
+
+            DrawExplosion(e->position.x, e->position.y, e->radius);
+        }
+    }
+
+    for(int e = 0; e < enemyCache.size(); e++)
+    {
+        Enemy* enemy = enemyCache[e];
+
+        if(!enemy) continue;
+
+        for(int b = 0; b < enemy->bulletpool->activeBullets.size(); b++)
+        {
+            Bullet* bullet = enemy->bulletpool->activeBullets[b];
+
+            if(!bullet) continue;
+
+            DrawBullet(bullet->posititon.x, bullet->posititon.y, bullet->radius, bullet->mainColor);
+        }
+
+        if(!enemy->bulletpool->explosions.empty())
+        {
+            for(int i = 0; i < enemy->bulletpool->activeExplosions.size(); i++)
+            {
+                Explosion* explosion = enemy->bulletpool->activeExplosions[i];
+
+                if(!explosion) continue;
+
+                DrawExplosion(explosion->position.x, explosion->position.y, explosion->radius);
+            }
+        }
+    }
 
     if(debugDrawing) DebugDrawing();
 
@@ -1946,7 +2011,7 @@ void Level::DrawLevel()
 
     EndShaderMode();
 
-    DrawText("HP:", TILE_SIZE, TILE_SIZE, TILE_SIZE, GBC_DARKEST_BROWN);
+    DrawText("HP:", TILE_SIZE, TILE_SIZE, TILE_SIZE, DARKEST_BROWN);
 
     EndTextureMode();
 

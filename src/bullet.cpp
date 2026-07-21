@@ -1,6 +1,6 @@
 #include "bullet.h"
 
-BulletPool::BulletPool(int quantity, const BulletProperties &bulletData, SpriteRenderData* explosionRenderData)
+BulletPool::BulletPool(int quantity, const BulletProperties &bulletData)
 {
     explodes = bulletData.explodes;
 
@@ -14,7 +14,6 @@ BulletPool::BulletPool(int quantity, const BulletProperties &bulletData, SpriteR
         tempBullet->radius = bulletData.radius;
 
         tempBullet->mainColor = bulletData.mainColor;
-        tempBullet->backColor = bulletData.backColor;
 
         tempBullet->ogMainColor = bulletData.mainColor;
         
@@ -27,8 +26,6 @@ BulletPool::BulletPool(int quantity, const BulletProperties &bulletData, SpriteR
         tempExplosion->radius = bulletData.explosionRadius;
 
         tempExplosion->lifeTime = bulletData.explosionLifeTime;
-
-        tempExplosion->renderData = explosionRenderData;
 
         explosions.push_back(std::move(tempExplosion));
     }

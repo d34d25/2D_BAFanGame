@@ -248,24 +248,16 @@ inline void DrawSprite(const GameObject& gameObj, SpriteRenderData* renderData, 
     );
 };
 
-inline void DrawBullet(int x, int y, float radius, Color mainColor, Color backColor)
+inline void DrawBullet(int x, int y, float radius, Color mainColor)
 {
-    if(!ColorIsEqual(backColor, BLACK)) DrawCircleGradient({(float)x,(float)y}, radius * 1.2f, mainColor, backColor);
-    else DrawCircle(x, y, radius * 1.2f, backColor);
-
     DrawCircle(x, y, radius, mainColor);
 };
 
-inline void DrawExplosion(int x, int y, float radius, SpriteRenderData* renderData, int frameIndex = 0, Color color = WHITE)
+inline void DrawExplosion(int x, int y, float radius)
 {
-    if(renderData)
-    {
-        //WIP
-    }
-    else
-    {
-        DrawCircleLines(x, y, radius, RED);
-    }
+    DrawCircle(x, y, radius, EXPLOSION_COLOR_A);
+
+    DrawCircle(x, y, radius * 0.75f, EXPLOSION_COLOR_B);
 }
 
 inline void SetShaderPalette(Shader shader, int location, const std::array<Color, 4>& palette)
