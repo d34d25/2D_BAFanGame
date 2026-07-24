@@ -221,6 +221,8 @@ int main()
 
     std::cout<<"level map size: "<<(int)sizeof(testLevel->level)<<"\n";
 
+    std::cout<<"level map size in tiles: "<<LAYERS * COLS * ROWS<<"\n";
+
     std::cout<<"Platform struct size: "<<(int)sizeof(Platform)<<"\n";
 
     std::cout<<"Enemy struct size: "<<(int)sizeof(Enemy)<<"\n";

@@ -169,14 +169,15 @@ inline void ShootBullet(
 
             if(bulletData.fanShaped)
             {
-                switch (i)
-                {
-                case 1: radians += bulletData.spread; break;
+                int step = i % bulletData.pelletCount;
 
-                case 2: radians -= bulletData.spread; break;
-                
-                default: break;
+                if(gameObj.flipData.flipY)
+                {
+                    if(gameObj.flipData.flipX) radians = angle + bulletData.spread * step;
+                    else radians = angle - bulletData.spread * step;
                 }
+                else if(gameObj.flipData.flipX) radians = angle - bulletData.spread * step;
+                else radians = angle + bulletData.spread * step;
             }
             else
             {

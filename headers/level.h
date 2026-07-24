@@ -103,6 +103,8 @@ struct Level
 
     void DrawLevel();
 
+    void DrawLevelUI();
+
     void ResetLevel();
 
     void ResetRoom();
@@ -190,6 +192,22 @@ struct Level
     inline bool IsTileOneWay(const Tile& tile)
     {
         return IsOneWayRightLeft(tile) || IsOneWayUpDown(tile);
+    }
+
+    inline Vector2 SetUIElementPosition(int x, int y)
+    {
+        Vector2 pos = {(float)TILE_SIZE * x, (float)TILE_SIZE * y};
+
+        return pos;
+    }
+
+    inline Vector2 SetUIElementPositionCentered(int x, int y)
+    {
+        float halfTileSize = TILE_SIZE * 0.5f;
+
+        Vector2 pos = {TILE_SIZE * x + halfTileSize, TILE_SIZE * y + halfTileSize};
+
+        return pos;
     }
 
     void LowFrequencyUpdate(); //less than 60 fps

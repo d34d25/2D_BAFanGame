@@ -307,6 +307,8 @@ void LevelEditor::Update()
 
             currentTexture = 0;
 
+            currentPalette = 0;
+
             currentAngle = 0;
 
             currentData = {false, false};
@@ -355,17 +357,40 @@ void LevelEditor::Update()
 
         if(!activePaletteList->empty())
         {
-            if(IsKeyPressed(KEY_W))
+            if(currentTileType > (int)TileType::ENEMY_START && currentTileType < (int)TileType::ENEMY_END)
             {
-                currentPalette++;
+                currentPalette = GetEnemyTilePaletteIndex((TileType)currentTileType);
 
                 if(currentPalette >= activePaletteList->size()) currentPalette = 0;
-            }
-            else if(IsKeyPressed(KEY_S))
-            {
-                currentPalette--;
+                else if(currentPalette < 0) currentPalette = activePaletteList->size() - 1;
 
-                if(currentPalette < 0) currentPalette = activePaletteList->size() - 1;
+                /*if(IsKeyPressed(KEY_W))
+                {
+                    currentPalette++;
+
+                    if(currentPalette >= activePaletteList->size()) currentPalette = 0;
+                }
+                else if(IsKeyPressed(KEY_S))
+                {
+                    currentPalette--;
+
+                    if(currentPalette < 0) currentPalette = activePaletteList->size() - 1;
+                }*/
+            }
+            else
+            {
+                if(IsKeyPressed(KEY_W))
+                {
+                    currentPalette++;
+
+                    if(currentPalette >= activePaletteList->size()) currentPalette = 0;
+                }
+                else if(IsKeyPressed(KEY_S))
+                {
+                    currentPalette--;
+
+                    if(currentPalette < 0) currentPalette = activePaletteList->size() - 1;
+                }
             }
 
             currentPaletteColors = activePaletteList->at(currentPalette);

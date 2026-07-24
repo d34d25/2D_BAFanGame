@@ -48,9 +48,9 @@ void Enemy::UpdateRender(float dt)
 
     case EnemyType::SWEEPER_B:
     {
-        bool& blocking = genericCondition;
+        //bool& blocking = genericCondition;
 
-        if(blocking)
+        if(!shooting)
         {
             startFrame = 1;
             endFrame = 1;
@@ -65,29 +65,48 @@ void Enemy::UpdateRender(float dt)
 
     case EnemyType::HELMET_GANG:
     {
-        bool& blocking = genericCondition;
+        //bool& blocking = genericCondition;
 
-        if(blocking)
+        if(!shooting)
         {
-            startFrame = 1;
-            endFrame = 1;
-
             if(!isGrounded)
             {
                 startFrame = 3;
                 endFrame = 3;
             }
+            else
+            {
+                startFrame = 1;
+                endFrame = 1;
+            }
         }
         else
         {
-            startFrame = 2;
-            endFrame = 2;
-
-            if(!isGrounded && shooting)
+            if(!isGrounded)
             {
                 startFrame = 4;
                 endFrame = 4;
             }
+            else
+            {
+                startFrame = 2;
+                endFrame = 2;
+            }
+        }
+    }
+    break;
+
+    case EnemyType::AMAS_HEAVY:
+    {
+        if(shooting)
+        {
+            startFrame = 1;
+            endFrame = 1;
+        }
+        else
+        {
+            startFrame = 0;
+            endFrame = 0;
         }
     }
     break;
@@ -194,11 +213,9 @@ void Enemy::UpdateRender(float dt)
 /*
 enemies to add:
 
-stationary turret
+stationary turret (8 (done) and 5 direction)
 
 a simple jumper enemy (yuuka's stomp pattern but simpler)
-
-tanky enemy (I still need to think of a pattern)
 
 and 1 boss more (at least)
 
@@ -291,6 +308,13 @@ void Enemy::AmasDroneBehavior(float dt, Player &player)
     }
 }
 
+void Enemy::AmasDroneBBehavior(float dt, Player &player)
+{
+    float dist = TILES_PER_ROOM_WIDHT * TILE_SIZE;
+
+    shooting = Vector2DistanceSqr(player.gameObj.transform.position, gameObj.transform.position) <= (dist * dist);
+}
+
 void Enemy::BomberDroneBehavior(float dt, Player &player)
 {
     float distanceToPlayerX = player.gameObj.transform.position.x - gameObj.transform.position.x;
@@ -356,60 +380,32 @@ void Enemy::SweeperABehavior(float dt, Player &player)
 
 void Enemy::SweeperBBehavior(float dt, Player &player)
 {
-    bool& blocking = genericCondition;
-
     timer += dt;
 
     if(timer >= maxTime)
     {
         timer = 0.0f;
 
-        int roll = GetRandomValue(1,100);
+        shooting = !shooting;
 
-        if(roll <= 50)
-        {
-            blocking = true;
-            shooting = false;
-        }
-        else
-        {
-            blocking = false;
-            shooting = true;
-        }
+        if(shooting) bulletData.fireTimer = 0;
     }
-
-    if(blocking) shooting = false;
-    if(shooting) blocking = false;
 }
 
 void Enemy::HelmetGangBehavior(float dt, Player &player)
 {
     gravity = ogGravity * 0.75f;
 
-    bool& blocking = genericCondition;
-
     timer += dt;
-
+    
     if(timer >= maxTime)
     {
         timer = 0.0f;
 
-        int roll = GetRandomValue(1,100);
+        shooting = !shooting;
 
-        if(roll <= 50)
-        {
-            blocking = true;
-            shooting = false;
-        }
-        else
-        {
-            blocking = false;
-            shooting = true;
-        }
+        if(shooting) bulletData.fireTimer = 0;
     }
-
-    if(blocking) shooting = false;
-    if(shooting) blocking = false;
 
     bool playerInRange = false;
 
@@ -437,6 +433,32 @@ void Enemy::HelmetGangBehavior(float dt, Player &player)
     }
 
     if(isGrounded) canJump = true;
+}
+
+void Enemy::AmasHeavyBehavior(float dt, Player &player)
+{
+    float dist = TILE_SIZE * 6;
+
+    float playerYDist = player.gameObj.transform.position.y - gameObj.transform.position.y;
+
+    if(std::abs(playerYDist) <= TILE_SIZE * 3)
+    {
+        if(
+            !gameObj.flipData.flipX && gameObj.transform.position.x <= player.gameObj.transform.position.x ||
+            gameObj.flipData.flipX && gameObj.transform.position.x > player.gameObj.transform.position.x
+        )
+        {
+            shooting = true;
+        }
+        else
+        {
+            shooting = false;
+        }
+    }
+    else
+    {
+        shooting = false;
+    }
 }
 
 void Enemy::YuukaBehavior(float dt, Player& player)
@@ -655,9 +677,12 @@ void Enemy::YuukaBehavior(float dt, Player& player)
 
 void Enemy::UpdateAI(float dt, Player& player)
 {
-    if(!lookAtPlayer) gameObj.body.velocity.x >= 0 ? gameObj.flipData.flipX = false : gameObj.flipData.flipX = true;
-    else player.gameObj.transform.position.x > gameObj.transform.position.x ? gameObj.flipData.flipX = false : gameObj.flipData.flipX = true;
-    
+    if(!IsEnemyStatic(type))
+    {
+        if(!lookAtPlayer) gameObj.body.velocity.x >= 0 ? gameObj.flipData.flipX = false : gameObj.flipData.flipX = true;
+        else player.gameObj.transform.position.x > gameObj.transform.position.x ? gameObj.flipData.flipX = false : gameObj.flipData.flipX = true;
+    }
+
     if(stateTimer <= 0.0f)
     {
         lastAttack = currentAttack;
@@ -667,10 +692,19 @@ void Enemy::UpdateAI(float dt, Player& player)
         if(roll <= 50) moveSpeedSign = -1;
         else moveSpeedSign = 1;
 
-        if (roll <= 50) currentAttack = Attacks::STOMP;
-        else if(roll <= 80) currentAttack = Attacks::STOMP_N_SHOT;
-        else currentAttack = Attacks::RUN_N_SHOOT;
-
+        switch (type)
+        {
+        case EnemyType::YUUKA:
+        {
+            if(roll <= 50) currentAttack = Attacks::STOMP;
+            else if(roll <= 80) currentAttack = Attacks::STOMP_N_SHOT;
+            else currentAttack = Attacks::RUN_N_SHOOT;
+        }
+        break;
+        
+        default: currentAttack = Attacks::NOTHING; break;
+        }
+       
         if(lastAttack != currentAttack)
         {
             lookAtPlayer = false;
@@ -703,6 +737,8 @@ void Enemy::UpdateAI(float dt, Player& player)
 
     case EnemyType::AMAS_DRONE: AmasDroneBehavior(dt, player); break;
 
+    case EnemyType::AMAS_DRONE_B: AmasDroneBBehavior(dt, player); break;
+
     case EnemyType::BOMBER_DRONE: BomberDroneBehavior(dt, player); break;
 
     case EnemyType::SWEEPER_A: SweeperABehavior(dt, player); break;
@@ -712,6 +748,8 @@ void Enemy::UpdateAI(float dt, Player& player)
     case EnemyType::YUUKA: YuukaBehavior(dt, player); break;
 
     case EnemyType::HELMET_GANG: HelmetGangBehavior(dt, player); break;
+
+    case EnemyType::AMAS_HEAVY: AmasHeavyBehavior(dt, player); break;
 
     default: break;
     }
@@ -727,11 +765,7 @@ void Enemy::InitEnemy(
 {
     gameObj.body = {};
 
-    gameObj.UpdateHitboxes();
-
     spawnFlipData = data;
-
-    gameObj.flipData = spawnFlipData;
 
     this->gravity = gravity;
 
@@ -742,6 +776,8 @@ void Enemy::InitEnemy(
     bulletData.explodes = false;
 
     bulletData.explosionRadius = 15.0f;
+
+    characterPaletteIndex = paletteIndex;
 
     Hitbox mainHitbox = {
         {0,0},
@@ -768,6 +804,33 @@ void Enemy::InitEnemy(
         gameObj.body.damping = 0;
 
         canFly = true;
+    }
+    break;
+
+    case EnemyType::AMAS_DRONE_B:
+    {
+        mainHitbox.aabb.width = 12;
+        mainHitbox.aabb.height = 6;
+
+        gameObj.body.damping = 0;
+
+        bulletData.fanShaped = true;
+
+        bulletData.fireRate = 1.15f;
+
+        bulletData.inertia = false;
+
+        bulletData.spread = 45;
+
+        bulletData.pelletCount = 8;
+
+        bulletData.speed = 90;
+
+        canFly = true;
+
+        bulletData.radius = 1;
+
+        lookAtPlayer = true;
     }
     break;
 
@@ -806,7 +869,7 @@ void Enemy::InitEnemy(
     case EnemyType::SWEEPER_B:
     {
         mainHitbox.aabb.width = 7;
-        mainHitbox.aabb.height = 11;
+        mainHitbox.aabb.height = 10;
 
         maxTime = 0.6f;
 
@@ -823,6 +886,30 @@ void Enemy::InitEnemy(
         bulletData.pelletCount = 3;
 
         bulletData.fanShaped = true;
+
+        bulletData.angle = -bulletData.spread;
+
+        canFly = true;
+    }
+    break;
+
+    case EnemyType::AMAS_HEAVY:
+    {
+        lookAtPlayer = false;
+
+        bulletData.fireRate = 0.6f;
+
+        bulletData.radius = 2;
+
+        bulletData.speed = 70;
+
+        bulletData.spread = 4;
+
+        mainHitbox.aabb.width = 20;
+
+        mainHitbox.aabb.height = 16;
+
+        canFly = true;
     }
     break;
 
@@ -830,10 +917,10 @@ void Enemy::InitEnemy(
     {
         lookAtPlayer = true;
 
-        maxTime = 0.4f;
+        maxTime = 1.0f;
 
         bulletData.speed = 80;
-        bulletData.fireRate = 1.5f;
+        bulletData.fireRate = 0.6f;
     }
     break;
 
@@ -883,8 +970,6 @@ void Enemy::InitEnemy(
 
     enemyRenderData = GetEnemyActiveRenderData(type, characterVariantIndex);
 
-    characterPaletteIndex = paletteIndex;
-
     aiFrameskip = frameskip;
 
     ogDamping = gameObj.body.damping;
@@ -892,9 +977,20 @@ void Enemy::InitEnemy(
     ogBulletData = bulletData;
 
     if(canFly) gameObj.body.hasGravity = false;
-    else gameObj.body.hasGravity = true;
+    else
+    {
+        gameObj.body.hasGravity = true;
+
+        spawnFlipData.flipY = gravity < 0;
+    } 
 
     if(!randomAttack) stateTimer = 1000;
+    
+    if(!IsEnemyStatic(type)) spawnFlipData.flipX = false;
+
+    gameObj.flipData = spawnFlipData;
+
+    gameObj.UpdateHitboxes();
 }
 
 void Enemy::Shoot(float dt)
@@ -903,8 +999,34 @@ void Enemy::Shoot(float dt)
 
     Vector2 bulletSpawnPos;
 
-    if(type == EnemyType::BOMBER_DRONE) bulletSpawnPos = gameObj.transform.position;
-    else bulletSpawnPos = GetTextureBulletSpawnPos(gameObj, enemyRenderData);
+    switch (type)
+    {
+    case EnemyType::BOMBER_DRONE:
+    case EnemyType::AMAS_DRONE_B:
+
+        bulletSpawnPos = gameObj.transform.position;
+
+    break;
+
+    case EnemyType::AMAS_HEAVY:
+    {
+        bulletSpawnPos = GetTextureBulletSpawnPos(gameObj, enemyRenderData);
+
+        int offset = 5;
+
+        if(!gameObj.flipData.flipY)
+        {
+            bulletSpawnPos.y -= offset;
+        }
+        else
+        {
+            bulletSpawnPos.y += offset;
+        }
+    }
+    break;
+    
+    default: bulletSpawnPos = GetTextureBulletSpawnPos(gameObj, enemyRenderData); break;
+    }
 
     ShootBullet(
         dt, gameObj,

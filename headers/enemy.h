@@ -136,6 +136,8 @@ struct Enemy
 
     void AmasDroneBehavior(float dt, Player& player);
 
+    void AmasDroneBBehavior(float dt, Player& player);
+
     void BomberDroneBehavior(float dt, Player& player);
 
     void SweeperABehavior(float dt, Player& player);
@@ -143,6 +145,8 @@ struct Enemy
     void SweeperBBehavior(float dt, Player& player);
 
     void HelmetGangBehavior(float dt, Player& player);
+
+    void AmasHeavyBehavior(float dt, Player& player);
 
     void YuukaBehavior(float dt, Player& player);
 

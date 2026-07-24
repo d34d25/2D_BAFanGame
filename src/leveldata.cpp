@@ -69,6 +69,8 @@ std::vector<SpriteRenderData> dummyRenderData = {};
 
 std::vector<SpriteRenderData> amasDroneRenderData = {};
 
+std::vector<SpriteRenderData> amasDroneBRenderData = {};
+
 std::vector<SpriteRenderData> bomberDroneRenderData = {};
 
 std::vector<SpriteRenderData> sweeperARenderData = {};
@@ -77,11 +79,9 @@ std::vector<SpriteRenderData> sweeperBRenderData = {};
 
 std::vector<SpriteRenderData> helmetGangRenderData = {};
 
+std::vector<SpriteRenderData> amasHeavyRenderData = {};
+
 std::vector<SpriteRenderData> yuukaRenderData = {};
-
-//enemies' weapons
-
-std::vector<SpriteRenderData> yuukaWeaponRenderData = {};
 
 //player
 
@@ -168,8 +168,6 @@ SpriteRenderData LoadRenderData(const char* path, Vector2 frameSize, Vector2 off
             allFrames.begin() + atlasEndFrame
         );
     }
-
-    renderData.maxFrames = (int)renderData.animationFrames.size();
 
     return renderData;
 }
@@ -350,13 +348,17 @@ void LoadAssets()
         tileSize, {0,0}
     ));
     
-
     //enemies
 
     dummyRenderData.push_back(LoadRenderData("assets/enemies/chibi-dummy.png", {8,12}, {0,0}));
 
     amasDroneRenderData.push_back(LoadRenderData(
         "assets/enemies/amas-drone.png", {12,6},
+        {0,0}
+    ));
+
+    amasDroneBRenderData.push_back(LoadRenderData(
+        "assets/enemies/amas-drone-b.png", {12,6},
         {0,0}
     ));
 
@@ -372,12 +374,17 @@ void LoadAssets()
 
     sweeperBRenderData.push_back(LoadRenderData(
         "assets/enemies/sweeper-2.png", {11,11},
-        {-1,0}, 1, 0,0, 10.0f
+        {-1,1}, 1, 0,0, 10.0f
     ));
 
     helmetGangRenderData.push_back(LoadRenderData(
         "assets/enemies/helmet-gang.png", {17,17},
         {-1,-1}, 1, 0, 0, 7.0f
+    ));
+
+    amasHeavyRenderData.push_back(LoadRenderData(
+        "assets/enemies/amas-heavy.png", {26,19},
+        {-1,-1}
     ));
 
     yuukaRenderData.push_back(LoadRenderData(
@@ -499,10 +506,6 @@ void UnloadAssets()
     CleanUp(amasDroneRenderData);
 
     CleanUp(sweeperARenderData);
-
-    //enemies' weapons
-
-    CleanUp(yuukaWeaponRenderData);
 
     //player
 

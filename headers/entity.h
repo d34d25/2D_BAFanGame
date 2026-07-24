@@ -225,8 +225,6 @@ struct SpriteRenderData
     float animationSpeed = 5.0f;
 
     int spacing = 0; //used for time based animations (passive animations)
-
-    int maxFrames = 1;
 };
 
 inline Direction CalculateDirection(float angle, SpriteFlipData data)

@@ -131,11 +131,15 @@ void Level::InitLevel(const char* levelPath, const char* roomPath ,float dt, int
 
                     case TileType::ENEMY_AMAS_DRONE: enemy.type = EnemyType::AMAS_DRONE; break;
 
+                    case TileType::ENEMY_AMAS_DRONE_B: enemy.type = EnemyType::AMAS_DRONE_B; break;
+
                     case TileType::ENEMY_BOMBER_DRONE: enemy.type = EnemyType::BOMBER_DRONE; break;
 
                     case TileType::ENEMY_SWEEPER_A: enemy.type = EnemyType::SWEEPER_A; break;
 
                     case TileType::ENEMY_SWEEPER_B: enemy.type = EnemyType::SWEEPER_B; break;
+
+                    case TileType::ENEMY_AMAS_HEAVY: enemy.type = EnemyType::AMAS_HEAVY; break;
 
                     case TileType::ENEMY_HELMET_GANG: enemy.type = EnemyType::HELMET_GANG; break;
 
@@ -145,8 +149,22 @@ void Level::InitLevel(const char* levelPath, const char* roomPath ,float dt, int
                     break;
                     }
 
+                    /*
+                    I should place normal tiles first
+                    then place enemies, so I can run an Rec vs Rec collision
+                    check, calculate the overlap, and move the spawn position
+                    the amount needed to spawn them outside of any tile
+                    */
+
+                    Vector2 enemySpawnPos = tilePosition;
+
+                    if(tile.flipData.flipY && tile.type == TileType::ENEMY_SWEEPER_B)
+                    {
+                        enemySpawnPos.y += 5;
+                    }
+
                     enemy.InitEnemy(
-                        tilePosition,
+                        enemySpawnPos,
                         tile.flipData,
                         tile.paletteIndex,
                         gravity
@@ -1982,38 +2000,7 @@ void Level::DrawLevel()
     EndTextureMode();
 
     //UI
-    BeginTextureMode(uiCanvas);
-
-    ClearBackground(WHITE);
-
-    Vector2 midCanvas = {
-        floorf(uiCanvas.texture.width * 0.5f),
-        floorf(uiCanvas.texture.height * 0.5f),
-    };
-
-    BeginShaderMode(paletteShader);
-
-    ChangePalette(player.characterCurrentPalette, &spritePalettes);
-    
-    if(player.currentPortrait > -1)
-    {
-        DrawSprite(
-            &portraits[player.currentPortrait],
-            uiCanvas.texture.width - (portraits[player.currentPortrait].frameSize.x / 2),
-            midCanvas.y,
-            player.currentPortraitFrame
-        );
-    }
-
-    ChangePalette(6, &spritePalettes);
-
-    DrawSprite(&uiElements[0], TILE_SIZE * 4, TILE_SIZE + TILE_SIZE * 0.5f, 0);
-
-    EndShaderMode();
-
-    DrawText("HP:", TILE_SIZE, TILE_SIZE, TILE_SIZE, DARKEST_BROWN);
-
-    EndTextureMode();
+    DrawLevelUI();
 
     ClearBackground(BLACK);
 
@@ -2071,6 +2058,76 @@ void Level::DrawLevel()
     //DebugTextDrawing();
 }
 
+void Level::DrawLevelUI()
+{
+    BeginTextureMode(uiCanvas);
+
+    ClearBackground(WHITE);
+
+    Vector2 midCanvas = {
+        floorf(uiCanvas.texture.width * 0.5f),
+        floorf(uiCanvas.texture.height * 0.5f),
+    };
+
+    BeginShaderMode(paletteShader);
+
+    ChangePalette(player.characterCurrentPalette, &spritePalettes);
+    
+    if(player.currentPortrait > -1)
+    {
+        Vector2 portraitPos = SetUIElementPosition(18,2);
+
+        DrawSprite(
+            &portraits[player.currentPortrait],
+            portraitPos.x,
+            portraitPos.y,
+            player.currentPortraitFrame
+        );
+    }
+
+    ChangePalette(11, &spritePalettes);
+
+    for(int i = 2; i < 2 + 3; i++)
+    {
+        Vector2 healthPointPos = SetUIElementPositionCentered(i, 0);
+
+        DrawSprite(&uiElements[0], healthPointPos.x, healthPointPos.y, 0);
+    }
+
+    EndShaderMode();
+
+    Vector2 hpTextPos = SetUIElementPosition(0,0);
+
+    DrawText("HP", hpTextPos.x, hpTextPos.y, TILE_SIZE, DARKEST_BROWN);
+
+    if(debugDrawing)
+    {
+        float dynamicThickness = 1.0f / camera.zoom;
+
+        for(int i = 0; i <= CANVAS_WIDTH; i+= TILE_SIZE)
+        {
+            DrawLineEx(
+                {(float)i, 0.0f},
+                {(float)i, (float)UI_CANVAS_HEIGHT},
+                dynamicThickness,
+                GRAY
+            );
+        }
+
+        for(int i = 0; i <= UI_CANVAS_HEIGHT; i+= TILE_SIZE)
+        {
+            DrawLineEx(
+                {0.0f, (float)i},
+                {(float)CANVAS_WIDTH, (float)i},
+                dynamicThickness,
+                GRAY
+            );
+        }
+    }
+
+    EndTextureMode();
+}
+
 void Level::DebugDrawing()
 {
     int worldWidth = COLS * TILE_SIZE;
@@ -2081,9 +2138,7 @@ void Level::DebugDrawing()
     Color gridColor = GRAY;
     gridColor.a = 127;
 
-    float lineThickness = 1.5f;
-
-    float dynamicThickness = lineThickness / camera.zoom;
+    float dynamicThickness = 1.0f / camera.zoom;
 
     for(int i = 0; i <= worldWidth; i+= TILE_SIZE)
     {
@@ -2180,11 +2235,11 @@ void Level::DebugDrawing()
 
                 if(level[l][i][j].type == TileType::PLATFORM_STOP) mainAABBColor = BLUE;
 
-                DrawAABB(tileMainAABB, mainAABBColor, 2.0f);
+                DrawAABB(tileMainAABB, mainAABBColor, dynamicThickness);
 
                 for(int h = 1; h < tile.hitboxes.size(); h++)
                 {
-                    DrawAABB(tile.hitboxes[h].aabb, MAGENTA, 1.25f);
+                    DrawAABB(tile.hitboxes[h].aabb, MAGENTA, dynamicThickness);
                 }
 
                 Vector2 lineEnd = tilePosition;
@@ -2235,7 +2290,7 @@ void Level::DebugDrawing()
         {
             for(int h = 1; h < platform->gameObj.hitboxes.size(); h++)
             {
-                DrawAABB(platform->gameObj.GetSubAABB(h), SPIKE);
+                DrawAABB(platform->gameObj.GetSubAABB(h), SPIKE, dynamicThickness);
             }
         }
     }
@@ -2273,7 +2328,7 @@ void Level::DebugDrawing()
 
         if(CheckCollisionRecs(player.gameObj.GetMainAABB(), room.aabb))
         {
-            DrawAABB(room.aabb, RED, 3.0f);
+            DrawAABB(room.aabb, RED, dynamicThickness);
         }
     }
 

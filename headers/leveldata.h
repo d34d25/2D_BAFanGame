@@ -93,6 +93,8 @@ enum struct TileType
 
     ENEMY_AMAS_DRONE,
 
+    ENEMY_AMAS_DRONE_B,
+
     ENEMY_BOMBER_DRONE,
 
     ENEMY_SWEEPER_A,
@@ -100,6 +102,8 @@ enum struct TileType
     ENEMY_SWEEPER_B,
 
     ENEMY_HELMET_GANG,
+
+    ENEMY_AMAS_HEAVY,
 
     ENEMY_YUUKA,
 
@@ -137,10 +141,12 @@ enum struct EnemyType
 {
     DUMMY,
     AMAS_DRONE,
+    AMAS_DRONE_B,
     BOMBER_DRONE,
     SWEEPER_A,
     SWEEPER_B,
     HELMET_GANG,
+    AMAS_HEAVY,
     YUUKA
 };
 
@@ -245,11 +251,15 @@ const std::vector<TileTypeList> TILE_TYPE_LIST = {
 
     {TileType::ENEMY_AMAS_DRONE, ENEMY_DUMMY, "ENEMY_AMAS_DRONE"},
 
+    {TileType::ENEMY_AMAS_DRONE_B, ENEMY_DUMMY, "ENEMY_AMAS_DRONE_B"},
+
     {TileType::ENEMY_BOMBER_DRONE, ENEMY_DUMMY, "ENEMY_BOMBER_DRONE"},
 
     {TileType::ENEMY_SWEEPER_A, ENEMY_DUMMY, "ENEMY_SWEEPER_A"},
 
     {TileType::ENEMY_SWEEPER_B, ENEMY_DUMMY, "ENEMY_SWEEPER_B"},
+
+    {TileType::ENEMY_AMAS_HEAVY, ENEMY_DUMMY, "ENEMY_AMAS_HEAVY"},
 
     {TileType::ENEMY_YUUKA, ENEMY_YUUKA, "ENEMY_YUUKA"},
 };
@@ -475,6 +485,8 @@ extern std::vector<SpriteRenderData> dummyRenderData;
 
 extern std::vector<SpriteRenderData> amasDroneRenderData;
 
+extern std::vector<SpriteRenderData> amasDroneBRenderData;
+
 extern std::vector<SpriteRenderData> bomberDroneRenderData;
 
 extern std::vector<SpriteRenderData> sweeperARenderData;
@@ -482,6 +494,8 @@ extern std::vector<SpriteRenderData> sweeperARenderData;
 extern std::vector<SpriteRenderData> sweeperBRenderData;
 
 extern std::vector<SpriteRenderData> helmetGangRenderData;
+
+extern std::vector<SpriteRenderData> amasHeavyRenderData;
 
 extern std::vector<SpriteRenderData> yuukaRenderData;
 
@@ -574,6 +588,8 @@ inline std::vector<SpriteRenderData>* GetTileActiveRenderDataList(TileType type)
 
     case TileType::ENEMY_AMAS_DRONE: return &amasDroneRenderData;
 
+    case TileType::ENEMY_AMAS_DRONE_B: return &amasDroneBRenderData;
+
     case TileType::ENEMY_BOMBER_DRONE: return &bomberDroneRenderData;
 
     case TileType::ENEMY_SWEEPER_A: return &sweeperARenderData;
@@ -581,6 +597,8 @@ inline std::vector<SpriteRenderData>* GetTileActiveRenderDataList(TileType type)
     case TileType::ENEMY_SWEEPER_B: return &sweeperBRenderData;
 
     case TileType::ENEMY_HELMET_GANG: return &helmetGangRenderData;
+
+    case TileType::ENEMY_AMAS_HEAVY: return &amasHeavyRenderData;
 
     case TileType::ENEMY_YUUKA: return &yuukaRenderData;
 
@@ -632,6 +650,30 @@ inline SpriteRenderData* GetPlatformActiveRenderData(PlatformType type, int vari
     return nullptr;
 }
 
+inline int GetEnemyTilePaletteIndex(TileType type)
+{
+    switch (type)
+    {
+    case TileType::ENEMY_AMAS_DRONE: return 6;
+
+    case TileType::ENEMY_AMAS_DRONE_B: return 10; // 8
+
+    case TileType::ENEMY_BOMBER_DRONE: return 8;
+
+    case TileType::ENEMY_HELMET_GANG: return 0;
+
+    case TileType::ENEMY_SWEEPER_A: return 6;
+
+    case TileType::ENEMY_SWEEPER_B: return 7;
+
+    case TileType::ENEMY_AMAS_HEAVY: return 6;
+
+    case TileType::ENEMY_YUUKA: return 4;
+    
+    default: return 0;
+    }
+}
+
 inline std::vector<SpriteRenderData>* GetEnemyActiveRenderDataList(EnemyType type)
 {
     switch (type)
@@ -640,6 +682,8 @@ inline std::vector<SpriteRenderData>* GetEnemyActiveRenderDataList(EnemyType typ
     
     case EnemyType::AMAS_DRONE: return &amasDroneRenderData;
 
+    case EnemyType::AMAS_DRONE_B: return &amasDroneBRenderData;
+
     case EnemyType::BOMBER_DRONE: return &bomberDroneRenderData;
 
     case EnemyType::SWEEPER_A: return &sweeperARenderData;
@@ -647,6 +691,8 @@ inline std::vector<SpriteRenderData>* GetEnemyActiveRenderDataList(EnemyType typ
     case EnemyType::SWEEPER_B: return &sweeperBRenderData;
 
     case EnemyType::HELMET_GANG: return &helmetGangRenderData;
+
+    case EnemyType::AMAS_HEAVY: return &amasHeavyRenderData;
 
     case EnemyType::YUUKA: return &yuukaRenderData;
 
@@ -664,6 +710,28 @@ inline SpriteRenderData* GetEnemyActiveRenderData(EnemyType type, int variant = 
     }
 
     return nullptr;
+}
+
+inline bool IsEnemyStatic(EnemyType type)
+{
+    switch (type)
+    {
+    case EnemyType::YUUKA: return false;
+
+    case EnemyType::AMAS_DRONE: return false;
+
+    case EnemyType::BOMBER_DRONE: return false;
+
+    case EnemyType::HELMET_GANG: return false;
+
+    case EnemyType::SWEEPER_A: return false;
+
+    case EnemyType::SWEEPER_B: return false;
+
+    case EnemyType::AMAS_HEAVY: return true;
+    
+    default: return false;
+    }
 }
 
 inline std::vector<SpriteRenderData>* GetPlayerActiveRenderDataList(Character type)
@@ -792,7 +860,7 @@ inline std::vector<std::array<Color, 4>>* GetCurrentTilePaletteList(TileType typ
     return nullptr;
 }
 
-inline void ChangePalette(int paletteIndex, std::vector<std::array<Color, 4>>* paletteList)
+inline void ChangePalette(int paletteIndex, std::vector<std::array<Color, MAX_PALETTE_COLS>>* paletteList)
 {
     if(paletteIndex >= 0 && paletteIndex < (int)paletteList->size())
     {

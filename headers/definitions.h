@@ -86,9 +86,9 @@ static constexpr int DOUBLE_ROTATING_SPIKE_MAX_HITBOX = 4;
 static constexpr float GRAVITY = 1250.0f;
 
 
-static constexpr int MAX_PALETTE_ROWS = 8; //number of squares
+static constexpr int MAX_PALETTE_ROWS = 12;//8 //number of squares (number of palletes)
 
-static constexpr int MAX_PALETTE_COLS = 4; //number of squares
+static constexpr int MAX_PALETTE_COLS = 4; //number of squares (number of colors in each palette)
 
 static constexpr Color BULLET_COLOR = Color{255,222,0,255};
 
