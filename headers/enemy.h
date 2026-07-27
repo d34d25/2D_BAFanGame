@@ -86,6 +86,10 @@ struct Enemy
     
     int aiFrameskip = 2;
 
+    int maxHealth = 6;
+
+    int health = 0;
+
     //flags
     bool alreadyFlipped = false;
 

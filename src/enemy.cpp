@@ -467,6 +467,8 @@ void Enemy::YuukaBehavior(float dt, Player& player)
 
     bool& isStomping = genericCondition;
 
+    currentAttack = Attacks::STOMP;
+
     switch (currentAttack)
     {
 
@@ -727,6 +729,8 @@ void Enemy::UpdateAI(float dt, Player& player)
             gameObj.body.damping = ogDamping;
 
             bulletData = ogBulletData;
+
+            stunState = StunState::NOT_STUNNED;
         }
     }
 
@@ -734,7 +738,6 @@ void Enemy::UpdateAI(float dt, Player& player)
 
     switch (type)
     {
-
     case EnemyType::AMAS_DRONE: AmasDroneBehavior(dt, player); break;
 
     case EnemyType::AMAS_DRONE_B: AmasDroneBBehavior(dt, player); break;
@@ -763,6 +766,8 @@ void Enemy::InitEnemy(
     int frameskip
 )
 {
+    health = maxHealth;
+
     gameObj.body = {};
 
     spawnFlipData = data;
@@ -991,6 +996,8 @@ void Enemy::InitEnemy(
     gameObj.flipData = spawnFlipData;
 
     gameObj.UpdateHitboxes();
+
+    health = maxHealth;
 }
 
 void Enemy::Shoot(float dt)

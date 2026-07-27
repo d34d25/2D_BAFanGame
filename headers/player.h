@@ -45,6 +45,11 @@ struct Player
 
     float maxStunTime = 0.0f;
 
+    //invul
+    float invulTimer = 0.0f;
+
+    float maxInvulTime = 0.0f;
+
     //ints
     int characterCurrentFrame = 0;
 
@@ -56,6 +61,10 @@ struct Player
 
     int currentPortraitFrame = 0;
 
+    int maxHealth = 6;
+
+    int health = 0;
+
     //previous frame flags
     bool wasGrounded = false;
     bool wasTouchingGravityChanger = false;
@@ -64,6 +73,8 @@ struct Player
     bool inLadder = false;
 
     bool climbing = false;
+
+    bool wasHurt = false;
 
     //current frame flags
 
@@ -80,6 +91,10 @@ struct Player
     bool hitCeiling = false;
 
     bool canMove = true;
+
+    bool canTakeDamage = true;
+
+    bool hurt = false;
 
     //jump flags
     bool canJump = false;
@@ -107,8 +122,6 @@ struct Player
     bool resetingZoom = false;
 
     bool eegg = false;
-
-    bool hurt = false;
 
     bool ogFlipOffset = false;
 
@@ -187,6 +200,8 @@ struct Player
         ResetFalgs();
 
         bulletpool.get()->Reset();
+
+        health = maxHealth;
     }
 
     inline bool IsFalling()
@@ -208,6 +223,8 @@ struct Player
         inLadder = false;
 
         hitCeiling = false;
+
+        hurt = false;
     }
 
     inline void UpdateFlags()
@@ -215,6 +232,8 @@ struct Player
         wasGrounded = isGrounded;
         wasTouchingGravityChanger = isTouchingGravityChanger;
         wasTouchingSpike = isTouchingSpike;
+
+        wasHurt = hurt;
     }
 
     inline bool IsHoldingDown()
@@ -242,5 +261,14 @@ struct Player
         stunTimer = 0.0f;
 
         maxStunTime = duration;
+    }
+
+    inline void ApplyInvul(float duration = 1.25f)
+    {
+        if(invulTimer < maxInvulTime) return;
+
+        invulTimer = 0.0f;
+
+        maxInvulTime = duration;
     }
 };

@@ -218,7 +218,7 @@ struct Level
 
     void HighFrequencyDiscreteUpdate(); //60 fps at 10 iterations (600 times total)
 
-    void CCD_Update();
+    void BulletsUpdate();
 
     void DebugDrawing();
 

@@ -2,6 +2,8 @@
 
 void Player::InitPlayer(Vector2 position, float gravity, bool flipY)
 {
+    health = maxHealth;
+
     this->gravity = gravity;
 
     gameObj.flipData.flipY = flipY;
@@ -190,7 +192,7 @@ void Player::UpdateInput()
     //release
     jumpRleased = IsKeyReleased(KEY_Z);
 
-    hurt = IsKeyDown(KEY_W);
+    //hurt = IsKeyDown(KEY_W);
 
     eegg = IsKeyDown(KEY_S);
 }
@@ -328,7 +330,7 @@ void Player::UpdateRender(float dt)
 
 void Player::Update(float dt)
 {
-    float jumpVel = -3500;
+    float jumpVel = -3100;
 
     float jump = jumpVel;
 
@@ -344,6 +346,15 @@ void Player::Update(float dt)
     FlipHitboxY(gameObj.hitboxes[3], gameObj.flipData.flipY, true);
 
     canMove = stunTimer >= maxStunTime;
+
+    canTakeDamage = invulTimer >= maxInvulTime;
+
+    if(!canTakeDamage)
+    {
+        invulTimer += dt;
+
+        if(invulTimer >= maxInvulTime) invulTimer = maxInvulTime;
+    }
 
     if(canMove)
     {
@@ -456,7 +467,7 @@ void Player::Update(float dt)
     {
         ResetInput();
 
-        gameObj.body.velocity.x = 0.0f;
+        if(canTakeDamage) gameObj.body.velocity.x = 0.0f;
 
         stunTimer += dt;
 

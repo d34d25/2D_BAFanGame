@@ -511,7 +511,7 @@ void Level::UpdateLevel()
         HighFrequencyDiscreteUpdate();
     }
 
-    CCD_Update(); //bullets only
+    BulletsUpdate(); //bullets only
 
     MediumFrequencyDiscreteUpdate_Second();
 
@@ -943,8 +943,24 @@ void Level::MediumFrequencyDiscreteUpdate_Second()
         ResetLevel();
     }
 
+    if(player.canTakeDamage && player.hurt && !player.wasHurt)
+    {
+        player.health--;
+
+        player.ApplyInvul(1.25f);
+
+        player.ApplyStun(0.5f);
+
+        int knockback = 45;
+
+        player.gameObj.body.velocity.x = player.gameObj.flipData.flipX ? knockback : -knockback;
+
+        if(player.health <= 0) player.health = 0;
+    }
+
     player.UpdateFlags();
 
+    std::cout<<"stun time "<<player.stunTimer<<"\n";
     //enemies
 
     for(int e = 0; e < enemyCache.size(); e++)
@@ -1348,6 +1364,8 @@ void Level::HighFrequencyDiscreteUpdate()
         if(CheckCollisionRecs(player.gameObj.GetMainAABB(), enemy->gameObj.GetMainAABB()))
         {
             enemy->hitPlayer = true;
+
+            if(player.canTakeDamage) player.hurt = true;
         }
     }
 
@@ -1566,7 +1584,7 @@ void Level::HighFrequencyDiscreteUpdate()
     }
 }
 
-void Level::CCD_Update()
+void Level::BulletsUpdate()
 {
     player.bulletpool.get()->UpdateBullets(dt);
 
@@ -1589,9 +1607,11 @@ void Level::CCD_Update()
 
             if(!enemy) continue;
 
-            CCD_CollisionResult result = CheckCollisionsBulletVsEntity_CCD(bullet, &enemy->gameObj, dt);
+            //CCD_CollisionResult result = CheckCollisionsBulletVsEntity_CCD(bullet, &enemy->gameObj, dt);
 
-            if(result.collision)
+            if(CheckCollisionCircleRec(
+                bullet->posititon, bullet->radius, enemy->gameObj.GetMainAABB()
+            ))
             {
                 if(!player.bulletpool.get()->pierces) bullet->didHit =  true;
             }
@@ -1660,6 +1680,15 @@ void Level::CCD_Update()
                 if(!CheckCollisionPointRec(bullet->posititon, currentRoom)) bullet->didHit = true;
             }
 
+            if(CheckCollisionCircleRec(
+                bullet->posititon, bullet->radius, player.gameObj.GetMainAABB()
+            ) && player.canTakeDamage)
+            {
+                bullet->didHit = true;
+
+                player.hurt = true;
+            }
+
             if(enemy->bulletpool->explodes)
             {
                 for(int l = GAMEPLAY_LAYER_START; l <= GAMEPLAY_LAYER_END; l++)
@@ -1687,9 +1716,25 @@ void Level::CCD_Update()
                         }
                     }
                 }
+
+                for(int x = 0; x < enemy->bulletpool->activeExplosions.size(); x++)
+                {
+                    Explosion* ex = enemy->bulletpool->activeExplosions[x];
+
+                    if(!ex) continue;
+
+                    if(CheckCollisionCircleRec(
+                        ex->position, ex->radius, player.gameObj.GetMainAABB()
+                    ) && player.canTakeDamage)
+                    {
+                        player.hurt = true;
+                    }
+                }
             }
         }
     }
+
+   
 }
 
 void Level::ResetLevel()
@@ -1915,31 +1960,13 @@ void Level::DrawLevel()
 
     ChangePalette(player.characterCurrentPalette, &spritePalettes);
 
-    DrawSprite(player.gameObj, player.characterRenderData, player.characterCurrentFrame);
-
-    //foreground
-    for(int i = playerTileRange.startX; i <= playerTileRange.endX; i++)
+    if(!player.canTakeDamage)
     {
-        for(int j = playerTileRange.startY; j <= playerTileRange.endY; j++)
-        {
-            Tile& tile = level[FOREGROUND_LAYER][i][j];
-
-            Vector2 tilePosition = GetTileCenter(i,j);
-
-            if(tile.type != TileType::DECO) continue;
-
-            SpriteRenderData* tileRenderData = GetTileActiveRenderData(tile.type, tile.variantIndex);
-
-            if(tileRenderData)
-            {
-                ChangePalette(tile.paletteIndex, &environmentPalettes);
-
-                if(tile.currentFrame >= 0 && tile.currentFrame < (int)tileRenderData->animationFrames.size())
-                {
-                    DrawSprite(tilePosition, tile.angle, tileRenderData, tile.flipData ,tile.currentFrame);
-                }
-            }
-        }
+        if(lowFrequencyCounter % 4 == 0) DrawSprite(player.gameObj, player.characterRenderData, player.characterCurrentFrame);
+    }
+    else
+    {
+        DrawSprite(player.gameObj, player.characterRenderData, player.characterCurrentFrame);
     }
 
     EndShaderMode();
@@ -2085,9 +2112,27 @@ void Level::DrawLevelUI()
         );
     }
 
+    int step = 2;
+
+    ChangePalette(7, &spritePalettes);
+
+    for(int e = 0; e < enemyCache.size(); e++)
+    {
+        Enemy* enemy = enemyCache[e];
+
+        if(!enemy || enemy->type != EnemyType::YUUKA) continue;
+
+        for(int i = 2; i < 2 + enemy->health * step; i += step)
+        {
+            Vector2 healthPointPos = SetUIElementPositionCentered(i, 2);
+
+            DrawSprite(&uiElements[0], healthPointPos.x, healthPointPos.y, 0);
+        }   
+    }
+
     ChangePalette(11, &spritePalettes);
 
-    for(int i = 2; i < 2 + 3; i++)
+    for(int i = 2; i < 2 + player.health * step; i += step)
     {
         Vector2 healthPointPos = SetUIElementPositionCentered(i, 0);
 
@@ -2099,6 +2144,10 @@ void Level::DrawLevelUI()
     Vector2 hpTextPos = SetUIElementPosition(0,0);
 
     DrawText("HP", hpTextPos.x, hpTextPos.y, TILE_SIZE, DARKEST_BROWN);
+
+    Vector2 bossHpTextPos = SetUIElementPosition(0,2);
+
+    DrawText("HP", bossHpTextPos.x, bossHpTextPos.y, TILE_SIZE, DARKEST_BROWN);
 
     if(debugDrawing)
     {

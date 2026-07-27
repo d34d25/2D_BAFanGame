@@ -518,7 +518,7 @@ void LevelEditor::Update()
 
         Tile& targetTile = tempLevel[currentLayer][mouseMatrixPosition.x][mouseMatrixPosition.y];
 
-        bool isDecorationLayer = (currentLayer == BACKGROUND_LAYER || currentLayer == FOREGROUND_LAYER);
+        bool isDecorationLayer = currentLayer == BACKGROUND_LAYER;
 
         bool canPlaceTile = false;
 
@@ -1172,8 +1172,6 @@ void LevelEditor::Draw()
     switch (currentLayer)
     {
     case BACKGROUND_LAYER: layerText = "BACKGROUND"; break;
-
-    case FOREGROUND_LAYER: layerText = "FOREGROUND"; break;
 
     case GAMEPLAY_LAYER_START: layerText = "GAMEPLAY 1"; break;
 
