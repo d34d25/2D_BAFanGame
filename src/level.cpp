@@ -961,6 +961,7 @@ void Level::MediumFrequencyDiscreteUpdate_Second()
     player.UpdateFlags();
 
     std::cout<<"stun time "<<player.stunTimer<<"\n";
+
     //enemies
 
     for(int e = 0; e < enemyCache.size(); e++)
@@ -969,7 +970,22 @@ void Level::MediumFrequencyDiscreteUpdate_Second()
 
         if(!enemy) continue;
 
-        if(lowFrequencyCounter % enemy->aiFrameskip == 0) enemy->UpdateFlags();
+        if(enemy->hurt && !enemy->wasHurt && enemy->canTakeDamage)
+        {
+            enemy->health--;
+
+            enemy->ApplyInvul(0.75f);
+
+            if(enemy->health <= 0)
+            {
+                enemy->health = 0;
+                enemy->isActive = false;
+            }
+        }
+
+        if(lowFrequencyCounter % enemy->aiFrameskip == 0) enemy->UpdateFlagsAI();
+
+        enemy->UpdateFlags();
     }
 }
 
@@ -1361,11 +1377,9 @@ void Level::HighFrequencyDiscreteUpdate()
             enemy->gameObj.GetMainAABB().width * REC_TO_CIRCLE_RADIUS_MULTIPLIER
         )) continue;
 
-        if(CheckCollisionRecs(player.gameObj.GetMainAABB(), enemy->gameObj.GetMainAABB()))
+        if(CheckCollisionRecs(player.gameObj.GetMainAABB(), enemy->gameObj.GetMainAABB()) && player.canTakeDamage)
         {
-            enemy->hitPlayer = true;
-
-            if(player.canTakeDamage) player.hurt = true;
+            player.hurt = true;
         }
     }
 
@@ -1607,13 +1621,13 @@ void Level::BulletsUpdate()
 
             if(!enemy) continue;
 
-            //CCD_CollisionResult result = CheckCollisionsBulletVsEntity_CCD(bullet, &enemy->gameObj, dt);
-
             if(CheckCollisionCircleRec(
                 bullet->posititon, bullet->radius, enemy->gameObj.GetMainAABB()
-            ))
+            ) && enemy->canTakeDamage)
             {
                 if(!player.bulletpool.get()->pierces) bullet->didHit =  true;
+
+                enemy->hurt = true;
             }
         }
 
@@ -1659,11 +1673,28 @@ void Level::BulletsUpdate()
 
         if(!enemy) continue;
 
+        if(player.bulletpool->explodes)
+        {
+            for(int x = 0; x < player.bulletpool->activeExplosions.size(); x++)
+            {
+                Explosion* ex = player.bulletpool->activeExplosions[x];
+                        
+                if(!ex) continue;
+
+                if(CheckCollisionCircleRec(
+                    ex->position, ex->radius, enemy->gameObj.GetMainAABB()
+                ) && enemy->canTakeDamage)
+                {
+                    enemy->hurt = true;
+                }
+            }
+        }
+
         enemy->bulletpool.get()->UpdateBullets(dt);
 
-        for(int i = 0; i < enemy->bulletpool->activeBullets.size(); i++)
+        for(int b = 0; b < enemy->bulletpool->activeBullets.size(); b++)
         {
-            Bullet* bullet = enemy->bulletpool->activeBullets[i];
+            Bullet* bullet = enemy->bulletpool->activeBullets[b];
 
             if(!bullet) continue;
 
@@ -1693,11 +1724,11 @@ void Level::BulletsUpdate()
             {
                 for(int l = GAMEPLAY_LAYER_START; l <= GAMEPLAY_LAYER_END; l++)
                 {
-                    for(int i = bulletRange.startX; i <= bulletRange.endX; i++)
+                    for(int c = bulletRange.startX; c <= bulletRange.endX; c++)
                     {
-                        for(int j = bulletRange.startY; j <= bulletRange.endY; j++)
+                        for(int r = bulletRange.startY; r <= bulletRange.endY; r++)
                         {
-                            Tile& tile = level[l][i][j];
+                            Tile& tile = level[l][c][r];
 
                             if(tile.hitboxes.empty()) continue;
 
@@ -1716,25 +1747,26 @@ void Level::BulletsUpdate()
                         }
                     }
                 }
+            }
+        }
 
-                for(int x = 0; x < enemy->bulletpool->activeExplosions.size(); x++)
+        if(enemy->bulletpool->explodes)
+        {
+            for(int x = 0; x < enemy->bulletpool->activeExplosions.size(); x++)
+            {
+                Explosion* ex = enemy->bulletpool->activeExplosions[x];
+
+                if(!ex) continue;
+
+                if(CheckCollisionCircleRec(
+                    ex->position, ex->radius, player.gameObj.GetMainAABB()
+                ) && player.canTakeDamage)
                 {
-                    Explosion* ex = enemy->bulletpool->activeExplosions[x];
-
-                    if(!ex) continue;
-
-                    if(CheckCollisionCircleRec(
-                        ex->position, ex->radius, player.gameObj.GetMainAABB()
-                    ) && player.canTakeDamage)
-                    {
-                        player.hurt = true;
-                    }
+                    player.hurt = true;
                 }
             }
         }
     }
-
-   
 }
 
 void Level::ResetLevel()
@@ -1945,6 +1977,8 @@ void Level::DrawLevel()
         }
     }
 
+    int flickeringRate = 2;
+
     for(int i = 0; i < enemyCache.size(); i++)
     {
         Enemy* enemy = enemyCache[i];
@@ -1954,7 +1988,15 @@ void Level::DrawLevel()
         {
             ChangePalette(enemy->characterPaletteIndex, &spritePalettes);
 
-            DrawSprite(enemy->gameObj, enemy->enemyRenderData, enemy->characterCurrentFrame);
+            if(!enemy->canTakeDamage)
+            {
+                if(lowFrequencyCounter % flickeringRate == 0) DrawSprite(enemy->gameObj, enemy->enemyRenderData, enemy->characterCurrentFrame);
+            }
+            else
+            {
+                DrawSprite(enemy->gameObj, enemy->enemyRenderData, enemy->characterCurrentFrame);
+            }
+            
         }
     }
 
@@ -1962,7 +2004,7 @@ void Level::DrawLevel()
 
     if(!player.canTakeDamage)
     {
-        if(lowFrequencyCounter % 4 == 0) DrawSprite(player.gameObj, player.characterRenderData, player.characterCurrentFrame);
+        if(lowFrequencyCounter % flickeringRate == 0) DrawSprite(player.gameObj, player.characterRenderData, player.characterCurrentFrame);
     }
     else
     {

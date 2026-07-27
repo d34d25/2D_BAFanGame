@@ -467,8 +467,6 @@ void Enemy::YuukaBehavior(float dt, Player& player)
 
     bool& isStomping = genericCondition;
 
-    currentAttack = Attacks::STOMP;
-
     switch (currentAttack)
     {
 
@@ -662,7 +660,7 @@ void Enemy::YuukaBehavior(float dt, Player& player)
             alreadyFlipped = false;
         }
 
-        if(stateTimer >= 4.0f)
+        if(stateTimer >= 2.5f)
         {
             stateTimer = 0.0f;
         }
@@ -701,6 +699,7 @@ void Enemy::UpdateAI(float dt, Player& player)
             if(roll <= 50) currentAttack = Attacks::STOMP;
             else if(roll <= 80) currentAttack = Attacks::STOMP_N_SHOT;
             else currentAttack = Attacks::RUN_N_SHOOT;
+
         }
         break;
         
@@ -798,6 +797,8 @@ void Enemy::InitEnemy(
         testColor = ENEMY_DUMMY;
 
         canFly = false;
+
+        maxHealth = 1;
     }
     break;
 
@@ -1044,6 +1045,15 @@ void Enemy::Shoot(float dt)
 
 void Enemy::Update(float dt, int iterations)
 {
+    canTakeDamage = invulTimer >= maxInvulTime;
+
+    if(!canTakeDamage)
+    {
+        invulTimer += dt;
+
+        if(invulTimer >= maxInvulTime) invulTimer = maxInvulTime;
+    }
+
     FlipHitboxY(gameObj.hitboxes[1], gameObj.flipData.flipY, false);
 
     FlipHitboxY(gameObj.hitboxes[2], gameObj.flipData.flipY, true);

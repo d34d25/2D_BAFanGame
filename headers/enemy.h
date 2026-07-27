@@ -64,6 +64,10 @@ struct Enemy
     //
     float animationTimer = 0.0f;
 
+    float invulTimer = 0.0f;
+
+    float maxInvulTime = 0.0f;
+
     EnemyType type = EnemyType::DUMMY;
 
     //can the enemy stun the player?
@@ -84,7 +88,7 @@ struct Enemy
     //
     int moveSpeedSign = 1;
     
-    int aiFrameskip = 2;
+    int aiFrameskip = 2; //2
 
     int maxHealth = 6;
 
@@ -109,13 +113,17 @@ struct Enemy
 
     bool justLanded = false;
 
+    bool hurt = false;
+
+    bool wasHurt = false;
+
+    bool canTakeDamage = false;
+
     //jump
     bool canJump = false;
 
     //bullets
     bool shooting = false;
-
-    bool hitPlayer = false;
 
     //
     bool isActive = false;
@@ -175,6 +183,13 @@ struct Enemy
     inline void ResetFlags()
     {
         inWater = false;
+
+        hurt = false;
+    }
+
+    inline void UpdateFlags()
+    {
+        wasHurt = hurt;
     }
 
     inline void ResetFlagsAI()
@@ -182,11 +197,9 @@ struct Enemy
         isTouchingWall = false;
         isGrounded = false;
         hitCeiling = false;
-
-        hitPlayer = false;
     }
 
-    inline void UpdateFlags()
+    inline void UpdateFlagsAI()
     {
         justLanded = isGrounded && !wasGrounded;
 
@@ -208,5 +221,16 @@ struct Enemy
         gameObj.UpdateHitboxes();
 
         bulletpool.get()->Reset();
+
+        health = maxHealth;
+    }
+
+    inline void ApplyInvul(float duration = 1.25f)
+    {
+        if(invulTimer < maxInvulTime) return;
+
+        invulTimer = 0.0f;
+
+        maxInvulTime = duration;
     }
 };
