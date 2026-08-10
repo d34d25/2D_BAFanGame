@@ -93,6 +93,8 @@ struct Level
 
     bool debugDrawing = false;
 
+    bool paused = false;
+
     Level() = default;
 
     ~Level();
@@ -108,6 +110,8 @@ struct Level
     void ResetLevel();
 
     void ResetRoom();
+
+    void Pause();
 
     inline void ClearTileMatrix()
     {
@@ -289,6 +293,11 @@ struct Level
 
         if(IsKeyPressed(KEY_D)) debugDrawing =  true;
         else if(IsKeyPressed(KEY_F)) debugDrawing = false;
+    }
+
+    inline void EvaluateLevelPause()
+    {
+        paused = player.pausePressed;
     }
 
     inline int GetPlatformCount()

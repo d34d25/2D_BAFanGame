@@ -572,6 +572,11 @@ void Level::ResetRoom()
     player.bulletpool.get()->Reset();
 }
 
+void Level::Pause()
+{
+    
+}
+
 void Level::UpdateCamera(const Vector2 &target, const Vector2 &offset)
 {
     int canvasWidth = gameplayCanvas.texture.width;
@@ -960,7 +965,7 @@ void Level::MediumFrequencyDiscreteUpdate_Second()
 
     player.UpdateFlags();
 
-    std::cout<<"stun time "<<player.stunTimer<<"\n";
+    //std::cout<<"stun time "<<player.stunTimer<<"\n";
 
     //enemies
 

@@ -93,7 +93,12 @@ int main()
         float dt = GetFrameTime();
         accumulator += dt;
 
-        if(!editorMode) testLevel->UpdatePlayerInput();
+        if(!editorMode)
+        {
+            testLevel->UpdatePlayerInput();
+
+            testLevel->EvaluateLevelPause();
+        }
 
         while (accumulator >= fixedDt)
         {
@@ -103,7 +108,11 @@ int main()
             
             auto allPhysicsTimerStart = std::chrono::high_resolution_clock::now();
 
-            if(!editorMode) testLevel->UpdateLevel();
+            if(!editorMode)
+            {
+               if(!testLevel->paused) testLevel->UpdateLevel();
+               else testLevel->Pause();
+            }
             else editor->Update();
 
             auto allPhysicsTimerEnd = std::chrono::high_resolution_clock::now();

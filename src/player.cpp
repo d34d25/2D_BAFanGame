@@ -189,6 +189,8 @@ void Player::UpdateInput()
         resetingZoom = true;
     }
 
+    if(IsKeyPressed(KEY_ENTER)) pausePressed = !pausePressed;
+   
     //release
     jumpRleased = IsKeyReleased(KEY_Z);
 

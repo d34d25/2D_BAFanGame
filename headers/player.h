@@ -123,6 +123,10 @@ struct Player
 
     bool eegg = false;
 
+    bool pausePressed = false;
+
+    //
+
     bool ogFlipOffset = false;
 
     Player() = default;
