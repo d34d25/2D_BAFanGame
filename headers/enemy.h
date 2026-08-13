@@ -68,6 +68,10 @@ struct Enemy
 
     float maxInvulTime = 0.0f;
 
+    float introTimer = 0.0f;
+
+    float maxIntroTime = 0.0f;
+
     EnemyType type = EnemyType::DUMMY;
 
     //can the enemy stun the player?
@@ -131,6 +135,10 @@ struct Enemy
     bool canFly = false;
 
     bool randomAttack = false;
+
+    bool isBoss = false;
+
+    bool playingIntro = false;
 
     Enemy() = default;
 
@@ -223,6 +231,15 @@ struct Enemy
         bulletpool.get()->Reset();
 
         health = maxHealth;
+
+        playingIntro = false;
+
+        if(isBoss) StartIntro();
+    }
+
+    inline bool TookDamage()
+    {
+        return hurt && !wasHurt && canTakeDamage;
     }
 
     inline void ApplyInvul(float duration = 1.25f)
@@ -232,5 +249,27 @@ struct Enemy
         invulTimer = 0.0f;
 
         maxInvulTime = duration;
+    }
+
+    inline void StartIntro(float duration = 0.5f)
+    {
+        if(introTimer < maxIntroTime) return;
+
+        introTimer = 0.0f;
+
+        maxIntroTime = duration;
+    }
+
+    inline void PlayIntro(float dt)
+    {
+        playingIntro = introTimer < maxIntroTime;
+
+        if(playingIntro)
+        {
+            introTimer += dt;
+
+            if(introTimer >= maxIntroTime)
+                introTimer = maxIntroTime;
+        }
     }
 };

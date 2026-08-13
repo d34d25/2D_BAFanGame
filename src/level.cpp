@@ -557,10 +557,14 @@ void Level::ResetRoom()
 
     if(currentRoomIndex > -1 && currentRoomIndex < enemyBuckets.size())
     {
+        bool bossInRoom = false;
+
         for(Enemy& enemy : enemyBuckets[currentRoomIndex])
         {
             enemy.isActive = true;
             enemy.Respawn();
+
+            if(enemy.isBoss) bossInRoom = true;
         }
 
         for(Platform& platform : platformBuckets[currentRoomIndex])
@@ -574,7 +578,7 @@ void Level::ResetRoom()
 
 void Level::Pause()
 {
-    
+
 }
 
 void Level::UpdateCamera(const Vector2 &target, const Vector2 &offset)
@@ -822,6 +826,9 @@ void Level::MediumFrequencyDiscreteUpdate_First()
     }
 
     //player vs enemy cache
+
+    bool isBossPlayingIntro = false;
+
     for(int e = 0; e < enemyCache.size(); e++)
     {
         Enemy* enemy = enemyCache[e];
@@ -854,7 +861,11 @@ void Level::MediumFrequencyDiscreteUpdate_First()
         enemy->Update(dt, iterations);
 
         enemy->ResetFlags();
+
+        if(enemy->isBoss && enemy->playingIntro) isBossPlayingIntro = true;
     }
+
+    player.isBossPlayingIntro = isBossPlayingIntro;
 
     if(player.hurt) TriggerScreenShake(0.025f, 5.0f);
 
@@ -917,7 +928,7 @@ void Level::MediumFrequencyDiscreteUpdate_Second()
         on exit trigger = wasTouchingTrigger && !isTouchingTrigger
     */
 
-    if(!player.wasTouchingGravityChanger && player.isTouchingGravityChanger)
+    if(player.touchedGravityChanger())
     {
         player.isGrounded = false;
         player.canJump = false;
@@ -943,12 +954,12 @@ void Level::MediumFrequencyDiscreteUpdate_Second()
         }
     }
 
-    if(!player.wasTouchingSpike && player.isTouchingSpike)
+    if(player.TouchedSpike())
     {
         ResetLevel();
     }
 
-    if(player.canTakeDamage && player.hurt && !player.wasHurt)
+    if(player.TookDamage())
     {
         player.health--;
 
@@ -975,7 +986,7 @@ void Level::MediumFrequencyDiscreteUpdate_Second()
 
         if(!enemy) continue;
 
-        if(enemy->hurt && !enemy->wasHurt && enemy->canTakeDamage)
+        if(enemy->TookDamage())
         {
             enemy->health--;
 

@@ -194,8 +194,7 @@ void Player::UpdateInput()
     //release
     jumpRleased = IsKeyReleased(KEY_Z);
 
-    //hurt = IsKeyDown(KEY_W);
-
+    //misc
     eegg = IsKeyDown(KEY_S);
 }
 
@@ -228,7 +227,7 @@ void Player::UpdateRender(float dt)
         startFrame = 10;
         endFrame = 10;
     }
-    else if(!canMove || hurt)
+    else if((!canMove && !isBossPlayingIntro) || hurt)
     {
         startFrame = 9;
         endFrame = 9;
@@ -347,9 +346,11 @@ void Player::Update(float dt)
     //ceiling detector
     FlipHitboxY(gameObj.hitboxes[3], gameObj.flipData.flipY, true);
 
-    canMove = stunTimer >= maxStunTime;
+    canMove = stunTimer >= maxStunTime && !isBossPlayingIntro;
 
     canTakeDamage = invulTimer >= maxInvulTime;
+
+    //std::cout<<"boss playing intro: "<<(int)isBossPlayingIntro<<"\n";
 
     if(!canTakeDamage)
     {

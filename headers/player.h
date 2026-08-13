@@ -125,6 +125,7 @@ struct Player
 
     bool pausePressed = false;
 
+    bool isBossPlayingIntro = false;
     //
 
     bool ogFlipOffset = false;
@@ -256,6 +257,26 @@ struct Player
         if(gameObj.flipData.flipY && IsKeyDown(KEY_DOWN)) return true;
 
         return false;
+    }
+
+    /*
+        on enter trigger = !wasTouchingTrigger && isTouchingTrigger
+        on exit trigger = wasTouchingTrigger && !isTouchingTrigger
+    */
+
+    inline bool TookDamage()
+    {
+        return canTakeDamage && hurt && !wasHurt;
+    }
+
+    inline bool TouchedSpike()
+    {
+        return !wasTouchingSpike && isTouchingSpike;
+    }
+
+    inline bool touchedGravityChanger()
+    {
+        return !wasTouchingGravityChanger && isTouchingGravityChanger;
     }
 
     inline void ApplyStun(float duration)

@@ -115,7 +115,12 @@ void Enemy::UpdateRender(float dt)
     {
         bool& isStomping = genericCondition;
 
-        if(!isGrounded)
+        if(playingIntro)
+        {
+            startFrame = 0;
+            endFrame = 0;
+        }
+        else if(!isGrounded)
         {
             if(shooting)
             {
@@ -683,6 +688,17 @@ void Enemy::UpdateAI(float dt, Player& player)
         else player.gameObj.transform.position.x > gameObj.transform.position.x ? gameObj.flipData.flipX = false : gameObj.flipData.flipX = true;
     }
 
+    PlayIntro(dt);
+
+    //std::cout<<"enemy "<< this <<" intro time: "<< introTimer<<"\n";
+
+    if(playingIntro)
+    {
+        bulletpool.get()->Reset();
+
+        return;
+    }
+
     if(stateTimer <= 0.0f)
     {
         lastAttack = currentAttack;
@@ -949,6 +965,8 @@ void Enemy::InitEnemy(
         bulletData.radius = 1.5f;
 
         bulletData.lifeTime = 4.0f;
+
+        isBoss = true;
     }
     break;
     
