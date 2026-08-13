@@ -557,14 +557,10 @@ void Level::ResetRoom()
 
     if(currentRoomIndex > -1 && currentRoomIndex < enemyBuckets.size())
     {
-        bool bossInRoom = false;
-
         for(Enemy& enemy : enemyBuckets[currentRoomIndex])
         {
             enemy.isActive = true;
             enemy.Respawn();
-
-            if(enemy.isBoss) bossInRoom = true;
         }
 
         for(Platform& platform : platformBuckets[currentRoomIndex])
