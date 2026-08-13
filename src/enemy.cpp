@@ -826,6 +826,8 @@ void Enemy::InitEnemy(
         gameObj.body.damping = 0;
 
         canFly = true;
+
+        maxHealth = 1;
     }
     break;
 
@@ -853,6 +855,8 @@ void Enemy::InitEnemy(
         bulletData.radius = 1;
 
         lookAtPlayer = true;
+
+        maxHealth = 1;
     }
     break;
 
@@ -876,6 +880,8 @@ void Enemy::InitEnemy(
         bulletData.explosionRadius = 12;
 
         bulletData.explodes = true;
+
+        maxHealth = 1;
     }
     break;
 
@@ -885,6 +891,8 @@ void Enemy::InitEnemy(
         mainHitbox.aabb.height = 11;
 
         lookAtPlayer = true;
+
+        maxHealth = 1;
     }
     break;
 
@@ -912,6 +920,8 @@ void Enemy::InitEnemy(
         bulletData.angle = -bulletData.spread;
 
         canFly = true;
+
+        maxHealth = 1;
     }
     break;
 
@@ -932,6 +942,8 @@ void Enemy::InitEnemy(
         mainHitbox.aabb.height = 16;
 
         canFly = true;
+
+        maxHealth = 4;
     }
     break;
 
@@ -943,6 +955,8 @@ void Enemy::InitEnemy(
 
         bulletData.speed = 80;
         bulletData.fireRate = 0.6f;
+
+        maxHealth = 3;
     }
     break;
 
