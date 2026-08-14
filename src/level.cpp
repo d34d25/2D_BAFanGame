@@ -2078,6 +2078,8 @@ void Level::DrawLevel()
 
     EndMode2D();
 
+    if(paused) PauseDrawing();
+
     EndTextureMode();
 
     //UI
@@ -2229,6 +2231,13 @@ void Level::DrawLevelUI()
     }
 
     EndTextureMode();
+}
+
+void Level::PauseDrawing()
+{
+    Vector2 pauseTextPos = SetUIElementPosition(8, 6);
+
+    DrawText("PAUSED",  pauseTextPos.x, pauseTextPos.y, 1, WHITE);
 }
 
 void Level::DebugDrawing()

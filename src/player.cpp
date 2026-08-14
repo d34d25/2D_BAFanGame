@@ -52,7 +52,7 @@ void Player::InitPlayer(Vector2 position, float gravity, bool flipY)
 
     characterVariantIndex = 0;
 
-    character = Character::YUZU;
+    character = Character::MIDORI;
 
     currentPortrait = -1;
 

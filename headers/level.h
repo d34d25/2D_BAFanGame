@@ -224,6 +224,8 @@ struct Level
 
     void BulletsUpdate();
 
+    void PauseDrawing();
+
     void DebugDrawing();
 
     void DebugTextDrawing();

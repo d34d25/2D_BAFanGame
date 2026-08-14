@@ -234,11 +234,15 @@ struct Enemy
 
         playingIntro = false;
 
+        invulTimer = 1000.0f;
+
         if(isBoss) StartIntro();
     }
 
     inline bool TookDamage()
     {
+        if(type == EnemyType::SWEEPER_B && !shooting) return false;
+
         return hurt && !wasHurt && canTakeDamage;
     }
 
