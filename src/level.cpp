@@ -851,16 +851,20 @@ void Level::MediumFrequencyDiscreteUpdate_First()
 
         enemy->UpdateRender(dt);
 
+        BulletPool* enemyBulletPool = GetEnemyBulletPool(enemy->id);
+
         if(lowFrequencyCounter % enemy->aiFrameskip == 0)
         {
             if(enemy->type == EnemyType::YUUKA && enemy->genericCondition) TriggerScreenShake(0.5f, 2.5f); //5.0f
+
+            if(enemy->playingIntro && enemyBulletPool) enemyBulletPool->Reset();
 
             enemy->UpdateAI(dt, player);
 
             enemy->ResetFlagsAI();
         }
 
-        if(enemy->shooting) enemy->Shoot(dt, GetEnemyBulletPool(enemy->id));
+        if(enemy->shooting && enemyBulletPool) enemy->Shoot(dt, enemyBulletPool);
         
         enemy->Update(dt, iterations);
 
