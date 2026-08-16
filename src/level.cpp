@@ -16,6 +16,8 @@ void Level::InitLevel(const char* levelPath, const char* roomPath ,float dt, int
 
     this->dt = dt;
 
+    enemiesBulletPools.clear();
+
     gravity = GRAVITY;
 
     camera.target = {0,0};
@@ -442,6 +444,12 @@ void Level::InitLevel(const char* levelPath, const char* roomPath ,float dt, int
 
     for(int i = 0; i < enemyList.size(); i++)
     {
+        enemyList[i].id = i;
+
+        enemiesBulletPools[enemyList[i].id] = std::make_unique<BulletPool>(
+            30, enemyList[i].bulletData
+        );
+        
         for(int r = 0; r < rooms.size(); r++)
         {    
             if(CheckCollisionPointRec(enemyList[i].spawnPosition, rooms[r].aabb))
@@ -852,7 +860,7 @@ void Level::MediumFrequencyDiscreteUpdate_First()
             enemy->ResetFlagsAI();
         }
 
-        if(enemy->shooting) enemy->Shoot(dt);
+        if(enemy->shooting) enemy->Shoot(dt, GetEnemyBulletPool(enemy->id));
         
         enemy->Update(dt, iterations);
 
@@ -971,8 +979,6 @@ void Level::MediumFrequencyDiscreteUpdate_Second()
     }
 
     player.UpdateFlags();
-
-    //std::cout<<"stun time "<<player.stunTimer<<"\n";
 
     //enemies
 
@@ -1701,12 +1707,17 @@ void Level::BulletsUpdate()
                 }
             }
         }
+    }
 
-        enemy->bulletpool.get()->UpdateBullets(dt);
+    for(auto& [id, enemyBulletPool] : enemiesBulletPools)
+    {
+        if(!enemyBulletPool) continue;
 
-        for(int b = 0; b < enemy->bulletpool->activeBullets.size(); b++)
+        enemyBulletPool->UpdateBullets(dt);
+
+        for(int b = 0; b < enemyBulletPool->activeBullets.size(); b++)
         {
-            Bullet* bullet = enemy->bulletpool->activeBullets[b];
+            Bullet* bullet = enemyBulletPool->activeBullets[b];
 
             if(!bullet) continue;
 
@@ -1732,7 +1743,7 @@ void Level::BulletsUpdate()
                 player.hurt = true;
             }
 
-            if(enemy->bulletpool->explodes)
+            if(enemyBulletPool->explodes)
             {
                 for(int l = GAMEPLAY_LAYER_START; l <= GAMEPLAY_LAYER_END; l++)
                 {
@@ -1762,11 +1773,11 @@ void Level::BulletsUpdate()
             }
         }
 
-        if(enemy->bulletpool->explodes)
+        if(enemyBulletPool->explodes)
         {
-            for(int x = 0; x < enemy->bulletpool->activeExplosions.size(); x++)
+            for(int x = 0; x < enemyBulletPool->activeExplosions.size(); x++)
             {
-                Explosion* ex = enemy->bulletpool->activeExplosions[x];
+                Explosion* ex = enemyBulletPool->activeExplosions[x];
 
                 if(!ex) continue;
 
@@ -1829,6 +1840,13 @@ void Level::ResetLevel()
                 }
             }
         }
+    }
+
+    for(auto& [id, enemyBulletPool] : enemiesBulletPools)
+    {
+        if(!enemyBulletPool) continue;
+
+        enemyBulletPool.get()->Reset();
     }
 
     player.Respawn();
@@ -2046,26 +2064,24 @@ void Level::DrawLevel()
         }
     }
 
-    for(int e = 0; e < enemyCache.size(); e++)
+    for(auto& [id, enemyBulletPool] : enemiesBulletPools)
     {
-        Enemy* enemy = enemyCache[e];
+        if(!enemyBulletPool) continue;
 
-        if(!enemy) continue;
-
-        for(int b = 0; b < enemy->bulletpool->activeBullets.size(); b++)
+        for(int b = 0; b < enemyBulletPool->activeBullets.size(); b++)
         {
-            Bullet* bullet = enemy->bulletpool->activeBullets[b];
+            Bullet* bullet = enemyBulletPool->activeBullets[b];
 
             if(!bullet) continue;
 
             DrawBullet(bullet->posititon.x, bullet->posititon.y, bullet->radius, bullet->mainColor);
         }
 
-        if(!enemy->bulletpool->explosions.empty())
+        if(!enemyBulletPool->explosions.empty())
         {
-            for(int i = 0; i < enemy->bulletpool->activeExplosions.size(); i++)
+            for(int i = 0; i < enemyBulletPool->activeExplosions.size(); i++)
             {
-                Explosion* explosion = enemy->bulletpool->activeExplosions[i];
+                Explosion* explosion = enemyBulletPool->activeExplosions[i];
 
                 if(!explosion) continue;
 

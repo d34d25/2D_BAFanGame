@@ -39,8 +39,6 @@ struct Enemy
 
     Vector2 targetPos = {0,0};
 
-    std::unique_ptr<BulletPool> bulletpool = {};
-
     Color testColor = ENEMY_DUMMY;
 
     SpriteFlipData spawnFlipData = {false, false};
@@ -97,6 +95,8 @@ struct Enemy
     int maxHealth = 6;
 
     int health = 0;
+
+    int id = 0;
 
     //flags
     bool alreadyFlipped = false;
@@ -176,7 +176,7 @@ struct Enemy
 
     void UpdateRender(float dt);
 
-    void Shoot(float dt);
+    void Shoot(float dt, BulletPool* bulletpool);
 
     inline Rectangle& GetJumpDetector()
     {
@@ -228,8 +228,6 @@ struct Enemy
 
         gameObj.UpdateHitboxes();
 
-        bulletpool.get()->Reset();
-
         health = maxHealth;
 
         playingIntro = false;
@@ -241,7 +239,20 @@ struct Enemy
 
     inline bool TookDamage()
     {
-        if(type == EnemyType::SWEEPER_B && !shooting) return false;
+        bool canBlock = false;
+
+        switch (type)
+        {
+        case EnemyType::SWEEPER_B:
+        case EnemyType::HELMET_GANG:
+            canBlock = true;
+        break;
+        
+        default:
+            break;
+        }
+
+        if(canBlock && !shooting) return false;
 
         return hurt && !wasHurt && canTakeDamage;
     }

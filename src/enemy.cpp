@@ -48,8 +48,6 @@ void Enemy::UpdateRender(float dt)
 
     case EnemyType::SWEEPER_B:
     {
-        //bool& blocking = genericCondition;
-
         if(!shooting)
         {
             startFrame = 1;
@@ -692,12 +690,7 @@ void Enemy::UpdateAI(float dt, Player& player)
 
     //std::cout<<"enemy "<< this <<" intro time: "<< introTimer<<"\n";
 
-    if(playingIntro)
-    {
-        bulletpool.get()->Reset();
-
-        return;
-    }
+    if(playingIntro) return;
 
     if(stateTimer <= 0.0f)
     {
@@ -1004,7 +997,7 @@ void Enemy::InitEnemy(
     
     gameObj.transform.position = spawnPosition;
 
-    bulletpool = std::make_unique<BulletPool>(30, bulletData);
+    //bulletpool = std::make_unique<BulletPool>(30, bulletData);
 
     enemyRenderData = GetEnemyActiveRenderData(type, characterVariantIndex);
 
@@ -1033,7 +1026,7 @@ void Enemy::InitEnemy(
     health = maxHealth;
 }
 
-void Enemy::Shoot(float dt)
+void Enemy::Shoot(float dt, BulletPool* bulletpool)
 {
     if(!bulletpool) return;
 
@@ -1071,7 +1064,7 @@ void Enemy::Shoot(float dt)
     ShootBullet(
         dt, gameObj,
         bulletData, bulletSpawnPos,
-        bulletpool.get(), shooting
+        bulletpool, shooting
     );
 }
 

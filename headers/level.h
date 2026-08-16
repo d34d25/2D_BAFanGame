@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <unordered_map>
 
 #include "raylib.h"
 #include "player.h"
@@ -36,6 +37,8 @@ struct Level
 {
     //level
     Tile level[LAYERS][COLS][ROWS];
+
+    std::unordered_map<int, std::unique_ptr<BulletPool>> enemiesBulletPools = {};
 
     std::vector<Enemy> enemyList = {};
 
@@ -300,6 +303,15 @@ struct Level
     inline void EvaluateLevelPause()
     {
         paused = player.pausePressed;
+    }
+
+    inline BulletPool* GetEnemyBulletPool(int id)
+    {
+        auto it = enemiesBulletPools.find(id);
+
+        if(it != enemiesBulletPools.end()) return it->second.get();
+
+        return nullptr;
     }
 
     inline int GetPlatformCount()
