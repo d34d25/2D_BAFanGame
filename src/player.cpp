@@ -154,6 +154,8 @@ void Player::InitPlayer(Vector2 position, float gravity, bool flipY)
 
     bulletpool = std::make_unique<BulletPool>(30, bulletData);
 
+    effectPool = std::make_unique<EffectPool>(8);
+
     gameObj.flipData.flipOffset = true;
 
     ogFlipOffset = gameObj.flipData.flipOffset;
@@ -365,7 +367,7 @@ void Player::Update(float dt)
         if(invulTimer >= maxInvulTime) invulTimer = maxInvulTime;
     }
 
-    if(canMove)
+    if(canMove && health > 0)
     {
         //lateral movement
 

@@ -23,6 +23,8 @@ struct Player
 
     Vector2 spawnPos = {0,0};
 
+    std::unique_ptr<EffectPool> effectPool = {};
+
     std::unique_ptr<BulletPool> bulletpool = {};
 
     SpriteRenderData* characterRenderData = {};
@@ -219,6 +221,8 @@ struct Player
         ResetFalgs();
 
         bulletpool.get()->Reset();
+
+        effectPool.get()->Reset();
 
         health = maxHealth;
     }

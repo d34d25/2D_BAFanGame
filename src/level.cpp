@@ -451,7 +451,7 @@ void Level::InitLevel(const char* levelPath, const char* roomPath ,float dt, int
         enemiesBulletPools[enemyList[i].id] = std::make_unique<BulletPool>(
             30, enemyList[i].bulletData
         );
-        
+
         for(int r = 0; r < rooms.size(); r++)
         {    
             if(CheckCollisionPointRec(enemyList[i].spawnPosition, rooms[r].aabb))
@@ -1058,7 +1058,18 @@ void Level::MediumFrequencyDiscreteUpdate_Second()
 
         player.gameObj.body.velocity.x = player.gameObj.flipData.flipX ? knockback : -knockback;
 
-        if(player.health <= 0) player.health = 0;
+        if(player.health <= 0)
+        {
+            player.health = 0;
+
+            ShootEffect(
+                dt,
+                player.gameObj.transform.position,
+                player.effectPool.get(), 
+                100, 
+                8
+            );
+        }
     }
 
     player.UpdateFlags();
@@ -1469,7 +1480,7 @@ void Level::HighFrequencyDiscreteUpdate()
     {
         Enemy* enemy = enemyCache_physics[i];
 
-        if(!enemy) continue;
+        if(!enemy || player.health <= 0) continue;
 
         if(!CheckCollisionCircles(
             player.gameObj.transform.position,
@@ -1703,6 +1714,8 @@ void Level::BulletsUpdate()
 {
     player.bulletpool.get()->UpdateBullets(dt);
 
+    player.effectPool.get()->UpdateEffects(dt);
+
     for(int i = 0; i < player.bulletpool->activeBullets.size(); i++)
     {
         Bullet* bullet = player.bulletpool->activeBullets[i];
@@ -1819,7 +1832,7 @@ void Level::BulletsUpdate()
 
             if(CheckCollisionCircleRec(
                 bullet->posititon, bullet->radius, player.gameObj.GetMainAABB()
-            ) && player.canTakeDamage)
+            ) && player.canTakeDamage && player.health > 0)
             {
                 bullet->didHit = true;
 
@@ -2115,16 +2128,32 @@ void Level::DrawLevel()
 
     ChangePalette(player.characterCurrentPalette, &spritePalettes);
 
-    if(!player.canTakeDamage)
+    if(player.health > 0)
     {
-        if(lowFrequencyCounter % flickeringRate == 0) DrawSprite(player.gameObj, player.characterRenderData, player.characterCurrentFrame);
+        if(!player.canTakeDamage)
+        {
+            if(lowFrequencyCounter % flickeringRate == 0) DrawSprite(player.gameObj, player.characterRenderData, player.characterCurrentFrame);
+        }
+        else
+        {
+            DrawSprite(player.gameObj, player.characterRenderData, player.characterCurrentFrame);
+        }
     }
-    else
-    {
-        DrawSprite(player.gameObj, player.characterRenderData, player.characterCurrentFrame);
-    }
-
+    
     EndShaderMode();
+
+    if(player.health <= 0)
+    {
+        for(int i = 0; i < player.effectPool->activeEffects.size(); i++)
+        {
+            Effect* e = player.effectPool->activeEffects[i];
+
+            if(!e) continue;
+
+            DrawBullet(e->position.x, e->position.y, e->radius, BULLET_COLOR);
+        }
+    }
+    
 
     for(int i = 0; i < player.bulletpool->activeBullets.size(); i++)
     {
@@ -2255,7 +2284,7 @@ void Level::DrawLevelUI()
 
     ChangePalette(player.characterCurrentPalette, &spritePalettes);
     
-    if(player.currentPortrait > -1)
+    if(player.currentPortrait > -1 && player.health > 0)
     {
         Vector2 portraitPos = SetUIElementPosition(18,2);
 

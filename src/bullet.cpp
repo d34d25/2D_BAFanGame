@@ -32,18 +32,14 @@ BulletPool::BulletPool(int quantity, const BulletProperties &bulletData)
 
     for(const auto& bulletptr : this->bullets)
     {
-        Bullet* rawBulletPtr = bulletptr.get();
-
-        inactiveBullets.push_back(rawBulletPtr);
+        inactiveBullets.push_back(bulletptr.get());
     }
 
     if(!explodes) return;
 
     for(const auto& explosionptr : this->explosions)
     {
-        Explosion* rawExplosionPtr = explosionptr.get();
-
-        inactiveExplosions.push_back(rawExplosionPtr);
+        inactiveExplosions.push_back(explosionptr.get());
     }
 }
 
@@ -122,5 +118,63 @@ void BulletPool::FireBullet(Vector2 position, Vector2 initialVelocity, float gra
         b->gravity = gravity;
 
         activeBullets.push_back(b);
+    }
+}
+
+EffectPool::EffectPool(int quantity)
+{
+    for(int i = 0; i < quantity; i++)
+    {
+        std::unique_ptr<Effect> tempEffect = std::make_unique<Effect>();
+
+        tempEffect->lifeTime = 2.0f;
+        
+        effects.push_back(std::move(tempEffect));
+    }
+
+    for(const auto& effectPtr : this->effects)
+    {
+        inactiveEffects.push_back(effectPtr.get());
+    }
+}
+
+void EffectPool::UpdateEffects(float dt)
+{
+    for(int i = 0; i < activeEffects.size();)
+    {
+        Effect* e = activeEffects[i];
+
+        e->UpdateEffect(dt);
+
+        e->currentTime += dt;
+
+        if(e->currentTime >= e->lifeTime)
+        {
+            inactiveEffects.push_back(e);
+
+            activeEffects[i] = activeEffects.back();
+
+            activeEffects.pop_back();
+        }
+        else
+        {
+            i++;
+        }
+    }
+}
+
+void EffectPool::SpawnEffect(Vector2 position, Vector2 initialVelocity)
+{
+    if(!inactiveEffects.empty())
+    {
+        Effect* e = inactiveEffects.back();
+
+        inactiveEffects.pop_back();
+
+        e->position = position;
+        e->currentTime = 0.0f;
+        e->velocity = initialVelocity;
+        
+        activeEffects.push_back(e);
     }
 }

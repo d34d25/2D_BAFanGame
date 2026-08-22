@@ -45,11 +45,8 @@ struct Explosion
     float currentTime = 0.0f;
 };
 
-class Bullet
+struct Bullet
 {
-
-public:
-
     Vector2 posititon = {0,0};
 
     Vector2 velocity = {0,0};
@@ -81,10 +78,8 @@ public:
     }
 };
 
-class BulletPool
+struct BulletPool
 {
-public:
-
     std::vector<std::unique_ptr<Bullet>> bullets = {};
     std::vector<std::unique_ptr<Explosion>> explosions = {};
 
@@ -92,7 +87,7 @@ public:
     std::vector<Bullet*> inactiveBullets = {};
    
     std::vector<Explosion*> activeExplosions = {};
-    std::vector<Explosion*> inactiveExplosions = {}; 
+    std::vector<Explosion*> inactiveExplosions = {};
 
     bool explodes = false;
     bool pierces = false;
@@ -205,3 +200,90 @@ inline void ShootBullet(
         bulletData.fireTimer = bulletData.fireRate;
     }
 }
+
+//Effects
+
+struct Effect
+{
+    Vector2 position = {0,0};
+
+    Vector2 velocity = {0,0};
+
+    float lifeTime = 0.0f;
+    float currentTime = 0.0f;
+
+    float radius = 4.0f;
+
+    Color color = BULLET_COLOR;
+
+    bool wobbles = false;
+
+    Effect() = default;
+
+    ~Effect() = default;
+
+    inline void UpdateEffect(float dt)
+    {
+        //if(wobbles);
+
+        position += velocity * dt;
+    }
+};
+
+struct EffectPool
+{
+    std::vector<std::unique_ptr<Effect>> effects = {};
+
+    std::vector<Effect*> activeEffects = {};
+    std::vector<Effect*> inactiveEffects = {};
+
+    EffectPool() = default;
+
+    EffectPool(int quantity);
+
+    ~EffectPool() = default;
+
+    void UpdateEffects(float dt);
+
+    void SpawnEffect(Vector2 position, Vector2 initialVelocity);
+
+    inline void Reset()
+    {
+        for(Effect* e : activeEffects)
+        {
+            inactiveEffects.push_back(e);
+        }
+
+        activeEffects.clear();
+    }
+};
+
+inline void ShootEffect(
+    float dt,
+    Vector2 spawnPos,
+    EffectPool* effectPool,
+    float speed,
+    int pelletCount = 1
+)
+{
+    float spread = 45;
+
+    for(int i = 0; i < pelletCount; i++)
+    {
+        float radians = 0;
+
+        int step = i % pelletCount;
+
+        radians += spread * step;
+
+        radians *= (PI / 180.0f);
+
+        Vector2 initialVel = {0,0};
+
+        initialVel.x = speed * cosf(radians);
+
+        initialVel.y = speed * sinf(radians);
+
+        effectPool->SpawnEffect(spawnPos, initialVel);
+    }
+};
