@@ -104,7 +104,7 @@ int main()
         {
             //when making levels a list of level instances
             //wrap that logic in a level manager
-            //hud and transitions and level switching are drawn and managed there
+            //transitions and level switching will be drawn and managed there
             
             auto allPhysicsTimerStart = std::chrono::high_resolution_clock::now();
 

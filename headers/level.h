@@ -25,6 +25,18 @@ const float ENEMY_DESPAWN_RADIUS = ENEMY_SPAWN_RADIUS + TILE_SIZE;
 
 const float PLATFORM_UPDATE_RADIUS = TILE_SIZE * 28.0f;
 
+const int CONTINUE_TEXT_POS_Y = 5;
+
+const int RETURN_TEXT_POS_Y = 7;
+
+const int RESTART_TEXT_POS_Y = 9;
+
+const int MIN_SELECTOR_POS = TILE_SIZE * CONTINUE_TEXT_POS_Y;
+
+const int MIDDLE_SELECTOR_POS = TILE_SIZE * RETURN_TEXT_POS_Y;
+
+const int MAX_SELECTOR_POS = TILE_SIZE * RESTART_TEXT_POS_Y;
+
 struct TileRangeLimits
 {
     int minX = 0;

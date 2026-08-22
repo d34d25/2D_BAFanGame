@@ -603,21 +603,17 @@ void Level::Pause()
         player.pressingUp = false;
     }
 
-    const int MIN_SELECTOR_POS = TILE_SIZE * 5;
-
-    const int MAX_SELECTOR_POS = TILE_SIZE * 9;
-
     if(selector.position.y <= MIN_SELECTOR_POS) selector.position.y = MIN_SELECTOR_POS;
 
     if(selector.position.y >= MAX_SELECTOR_POS) selector.position.y = MAX_SELECTOR_POS;
 
     switch ((int)selector.position.y)
     {
-    case TILE_SIZE * 5: selector.selectedOption = MenuOptions::CONTINUE; break;
+    case MIN_SELECTOR_POS: selector.selectedOption = MenuOptions::CONTINUE; break;
 
-    case TILE_SIZE * 7: selector.selectedOption = MenuOptions::RETURN_TO_TITLE; break;
+    case MIDDLE_SELECTOR_POS: selector.selectedOption = MenuOptions::RETURN_TO_TITLE; break;
 
-    case TILE_SIZE * 9: selector.selectedOption = MenuOptions::RESTART; break;
+    case MAX_SELECTOR_POS: selector.selectedOption = MenuOptions::RESTART; break;
     
     default: selector.selectedOption = MenuOptions::CONTINUE; break;
     }
@@ -2355,15 +2351,15 @@ void Level::PauseDrawing()
 
     DrawRectangleLinesEx(pauseMenuRec, 1, WHITE);
 
-    Vector2 contTextPos = SetUIElementPosition(4,5);
+    Vector2 contTextPos = SetUIElementPosition(4,CONTINUE_TEXT_POS_Y);
 
     DrawText("Continue", contTextPos.x, contTextPos.y, 1, WHITE);
 
-    Vector2 retTextPos = SetUIElementPosition(4, 7);
+    Vector2 retTextPos = SetUIElementPosition(4, RETURN_TEXT_POS_Y);
 
     DrawText("Return to title", retTextPos.x, retTextPos.y, 1, WHITE);
 
-    Vector2 restartTextPos = SetUIElementPosition(4, 9);
+    Vector2 restartTextPos = SetUIElementPosition(4, RESTART_TEXT_POS_Y);
 
     DrawText("Restart", restartTextPos.x, restartTextPos.y, 1, WHITE);
 
