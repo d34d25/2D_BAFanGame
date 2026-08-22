@@ -2269,6 +2269,8 @@ void Level::DrawLevelUI()
 
     int step = 2;
 
+    int healthPosStart = 3;
+
     ChangePalette(7, &spritePalettes);
 
     for(int e = 0; e < enemyCache.size(); e++)
@@ -2277,7 +2279,7 @@ void Level::DrawLevelUI()
 
         if(!enemy || enemy->type != EnemyType::YUUKA) continue;
 
-        for(int i = 2; i < 2 + enemy->health * step; i += step)
+        for(int i = healthPosStart; i < healthPosStart + enemy->health * step; i += step)
         {
             Vector2 healthPointPos = SetUIElementPositionCentered(i, 2);
 
@@ -2287,7 +2289,7 @@ void Level::DrawLevelUI()
 
     ChangePalette(11, &spritePalettes);
 
-    for(int i = 2; i < 2 + player.health * step; i += step)
+    for(int i = healthPosStart; i < healthPosStart + player.health * step; i += step)
     {
         Vector2 healthPointPos = SetUIElementPositionCentered(i, 0);
 
@@ -2296,13 +2298,18 @@ void Level::DrawLevelUI()
 
     EndShaderMode();
 
-    Vector2 hpTextPos = SetUIElementPosition(0,0);
+    Vector2 hpTextPos = SetUIElementPosition(1,0);
 
     DrawText("HP", hpTextPos.x, hpTextPos.y, TILE_SIZE, DARKEST_BROWN);
 
-    Vector2 bossHpTextPos = SetUIElementPosition(0,2);
+    Vector2 bossHpTextPos = SetUIElementPosition(1,2);
 
     DrawText("HP", bossHpTextPos.x, bossHpTextPos.y, TILE_SIZE, DARKEST_BROWN);
+
+    DrawRectangleLinesEx(
+        {0,0,CANVAS_WIDTH, UI_CANVAS_HEIGHT},
+        1, DARKEST_BROWN
+    );
 
     if(debugDrawing)
     {
