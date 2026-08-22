@@ -125,6 +125,15 @@ struct Player
 
     bool pausePressed = false;
 
+    //menu input
+
+    bool pressingUp = false;
+
+    bool pressingDown = false;
+
+    bool confirmationPressed = false;
+
+    //input end
     bool isBossPlayingIntro = false;
     //
 
@@ -136,7 +145,7 @@ struct Player
 
     ~Player() = default;
 
-    void UpdateInput();
+    void UpdateInput(bool paused);
 
     void UpdateRender(float dt);
 
@@ -182,6 +191,11 @@ struct Player
 
         resetingLevel = false;
         resetingZoom = false;
+
+        pressingUp = false;
+        pressingDown = false;
+
+        confirmationPressed = false;
     }
 
     inline void Respawn()

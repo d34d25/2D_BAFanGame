@@ -33,6 +33,20 @@ struct TileRangeLimits
     int maxY = COLS - 1;
 };
 
+enum struct MenuOptions
+{
+    CONTINUE,
+    RETURN_TO_TITLE,
+    RESTART
+};
+
+struct MenuSelector
+{
+    Vector2 position;
+
+    MenuOptions selectedOption = MenuOptions::CONTINUE;
+};
+
 struct Level
 {
     //level
@@ -66,6 +80,8 @@ struct Level
     
     //clamps the tile range to the current room
     TileRangeLimits rangeLimits = {};
+
+    MenuSelector selector = {};
 
     Vector2 screenShakeOffset = {0,0};
 
@@ -294,7 +310,7 @@ struct Level
 
     inline void UpdatePlayerInput()
     {
-        player.UpdateInput();
+        player.UpdateInput(paused);
 
         if(IsKeyPressed(KEY_D)) debugDrawing =  true;
         else if(IsKeyPressed(KEY_F)) debugDrawing = false;
@@ -303,6 +319,8 @@ struct Level
     inline void EvaluateLevelPause()
     {
         paused = player.pausePressed;
+
+        if(!paused) player.confirmationPressed = false;
     }
 
     inline BulletPool* GetEnemyBulletPool(int id)

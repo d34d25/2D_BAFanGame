@@ -159,7 +159,7 @@ void Player::InitPlayer(Vector2 position, float gravity, bool flipY)
     ogFlipOffset = gameObj.flipData.flipOffset;
 }
 
-void Player::UpdateInput()
+void Player::UpdateInput(bool paused)
 {
     movingLeft = IsKeyDown(KEY_LEFT);
 
@@ -183,13 +183,19 @@ void Player::UpdateInput()
    
     if(IsKeyPressed(KEY_R)) resetingLevel = true;
 
+    if(IsKeyPressed(KEY_UP)) pressingUp = true;
+
+    if(IsKeyPressed(KEY_DOWN)) pressingDown = true;
+
+    if((IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_Z)) && paused) confirmationPressed = true;
+
     if(IsKeyPressed(KEY_R) && IsKeyDown(KEY_LEFT_SHIFT))
     {
         resetingLevel = false;
         resetingZoom = true;
     }
 
-    if(IsKeyPressed(KEY_ENTER)) pausePressed = !pausePressed;
+    if(IsKeyPressed(KEY_ENTER)) pausePressed = true; //!pausePressed;
    
     //release
     jumpRleased = IsKeyReleased(KEY_Z);

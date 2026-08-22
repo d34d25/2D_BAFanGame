@@ -26,6 +26,8 @@ void Level::InitLevel(const char* levelPath, const char* roomPath ,float dt, int
     
     camera.rotation = 0.0f;
 
+    selector.position = SetUIElementPosition(3,5);
+
     float step = 1.0f / (float)TILE_SIZE;
 
     camera.zoom = roundf(camera.zoom / step) * step;
@@ -582,7 +584,88 @@ void Level::ResetRoom()
 
 void Level::Pause()
 {
+    const int INCREMENT = TILE_SIZE * 2;
 
+    if(player.pressingUp)
+    {
+        selector.position.y -= INCREMENT;
+
+        player.pressingUp = false;
+
+        player.pressingDown = false;
+    }
+    else if(player.pressingDown)
+    {
+        selector.position.y += INCREMENT;
+
+        player.pressingDown = false;
+
+        player.pressingUp = false;
+    }
+
+    const int MIN_SELECTOR_POS = TILE_SIZE * 5;
+
+    const int MAX_SELECTOR_POS = TILE_SIZE * 9;
+
+    if(selector.position.y <= MIN_SELECTOR_POS) selector.position.y = MIN_SELECTOR_POS;
+
+    if(selector.position.y >= MAX_SELECTOR_POS) selector.position.y = MAX_SELECTOR_POS;
+
+    switch ((int)selector.position.y)
+    {
+    case TILE_SIZE * 5: selector.selectedOption = MenuOptions::CONTINUE; break;
+
+    case TILE_SIZE * 7: selector.selectedOption = MenuOptions::RETURN_TO_TITLE; break;
+
+    case TILE_SIZE * 9: selector.selectedOption = MenuOptions::RESTART; break;
+    
+    default: selector.selectedOption = MenuOptions::CONTINUE; break;
+    }
+
+    /*const char* debtext = "";
+
+    switch (selector.selectedOption)
+    {
+    case MenuOptions::CONTINUE: debtext = "CONTINUE"; break;
+
+    case MenuOptions::RETURN_TO_TITLE: debtext = "RETURN_TO_TITLE"; break;
+
+    case MenuOptions::RESTART: debtext = "RESTART"; break;
+    
+    default:
+        break;
+    }
+
+    std::cout<<debtext<<"\n";*/
+
+    if(player.confirmationPressed)
+    {
+        switch (selector.selectedOption)
+        {
+        case MenuOptions::CONTINUE:
+        {
+            player.pausePressed = false;
+        }
+        break;
+
+        case MenuOptions::RETURN_TO_TITLE: break;
+
+        case MenuOptions::RESTART:
+        {
+            player.pausePressed = false;
+
+            ResetLevel();
+        }
+        break;
+
+        default:
+            break;
+        }
+
+        player.ResetInput();
+
+        selector.position.y = MIN_SELECTOR_POS;
+    }
 }
 
 void Level::UpdateCamera(const Vector2 &target, const Vector2 &offset)
@@ -2255,9 +2338,59 @@ void Level::DrawLevelUI()
 
 void Level::PauseDrawing()
 {
-    Vector2 pauseTextPos = SetUIElementPosition(8, 6);
+    Vector2 pauseTextPos = SetUIElementPosition(8, 2);
 
-    DrawText("PAUSED",  pauseTextPos.x, pauseTextPos.y, 1, WHITE);
+    DrawText("PAUSE", pauseTextPos.x,  pauseTextPos.y, 1, WHITE);
+
+    Vector2 pauseMenuRecPos = SetUIElementPosition(2,4);
+
+    Rectangle pauseMenuRec = {
+        pauseMenuRecPos.x,
+        pauseMenuRecPos.y,
+        TILE_SIZE * 16,
+        TILE_SIZE * 7
+    };
+
+    DrawRectangleRec(pauseMenuRec, DARKEST_BROWN);
+
+    DrawRectangleLinesEx(pauseMenuRec, 1, WHITE);
+
+    Vector2 contTextPos = SetUIElementPosition(4,5);
+
+    DrawText("Continue", contTextPos.x, contTextPos.y, 1, WHITE);
+
+    Vector2 retTextPos = SetUIElementPosition(4, 7);
+
+    DrawText("Return to title", retTextPos.x, retTextPos.y, 1, WHITE);
+
+    Vector2 restartTextPos = SetUIElementPosition(4, 9);
+
+    DrawText("Restart", restartTextPos.x, restartTextPos.y, 1, WHITE);
+
+    DrawText(">", selector.position.x, selector.position.y, 1, WHITE);
+
+    if(debugDrawing)
+    {
+        for(int i = 0; i <= CANVAS_WIDTH; i+= TILE_SIZE)
+        {
+            DrawLineEx(
+                {(float)i, 0.0f},
+                {(float)i, (float)GAMEPLAY_CANVAS_HEIGHT},
+                1.0f,
+                MAGENTA
+            );
+        }
+
+        for(int i = 0; i <= GAMEPLAY_CANVAS_HEIGHT; i+= TILE_SIZE)
+        {
+            DrawLineEx(
+                {0.0f, (float)i},
+                {(float)CANVAS_WIDTH, (float)i},
+                1.0f,
+                MAGENTA
+            );
+        }
+    }
 }
 
 void Level::DebugDrawing()
