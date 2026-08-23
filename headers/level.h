@@ -66,7 +66,7 @@ struct Level
 
     std::unordered_map<int, std::unique_ptr<BulletPool>> enemiesBulletPools = {};
 
-    //std::unordered_map<int, std::unique_ptr<EffectPool>> enemiesEffectPools = {};
+    std::unordered_map<int, std::unique_ptr<EffectPool>> enemiesEffectPools = {};
 
     std::vector<Enemy> enemyList = {};
 

@@ -7,6 +7,8 @@
 
 #include "entity.h"
 
+const float MAX_RADIUS = 10;
+
 struct BulletProperties
 {
     Color mainColor = BULLET_COLOR;
@@ -214,6 +216,8 @@ struct Effect
 
     float radius = 4.0f;
 
+    float ogRadius = 4.0f;
+
     Color color = BULLET_COLOR;
 
     bool wobbles = false;
@@ -224,7 +228,12 @@ struct Effect
 
     inline void UpdateEffect(float dt)
     {
-        //if(wobbles);
+        if(wobbles)
+        {
+            radius += 50 * dt;
+
+            radius = Clamp(radius, 1, 10);
+        }
 
         position += velocity * dt;
     }
@@ -239,7 +248,7 @@ struct EffectPool
 
     EffectPool() = default;
 
-    EffectPool(int quantity);
+    EffectPool(int quantity, float lifeTime = 2.0f, bool wobbles = false);
 
     ~EffectPool() = default;
 
@@ -266,6 +275,8 @@ inline void ShootEffect(
     int pelletCount = 1
 )
 {
+    //std::cout<<"effect shot\n";
+
     float spread = 45;
 
     for(int i = 0; i < pelletCount; i++)

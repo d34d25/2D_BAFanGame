@@ -121,14 +121,16 @@ void BulletPool::FireBullet(Vector2 position, Vector2 initialVelocity, float gra
     }
 }
 
-EffectPool::EffectPool(int quantity)
+EffectPool::EffectPool(int quantity, float lifeTime, bool wobbles)
 {
     for(int i = 0; i < quantity; i++)
     {
         std::unique_ptr<Effect> tempEffect = std::make_unique<Effect>();
 
-        tempEffect->lifeTime = 2.0f;
+        tempEffect->lifeTime = lifeTime;
         
+        tempEffect->wobbles = wobbles;
+
         effects.push_back(std::move(tempEffect));
     }
 
@@ -148,7 +150,7 @@ void EffectPool::UpdateEffects(float dt)
 
         e->currentTime += dt;
 
-        if(e->currentTime >= e->lifeTime)
+        if(e->currentTime >= e->lifeTime || e->radius >= MAX_RADIUS)
         {
             inactiveEffects.push_back(e);
 
@@ -175,6 +177,8 @@ void EffectPool::SpawnEffect(Vector2 position, Vector2 initialVelocity)
         e->currentTime = 0.0f;
         e->velocity = initialVelocity;
         
+        e->radius = e->ogRadius;
+
         activeEffects.push_back(e);
     }
 }

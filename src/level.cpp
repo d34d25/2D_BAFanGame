@@ -452,6 +452,8 @@ void Level::InitLevel(const char* levelPath, const char* roomPath ,float dt, int
             30, enemyList[i].bulletData
         );
 
+        enemiesEffectPools[enemyList[i].id] = std::make_unique<EffectPool>(1, 1.0f, true);
+            
         for(int r = 0; r < rooms.size(); r++)
         {    
             if(CheckCollisionPointRec(enemyList[i].spawnPosition, rooms[r].aabb))
@@ -1091,6 +1093,9 @@ void Level::MediumFrequencyDiscreteUpdate_Second()
             if(enemy->health <= 0)
             {
                 enemy->health = 0;
+
+                ShootEffect(dt, enemy->gameObj.transform.position, enemiesEffectPools[enemy->id].get(), 0);
+
                 enemy->isActive = false;
             }
         }
@@ -1733,7 +1738,7 @@ void Level::BulletsUpdate()
         {
             Enemy* enemy = enemyCache[e];
 
-            if(!enemy) continue;
+            if(!enemy || enemy->health <= 0) continue;
 
             if(CheckCollisionCircleRec(
                 bullet->posititon, bullet->radius, enemy->gameObj.GetMainAABB()
@@ -1886,6 +1891,13 @@ void Level::BulletsUpdate()
             }
         }
     }
+
+    for(auto& [id, enemyEffectPool] : enemiesEffectPools)
+    {
+        if(!enemyEffectPool) continue;
+
+        enemyEffectPool->UpdateEffects(dt);
+    }
 }
 
 void Level::ResetLevel()
@@ -1943,6 +1955,13 @@ void Level::ResetLevel()
         if(!enemyBulletPool) continue;
 
         enemyBulletPool.get()->Reset();
+    }
+
+    for(auto& [id, enemiesEffectPool] : enemiesEffectPools)
+    {
+        if(!enemiesEffectPool) continue;
+
+        enemiesEffectPool.get()->Reset();
     }
 
     player.Respawn();
@@ -2202,6 +2221,18 @@ void Level::DrawLevel()
         }
     }
 
+    for(auto& [id, enemyEffectPool] : enemiesEffectPools)
+    {
+        if(!enemyEffectPool) continue;
+
+        for(Effect* e : enemyEffectPool->activeEffects)
+        {
+            if(!e) continue;
+
+            DrawBullet(e->position.x, e->position.y, e->radius, BULLET_COLOR);
+        }
+    }
+
     if(debugDrawing) DebugDrawing();
 
     EndMode2D();
@@ -2224,7 +2255,7 @@ void Level::DrawLevel()
     Rectangle sourceGameplayRec = {
         0,
         0, 
-        (float)gameplayCanvas.texture.width, 
+        (float)gameplayCanvas.texture.width,
         (float)-gameplayCanvas.texture.height
     };
 
