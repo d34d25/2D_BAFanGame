@@ -958,9 +958,12 @@ void Level::MediumFrequencyDiscreteUpdate_First()
 
     if(player.hurt) TriggerScreenShake(0.025f, 5.0f);
 
-    player.UpdateRender(dt);
+    if(player.health > 0)
+    {
+        player.UpdateRender(dt);
 
-    player.Update(dt);
+        player.Update(dt);
+    }
 
     if(player.canMove) player.Shoot(dt);
 
@@ -1045,7 +1048,15 @@ void Level::MediumFrequencyDiscreteUpdate_Second()
 
     if(player.TouchedSpike())
     {
-        ResetLevel();
+        player.health = 0;
+
+        ShootEffect(
+            dt,
+            player.gameObj.transform.position,
+            player.effectPool.get(), 
+            100, 
+             8
+        );
     }
 
     if(player.TookDamage())
@@ -1154,7 +1165,7 @@ void Level::HighFrequencyDiscreteUpdate()
 
     //player X pass
 
-    player.gameObj.UpdatePositionX(dt, iterations);
+    if(player.health > 0) player.gameObj.UpdatePositionX(dt, iterations);
 
     for(int l = GAMEPLAY_LAYER_START; l <= GAMEPLAY_LAYER_END; l++)
     {
@@ -1209,7 +1220,7 @@ void Level::HighFrequencyDiscreteUpdate()
 
     //player Y pass
 
-    player.gameObj.UpdatePositionY(dt, iterations);
+    if(player.health > 0) player.gameObj.UpdatePositionY(dt, iterations);
 
     for(int l = GAMEPLAY_LAYER_START; l <= GAMEPLAY_LAYER_END; l++)
     {
