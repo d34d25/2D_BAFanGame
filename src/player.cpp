@@ -183,7 +183,7 @@ void Player::UpdateInput(bool paused)
 
     if(IsKeyPressed(KEY_Z)) jumpingOffLadder = true;
    
-    if(IsKeyPressed(KEY_R)) resetingLevel = true;
+    //if(IsKeyPressed(KEY_R)) resetingLevel = true;
 
     if(IsKeyPressed(KEY_UP)) pressingUp = true;
 

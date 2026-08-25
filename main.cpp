@@ -93,7 +93,7 @@ int main()
         float dt = GetFrameTime();
         accumulator += dt;
 
-        if(!editorMode)
+        if(!editorMode && testLevel->LevelStarted())
         {
             testLevel->UpdatePlayerInput();
 
@@ -110,8 +110,10 @@ int main()
 
             if(!editorMode)
             {
-               if(!testLevel->paused) testLevel->UpdateLevel();
-               else testLevel->Pause();
+                if(!testLevel->LevelStarted()) testLevel->TickLevelStartTimer();
+
+                if(!testLevel->paused) testLevel->UpdateLevel();
+                else testLevel->Pause();
             }
             else editor->Update();
 

@@ -121,6 +121,7 @@ struct Player
     bool holdingShoot = false;
 
     bool resetingLevel = false;
+    
     bool resetingZoom = false;
 
     bool eegg = false;

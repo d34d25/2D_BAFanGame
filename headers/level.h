@@ -108,6 +108,14 @@ struct Level
 
     float gravity = 500.0f;
 
+    float levelStartTimer = 0.0f;
+
+    float levelStartMaxTime = 1.5f;
+
+    float respawnTimer = 0.0f;
+
+    float respawnMaxTime = 2.5f;
+
     int iterations = 1;
 
     int lowFrequencyCounter = 0;
@@ -247,6 +255,40 @@ struct Level
         return pos;
     }
 
+    inline void TickLevelStartTimer()
+    {
+        if(levelStartTimer >= levelStartMaxTime) return;
+
+        levelStartTimer += dt;
+
+        if(levelStartTimer >= levelStartMaxTime)
+        {
+            levelStartTimer = levelStartMaxTime;
+        }
+    }
+
+    inline bool LevelStarted()
+    {
+        return levelStartTimer >= levelStartMaxTime;
+    }
+
+    inline void TickRespawnTimer()
+    {
+        if(respawnTimer >= respawnMaxTime) return;
+
+        respawnTimer += dt;
+
+        if(respawnTimer >= respawnMaxTime)
+        {
+            respawnTimer = respawnMaxTime;
+        }
+    }
+
+    inline bool Respawning()
+    {
+        return respawnTimer < respawnMaxTime;
+    }
+
     void LowFrequencyUpdate(); //less than 60 fps
 
     void MediumFrequencyDiscreteUpdate_First(); //60 fps
@@ -254,6 +296,8 @@ struct Level
     void MediumFrequencyDiscreteUpdate_Second(); //60 fps
 
     void HighFrequencyDiscreteUpdate(); //60 fps at 10 iterations (600 times total)
+
+    void RoomChangeEvaluation();
 
     void BulletsUpdate();
 

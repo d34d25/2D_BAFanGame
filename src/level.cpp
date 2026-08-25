@@ -520,7 +520,8 @@ void Level::UpdateLevel()
 
     for(int iteraion = 0; iteraion < iterations; iteraion++)
     {
-        HighFrequencyDiscreteUpdate();
+        if(LevelStarted()) HighFrequencyDiscreteUpdate();
+        else RoomChangeEvaluation();
     }
 
     BulletsUpdate(); //bullets only
@@ -548,6 +549,15 @@ void Level::UpdateLevel()
     {
         player.resetingLevel = false;
         ResetLevel();
+    }
+
+    std::cout<<"respawn timer: "<<respawnTimer<<"\n";
+
+    if(player.health <= 0)
+    {
+        TickRespawnTimer();
+
+        if(!Respawning()) ResetLevel();
     }
 }
 
@@ -643,6 +653,8 @@ void Level::Pause()
         case MenuOptions::CONTINUE:
         {
             player.pausePressed = false;
+
+            player.ResetInput();
         }
         break;
 
@@ -652,16 +664,14 @@ void Level::Pause()
         {
             player.pausePressed = false;
 
-            ResetLevel();
+            player.resetingLevel = true;
         }
         break;
 
         default:
             break;
         }
-
-        player.ResetInput();
-
+        
         selector.position.y = MIN_SELECTOR_POS;
     }
 }
@@ -1082,6 +1092,8 @@ void Level::MediumFrequencyDiscreteUpdate_Second()
                 100, 
                 8
             );
+
+            respawnTimer = 0.0f;
         }
     }
 
@@ -1119,31 +1131,7 @@ void Level::MediumFrequencyDiscreteUpdate_Second()
 
 void Level::HighFrequencyDiscreteUpdate()
 {
-    Vector2 playerFuturePos = {
-        player.gameObj.transform.position.x + player.gameObj.body.GetFinalVelocity().x * (dt / iterations),
-        player.gameObj.transform.position.y + player.gameObj.body.GetFinalVelocity().y * (dt / iterations)
-    };
-
-    int roomIndex = -1;
-
-    for(int r = 0; r < rooms.size(); r++)
-    {
-        if(CheckCollisionPointRec(playerFuturePos, rooms[r].aabb))
-        {
-            roomIndex = r;
-            break;
-        }
-    }
-
-    if(roomIndex != currentRoomIndex)
-    {
-        previousRoomIndex = currentRoomIndex;
-        currentRoomIndex = roomIndex;
-
-        rangeLimits = GetTileRangeLimits();
-
-        ResetRoom();
-    }
+    RoomChangeEvaluation();
 
     isGravityUp = gravity < 0;
 
@@ -1726,6 +1714,35 @@ void Level::HighFrequencyDiscreteUpdate()
     }
 }
 
+void Level::RoomChangeEvaluation()
+{
+    Vector2 playerFuturePos = {
+        player.gameObj.transform.position.x + player.gameObj.body.GetFinalVelocity().x * (dt / iterations),
+        player.gameObj.transform.position.y + player.gameObj.body.GetFinalVelocity().y * (dt / iterations)
+    };
+
+    int roomIndex = -1;
+
+    for(int r = 0; r < rooms.size(); r++)
+    {
+        if(CheckCollisionPointRec(playerFuturePos, rooms[r].aabb))
+        {
+            roomIndex = r;
+            break;
+        }
+    }
+
+    if(roomIndex != currentRoomIndex)
+    {
+        previousRoomIndex = currentRoomIndex;
+        currentRoomIndex = roomIndex;
+
+        rangeLimits = GetTileRangeLimits();
+
+        ResetRoom();
+    }
+}
+
 void Level::BulletsUpdate()
 {
     player.bulletpool.get()->UpdateBullets(dt);
@@ -1976,6 +1993,10 @@ void Level::ResetLevel()
     }
 
     player.Respawn();
+
+    levelStartTimer = 0.0f;
+
+    respawnTimer = 0.0f;
 }
 
 void Level::DrawLevel()
@@ -2162,11 +2183,11 @@ void Level::DrawLevel()
     {
         if(!player.canTakeDamage)
         {
-            if(lowFrequencyCounter % flickeringRate == 0) DrawSprite(player.gameObj, player.characterRenderData, player.characterCurrentFrame);
+            if((lowFrequencyCounter % flickeringRate == 0) && LevelStarted()) DrawSprite(player.gameObj, player.characterRenderData, player.characterCurrentFrame);
         }
         else
         {
-            DrawSprite(player.gameObj, player.characterRenderData, player.characterCurrentFrame);
+            if(LevelStarted()) DrawSprite(player.gameObj, player.characterRenderData, player.characterCurrentFrame);
         }
     }
     
@@ -2183,7 +2204,6 @@ void Level::DrawLevel()
             DrawBullet(e->position.x, e->position.y, e->radius, BULLET_COLOR);
         }
     }
-    
 
     for(int i = 0; i < player.bulletpool->activeBullets.size(); i++)
     {
@@ -2248,7 +2268,13 @@ void Level::DrawLevel()
 
     EndMode2D();
 
-    if(paused) PauseDrawing();
+    if(!LevelStarted())
+    {
+        Vector2 readyTextPos = SetUIElementPosition(8,2);
+
+        if(lowFrequencyCounter % 4 == 0) DrawText("Ready", readyTextPos.x, readyTextPos.y, 1, WHITE);
+    }
+    else if(paused) PauseDrawing();
 
     EndTextureMode();
 
