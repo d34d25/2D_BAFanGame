@@ -662,6 +662,8 @@ void Level::Pause()
 
         case MenuOptions::RESTART:
         {
+            player.stunTimer = player.maxStunTime;
+
             player.pausePressed = false;
 
             player.resetingLevel = true;
