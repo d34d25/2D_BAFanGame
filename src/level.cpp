@@ -2297,7 +2297,7 @@ void Level::DrawLevel()
     //UI
     DrawLevelUI();
 
-    ClearBackground(DARKEST_BROWN);
+    ClearBackground(BLACK);
 
     float scale = fminf((float)GetScreenWidth() / NATIVE_WIDTH, 
     (float)GetScreenHeight() / NATIVE_HEIGHT);
@@ -2413,15 +2413,15 @@ void Level::DrawLevelUI()
 
     Vector2 hpTextPos = SetUIElementPosition(1,0);
 
-    DrawText("HP", hpTextPos.x, hpTextPos.y, TILE_SIZE, DARKEST_BROWN);
+    DrawText("HP", hpTextPos.x, hpTextPos.y, TILE_SIZE, BLACK);
 
     Vector2 bossHpTextPos = SetUIElementPosition(1,2);
 
-    DrawText("HP", bossHpTextPos.x, bossHpTextPos.y, TILE_SIZE, DARKEST_BROWN);
+    DrawText("HP", bossHpTextPos.x, bossHpTextPos.y, TILE_SIZE, BLACK);
 
     DrawRectangleLinesEx(
         {0,0,CANVAS_WIDTH, UI_CANVAS_HEIGHT},
-        1, DARKEST_BROWN
+        1, BLACK
     );
 
     if(debugDrawing)
@@ -2467,7 +2467,7 @@ void Level::PauseDrawing()
         TILE_SIZE * 7
     };
 
-    DrawRectangleRec(pauseMenuRec, DARKEST_BROWN);
+    DrawRectangleRec(pauseMenuRec, BLACK);
 
     DrawRectangleLinesEx(pauseMenuRec, 1, WHITE);
 

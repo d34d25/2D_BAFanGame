@@ -94,7 +94,7 @@ static constexpr Color EXPLOSION_COLOR_A = Color{255,222,0,255};
 
 static constexpr Color EXPLOSION_COLOR_B = WHITE;
 
-static constexpr Color DARKEST_BROWN = Color{58,40,2,255};
+//static constexpr Color DARKEST_BROWN = Color{58,40,2,255};
 
 inline Vector2 SetUIElementPosition(int x, int y)
 {

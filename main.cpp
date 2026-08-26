@@ -15,8 +15,6 @@ int main()
     int screenWidth = NATIVE_WIDTH * screenScale;
     int screenHeight = NATIVE_HEIGHT * screenScale;
 
-    if(currentScreen == GameScreen::EDITOR) screenWidth = 1600;
-
     InitWindow(screenWidth, screenHeight, "");
 
     SetTargetFPS(60);
@@ -37,6 +35,13 @@ int main()
     }
 
     InitManagerExtern();
+
+    if(currentScreen == GameScreen::EDITOR)
+    {
+        screenWidth = 1600;
+
+        SetWindowSize(screenWidth, screenHeight);
+    }
 
     auto levelInitTimeStart = std::chrono::high_resolution_clock::now();
 

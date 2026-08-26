@@ -89,7 +89,7 @@ void DrawScreen()
     case GameScreen::GAMEPLAY:
     {
         if(levelReady) currLevel->DrawLevel();
-        else ClearBackground(DARKEST_BROWN);
+        else ClearBackground(BLACK);
         
     }
     break;

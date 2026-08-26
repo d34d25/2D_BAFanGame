@@ -4,7 +4,7 @@
 
 void Title::DrawTitle()
 {
-    ClearBackground(DARKEST_BROWN);
+    ClearBackground(BLACK);
 
     BeginTextureMode(titleCanvas);
 
