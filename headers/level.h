@@ -136,6 +136,8 @@ struct Level
 
     bool paused = false;
 
+    bool retToTitle = false;
+
     Level() = default;
 
     ~Level();
@@ -237,22 +239,6 @@ struct Level
     inline bool IsTileOneWay(const Tile& tile)
     {
         return IsOneWayRightLeft(tile) || IsOneWayUpDown(tile);
-    }
-
-    inline Vector2 SetUIElementPosition(int x, int y)
-    {
-        Vector2 pos = {(float)TILE_SIZE * x, (float)TILE_SIZE * y};
-
-        return pos;
-    }
-
-    inline Vector2 SetUIElementPositionCentered(int x, int y)
-    {
-        float halfTileSize = TILE_SIZE * 0.5f;
-
-        Vector2 pos = {TILE_SIZE * x + halfTileSize, TILE_SIZE * y + halfTileSize};
-
-        return pos;
     }
 
     inline void TickLevelStartTimer()

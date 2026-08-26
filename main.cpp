@@ -2,9 +2,7 @@
 
 #include "raylib.h"
 
-#include "level.h"
-
-#include "levelEditor.h"
+#include "levelmanager.h"
 
 #include <chrono>
 
@@ -12,14 +10,12 @@
 
 int main()
 {
-    bool editorMode = false;
-
     int screenScale = 6;
 
     int screenWidth = NATIVE_WIDTH * screenScale;
     int screenHeight = NATIVE_HEIGHT * screenScale;
 
-    if(editorMode) screenWidth = 1600;
+    if(currentScreen == GameScreen::EDITOR) screenWidth = 1600;
 
     InitWindow(screenWidth, screenHeight, "");
 
@@ -40,23 +36,11 @@ int main()
         return 0;
     }
 
-    LoadAssets();
-
-    RenderTexture2D gameplayCanvas = LoadRenderTexture(CANVAS_WIDTH, GAMEPLAY_CANVAS_HEIGHT);
-
-    RenderTexture2D uiCanvas = LoadRenderTexture(CANVAS_WIDTH, UI_CANVAS_HEIGHT);
-
-    SetTextureFilter(gameplayCanvas.texture, TEXTURE_FILTER_POINT);
-
-    SetTextureFilter(uiCanvas.texture, TEXTURE_FILTER_POINT);
-
-    std::unique_ptr testLevel = std::make_unique<Level>();
-
-    std::unique_ptr editor = std::make_unique<LevelEditor>(NATIVE_WIDTH, NATIVE_HEIGHT, "levels/testLevel", "levels/testRooms");
+    InitManagerExtern();
 
     auto levelInitTimeStart = std::chrono::high_resolution_clock::now();
 
-    testLevel->InitLevel(
+    ResetLevel(
         "levels/testLevel",
         "levels/testRooms",
         fixedDt,
@@ -65,10 +49,7 @@ int main()
 
     auto levelInitTimeEnd = std::chrono::high_resolution_clock::now();
 
-    double levelInitTime = std::chrono::duration<double, std::milli>(levelInitTimeEnd - levelInitTimeStart).count();    
-
-    testLevel->gameplayCanvas = gameplayCanvas;
-    testLevel->uiCanvas = uiCanvas;
+    double levelInitTime = std::chrono::duration<double, std::milli>(levelInitTimeEnd - levelInitTimeStart).count();
 
     const int MAX_LAST_FRAMES = 120;
 
@@ -93,35 +74,17 @@ int main()
         float dt = GetFrameTime();
         accumulator += dt;
 
-        if(!editorMode && testLevel->LevelStarted())
-        {
-            testLevel->UpdatePlayerInput();
-
-            testLevel->EvaluateLevelPause();
-        }
+        UpdateScreenInput();
 
         while (accumulator >= fixedDt)
         {
-            //when making levels a list of level instances
-            //wrap that logic in a level manager
-            //transitions and level switching will be drawn and managed there
-            
             auto allPhysicsTimerStart = std::chrono::high_resolution_clock::now();
 
-            if(!editorMode)
-            {
-                if(!testLevel->LevelStarted()) testLevel->TickLevelStartTimer();
-
-                if(!testLevel->paused) testLevel->UpdateLevel();
-                else testLevel->Pause();
-            }
-            else editor->Update();
+            UpdateScreen(fixedDt, iterations);
 
             auto allPhysicsTimerEnd = std::chrono::high_resolution_clock::now();
             
             double physicsTime = std::chrono::duration<double, std::milli>(allPhysicsTimerEnd - allPhysicsTimerStart).count();
-
-            //if(!editorMode) std::cout<<"Total UpdateLevel time: "<<physicsTime<<" ms \n";
 
             totalPhysicsTime += physicsTime;
             physicsStepCount++;
@@ -141,18 +104,13 @@ int main()
 
         auto drawingStart = std::chrono::high_resolution_clock::now();
 
-        if(!editorMode) testLevel->DrawLevel();
-        else
-        {
-            editor->Draw();
-        }
+        DrawScreen();
 
         DrawFPS(10,10);
 
         auto drawingEnd = std::chrono::high_resolution_clock::now();
         
         double drawingTime = std::chrono::duration<double, std::milli>(drawingEnd - drawingStart).count();
-        //if(!editorMode) std::cout<<"Drawing total time: "<<drawingTime<<" ms \n";
 
         totalDrawingTime += drawingTime;
         drawingStepCount++;
@@ -213,24 +171,24 @@ int main()
         std::cout<<"Average last drawing time: "<<avgDrawingLastTime<<" ms (over "<<MAX_LAST_FRAMES<<" frames)\n";
     }
 
-    std::cout<<"total platform count: "<<testLevel->GetPlatformCount()<<"\n";
+    std::cout<<"total platform count: "<<currLevel->GetPlatformCount()<<"\n";
 
     std::cout<<"\n";
 
-    std::cout<<"total player update platform cache count: "<<testLevel->GetPlatformCache_Update()<<"\n";
-    std::cout<<"total player physics platform cache count: "<<testLevel->GetPlatformCache_Physics()<<"\n";
-    std::cout<<"total player render platform cache count: "<<testLevel->GetPlatformCache_Render()<<"\n";
+    std::cout<<"total player update platform cache count: "<<currLevel->GetPlatformCache_Update()<<"\n";
+    std::cout<<"total player physics platform cache count: "<<currLevel->GetPlatformCache_Physics()<<"\n";
+    std::cout<<"total player render platform cache count: "<<currLevel->GetPlatformCache_Render()<<"\n";
 
     std::cout<<"\n";
 
-    std::cout<<"total enemy count: "<<testLevel->GetEnemyCount()<<"\n";
+    std::cout<<"total enemy count: "<<currLevel->GetEnemyCount()<<"\n";
 
-    std::cout<<"total player enemy cache count: "<<testLevel->GetEnemyCache()<<"\n";
-    std::cout<<"total player enemy physics cache count: "<<testLevel->GetEnemyCache_Physics()<<"\n";
+    std::cout<<"total player enemy cache count: "<<currLevel->GetEnemyCache()<<"\n";
+    std::cout<<"total player enemy physics cache count: "<<currLevel->GetEnemyCache_Physics()<<"\n";
 
     std::cout<<"Tile struct size: "<<(int)sizeof(Tile)<<"\n";
 
-    std::cout<<"level map size: "<<(int)sizeof(testLevel->level)<<"\n";
+    std::cout<<"level map size: "<<(int)sizeof(currLevel->level)<<"\n";
 
     std::cout<<"level map size in tiles: "<<LAYERS * COLS * ROWS<<"\n";
 
@@ -240,17 +198,7 @@ int main()
 
     std::cout<<"\n";
 
-    testLevel.reset();
-    
-    editor.reset();
-
-    UnloadAssets();
-    testLevel.reset();
-    
-    editor.reset();
-    UnloadRenderTexture(gameplayCanvas);
-
-    UnloadRenderTexture(uiCanvas);
+    DestroyManager();
 
     CloseWindow();
 

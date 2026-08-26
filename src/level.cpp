@@ -12,6 +12,8 @@ Level::~Level()
 
 void Level::InitLevel(const char* levelPath, const char* roomPath ,float dt, int iterations)
 {
+    retToTitle = false;
+
     this->iterations = iterations;
 
     this->dt = dt;
@@ -551,7 +553,7 @@ void Level::UpdateLevel()
         ResetLevel();
     }
 
-    std::cout<<"respawn timer: "<<respawnTimer<<"\n";
+    //std::cout<<"respawn timer: "<<respawnTimer<<"\n";
 
     if(player.health <= 0)
     {
@@ -658,7 +660,17 @@ void Level::Pause()
         }
         break;
 
-        case MenuOptions::RETURN_TO_TITLE: break;
+        case MenuOptions::RETURN_TO_TITLE:
+        {
+            player.stunTimer = player.maxStunTime;
+
+            player.pausePressed = false;
+
+            player.resetingLevel = true;
+
+            retToTitle = true;
+        } 
+        break;
 
         case MenuOptions::RESTART:
         {
@@ -1999,6 +2011,8 @@ void Level::ResetLevel()
     levelStartTimer = 0.0f;
 
     respawnTimer = 0.0f;
+
+    retToTitle = false;
 }
 
 void Level::DrawLevel()
@@ -2283,7 +2297,7 @@ void Level::DrawLevel()
     //UI
     DrawLevelUI();
 
-    ClearBackground(BLACK);
+    ClearBackground(DARKEST_BROWN);
 
     float scale = fminf((float)GetScreenWidth() / NATIVE_WIDTH, 
     (float)GetScreenHeight() / NATIVE_HEIGHT);
