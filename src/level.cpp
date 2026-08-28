@@ -493,6 +493,8 @@ void Level::InitLevel(const char* levelPath, const char* roomPath ,float dt, int
     platformCache_rendering.reserve(100);
 
     enemyCache.reserve(100);
+
+    RoomChangeEvaluation();
 }
 
 /*
@@ -695,7 +697,7 @@ void Level::UpdateCamera(const Vector2 &target, const Vector2 &offset)
     int canvasWidth = gameplayCanvas.texture.width;
     int canvasHeight = gameplayCanvas.texture.height;
 
-    int roomIndex = -1;
+    int roomIndex = 0;
 
     Rectangle currentRoom = {};
 
@@ -1735,7 +1737,7 @@ void Level::RoomChangeEvaluation()
         player.gameObj.transform.position.y + player.gameObj.body.GetFinalVelocity().y * (dt / iterations)
     };
 
-    int roomIndex = -1;
+    int roomIndex = 0;
 
     for(int r = 0; r < rooms.size(); r++)
     {

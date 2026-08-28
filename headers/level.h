@@ -339,13 +339,15 @@ struct Level
 
         if(currentRoomIndex > -1)
         {
-            Rectangle& currentRoom = rooms[currentRoomIndex].aabb;
+            Rectangle* currentRoom = &rooms[currentRoomIndex].aabb;
+
+            if(!currentRoom) return rangeLimits;
 
             rangeLimits = {
-                (int)(currentRoom.x / TILE_SIZE),
-                (int)(currentRoom.y / TILE_SIZE),
-                (int)((currentRoom.x + currentRoom.width) / TILE_SIZE) - 1,
-                (int)((currentRoom.y + currentRoom.height) / TILE_SIZE) - 1
+                (int)(currentRoom->x / TILE_SIZE),
+                (int)(currentRoom->y / TILE_SIZE),
+                (int)((currentRoom->x + currentRoom->width) / TILE_SIZE) - 1,
+                (int)((currentRoom->y + currentRoom->height) / TILE_SIZE) - 1
             };
         }
 
