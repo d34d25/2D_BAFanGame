@@ -280,7 +280,7 @@ enum class NeighborDirection
 
 struct Tile
 {
-    std::vector<Hitbox> hitboxes = {};
+    //std::vector<Hitbox> hitboxes = {};
 
     TileType neighborsTypes[8] = {TileType::VOID};
 
@@ -785,17 +785,29 @@ inline void LoadLevelData(const char* levelPath, Tile(&destination)[LAYERS][COLS
 
     if(fileData == nullptr) return;
 
-    if(dataSize != (LAYERS * ROWS * COLS * sizeof(Tile))) return;
+    if(dataSize != (LAYERS * ROWS * COLS * sizeof(Tile))) 
+    {
+        std::cout<<"TILE LOADING FAILED\n";
+
+        return;
+    }
 
     memcpy(destination, fileData, dataSize);
     
     UnloadFileData(fileData);
 
+    std::cout<<"TILE LOADING SUCCESS\n";
+
     int roomDataSize = 0;
 
     unsigned char* roomFileData = LoadFileData(roomPath, &roomDataSize);
 
-    if(roomFileData == nullptr) return;
+    if(roomFileData == nullptr)
+    {
+        std::cout<<"ROOM LOADING FAILED\n";
+
+        return;
+    } 
 
     int roomCount = roomDataSize / sizeof(Room);
 
@@ -811,6 +823,8 @@ inline void LoadLevelData(const char* levelPath, Tile(&destination)[LAYERS][COLS
     }
 
     UnloadFileData(roomFileData);
+
+    std::cout<<"ROOM LOADING SUCCESS\n";
 }
 
 inline std::vector<std::array<Color, 4>> LoadPalette(const char* palettePath)

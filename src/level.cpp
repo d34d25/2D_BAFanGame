@@ -234,11 +234,11 @@ void Level::InitLevel(const char* levelPath, const char* roomPath ,float dt, int
 
                 tile.isMiddle = true;
 
-                tile.hitboxes.push_back(Hitbox{{0,0}, {TILE_SIZE, TILE_SIZE}});
+                tileHitboxes[l][i][j].push_back(Hitbox{{0,0}, {TILE_SIZE, TILE_SIZE}});
 
-                for(int h = 0; h < tile.hitboxes.size(); h++)
+                for(int h = 0; h < tileHitboxes[l][i][j].size(); h++)
                 {
-                    tile.hitboxes[h].Update(tilePosition);
+                    tileHitboxes[l][i][j][h].Update(tilePosition);
                 }
 
                 float treadmillVel = 50.0f;
@@ -335,7 +335,7 @@ void Level::InitLevel(const char* levelPath, const char* roomPath ,float dt, int
                             std::swap(widthFactor, heightFactor);
                         }
 
-                        Rectangle& tileMainAABB = tile.hitboxes[0].aabb;
+                        Rectangle& tileMainAABB = tileHitboxes[l][i][j][0].aabb;
 
                         Vector2 size = {tileMainAABB.width * widthFactor, tileMainAABB.height * heightFactor};
 
@@ -354,7 +354,7 @@ void Level::InitLevel(const char* levelPath, const char* roomPath ,float dt, int
                             default: break;
                         }
 
-                        tile.hitboxes.push_back(Hitbox{tilePosition, size, offset, true}); 
+                        tileHitboxes[l][i][j].push_back(Hitbox{tilePosition, size, offset, true}); 
                     };
 
                     switch (tile.type)
@@ -433,7 +433,7 @@ void Level::InitLevel(const char* levelPath, const char* roomPath ,float dt, int
             }
         }
     }
-
+    
     std::stable_sort(platformList.begin(), platformList.end(), [](const Platform& a, const Platform& b)
     {
         bool isASpike = IsPlatformSpike(a.type);
@@ -596,6 +596,8 @@ void Level::ResetRoom()
     }
 
     player.bulletpool.get()->Reset();
+
+    RoomChangeEvaluation();
 }
 
 void Level::Pause()
@@ -904,9 +906,9 @@ void Level::MediumFrequencyDiscreteUpdate_First()
 
                         if(!tile.canPlatformCollidePhysically) continue;
                         
-                        if(tile.hitboxes.empty()) continue;
+                        if(tileHitboxes[l][i][j].empty()) continue;
 
-                        Rectangle& tileMainAABB = tile.hitboxes[0].aabb;
+                        Rectangle& tileMainAABB = tileHitboxes[l][i][j][0].aabb;
 
                         if(CheckCollisionCircles(
                             platform->gameObj.transform.position, 
@@ -1183,9 +1185,9 @@ void Level::HighFrequencyDiscreteUpdate()
 
                 if(!tile.canEntityCollidePhysically) continue;
 
-                if(!tile.isMiddle || tile.hitboxes.empty()) continue;
+                if(!tile.isMiddle || tileHitboxes[l][i][j].empty()) continue;
 
-                Rectangle& tileMainAABB = tile.hitboxes[0].aabb;
+                Rectangle& tileMainAABB = tileHitboxes[l][i][j][0].aabb;
 
                 if(!CheckCollisionCircles(
                     player.gameObj.transform.position,
@@ -1236,9 +1238,9 @@ void Level::HighFrequencyDiscreteUpdate()
 
                 Vector2 tilePosition = GetTileCenter(i,j);
 
-                if(!tile.isMiddle || tile.hitboxes.empty()) continue;
+                if(!tile.isMiddle || tileHitboxes[l][i][j].empty()) continue;
 
-                Rectangle& tileMainAABB = tile.hitboxes[0].aabb;
+                Rectangle& tileMainAABB = tileHitboxes[l][i][j][0].aabb;
 
                 if(!CheckCollisionCircles(
                     player.gameObj.transform.position,
@@ -1407,9 +1409,9 @@ void Level::HighFrequencyDiscreteUpdate()
 
                     if(IsTileSpike(tile.type))
                     {
-                        for(int h = 1; h < tile.hitboxes.size(); h++)
+                        for(int h = 1; h < tileHitboxes[l][i][j].size(); h++)
                         {
-                            if(CheckCollisionRecs(player.gameObj.GetMainAABB(), tile.hitboxes[h].aabb))
+                            if(CheckCollisionRecs(player.gameObj.GetMainAABB(), tileHitboxes[l][i][j][h].aabb))
                             {
                                 player.isTouchingSpike = true;
                                 break;
@@ -1556,9 +1558,9 @@ void Level::HighFrequencyDiscreteUpdate()
 
                     if(!CanEnemyCollideWithTile(tile.type)) continue; 
 
-                    if(!tile.isMiddle || tile.hitboxes.empty()) continue;
+                    if(!tile.isMiddle || tileHitboxes[l][i][j].empty()) continue;
 
-                    Rectangle& tileMainAABB = tile.hitboxes[0].aabb;
+                    Rectangle& tileMainAABB = tileHitboxes[l][i][j][0].aabb;
 
                     if(!CheckCollisionCircles(
                         enemy->gameObj.transform.position,
@@ -1615,9 +1617,9 @@ void Level::HighFrequencyDiscreteUpdate()
 
                     if(!CanEnemyCollideWithTile(tile.type)) continue; 
 
-                    if(!tile.isMiddle || tile.hitboxes.empty()) continue;
+                    if(!tile.isMiddle || tileHitboxes[l][i][j].empty()) continue;
 
-                    Rectangle& tileMainAABB = tile.hitboxes[0].aabb;
+                    Rectangle& tileMainAABB = tileHitboxes[l][i][j][0].aabb;
 
                     if(!CheckCollisionCircles(
                         enemy->gameObj.transform.position,
@@ -1810,9 +1812,9 @@ void Level::BulletsUpdate()
                     {
                         Tile& tile = level[l][i][j];
 
-                        if(tile.hitboxes.empty()) continue;
+                        if(tileHitboxes[l][i][j].empty()) continue;
 
-                        Rectangle& tileMainAABB = tile.hitboxes[0].aabb;
+                        Rectangle& tileMainAABB = tileHitboxes[l][i][j][0].aabb;
 
                         if(tile.canEntityCollidePhysically)
                         {
@@ -1898,9 +1900,9 @@ void Level::BulletsUpdate()
                         {
                             Tile& tile = level[l][c][r];
 
-                            if(tile.hitboxes.empty()) continue;
+                            if(tileHitboxes[l][c][r].empty()) continue;
 
-                            Rectangle& tileMainAABB = tile.hitboxes[0].aabb;
+                            Rectangle& tileMainAABB = tileHitboxes[l][c][r][0].aabb;
 
                             if(tile.canEntityCollidePhysically)
                             {
@@ -2581,7 +2583,7 @@ void Level::DebugDrawing()
 
                 if(IsNotRealTile(tile.type)) continue;
 
-                if(tile.hitboxes.empty()) continue;
+                if(tileHitboxes[l][i][j].empty()) continue;
 
                 Color collisionCheckColor = {255,0,0,172};
 
@@ -2610,9 +2612,9 @@ void Level::DebugDrawing()
 
                 if(IsNotRealTile(tile.type)) continue;
 
-                if(tile.hitboxes.empty()) continue;
+                if(tileHitboxes[l][i][j].empty()) continue;
 
-                Rectangle& tileMainAABB = tile.hitboxes[0].aabb;
+                Rectangle& tileMainAABB = tileHitboxes[l][i][j][0].aabb;
 
                 Color mainAABBColor = RED;
 
@@ -2620,9 +2622,9 @@ void Level::DebugDrawing()
 
                 DrawAABB(tileMainAABB, mainAABBColor, dynamicThickness);
 
-                for(int h = 1; h < tile.hitboxes.size(); h++)
+                for(int h = 1; h < tileHitboxes[l][i][j].size(); h++)
                 {
-                    DrawAABB(tile.hitboxes[h].aabb, MAGENTA, dynamicThickness);
+                    DrawAABB(tileHitboxes[l][i][j][h].aabb, MAGENTA, dynamicThickness);
                 }
 
                 Vector2 lineEnd = tilePosition;
@@ -2649,7 +2651,7 @@ void Level::DebugDrawing()
 
                     if(IsColorOf(color, BLANK) || tile.type == TileType::PLATFORM_STOP) continue;
 
-                    if(!tile.hitboxes.empty()) DrawRectangleRec(tileMainAABB, color);
+                    if(!tileHitboxes[l][i][j].empty()) DrawRectangleRec(tileMainAABB, color);
                     else DrawRectangle(i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE, TILE_SIZE, color);
                 }
             }

@@ -8,22 +8,98 @@
 
 #include <memory>
 
+#if defined(PLATFORM_WEB)
+    #include <emscripten/emscripten.h>
+#endif
+
+int screenScale = 6;
+
+int screenWidth = NATIVE_WIDTH * screenScale;
+int screenHeight = NATIVE_HEIGHT * screenScale;
+
+float accumulator = 0.0f;
+    
+float fixedDt = 1.0f / 60.0f;
+
+int iterations = 10;
+
+const int MAX_LAST_FRAMES = 120;
+
+double lastPhysicsFrames[MAX_LAST_FRAMES] = {0.0};
+int lastPhysicsCount = 0;
+int lastPhysicsIndex = 0;
+
+int physicsStepCount = 0;
+double totalPhysicsTime = 0.0;
+
+double lastDrawingFrames[MAX_LAST_FRAMES] = {0.0};
+int lastDrawingCount = 0;
+int lastDrawingIndex = 0;
+
+double totalDrawingTime = 0.0;
+int drawingStepCount = 0;
+
+void RunGame()
+{
+    float dt = GetFrameTime();
+    accumulator += dt;
+
+    UpdateScreenInput();
+
+    while (accumulator >= fixedDt)
+    {
+        auto allPhysicsTimerStart = std::chrono::high_resolution_clock::now();
+
+        UpdateScreen(fixedDt, iterations);
+
+        auto allPhysicsTimerEnd = std::chrono::high_resolution_clock::now();
+            
+        double physicsTime = std::chrono::duration<double, std::milli>(allPhysicsTimerEnd - allPhysicsTimerStart).count();
+
+        totalPhysicsTime += physicsTime;
+        physicsStepCount++;
+
+        lastPhysicsFrames[lastPhysicsIndex] = physicsTime;
+
+        lastPhysicsIndex = (lastPhysicsIndex + 1) % MAX_LAST_FRAMES;
+
+        if(lastPhysicsCount < MAX_LAST_FRAMES) lastPhysicsCount++;
+
+        accumulator -= fixedDt;
+    }
+        
+    //-----
+
+    BeginDrawing();
+
+    auto drawingStart = std::chrono::high_resolution_clock::now();
+
+    DrawScreen();
+
+    DrawFPS(10,10);
+
+    auto drawingEnd = std::chrono::high_resolution_clock::now();
+        
+    double drawingTime = std::chrono::duration<double, std::milli>(drawingEnd - drawingStart).count();
+
+    totalDrawingTime += drawingTime;
+    drawingStepCount++;
+
+    lastDrawingFrames[lastDrawingIndex] = drawingTime;
+
+    lastDrawingIndex = (lastDrawingIndex + 1) % MAX_LAST_FRAMES;
+
+    if(lastDrawingCount < MAX_LAST_FRAMES) lastDrawingCount++;
+
+    EndDrawing();
+
+}
+
 int main()
 {
-    int screenScale = 6;
-
-    int screenWidth = NATIVE_WIDTH * screenScale;
-    int screenHeight = NATIVE_HEIGHT * screenScale;
-
     InitWindow(screenWidth, screenHeight, "");
 
     SetTargetFPS(60);
-
-    float accumulator = 0.0f;
-    
-    float fixedDt = 1.0f / 60.0f;
-
-    int iterations = 10;
 
     if(iterations < 1)
     {
@@ -45,90 +121,29 @@ int main()
 
     auto levelInitTimeStart = std::chrono::high_resolution_clock::now();
 
-    ResetLevel(
-        "levels/testLevel",
-        "levels/testRooms",
-        fixedDt,
-        iterations
-    );
+    if(currentScreen != GameScreen::EDITOR)
+    {
+        ResetLevel(
+            "levels/testLevel",
+            "levels/testRooms",
+            fixedDt,
+            iterations
+        );
+    }
 
     auto levelInitTimeEnd = std::chrono::high_resolution_clock::now();
 
     double levelInitTime = std::chrono::duration<double, std::milli>(levelInitTimeEnd - levelInitTimeStart).count();
 
-    const int MAX_LAST_FRAMES = 120;
-
-    double lastPhysicsFrames[MAX_LAST_FRAMES] = {0.0};
-    int lastPhysicsCount = 0;
-    int lastPhysicsIndex = 0;
-
-    int physicsStepCount = 0;
-    double totalPhysicsTime = 0.0;
-
-    double lastDrawingFrames[MAX_LAST_FRAMES] = {0.0};
-    int lastDrawingCount = 0;
-    int lastDrawingIndex = 0;
-
-    double totalDrawingTime = 0.0;
-    int drawingStepCount = 0;
-
+    #if defined(PLATFORM_WEB)
+        emscripten_set_main_loop(RunGame, 0, 1);
+    #else
+    
     while (!WindowShouldClose())
     {
-        //update
-
-        float dt = GetFrameTime();
-        accumulator += dt;
-
-        UpdateScreenInput();
-
-        while (accumulator >= fixedDt)
-        {
-            auto allPhysicsTimerStart = std::chrono::high_resolution_clock::now();
-
-            UpdateScreen(fixedDt, iterations);
-
-            auto allPhysicsTimerEnd = std::chrono::high_resolution_clock::now();
-            
-            double physicsTime = std::chrono::duration<double, std::milli>(allPhysicsTimerEnd - allPhysicsTimerStart).count();
-
-            totalPhysicsTime += physicsTime;
-            physicsStepCount++;
-
-            lastPhysicsFrames[lastPhysicsIndex] = physicsTime;
-
-            lastPhysicsIndex = (lastPhysicsIndex + 1) % MAX_LAST_FRAMES;
-
-            if(lastPhysicsCount < MAX_LAST_FRAMES) lastPhysicsCount++;
-
-            accumulator -= fixedDt;
-        }
-        
-        //-----
-
-        BeginDrawing();
-
-        auto drawingStart = std::chrono::high_resolution_clock::now();
-
-        DrawScreen();
-
-        DrawFPS(10,10);
-
-        auto drawingEnd = std::chrono::high_resolution_clock::now();
-        
-        double drawingTime = std::chrono::duration<double, std::milli>(drawingEnd - drawingStart).count();
-
-        totalDrawingTime += drawingTime;
-        drawingStepCount++;
-
-        lastDrawingFrames[lastDrawingIndex] = drawingTime;
-
-        lastDrawingIndex = (lastDrawingIndex + 1) % MAX_LAST_FRAMES;
-
-        if(lastDrawingCount < MAX_LAST_FRAMES) lastDrawingCount++;
-
-        EndDrawing();
+        RunGame();   
     }
-
+    
     std::cout<<"\n";
 
     std::cout<<"Level loading time: "<<levelInitTime<<" ms\n";
@@ -212,5 +227,7 @@ int main()
 
     std::cout<<"aspect ratio: "<<(float)((float)NATIVE_WIDTH / (float)NATIVE_HEIGHT)<<"\n";
 
-    std::cout<<std::endl;   
+    std::cout<<std::endl;
+
+    #endif
 }
