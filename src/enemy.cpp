@@ -232,7 +232,7 @@ void Enemy::AmasDroneBehavior(float dt, Player &player)
     float distanceToPlayerX = player.gameObj.transform.position.x - gameObj.transform.position.x;
     float distanceToPlayerY = player.gameObj.transform.position.y - gameObj.transform.position.y;
 
-    float hoverSpeed = 40;
+    float hoverSpeed = 30; //40
     float diveSpeed = 70;
 
     float triggerRange = TILE_SIZE * 4;
@@ -833,7 +833,7 @@ void Enemy::InitEnemy(
 
         bulletData.fanShaped = true;
 
-        bulletData.fireRate = 1.15f;
+        bulletData.fireRate = 1.7f;
 
         bulletData.inertia = false;
 
@@ -841,7 +841,7 @@ void Enemy::InitEnemy(
 
         bulletData.pelletCount = 8;
 
-        bulletData.speed = 90;
+        bulletData.speed = 80; //90
 
         canFly = true;
 
