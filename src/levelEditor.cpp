@@ -990,7 +990,14 @@ void LevelEditor::Draw()
                 {
                     std::vector<std::array<Color, MAX_PALETTE_COLS>>* currentTilePaletteList = GetCurrentTilePaletteList(type);
 
-                    ChangePalette(tile.paletteIndex, currentTilePaletteList);
+                    if(tile.type == TileType::CHECKPOINT)
+                    {
+                        ChangePalette(2, currentTilePaletteList);
+                    }
+                    else
+                    {
+                        ChangePalette(tile.paletteIndex, currentTilePaletteList);
+                    }
 
                     if(tile.type == TileType::ROTATING_SPIKE_SINGLE ||
                     tile.type == TileType::ROTATING_SPIKE_DOUBLE)

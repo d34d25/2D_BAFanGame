@@ -10,6 +10,8 @@ void Player::InitPlayer(Vector2 position, float gravity, bool flipY)
 
     spawnPos = position;
 
+    initialPosition = position;
+
     gameObj.transform.position = position;
 
     gameObj.body = {};

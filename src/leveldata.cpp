@@ -110,6 +110,8 @@ std::vector<SpriteRenderData> uiElements = {};
 
 std::vector<Texture2D> backgrounds = {};
 
+std::vector<SpriteRenderData> checkpointRenderData = {};
+
 /*
     spacing is how many frames an animation loop has, this value is fixed for each SpriteRenderData
     if the spacing is 0 or less the whole animation vector will be used, if it is 1 the SpriteRenderData won't have animations,
@@ -439,6 +441,8 @@ void LoadAssets()
     uiElements.push_back(LoadRenderData(
         "assets/ui/health-point.png", tileSize
     ));
+
+    checkpointRenderData.push_back(LoadRenderData("assets/tiles/checkpoint.png", tileSize, {0,0}, 3));
 }
 
 void UnloadAssets()
@@ -527,6 +531,8 @@ void UnloadAssets()
     CleanUp(portraits);
 
     CleanUp(uiElements);
+
+    CleanUp(checkpointRenderData);
 
     for(int i = 0; i < backgrounds.size(); i++)
     {

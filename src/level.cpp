@@ -70,6 +70,8 @@ void Level::InitLevel(const char* levelPath, const char* roomPath ,float dt, int
                     player.gameObj.transform.position = spawnPos;
                     player.spawnPos = player.gameObj.transform.position;
 
+                    player.initialPosition = player.gameObj.transform.position;
+
                     player.gameObj.flipData.flipOffset = tile.flipData.flipOffset;
                 }
 
@@ -666,6 +668,8 @@ void Level::Pause()
 
         case MenuOptions::RETURN_TO_TITLE:
         {
+            player.spawnPos = player.initialPosition;
+
             player.stunTimer = player.maxStunTime;
 
             player.pausePressed = false;
@@ -1402,6 +1406,12 @@ void Level::HighFrequencyDiscreteUpdate()
                         }
                     }
                     break;
+
+                    case TileType::CHECKPOINT:
+                    {
+                        player.spawnPos = Vector2{(float)(i * TILE_SIZE), (float)(j * TILE_SIZE)};
+                    }
+                    break;
                     
                     default:
                         break;
@@ -2110,11 +2120,25 @@ void Level::DrawLevel()
 
                 if(tileRenderData)
                 {
-                    ChangePalette(tile.paletteIndex, &environmentPalettes);
-
+                    if(tile.type == TileType::CHECKPOINT)
+                    {
+                        if((i * TILE_SIZE) == player.spawnPos.x && (j * TILE_SIZE) == player.spawnPos.y)
+                        {
+                            ChangePalette(1, &environmentPalettes);
+                        }
+                        else
+                        {
+                            ChangePalette(2, &environmentPalettes);
+                        }
+                    }
+                    else
+                    {
+                        ChangePalette(tile.paletteIndex, &environmentPalettes);
+                    }
+                    
                     if(tile.currentFrame >= 0 && tile.currentFrame < (int)tileRenderData->animationFrames.size())
                     {
-                        DrawSprite(tilePosition, tile.angle, tileRenderData, tile.flipData ,tile.currentFrame);
+                        DrawSprite(tilePosition, tile.angle, tileRenderData, tile.flipData, tile.currentFrame);
                     }
                 }
             }

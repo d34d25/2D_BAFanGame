@@ -21,7 +21,9 @@ struct Player
 {
     GameObject gameObj = {};
 
-    Vector2 spawnPos = {0,0};
+    Vector2 initialPosition = {0.0f, 0.0f};
+
+    Vector2 spawnPos = {0.0f, 0.0f};
 
     std::unique_ptr<EffectPool> effectPool = {};
 

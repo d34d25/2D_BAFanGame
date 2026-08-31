@@ -67,6 +67,8 @@ enum struct TileType
 
     PLAYER_SPAWN, //not a real tile
 
+    CHECKPOINT,
+
     MISC_END,
 
     DECO,
@@ -243,6 +245,8 @@ const std::vector<TileTypeList> TILE_TYPE_LIST = {
     {TileType::ROTATING_SPIKE_DOUBLE, SPIKE, "ROTATING_SPIKE_DOUBLE"},
 
     {TileType::PLAYER_SPAWN, PLAYER_SPAWN, "PLAYER_SPAWN"},
+
+    {TileType::CHECKPOINT, WHITE, "CHECKPOINT"},
 
     {TileType::DECO, DECO, "DECO"},
 
@@ -517,6 +521,8 @@ extern std::vector<SpriteRenderData> uiElements;
 
 extern std::vector<Texture2D> backgrounds;
 
+extern std::vector<SpriteRenderData> checkpointRenderData;
+
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 extern SpriteRenderData LoadRenderData(const char* path, Vector2 frameSize, Vector2 offset = {0,0}, int spacing = 1, int atlasStartFrame = 0, int atlasEndFrame = 0, float animationSpeed = 5.0f);
@@ -601,6 +607,8 @@ inline std::vector<SpriteRenderData>* GetTileActiveRenderDataList(TileType type)
     case TileType::ENEMY_AMAS_HEAVY: return &amasHeavyRenderData;
 
     case TileType::ENEMY_YUUKA: return &yuukaRenderData;
+
+    case TileType::CHECKPOINT: return &checkpointRenderData;
 
     default: return nullptr;
     }
