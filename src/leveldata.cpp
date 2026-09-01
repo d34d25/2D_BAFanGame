@@ -242,6 +242,16 @@ void LoadAssets()
         tileSize,{0,0}
     ));
 
+    decoRenderData.push_back(LoadRenderData(
+        "assets/tiles/deco/controls.png",
+        {94,51},{0,0}
+    ));
+
+    decoRenderData.push_back(LoadRenderData(
+        "assets/tiles/deco/arrow.png",
+        {27,11},{0,0}
+    ));
+
     //rest of tiles
 
     ladderRenderData.push_back(LoadRenderData("assets/tiles/ladder.png", tileSize));

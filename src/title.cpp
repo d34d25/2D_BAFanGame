@@ -14,7 +14,13 @@ void Title::DrawTitle()
 
     Vector2 startTextPos = SetUIElementPosition(5, 8);
 
-    if(lowFrequencyCounter >= MAX_COUNT * 0.5f) DrawText("PRESS START!", startTextPos.x, startTextPos.y, 1, WHITE);
+    Vector2 zTextPos = SetUIElementPosition(7, 10);
+
+    if(lowFrequencyCounter >= MAX_COUNT * 0.5f)
+    {
+        DrawText("PRESS START!", startTextPos.x, startTextPos.y, 1, WHITE);
+        DrawText("(Z/Enter)", zTextPos.x, zTextPos.y, 1, WHITE);
+    } 
 
     if(debugDrawing)
     {
