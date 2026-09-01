@@ -121,16 +121,6 @@ int main()
 
     auto levelInitTimeStart = std::chrono::high_resolution_clock::now();
 
-    if(currentScreen != GameScreen::EDITOR)
-    {
-        ResetLevel(
-            "levels/testLevel",
-            "levels/testRooms",
-            fixedDt,
-            iterations
-        );
-    }
-
     auto levelInitTimeEnd = std::chrono::high_resolution_clock::now();
 
     double levelInitTime = std::chrono::duration<double, std::milli>(levelInitTimeEnd - levelInitTimeStart).count();

@@ -22,6 +22,8 @@ void UpdateScreen(float dt, int iterations)
     {
     case GameScreen::GAMEPLAY:
     {
+        if(!currLevel) break;
+
         if(!currLevel->LevelStarted()) currLevel->TickLevelStartTimer();
 
         if(!currLevel->paused) currLevel->UpdateLevel();
@@ -44,16 +46,15 @@ void UpdateScreen(float dt, int iterations)
 
         if(title.contToGameplay)
         {
-            currentScreen = GameScreen::GAMEPLAY;
-
-            /*ResetLevel(
+            ResetLevel(
                 "levels/testLevel",
                 "levels/testRooms",
                 dt,
                 iterations
-            );*/
-        }
+            );
 
+            if(levelReady) currentScreen = GameScreen::GAMEPLAY;
+        }
     }
     break;
 
@@ -88,9 +89,8 @@ void DrawScreen()
     {
     case GameScreen::GAMEPLAY:
     {
-        if(levelReady) currLevel->DrawLevel();
-        else ClearBackground(BLACK);
-        
+        if(!levelReady) ClearBackground(BLACK);
+        else currLevel->DrawLevel();
     }
     break;
         

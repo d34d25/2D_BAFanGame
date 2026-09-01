@@ -68,6 +68,10 @@ inline void ResetLevel(
 
     levelReady = false;
 
+    currLevel.reset();
+
+    currLevel = std::make_unique<Level>();
+
     currLevel->InitLevel(levelPath, roomPath, dt, iterations);
     
     currLevel->gameplayCanvas = gameplayCanvas;
