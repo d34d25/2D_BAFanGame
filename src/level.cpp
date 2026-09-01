@@ -70,7 +70,7 @@ void Level::InitLevel(const char* levelPath, const char* roomPath ,float dt, int
                     player.gameObj.transform.position = spawnPos;
                     player.spawnPos = player.gameObj.transform.position;
 
-                    player.initialPosition = player.gameObj.transform.position;
+                    player.initialPosition = spawnPos;
 
                     player.gameObj.flipData.flipOffset = tile.flipData.flipOffset;
                 }
@@ -553,7 +553,6 @@ void Level::UpdateLevel()
     }
     else if(player.resetingLevel)
     {
-        player.resetingLevel = false;
         ResetLevel();
     }
 
@@ -631,9 +630,11 @@ void Level::Pause()
     {
     case MIN_SELECTOR_POS: selector.selectedOption = MenuOptions::CONTINUE; break;
 
-    case MIDDLE_SELECTOR_POS: selector.selectedOption = MenuOptions::RETURN_TO_TITLE; break;
+    case MIDDLE_SELECTOR_POS_A: selector.selectedOption = MenuOptions::RESPAWN; break;
 
-    case MAX_SELECTOR_POS: selector.selectedOption = MenuOptions::RESTART; break;
+    case MIDDLE_SELECTOR_POS_B: selector.selectedOption = MenuOptions::RESTART; break;
+
+    case MAX_SELECTOR_POS: selector.selectedOption = MenuOptions::RETURN_TO_TITLE; break;
     
     default: selector.selectedOption = MenuOptions::CONTINUE; break;
     }
@@ -647,6 +648,8 @@ void Level::Pause()
     case MenuOptions::RETURN_TO_TITLE: debtext = "RETURN_TO_TITLE"; break;
 
     case MenuOptions::RESTART: debtext = "RESTART"; break;
+
+    case MenuOptions::RESPAWN: debtext = "RESPAWN"; break;
     
     default:
         break;
@@ -662,14 +665,14 @@ void Level::Pause()
         {
             player.pausePressed = false;
 
+            retToTitle = false;
+
             player.ResetInput();
         }
         break;
 
         case MenuOptions::RETURN_TO_TITLE:
         {
-            player.spawnPos = player.initialPosition;
-
             player.stunTimer = player.maxStunTime;
 
             player.pausePressed = false;
@@ -687,6 +690,22 @@ void Level::Pause()
             player.pausePressed = false;
 
             player.resetingLevel = true;
+
+            retToTitle = false;
+        }
+        break;
+
+        case MenuOptions::RESPAWN:
+        {
+            player.stunTimer = player.maxStunTime;
+
+            player.pausePressed = false;
+
+            player.respawning = true;
+
+            player.resetingLevel = true;
+
+            retToTitle = false;
         }
         break;
 
@@ -2492,7 +2511,7 @@ void Level::PauseDrawing()
         pauseMenuRecPos.x,
         pauseMenuRecPos.y,
         TILE_SIZE * 16,
-        TILE_SIZE * 7
+        TILE_SIZE * 9
     };
 
     DrawRectangleRec(pauseMenuRec, BLACK);
@@ -2503,13 +2522,17 @@ void Level::PauseDrawing()
 
     DrawText("Continue", contTextPos.x, contTextPos.y, 1, WHITE);
 
-    Vector2 retTextPos = SetUIElementPosition(4, RETURN_TEXT_POS_Y);
+    Vector2 respTextPos = SetUIElementPosition(4, RESPAWN_TEXT_POS_Y);
 
-    DrawText("Return to title", retTextPos.x, retTextPos.y, 1, WHITE);
+    DrawText("Respawn", respTextPos.x, respTextPos.y, 1, WHITE);
 
     Vector2 restartTextPos = SetUIElementPosition(4, RESTART_TEXT_POS_Y);
 
     DrawText("Restart", restartTextPos.x, restartTextPos.y, 1, WHITE);
+
+    Vector2 retTextPos = SetUIElementPosition(4, RETURN_TEXT_POS_Y);
+
+    DrawText("Return to title", retTextPos.x, retTextPos.y, 1, WHITE);
 
     DrawText(">", selector.position.x, selector.position.y, 1, WHITE);
 

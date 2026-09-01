@@ -27,15 +27,19 @@ const float PLATFORM_UPDATE_RADIUS = TILE_SIZE * 28.0f;
 
 const int CONTINUE_TEXT_POS_Y = 5;
 
-const int RETURN_TEXT_POS_Y = 7;
+const int RESPAWN_TEXT_POS_Y = 7;
 
 const int RESTART_TEXT_POS_Y = 9;
 
+const int RETURN_TEXT_POS_Y = 11;
+
 const int MIN_SELECTOR_POS = TILE_SIZE * CONTINUE_TEXT_POS_Y;
 
-const int MIDDLE_SELECTOR_POS = TILE_SIZE * RETURN_TEXT_POS_Y;
+const int MIDDLE_SELECTOR_POS_A = TILE_SIZE * RESPAWN_TEXT_POS_Y;
 
-const int MAX_SELECTOR_POS = TILE_SIZE * RESTART_TEXT_POS_Y;
+const int MIDDLE_SELECTOR_POS_B = TILE_SIZE * RESTART_TEXT_POS_Y;
+
+const int MAX_SELECTOR_POS = TILE_SIZE * RETURN_TEXT_POS_Y;
 
 struct TileRangeLimits
 {
@@ -48,8 +52,9 @@ struct TileRangeLimits
 enum struct MenuOptions
 {
     CONTINUE,
-    RETURN_TO_TITLE,
-    RESTART
+    RESPAWN,
+    RESTART,
+    RETURN_TO_TITLE
 };
 
 struct MenuSelector

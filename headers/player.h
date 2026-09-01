@@ -123,6 +123,8 @@ struct Player
     bool holdingShoot = false;
 
     bool resetingLevel = false;
+
+    bool respawning = false;
     
     bool resetingZoom = false;
 
@@ -195,6 +197,8 @@ struct Player
         holdingShoot = false;
 
         resetingLevel = false;
+        respawning = false;
+
         resetingZoom = false;
 
         pressingUp = false;
@@ -205,9 +209,11 @@ struct Player
 
     inline void Respawn()
     {
-        ResetInput();
+        if(resetingLevel && !respawning) spawnPos = initialPosition;
 
         gameObj.transform.position = spawnPos;
+
+        ResetInput();
 
         gameObj.body.velocity = {0,0};
 
