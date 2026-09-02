@@ -1,6 +1,6 @@
 #include "player.h"
 
-void Player::InitPlayer(Vector2 position, float gravity, bool flipY)
+void Player::InitPlayer(Vector2 position, float gravity, bool flipY, Character character)
 {
     health = maxHealth;
 
@@ -54,11 +54,11 @@ void Player::InitPlayer(Vector2 position, float gravity, bool flipY)
 
     characterVariantIndex = 0;
 
-    character = Character::YUZU;
+    this->character = character;
 
     currentPortrait = -1;
 
-    switch (character)
+    switch (this->character)
     {
     case Character::MOMOI:
 
@@ -152,7 +152,7 @@ void Player::InitPlayer(Vector2 position, float gravity, bool flipY)
         break;
     }
 
-    characterRenderData = GetPlayerActiveRenderData(character, characterVariantIndex);
+    characterRenderData = GetPlayerActiveRenderData(this->character, characterVariantIndex);
 
     bulletpool = std::make_unique<BulletPool>(30, bulletData);
 

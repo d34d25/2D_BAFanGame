@@ -10,7 +10,13 @@ Level::~Level()
     ClearPlatformList();
 }
 
-void Level::InitLevel(const char* levelPath, const char* roomPath ,float dt, int iterations)
+void Level::InitLevel(
+    const char* levelPath, 
+    const char* roomPath,
+    float dt, 
+    int iterations, 
+    Character character
+)
 {
     retToTitle = false;
 
@@ -63,7 +69,7 @@ void Level::InitLevel(const char* levelPath, const char* roomPath ,float dt, int
                 {
                     Vector2 spawnPos = tilePosition;
 
-                    player.InitPlayer(spawnPos, gravity, gravity < 0);
+                    player.InitPlayer(spawnPos, gravity, gravity < 0, character);
 
                     if(player.gameObj.GetMainAABB().height > TILE_SIZE) spawnPos.y -= player.gameObj.GetMainAABB().height * 0.25f;
 

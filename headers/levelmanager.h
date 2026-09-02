@@ -34,6 +34,8 @@ inline void InitManagerExtern()
 {
     LoadAssets();
 
+    title.InitTitle();
+
     title.titleScreen = LoadTexture("assets/ui/titleScreen.png");
 
     title.titleCanvas = LoadRenderTexture(NATIVE_WIDTH, NATIVE_HEIGHT);
@@ -61,7 +63,8 @@ inline void ResetLevel(
     const char* levelPath,
     const char* roomPath,
     float dt,
-    int iterations
+    int iterations,
+    Character character = Character::YUZU
 )
 {
     std::cout<<"level not ready\n";
@@ -72,7 +75,7 @@ inline void ResetLevel(
 
     currLevel = std::make_unique<Level>();
 
-    currLevel->InitLevel(levelPath, roomPath, dt, iterations);
+    currLevel->InitLevel(levelPath, roomPath, dt, iterations, character);
     
     currLevel->gameplayCanvas = gameplayCanvas;
     currLevel->uiCanvas = uiCanvas;

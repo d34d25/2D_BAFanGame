@@ -33,11 +33,13 @@ void UpdateScreen(float dt, int iterations)
         {
             currentScreen = GameScreen::TITLE;
 
+            title.InitTitle();
+
             title.ResetTitle();
         }
     }
     break;
-    
+
     case GameScreen::EDITOR: editor->Update(); break;
     
     case GameScreen::TITLE:
@@ -50,7 +52,8 @@ void UpdateScreen(float dt, int iterations)
                 "levels/testLevel",
                 "levels/testRooms",
                 dt,
-                iterations
+                iterations,
+                title.selectedCharacter
             );
 
             if(levelReady) currentScreen = GameScreen::GAMEPLAY;

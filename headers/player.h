@@ -148,7 +148,7 @@ struct Player
 
     Player() = default;
 
-    void InitPlayer(Vector2 position, float gravity, bool flipY);
+    void InitPlayer(Vector2 position, float gravity, bool flipY, Character character);
 
     ~Player() = default;
 

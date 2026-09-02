@@ -149,7 +149,7 @@ struct Level
 
     ~Level();
 
-    void InitLevel(const char* levelPath, const char* roomPath ,float dt, int iterations);
+    void InitLevel(const char* levelPath, const char* roomPath ,float dt, int iterations, Character character);
 
     void UpdateLevel();
 
