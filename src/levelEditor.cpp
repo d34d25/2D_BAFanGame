@@ -1,13 +1,34 @@
 #include "levelEditor.h"
 
-#include<iostream>
-#include<cstring>
+#include <iostream>
+#include <cstring>
+#include <string>
 
 void LevelEditor::ExportLevel()
 {
     int dataSize = LAYERS * ROWS * COLS * sizeof(Tile);
 
-    if(SaveFileData("testLevel", tempLevel, dataSize))
+    bool levelSaved = false;
+
+    int levelCounter = 0;
+
+    std::string baseLevelName = "levels/testLevel";
+    std::string levelName = baseLevelName;
+
+    bool overwriteLevel = IsKeyDown(KEY_LEFT_SHIFT);
+
+    if(!overwriteLevel)
+    {
+        while (FileExists(levelName.c_str()))
+        {
+            levelName = baseLevelName + std::to_string(levelCounter);
+            levelCounter++;
+        }
+    }
+    
+    levelSaved = SaveFileData(levelName.c_str(), tempLevel, dataSize);
+
+    if(levelSaved)
     {
         std::cout<<"LEVEL EXPORT SUCCEED"<<"\n";
     }
@@ -20,7 +41,25 @@ void LevelEditor::ExportLevel()
     
     int roomDataSize = sizeof(Room) * roomCount;
 
-    if(SaveFileData("testRooms", rooms.data(), roomDataSize))
+    int roomCounter = 0;
+
+    std::string roomsBaseName = "levels/testRooms";
+    std::string roomsName = roomsBaseName;
+
+    bool roomSaved = false;
+
+    if(!overwriteLevel)
+    {
+        while (FileExists(roomsName.c_str()))
+        {
+            roomsName = roomsBaseName + std::to_string(roomCounter);
+            roomCounter++;
+        }
+    }
+    
+    roomSaved = SaveFileData(roomsName.c_str(), rooms.data(), roomDataSize); 
+
+    if(roomSaved)
     {
         std::cout<<"ROOMS EXPORT SUCCEED"<<"\n";
     }
@@ -156,7 +195,12 @@ void LevelEditor::DrawRotatingSpikesSprite(int currentType, int frame, const Spr
     }
 }
 
-LevelEditor::LevelEditor(int screenWidth, int screenHeight, const char* levelPath, const char* roomPath)
+LevelEditor::LevelEditor(
+    int screenWidth,
+    int screenHeight,
+    std::string levelPath,
+    std::string roomPath
+)
 {
     this->levelPath = levelPath;
 
@@ -833,7 +877,7 @@ void LevelEditor::Update()
     }
     else if(IsKeyPressed(KEY_F9))
     {
-        LoadLevelData(levelPath, tempLevel, roomPath, rooms);
+        LoadLevelData(levelPath.c_str(), tempLevel, roomPath.c_str(), rooms);
     }
 }
 

@@ -27,9 +27,9 @@ struct LevelEditor
 
     SpriteRenderData* activeRenderData = nullptr;
 
-    const char* levelPath;
+    std::string levelPath;
 
-    const char* roomPath;
+    std::string roomPath;
 
     Vector2 targetNeigbourPos = {0,0};
 
@@ -67,7 +67,7 @@ struct LevelEditor
 
     bool roomMode = false;
 
-    LevelEditor(int screenWidth, int screenHeight, const char* levelPath, const char* roomPath);
+    LevelEditor(int screenWidth, int screenHeight, std::string levelPath, std::string roomPath);
 
     ~LevelEditor() = default;
 

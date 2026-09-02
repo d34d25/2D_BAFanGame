@@ -41,6 +41,8 @@ int drawingStepCount = 0;
 
 void RunGame()
 {
+    //std::cout<<GetWorkingDirectory()<<"\n";
+
     float dt = GetFrameTime();
     accumulator += dt;
 

@@ -77,7 +77,7 @@ void UpdateScreenInput()
 
             currLevel->EvaluateLevelPause();
         }
-    } 
+    }
     break;
 
     case GameScreen::TITLE: title.UpdateTitleInput(); break;

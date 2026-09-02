@@ -56,7 +56,23 @@ inline void InitManagerExtern()
 
     currLevel = std::make_unique<Level>();
 
-    editor = std::make_unique<LevelEditor>(NATIVE_WIDTH, NATIVE_HEIGHT, "levels/testLevel", "levels/testRooms");
+    std::string levelToLoad = "levels/testLevel";
+    std::string roomsToLoad = "levels/testRooms";
+
+    int levelToLoadCounter = -1;
+
+    if(levelToLoadCounter >= 0)
+    {
+        levelToLoad += std::to_string(levelToLoadCounter);
+
+        roomsToLoad += std::to_string(levelToLoadCounter);
+    }
+
+    editor = std::make_unique<LevelEditor>(
+        NATIVE_WIDTH, NATIVE_HEIGHT, 
+        levelToLoad,
+        roomsToLoad
+    );
 }
 
 inline void ResetLevel(
