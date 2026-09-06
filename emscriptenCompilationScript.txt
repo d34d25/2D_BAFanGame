@@ -1,1 +1,13 @@
+#compilation
+
 em++ main.cpp src/*.cpp lib/libraylib.a -Iheaders -Iheaders/raylib_headers -Isrc -Ilib --preload-file assets --preload-file shaders --preload-file levels -s USE_GLFW=3 -s ASYNCIFY -s ALLOW_MEMORY_GROWTH=1 -o index.html
+
+
+#local server
+
+python3 -m http.server 8080
+
+
+#local host address
+
+localhost:8080/project_name.html
